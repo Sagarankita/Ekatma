@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { M33RegChangePage } from '@/App';
+import { ROUTES } from '@/lib/routes';
 
 export default function Page() {
   const router = useRouter();
@@ -9,9 +10,9 @@ export default function Page() {
   return (
     <M33RegChangePage 
       
-      onBack={() => router.push('/department')}
-      onOpenRAG={() => router.push('/department/regasst')}
-      onOpenImpact={() => router.push('/department/regchng/impact')}
+      onBack={() => router.push(ROUTES.department.home)}
+      onOpenRAG={() => router.push(ROUTES.department.regAssistant)}
+      onOpenImpact={() => router.push(ROUTES.department.regImpact)}
     
     />
   );

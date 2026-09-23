@@ -2,17 +2,18 @@
 
 import { M21InspectionQueuePage } from '@/App';
 import { useRouter } from 'next/navigation';
+import { ROUTES } from '@/lib/routes';
 
 export default function InspectionQueuePage() {
   const router = useRouter();
 
   return (
     <M21InspectionQueuePage 
-      onBack={() => router.push('/department')}
-      onPlanInspection={(appId, inspId) => router.push(`/department/applications/${appId}/inspections/${inspId}/plan`)}
-      onOpenDepView={() => console.log('Open dep view')}
-      onOpenQueryHistory={() => console.log('Open query history')}
-      onOpenDelta={() => console.log('Open delta')}
+      onBack={() => router.push(ROUTES.department.home)}
+      onPlanInspection={(appId, inspId) => router.push(ROUTES.department.inspectionPlan(appId, inspId))}
+      onOpenDepView={appId => router.push(ROUTES.department.applicationDependencyView(appId))}
+      onOpenQueryHistory={appId => router.push(ROUTES.department.applicationQueryHistory(appId))}
+      onOpenDelta={appId => router.push(ROUTES.department.applicationDeltaRescrutiny(appId))}
     />
   );
 }

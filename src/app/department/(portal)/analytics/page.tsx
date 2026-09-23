@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { M35AnalyticsPage } from '@/App';
+import { ROUTES } from '@/lib/routes';
 
 export default function Page() {
   const router = useRouter();
@@ -9,10 +10,10 @@ export default function Page() {
   return (
     <M35AnalyticsPage 
       
-      onBack={() => router.push('/department')}
-      onOpenSLA={() => router.push('/department/sla')}
-      onOpenInspection={() => router.push('/department/inspection-queue')}
-      onOpenBottleneck={() => router.push('/department/bottleneck')}
+      onBack={() => router.push(ROUTES.department.home)}
+      onOpenSLA={() => router.push(ROUTES.department.sla)}
+      onOpenInspection={() => router.push(ROUTES.department.inspectionQueue)}
+      onOpenBottleneck={() => router.push(ROUTES.department.bottleneck)}
     
     />
   );

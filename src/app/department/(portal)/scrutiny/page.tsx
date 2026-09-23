@@ -2,6 +2,7 @@
 
 import { ScrutinyCommandCentre } from '@/App';
 import { useRouter } from 'next/navigation';
+import { departmentScrutinyRoute } from '@/lib/routes';
 
 export default function ScrutinyPage() {
   const router = useRouter();
@@ -9,7 +10,7 @@ export default function ScrutinyPage() {
   return (
     <ScrutinyCommandCentre 
       onOpenScrutinyApp={(appId, dest) => {
-        console.log(`Open scrutiny app ${appId} at dest ${dest}`);
+        router.push(departmentScrutinyRoute(appId, dest));
       }} 
     />
   );

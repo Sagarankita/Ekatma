@@ -1250,7 +1250,10 @@ export function DeptSidebar({ active, setActive }: { active: string; setActive: 
 
 // ─── M01 Dept Context Bar ─────────────────────────────────────────────────────
 
-export function DeptContextBar({ onLogout, onNotif }: { onLogout: () => void; onNotif?: () => void }) {
+export function DeptContextBar({ onLogout, onNotif, onRegAssistant, onSearch }: {
+  onLogout: () => void; onNotif?: () => void; onRegAssistant?: () => void; onSearch?: (query: string) => void
+}) {
+  const [searchQuery, setSearchQuery] = useState('')
   return (
     <div className="bg-[#1a3a5c] border-b border-[#0f2540]" role="navigation" aria-label="Department context and utilities">
       <div className="max-w-[1440px] mx-auto px-4 flex items-center gap-4 h-11">
@@ -1278,9 +1281,11 @@ export function DeptContextBar({ onLogout, onNotif }: { onLogout: () => void; on
         </div>
 
         {/* Global search */}
-        <div className="flex-1 max-w-sm mx-auto relative">
+        <form className="flex-1 max-w-sm mx-auto relative" onSubmit={event => { event.preventDefault(); onSearch?.(searchQuery) }}>
           <input
             type="search"
+            value={searchQuery}
+            onChange={event => setSearchQuery(event.target.value)}
             placeholder="Search application ID, business or service"
             aria-label="Search application ID, business or service"
             className="w-full pl-8 pr-3 py-1.5 text-xs rounded border border-white/20 bg-white/10 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-white/50 focus:bg-white/15 transition-colors"
@@ -1288,7 +1293,7 @@ export function DeptContextBar({ onLogout, onNotif }: { onLogout: () => void; on
           <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/40" aria-hidden="true">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
           </span>
-        </div>
+        </form>
 
         {/* Right utilities */}
         <div className="flex items-center gap-1 ml-auto shrink-0">
@@ -1305,6 +1310,7 @@ export function DeptContextBar({ onLogout, onNotif }: { onLogout: () => void; on
           {/* Regulatory Assistant */}
           <button
             aria-label="Regulatory Assistant — AI-assisted regulatory reference"
+            onClick={onRegAssistant}
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-white/70 hover:text-white hover:bg-white/10 transition-colors text-xs focus-visible:ring-2 focus-visible:ring-white/60"
           >
             <MIcon.Bot />
@@ -1375,7 +1381,7 @@ function PanelHeader({ title, link, linkLabel = 'View all →', icon, onLinkClic
   )
 }
 
-export function DeptHome({ onNavigate, onOpenApp }: { onNavigate: (dest: string) => void; onOpenApp: () => void }) {
+export function DeptHome({ onNavigate, onOpenApp }: { onNavigate: (dest: string) => void; onOpenApp: (applicationId: string) => void }) {
   const [activeFilter, setActiveFilter] = useState('all')
 
   const kpis = [
@@ -1543,7 +1549,7 @@ export function DeptHome({ onNavigate, onOpenApp }: { onNavigate: (dest: string)
                       <td className="px-3 py-2.5 text-[#1a2533] whitespace-nowrap">{a.age}</td>
                       <td className="px-3 py-2.5"><SlaChip state={a.sla} /></td>
                       <td className="px-3 py-2.5">
-                        <button onClick={onOpenApp} className="bg-[#1a3a5c] text-white text-[10px] font-semibold px-2.5 py-1 rounded hover:bg-[#0f2540] transition-colors whitespace-nowrap">
+                        <button onClick={() => onOpenApp(a.id)} className="bg-[#1a3a5c] text-white text-[10px] font-semibold px-2.5 py-1 rounded hover:bg-[#0f2540] transition-colors whitespace-nowrap">
                           {a.action}
                         </button>
                       </td>
@@ -1616,7 +1622,7 @@ export function DeptHome({ onNavigate, onOpenApp }: { onNavigate: (dest: string)
                         <p className={`text-[10px] font-medium ${item.assigned ? 'text-green-700' : 'text-red-600'}`}>
                           {item.assigned ? 'Assigned' : 'Unassigned'}
                         </p>
-                        <button onClick={() => onNavigate('dept-insp-queue')} className="text-[11px] text-[#1a56db] hover:underline">{cat === 'overdue' ? 'Schedule' : 'Open'}</button>
+                        <button onClick={() => onOpenApp(item.id)} className="text-[11px] text-[#1a56db] hover:underline">{cat === 'overdue' ? 'Schedule' : 'Open'}</button>
                       </div>
                     </div>
                   </div>
@@ -1754,8 +1760,8 @@ export function DeptHome({ onNavigate, onOpenApp }: { onNavigate: (dest: string)
 // ─── M03 — MIDC Queue / Inbox ─────────────────────────────────────────────────
 
 
-function AppIdCell({ id }: { id: string }) {
-  return <button className="font-mono text-xs text-[#1a56db] font-semibold hover:underline focus-visible:ring-2 focus-visible:ring-[#1a56db] rounded" title="Open application">{id}</button>
+function AppIdCell({ id, onOpenApp }: { id: string; onOpenApp?: (applicationId: string) => void }) {
+  return <button onClick={() => onOpenApp?.(id)} className="font-mono text-xs text-[#1a56db] font-semibold hover:underline focus-visible:ring-2 focus-visible:ring-[#1a56db] rounded" title="Open application">{id}</button>
 }
 
 function SLACell({ target, elapsed, remaining, state }: { target: string; elapsed: string; remaining: string; state: 'normal' | 'approaching' | 'breached' }) {
@@ -1785,7 +1791,7 @@ function DepCell({ dep }: { dep: string }) {
   return <span className={`text-[11px] font-medium ${isBlocking ? 'text-amber-700' : 'text-[#1a2533]'}`}>{dep}</span>
 }
 
-function QueueTable({ apps, onOpenApp }: { apps: typeof QUEUE_APPS; onOpenApp?: () => void }) {
+function QueueTable({ apps, onOpenApp }: { apps: typeof QUEUE_APPS; onOpenApp?: (applicationId: string) => void }) {
   const [selected, setSelected] = useState<Set<string>>(new Set())
 
   const toggleRow = (id: string) => setSelected(prev => {
@@ -1849,7 +1855,7 @@ function QueueTable({ apps, onOpenApp }: { apps: typeof QUEUE_APPS; onOpenApp?: 
               <td className={`px-3 py-3 ${colBorder}`}>
                 <input type="checkbox" checked={selected.has(a.id)} onChange={() => toggleRow(a.id)} className="rounded border-[#d1d9e0]" aria-label={`Select ${a.id}`} />
               </td>
-              <td className={tdClass}><AppIdCell id={a.id} /></td>
+              <td className={tdClass}><AppIdCell id={a.id} onOpenApp={onOpenApp} /></td>
               <td className={tdClass}>
                 <p className="font-medium text-[#1a2533] truncate" title={a.business}>{a.business}</p>
                 <p className="text-[#374151] mt-0.5">{a.applicant}</p>
@@ -1882,7 +1888,7 @@ function QueueTable({ apps, onOpenApp }: { apps: typeof QUEUE_APPS; onOpenApp?: 
               </td>
               <td className={`${tdClass} text-[#1a2533]`}>{a.actionRequired}</td>
               <td className={tdClass}>
-                <button onClick={() => onOpenApp?.()} className="bg-[#1a3a5c] text-white text-[10px] font-semibold px-3 py-1.5 rounded hover:bg-[#0f2540] transition-colors whitespace-nowrap focus-visible:ring-2 focus-visible:ring-[#1a56db]">
+                <button onClick={() => onOpenApp?.(a.id)} className="bg-[#1a3a5c] text-white text-[10px] font-semibold px-3 py-1.5 rounded hover:bg-[#0f2540] transition-colors whitespace-nowrap focus-visible:ring-2 focus-visible:ring-[#1a56db]">
                   Open
                 </button>
               </td>
@@ -1894,7 +1900,7 @@ function QueueTable({ apps, onOpenApp }: { apps: typeof QUEUE_APPS; onOpenApp?: 
   )
 }
 
-export function M03QueuePage({ onOpenApp }: { onOpenApp?: () => void }) {
+export function M03QueuePage({ onOpenApp }: { onOpenApp?: (applicationId: string) => void }) {
   const [activeTab, setActiveTab] = useState('all')
   const [sortBy, setSortBy] = useState('sla-risk')
   const [activeFilters, setActiveFilters] = useState<{label: string; key: string}[]>([])
@@ -2055,11 +2061,17 @@ export function M03QueuePage({ onOpenApp }: { onOpenApp?: () => void }) {
 
 // ─── M04 — Application Search ─────────────────────────────────────────────────
 
-export function M04SearchPage({ onOpenApp }: { onOpenApp?: () => void }) {
-  const [query, setQuery] = useState('')
-  const [searchState, setSearchState] = useState<'idle' | 'results' | 'no-results' | 'exact'>('idle')
+export function M04SearchPage({ onOpenApp, initialQuery = '' }: { onOpenApp?: (applicationId: string) => void; initialQuery?: string }) {
+  const [query, setQuery] = useState(initialQuery)
+  const [results, setResults] = useState<typeof QUEUE_APPS>(() => {
+    const q = initialQuery.trim().toLowerCase()
+    return q ? QUEUE_APPS.filter(a => [a.id, a.business, a.applicant, a.service].some(value => value.toLowerCase().includes(q))) : []
+  })
+  const [searchState, setSearchState] = useState<'idle' | 'results' | 'no-results' | 'exact'>(() =>
+    !initialQuery.trim() ? 'idle' : results.length === 0 ? 'no-results' :
+      results.length === 1 && results[0].id.toLowerCase() === initialQuery.trim().toLowerCase() ? 'exact' : 'results'
+  )
   const [showAdvanced, setShowAdvanced] = useState(false)
-  const [results, setResults] = useState<typeof QUEUE_APPS>([])
 
   const handleSearch = () => {
     if (!query.trim()) return
@@ -2163,7 +2175,7 @@ export function M04SearchPage({ onOpenApp }: { onOpenApp?: () => void }) {
                 <p className="text-xs text-green-700">{results[0].business} · {results[0].service}</p>
               </div>
             </div>
-            <button className="bg-[#1a3a5c] text-white text-xs font-semibold px-4 py-2 rounded hover:bg-[#0f2540] transition-colors whitespace-nowrap">
+            <button onClick={() => onOpenApp?.(results[0].id)} className="bg-[#1a3a5c] text-white text-xs font-semibold px-4 py-2 rounded hover:bg-[#0f2540] transition-colors whitespace-nowrap">
               Open Application →
             </button>
           </div>
@@ -2211,7 +2223,7 @@ export function M04SearchPage({ onOpenApp }: { onOpenApp?: () => void }) {
                     }
                     return (
                       <tr key={a.id} className="hover:bg-[#f8f9fb] transition-colors">
-                        <td className="px-3 py-2.5"><AppIdCell id={a.id} /></td>
+                        <td className="px-3 py-2.5"><AppIdCell id={a.id} onOpenApp={onOpenApp} /></td>
                         <td className="px-3 py-2.5 max-w-[180px] truncate font-medium text-[#1a2533]" title={a.business}>{highlight(a.business)}</td>
                         <td className="px-3 py-2.5 text-[#1a2533]">{a.applicant}</td>
                         <td className="px-3 py-2.5"><span className="text-[10px] font-semibold bg-[#ebf3ff] text-[#1a3a5c] px-1.5 py-0.5 rounded">{a.service}</span></td>
@@ -2220,7 +2232,7 @@ export function M04SearchPage({ onOpenApp }: { onOpenApp?: () => void }) {
                         <td className="px-3 py-2.5 font-mono text-[10px] text-[#1a2533]">{a.state}</td>
                         <td className="px-3 py-2.5 text-[#374151] whitespace-nowrap">{a.received}</td>
                         <td className="px-3 py-2.5">
-                          <button onClick={() => onOpenApp?.()} className="bg-[#1a3a5c] text-white text-[10px] font-semibold px-3 py-1.5 rounded hover:bg-[#0f2540] transition-colors">Open</button>
+                          <button onClick={() => onOpenApp?.(a.id)} className="bg-[#1a3a5c] text-white text-[10px] font-semibold px-3 py-1.5 rounded hover:bg-[#0f2540] transition-colors">Open</button>
                         </td>
                       </tr>
                     )
@@ -9022,18 +9034,20 @@ function InspStatusBadge({ status }: { status: InspStatus }) {
   return <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold border ${m.bg} ${m.text} ${m.border}`}>{m.label}</span>
 }
 
-export function M21InspectionQueuePage({ onBack, onPlanInspection, onOpenDepView, onOpenQueryHistory, onOpenDelta }: {
+export function M21InspectionQueuePage({ applicationId, onBack, onPlanInspection, onOpenDepView, onOpenQueryHistory, onOpenDelta }: {
+  applicationId?: string
   onBack: () => void; onPlanInspection: (appId: string, inspId: string) => void
-  onOpenDepView: () => void; onOpenQueryHistory: () => void; onOpenDelta: () => void
+  onOpenDepView: (applicationId: string) => void; onOpenQueryHistory: (applicationId: string) => void; onOpenDelta: (applicationId: string) => void
 }) {
+  const rows = applicationId ? M21_ROWS.filter(row => row.appId === applicationId) : M21_ROWS
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('All')
   const [serviceFilter, setServiceFilter] = useState('All')
   const [slaFilter, setSlaFilter] = useState('All')
-  const [selectedId, setSelectedId] = useState<string | null>('INSP-2026-00418')
+  const [selectedId, setSelectedId] = useState<string | null>(() => rows[0]?.inspId ?? null)
   const [sortBy, setSortBy] = useState<'requiredBy' | 'slaImpact' | 'reInspection'>('requiredBy')
 
-  const filtered = M21_ROWS.filter(r => {
+  const filtered = rows.filter(r => {
     const q = search.toLowerCase()
     const matchSearch = !q || r.appId.toLowerCase().includes(q) || r.business.toLowerCase().includes(q) || r.site.toLowerCase().includes(q) || r.inspId.toLowerCase().includes(q)
     const matchStatus = statusFilter === 'All' || INSP_STATUS_MAP[r.status].label === statusFilter
@@ -9045,15 +9059,15 @@ export function M21InspectionQueuePage({ onBack, onPlanInspection, onOpenDepView
     return a.requiredBy.localeCompare(b.requiredBy)
   })
 
-  const selected = M21_ROWS.find(r => r.inspId === selectedId) ?? null
+  const selected = rows.find(r => r.inspId === selectedId) ?? null
 
   const COUNTS = [
-    { label:'Pending', count:M21_ROWS.filter(r=>r.status==='PENDING').length, color:'text-[#9a3412]' },
-    { label:'Scheduled', count:M21_ROWS.filter(r=>r.status==='SCHEDULED').length, color:'text-[#1e40af]' },
-    { label:'Completed', count:M21_ROWS.filter(r=>r.status==='COMPLETED').length, color:'text-[#065f46]' },
-    { label:'Re-inspection', count:M21_ROWS.filter(r=>r.reInspection).length, color:'text-[#991b1b]' },
-    { label:'Coord. Required', count:M21_ROWS.filter(r=>r.status==='AWAITING_COORDINATION').length, color:'text-[#5b21b6]' },
-    { label:'SLA Risk', count:M21_ROWS.filter(r=>r.slaImpact==='SLA Risk').length, color:'text-[#dc2626]' },
+    { label:'Pending', count:rows.filter(r=>r.status==='PENDING').length, color:'text-[#9a3412]' },
+    { label:'Scheduled', count:rows.filter(r=>r.status==='SCHEDULED').length, color:'text-[#1e40af]' },
+    { label:'Completed', count:rows.filter(r=>r.status==='COMPLETED').length, color:'text-[#065f46]' },
+    { label:'Re-inspection', count:rows.filter(r=>r.reInspection).length, color:'text-[#991b1b]' },
+    { label:'Coord. Required', count:rows.filter(r=>r.status==='AWAITING_COORDINATION').length, color:'text-[#5b21b6]' },
+    { label:'SLA Risk', count:rows.filter(r=>r.slaImpact==='SLA Risk').length, color:'text-[#dc2626]' },
   ]
 
   return (
@@ -9222,7 +9236,7 @@ export function M21InspectionQueuePage({ onBack, onPlanInspection, onOpenDepView
                 <div className="flex justify-between"><span className="text-[#1a2533]">{selected.service}</span><span className="font-semibold text-[#9a3412]">Inspection Required</span></div>
                 <div className="flex justify-between"><span className="text-[#1a2533]">Fire</span><span className="font-semibold text-[#1a2533]">Conditional</span></div>
               </div>
-              <button onClick={onOpenDepView} className="mt-1.5 text-[10px] text-[#1a56db] hover:underline">View Regulatory Dependencies → M17</button>
+              <button onClick={() => onOpenDepView(selected.appId)} className="mt-1.5 text-[10px] text-[#1a56db] hover:underline">View Regulatory Dependencies → M17</button>
             </div>
 
             {selected.reInspection && (
@@ -9236,9 +9250,9 @@ export function M21InspectionQueuePage({ onBack, onPlanInspection, onOpenDepView
             <div className="flex flex-col gap-2 pt-2 border-t border-[#e5eaf0]">
               <div className="text-[9px] font-bold text-[#374151] uppercase tracking-wider">Actions</div>
               <button onClick={() => onPlanInspection(selected.appId, selected.inspId)} className="text-left text-xs text-white font-bold px-3 py-1.5 bg-[#1a3a5c] rounded hover:bg-[#0f2540]">Plan Inspection → M22</button>
-              <button onClick={onOpenDepView}      className="text-left text-xs text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">View Dependency → M17</button>
-              <button onClick={onOpenQueryHistory} className="text-left text-xs text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">View Query History → M19</button>
-              <button onClick={onOpenDelta}        className="text-left text-xs text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">View Delta → M20</button>
+              <button onClick={() => onOpenDepView(selected.appId)}      className="text-left text-xs text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">View Dependency → M17</button>
+              <button onClick={() => onOpenQueryHistory(selected.appId)} className="text-left text-xs text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">View Query History → M19</button>
+              <button onClick={() => onOpenDelta(selected.appId)}        className="text-left text-xs text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">View Delta → M20</button>
             </div>
           </div>
         )}
@@ -10143,7 +10157,14 @@ export function M24ObservationReinspectionPage({ onBack, onBackToM23, onOpenM22,
 
 // ─── DecisionsDashboard ────────────────────────────────────────────────────────
 
-export function DecisionsDashboard({ onOpenApp, onOpenCompliance, onOpenDependencyUpdate }: { onOpenApp: () => void; onOpenCompliance: () => void; onOpenDependencyUpdate: () => void }) {
+export function DecisionsDashboard({ onOpenApp, onOpenCompliance, onOpenDependencyUpdate }: {
+  onOpenApp: (applicationId: string) => void
+  onOpenCompliance: (applicationId: string, complianceId: string) => void
+  onOpenDependencyUpdate: (applicationId: string, dependencyNodeId: string) => void
+}) {
+  // All existing cards explicitly represent this sample application. Child IDs
+  // come from its M28 obligations and M27 dependency graph fixtures.
+  const applicationId = 'MIDC-APP-2026-00418'
   return (
     <div className="bg-[#f8f9fb] flex-1 overflow-y-auto">
       <div className="px-6 py-5 space-y-5 max-w-4xl">
@@ -10154,17 +10175,17 @@ export function DecisionsDashboard({ onOpenApp, onOpenCompliance, onOpenDependen
 
         {/* Quick access */}
         <div className="grid grid-cols-3 gap-3">
-          <button onClick={onOpenApp} className="bg-[#1a3a5c] text-white rounded-lg p-4 text-left hover:bg-[#0f2540] transition-colors">
+          <button onClick={() => onOpenApp(applicationId)} className="bg-[#1a3a5c] text-white rounded-lg p-4 text-left hover:bg-[#0f2540] transition-colors">
             <div className="text-[10px] font-bold text-[#93c5fd] uppercase tracking-wider mb-1">M25 / M26</div>
             <div className="text-sm font-bold">Decision Workspace</div>
             <div className="text-[10px] text-[#bfdbfe] mt-0.5">Final statutory decision for MIDC-APP-2026-00418</div>
           </button>
-          <button onClick={onOpenDependencyUpdate} className="bg-white border border-[#e5eaf0] rounded-lg p-4 text-left hover:border-[#1a3a5c] transition-colors">
+          <button onClick={() => onOpenDependencyUpdate(applicationId, 'midc-bldg')} className="bg-white border border-[#e5eaf0] rounded-lg p-4 text-left hover:border-[#1a3a5c] transition-colors">
             <div className="text-[10px] font-bold text-[#374151] uppercase tracking-wider mb-1">M27</div>
             <div className="text-sm font-bold text-[#1a2533]">Dependency Update</div>
             <div className="text-[10px] text-[#1a2533] mt-0.5">Post-decision propagation — MIDC-APP-2026-00418</div>
           </button>
-          <button onClick={onOpenCompliance} className="bg-white border border-[#c4b5fd] rounded-lg p-4 text-left hover:border-[#5b21b6] transition-colors">
+          <button onClick={() => onOpenCompliance(applicationId, M28_OBLIGATIONS[0].id)} className="bg-white border border-[#c4b5fd] rounded-lg p-4 text-left hover:border-[#5b21b6] transition-colors">
             <div className="text-[10px] font-bold text-[#5b21b6] uppercase tracking-wider mb-1">M28</div>
             <div className="text-sm font-bold text-[#1a2533]">Conditions / Compliance</div>
             <div className="text-[10px] text-[#1a2533] mt-0.5">Post-decision obligations — MIDC-APP-2026-00418</div>
@@ -10182,7 +10203,7 @@ export function DecisionsDashboard({ onOpenApp, onOpenCompliance, onOpenDependen
               </div>
               <span className="text-[10px] font-semibold bg-[#fffbeb] text-[#92400e] border border-[#fcd34d] px-2 py-0.5 rounded">FINAL_DECISION</span>
               <span className="text-[10px] text-red-700 font-semibold">Due in 2 days</span>
-              <button onClick={onOpenApp} className="text-[11px] bg-[#1a3a5c] text-white px-3 py-1.5 rounded hover:bg-[#0f2540]">Open Decision Workspace →</button>
+              <button onClick={() => onOpenApp(applicationId)} className="text-[11px] bg-[#1a3a5c] text-white px-3 py-1.5 rounded hover:bg-[#0f2540]">Open Decision Workspace →</button>
             </div>
           </div>
         </div>
@@ -10198,8 +10219,8 @@ export function DecisionsDashboard({ onOpenApp, onOpenCompliance, onOpenDependen
               </div>
               <span className="text-[10px] font-semibold bg-[#ecfdf5] text-[#065f46] border border-[#6ee7b7] px-2 py-0.5 rounded">APPROVED</span>
               <div className="flex gap-2">
-                <button onClick={onOpenDependencyUpdate} className="text-[11px] border border-[#d1d9e0] text-[#1a2533] px-2 py-1 rounded hover:bg-[#f8f9fb]">M27 Dep. Update</button>
-                <button onClick={onOpenCompliance}       className="text-[11px] bg-[#f5f3ff] text-[#5b21b6] border border-[#c4b5fd] px-2 py-1 rounded hover:bg-[#ede9fe]">M28 Compliance →</button>
+                <button onClick={() => onOpenDependencyUpdate(applicationId, 'midc-bldg')} className="text-[11px] border border-[#d1d9e0] text-[#1a2533] px-2 py-1 rounded hover:bg-[#f8f9fb]">M27 Dep. Update</button>
+                <button onClick={() => onOpenCompliance(applicationId, M28_OBLIGATIONS[0].id)}       className="text-[11px] bg-[#f5f3ff] text-[#5b21b6] border border-[#c4b5fd] px-2 py-1 rounded hover:bg-[#ede9fe]">M28 Compliance →</button>
               </div>
             </div>
           </div>
@@ -12227,7 +12248,7 @@ function M01Shell({ onLogout, lang, fontSize, highContrast }: {
 // ─── M30 SLA Dashboard ────────────────────────────────────────────────────────
 
 
-export function M30SLADashboard({ onOpenApp, onOpenGrievance }: { onOpenApp: () => void; onOpenGrievance: () => void }) {
+export function M30SLADashboard({ onOpenApp, onOpenGrievance }: { onOpenApp: (applicationId: string) => void; onOpenGrievance: () => void }) {
   const [slaFilter, setSlaFilter] = useState<'all'|'normal'|'approaching'|'breached'>('all')
   const [view, setView] = useState<'applications'|'service'|'desk'>('applications')
   const [selectedApp, setSelectedApp] = useState<typeof M30_SLA_ROWS[0] | null>(null)
@@ -12433,7 +12454,7 @@ export function M30SLADashboard({ onOpenApp, onOpenGrievance }: { onOpenApp: () 
               <div><span className="text-[#374151]">SLA Due</span><p className={`font-semibold ${selectedApp.slaStatus === 'breached' ? 'text-red-700' : 'text-amber-700'}`}>{selectedApp.due}</p></div>
             </div>
             <div className="flex gap-2 pt-1">
-              <button onClick={onOpenApp} className="text-[11px] bg-[#1a3a5c] text-white px-3 py-1.5 rounded hover:bg-[#0f2540]">Open Application → M06</button>
+              <button onClick={() => onOpenApp(selectedApp.id)} className="text-[11px] bg-[#1a3a5c] text-white px-3 py-1.5 rounded hover:bg-[#0f2540]">Open Application → M06</button>
               {selectedApp.slaStatus === 'breached' && <button onClick={onOpenGrievance} className="text-[11px] bg-red-50 text-red-700 border border-red-200 px-3 py-1.5 rounded hover:bg-red-100">Raise Grievance → M31</button>}
             </div>
           </div>
@@ -12448,7 +12469,8 @@ export function M30SLADashboard({ onOpenApp, onOpenGrievance }: { onOpenApp: () 
 
 
 export function M31GrievancePage({ onBack, onOpenApp, onOpenSLA, onOpenQuery, onOpenInspection }: {
-  onBack: () => void; onOpenApp: () => void; onOpenSLA: () => void; onOpenQuery: () => void; onOpenInspection: () => void
+  onBack: () => void; onOpenApp: (applicationId: string) => void; onOpenSLA: () => void
+  onOpenQuery: (applicationId: string) => void; onOpenInspection: (applicationId: string, inspectionId: string) => void
 }) {
   const [selectedGrv, setSelectedGrv] = useState<typeof M31_GRIEVANCES[0]>(M31_GRIEVANCES[0])
   const [resolutionText, setResolutionText] = useState('')
@@ -12540,7 +12562,7 @@ export function M31GrievancePage({ onBack, onOpenApp, onOpenSLA, onOpenQuery, on
                   <div><span className="text-amber-700">Required</span><p className="font-bold">15 Sep 2026</p></div>
                   <div><span className="text-amber-700">Status</span><p className="font-bold text-amber-800">Pending — 8 days</p></div>
                 </div>
-                <button onClick={onOpenInspection} className="mt-2 text-[11px] text-amber-700 underline">View Inspection → M21/M22</button>
+                <button onClick={() => onOpenInspection(selectedGrv.appId, 'INSP-2026-00388')} className="mt-2 text-[11px] text-amber-700 underline">View Inspection → M21/M22</button>
               </div>
             )}
 
@@ -12609,7 +12631,7 @@ export function M31GrievancePage({ onBack, onOpenApp, onOpenSLA, onOpenQuery, on
                 <div className="flex gap-2 pt-1">
                   <button onClick={() => setResolved(true)} disabled={!resolutionText} className="text-xs bg-emerald-700 text-white px-4 py-2 rounded font-semibold hover:bg-emerald-800 disabled:opacity-40">Record Resolution</button>
                   <button className="text-xs bg-purple-50 text-purple-700 border border-purple-200 px-4 py-2 rounded font-semibold hover:bg-purple-100">Escalate Further</button>
-                  <button onClick={onOpenApp} className="text-xs border border-[#d1d9e0] px-3 py-2 rounded text-[#1a2533] hover:bg-[#f8f9fb]">Open Application → M06</button>
+                  <button onClick={() => onOpenApp(selectedGrv.appId)} className="text-xs border border-[#d1d9e0] px-3 py-2 rounded text-[#1a2533] hover:bg-[#f8f9fb]">Open Application → M06</button>
                 </div>
                 {resolved && <div className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded px-3 py-2 font-semibold">Resolution recorded. Grievance marked as Resolved. Application journey is unchanged unless a configured action was selected.</div>}
               </div>
@@ -12620,8 +12642,8 @@ export function M31GrievancePage({ onBack, onOpenApp, onOpenSLA, onOpenQuery, on
                 <p className="text-xs font-bold text-emerald-700 uppercase tracking-wider mb-1">Resolved</p>
                 <p className="text-xs text-emerald-800">This grievance has been resolved. The complete resolution timeline is preserved in the audit record.</p>
                 <div className="flex gap-2 mt-3">
-                  <button onClick={onOpenApp} className="text-[11px] text-[#1a56db] underline">Open Application → M06</button>
-                  <button onClick={onOpenQuery} className="text-[11px] text-[#1a56db] underline">View Query History → M19</button>
+                  <button onClick={() => onOpenApp(selectedGrv.appId)} className="text-[11px] text-[#1a56db] underline">Open Application → M06</button>
+                  <button onClick={() => onOpenQuery(selectedGrv.appId)} className="text-[11px] text-[#1a56db] underline">View Query History → M19</button>
                 </div>
               </div>
             )}
@@ -12638,7 +12660,7 @@ export function M31GrievancePage({ onBack, onOpenApp, onOpenSLA, onOpenQuery, on
 export function M39NotificationDrawer({ open, onClose, onNavigate }: {
   open: boolean
   onClose: () => void
-  onNavigate: (link: typeof M39_NOTIFICATIONS[0]['link']) => void
+  onNavigate: (link: typeof M39_NOTIFICATIONS[0]['link'], applicationId: string) => void
 }) {
   const [filter, setFilter] = useState<'all'|'unread'|'sla'|'grievances'|'applications'|'inspections'>('all')
   const [notifications, setNotifications] = useState(M39_NOTIFICATIONS)
@@ -12709,7 +12731,7 @@ export function M39NotificationDrawer({ open, onClose, onNavigate }: {
                   <p className="text-[10px] text-[#1a2533] mt-0.5 italic">{n.action}</p>
                   <div className="flex items-center gap-3 mt-1.5">
                     <span className="text-[10px] text-[#1a3a5c] font-semibold">{n.appId}</span>
-                    <button onClick={() => { markRead(n.id); onNavigate(n.link) }} className="text-[10px] bg-[#1a3a5c] text-white px-2 py-0.5 rounded hover:bg-[#0f2540]">Open →</button>
+                    <button onClick={() => { markRead(n.id); onNavigate(n.link, n.appId) }} className="text-[10px] bg-[#1a3a5c] text-white px-2 py-0.5 rounded hover:bg-[#0f2540]">Open →</button>
                     {!n.read && <button onClick={() => markRead(n.id)} className="text-[10px] text-[#374151] hover:text-[#1a2533]">Mark read</button>}
                   </div>
                 </div>
@@ -12981,7 +13003,7 @@ export function M33RegChangePage({ onBack, onOpenRAG, onOpenImpact }: { onBack: 
 // ─── M34 Regulatory Impact Analysis ──────────────────────────────────────────
 
 
-export function M34ImpactPage({ onBack, onOpenApp, onOpenRegChange }: { onBack: () => void; onOpenApp?: () => void; onOpenRegChange?: () => void }) {
+export function M34ImpactPage({ onBack, onOpenApp, onOpenRegChange }: { onBack: () => void; onOpenApp?: (applicationId: string) => void; onOpenRegChange?: () => void }) {
   const [activeTab, setActiveTab] = useState<'Applications'|'Documents'|'Compliance'|'Journeys'>('Applications')
 
   const impactChip = (s: string) =>
@@ -13039,7 +13061,7 @@ export function M34ImpactPage({ onBack, onOpenApp, onOpenRegChange }: { onBack: 
                     <td className="px-3 py-2.5 text-[#1a2533]">{r.newVer}</td>
                     <td className="px-3 py-2.5 text-[#1a2533]">{r.requirement}</td>
                     <td className="px-3 py-2.5"><span className={`text-[10px] font-semibold px-2 py-0.5 rounded border ${impactChip(r.impactStatus)}`}>{r.impactStatus}</span></td>
-                    <td className="px-3 py-2.5"><button onClick={onOpenApp} className="text-[10px] text-[#1a56db] hover:underline">Open App →</button></td>
+                    <td className="px-3 py-2.5"><button onClick={() => onOpenApp?.(r.id)} className="text-[10px] text-[#1a56db] hover:underline">Open App →</button></td>
                   </tr>
                 ))}
               </tbody>
@@ -13430,7 +13452,7 @@ export function M37WorkloadPage({ onBack, onOpenSLA, onOpenInspection, onOpenAna
 // ─── M38 Audit / History ──────────────────────────────────────────────────────
 
 
-export function M38AuditPage({ onBack, onOpenApp }: { onBack: () => void; onOpenApp?: () => void }) {
+export function M38AuditPage({ onBack, onOpenApp }: { onBack: () => void; onOpenApp?: (applicationId: string) => void }) {
   const [search, setSearch] = useState('MIDC-APP-2026-00418')
   const [filterType, setFilterType] = useState<'all'|'CHANGE'|'VIEW'>('all')
   const [selectedEvent, setSelectedEvent] = useState<typeof M38_EVENTS[0] | null>(null)
@@ -13509,7 +13531,7 @@ export function M38AuditPage({ onBack, onOpenApp }: { onBack: () => void; onOpen
                   </div>
                 ))}
                 <div className="pt-2 flex gap-2">
-                  <button onClick={onOpenApp} className="text-[11px] text-[#1a56db] hover:underline">Open Application → M06</button>
+                  <button onClick={() => onOpenApp?.(selectedEvent.record)} className="text-[11px] text-[#1a56db] hover:underline">Open Application → M06</button>
                 </div>
               </div>
               <div className="text-[9px] text-[#374151] italic px-2">Historical audit records are immutable. If a correction is necessary, a new corrective event is created — the original record is preserved.</div>
