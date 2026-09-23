@@ -1,0 +1,2242 @@
+# EKATMA Department Portal — Next.js + PWA Migration Source of Truth
+
+> **Purpose:** This file is the execution guide for Antigravity (and human developers) to convert the supplied **Bianca Dept** Figma Make codebase from React + Vite into a production-structured **Next.js App Router** application and make it an **installable PWA**, without losing, simplifying, redesigning, or inventing department-side functionality.
+>
+> **Source project inspected:** `Bianca Dept.zip`
+>
+> **Migration principle:** Preserve first. Refactor second. Integrate backend third. Do not redesign during migration.
+>
+> **Current recommended Next.js baseline at the time this guide was created and re-verified (23 Sep 2026):** Next.js **16.3.6 Active LTS** or a newer patched Active LTS available at execution time. Do not intentionally downgrade to an older vulnerable release.
+>
+> **Proofread status:** Re-checked against the supplied source tree, the EKATMA shared architecture requirements supplied with this project, and current official Next.js/Tailwind guidance. This revision additionally locks canonical domain contracts before M06+, scopes the Department PWA to `/department/`, adds explicit RAG/rule/dependency boundaries, fixes the test stack, prohibits static export, preserves Figma reference material, and adds a post-parity Department Pack abstraction so MIDC remains the first implementation rather than becoming the architecture.
+
+---
+
+## 0. NON-NEGOTIABLE INSTRUCTION TO ANTIGRAVITY
+
+Treat the existing code as the **visual and behavioral source of truth**.
+
+The migration is successful only if:
+
+1. Every existing department screen remains available.
+2. Existing UI text, labels, government identity, information hierarchy, tables, drawers, filters, buttons, badges, chips, modal behavior, navigation relationships, and prototype interactions are preserved unless this document explicitly changes implementation architecture.
+3. The application is converted from Vite SPA architecture into Next.js App Router architecture.
+4. The application becomes installable as a PWA.
+5. Authenticated/sensitive government workflow data is handled safely; the service worker must not indiscriminately cache sensitive API responses or mutation requests.
+6. The existing giant `src/App.tsx` is decomposed into maintainable route, feature, component, data, and type files.
+7. URL navigation replaces the current large in-memory `activeDeptItem` / `appSubPage` routing state.
+8. No screen is deleted because it looks repetitive.
+9. No content is silently replaced by generic placeholder UI.
+10. No new product feature should be invented merely to make the migration easier.
+11. Existing sample data may stay as fixture/mock data until backend APIs are connected, but it must be moved out of UI components.
+12. Do not rename business concepts such as Business DNA, Regulatory Dependency, Delta Re-scrutiny, Query Builder, Inspection Workspace, Decision Record, SLA, Grievance, Regulatory Assistant, etc. unless a separate product decision instructs it.
+13. Do not convert the portal into a generic dashboard template.
+14. Do not remove GIGW/accessibility-oriented controls merely because they are prototype controls.
+15. Build and type-check must remain green at the end of every migration phase.
+16. Canonical IDs and state dictionaries must be locked before migrating M06+; do not let each route invent its own `status: string` model.
+17. UI labels such as **Under Review** are presentation text; they must not silently replace the canonical backend/domain state.
+18. The Department app must use the same underlying application/query/inspection/decision/dependency identities expected by the Entrepreneur app and shared EKATMA backend.
+19. MIDC is the first Department Pack, **not** the architecture. Do not copy MIDC-specific code to create future MPCB/Fire/DISH/Boiler/Legal Metrology portals.
+20. RAG may retrieve/explain regulations, but it must not own or mutate application state, regulatory applicability, dependency unlocking, or department decisions.
+21. Production must remain server-capable; do not convert the authenticated Department Portal into a static-export-only PWA.
+22. Figma-generated specification/reference material must remain traceable until parity is proven; do not silently delete it during migration.
+
+### Golden Rule
+
+**Do not rebuild the product from memory. Migrate the code that exists.**
+
+---
+
+# 1. WHAT EXISTS TODAY
+
+The supplied project was inspected and currently uses:
+
+- React 19
+- React DOM 19
+- Vite 8
+- TypeScript 5.7
+- Tailwind CSS v4 through `@tailwindcss/vite`
+- pnpm lockfile
+- Figma Make runtime/build helpers
+- A `@/* -> ./src/*` path alias
+
+Important current files:
+
+```text
+Bianca Dept/
+├── .figma/
+│   └── make/...
+├── public/
+│   └── assets/
+│       ├── india-emblem.png
+│       ├── maha-seal.png
+│       └── ekatma-logo.png
+├── src/
+│   ├── imports/
+│   │   └── image*.png
+│   ├── App.tsx               # ~14,000 lines — current main application
+│   ├── index.css
+│   ├── main.tsx              # Vite entrypoint
+│   └── vite-env.d.ts
+├── AGENTS.md                 # Figma Make/Vite-specific
+├── CLAUDE.md
+├── index.html                # Vite shell
+├── package.json
+├── pnpm-lock.yaml
+├── tsconfig.json
+└── vite.config.ts            # Includes Figma/Vite-specific plugins
+```
+
+## Important observation
+
+The source is **not a small single-page mockup**. The current `src/App.tsx` contains a large department workflow with approximately M01–M39 screens/modules and many linked states.
+
+Therefore:
+
+> **Do not replace `App.tsx` with a simplified dashboard page. Extract it systematically.**
+
+---
+
+# 2. EXISTING SCREEN / MODULE INVENTORY — MUST BE PRESERVED
+
+The inspected source contains the following named modules.
+
+| ID | Existing module | Migration expectation |
+|---|---|---|
+| M01 | Department Login + authenticated shell | Preserve; split login and authenticated layout |
+| M02 | Operational Command Centre / Department Home | Route page |
+| M03 | MIDC Queue / Inbox | Route page |
+| M04 | Application Search | Route page |
+| M05 | Service / Queue Segmentation | Route page |
+| M06 | Application Overview | Nested application route |
+| M07 | Business DNA / Adaptive Profile Context | Nested application route |
+| M08 | Application Timeline | Nested application route |
+| M09 | Automated Pre-check | Nested application route |
+| M10 | Scrutiny Route / Explainability | Nested application route |
+| M11 | Scrutiny Workbench | Nested application route |
+| M12 | Parameter Detail | Nested application route; later support parameter ID |
+| M13 | Document Review | Nested application route; later support document ID |
+| M14 | Building / Planning Scrutiny | Nested application route |
+| M15 | Water / Utility / Drainage Scrutiny | Nested application route |
+| M16 | Cross-form Consistency | Nested application route |
+| M17 | Regulatory Dependency View | Nested application route |
+| M18 | Consolidated Query Builder | Nested application route |
+| M19 | Query / Response History | Nested application route |
+| M20 | Delta Re-scrutiny | Nested application route |
+| M21 | Inspection Queue | Department queue route + application-context reuse |
+| M22 | Inspection Planning | Nested application/inspection route; reachable from department queue |
+| M23 | Inspection Workspace | Nested application/inspection route |
+| M24 | Observation / Re-inspection | Nested application/inspection route |
+| M25 | Decision Workspace | Nested application route |
+| M26 | Decision Record | Nested application route |
+| M27 | Dependency Update + Entrepreneur Synchronization | Nested application route |
+| M28 | Conditions / Compliance / Renewal Context | Nested application route |
+| M29 | Expansion / Amendment Intake | Nested application route |
+| M30 | SLA Dashboard | Department route |
+| M31 | Escalation / Grievance | Department route |
+| M32 | Officer Regulatory RAG / Regulatory Assistant | Department route |
+| M33 | Regulatory Change Centre | Department route |
+| M34 | Regulatory Impact Analysis | Department route |
+| M35 | Department Analytics | Department route |
+| M36 | Bottleneck Analytics | Department route |
+| M37 | Workload / Capacity | Department route |
+| M38 | Audit / History | Department route |
+| M39 | Notification Drawer | Shared shell component, not a standalone route unless product later requires it |
+
+### Existing implemented department-level surfaces without M-numbers — ALSO MUST BE PRESERVED
+
+The source also contains real implemented surfaces that are **not** part of the M01–M39 numbering. They must not be lost merely because they do not have an `Mxx` label:
+
+| Existing surface | Required target | Important distinction |
+|---|---|---|
+| `ScrutinyCommandCentre` | `/department/scrutiny` | Department-level scrutiny command/overview surface; **not** the same as M11 application scrutiny workbench |
+| `DecisionsDashboard` | `/department/decisions` | Department-level decisions dashboard/entry surface; **not** the same as M25/M26 application decision workflow |
+
+### Current sidebar entries seen in source
+
+- Department Home
+- My Queue
+- Applications
+- Service Catalogue
+- Inspection Queue
+- Scrutiny
+- Inspections
+- Queries / Deficiencies
+- Decisions
+- SLA & Escalations
+- Grievances
+- Regulatory Assistant
+- Analytics
+- Regulatory Changes
+- Workload
+- Audit / History
+
+Some sidebar items currently lead to placeholders or overlap with existing application-level workflows. **Preserve those entries as distinct navigation contracts during migration. Do not merge them because their names look related.**
+
+In particular, the inspected source distinguishes all of these:
+
+- `Inspection Queue` → currently implemented M21 queue
+- `Inspections` → currently a distinct sidebar destination/placeholder
+- `Queries / Deficiencies` → currently a distinct sidebar destination/placeholder
+- `Scrutiny` → implemented `ScrutinyCommandCentre`
+- `Decisions` → implemented `DecisionsDashboard`
+
+Keep those top-level routes distinct. Application-level M18/M19 query screens, M23/M24 inspection screens, M11 scrutiny, and M25/M26 decision screens remain nested under the selected application and must not replace the department-level navigation entries.
+
+---
+
+# 3. TARGET TECHNOLOGY BASELINE
+
+Use:
+
+- Next.js App Router
+- TypeScript strict mode
+- React / React DOM versions compatible with the chosen Next.js release
+- Tailwind CSS v4 through PostCSS (`@tailwindcss/postcss`)
+- pnpm
+- `src/` directory layout
+- Next.js Metadata API
+- `next/font` for Noto Sans and Noto Sans Devanagari where available
+- Native Next.js `Link`, `Image`, route layouts, loading/error boundaries, metadata conventions
+- PWA web manifest
+- One controlled service worker
+
+## Runtime and version policy
+
+At migration time:
+
+1. Use **Node.js 20.9 or newer**; this is the documented minimum for the current Next.js line. Record the actual Node and pnpm versions used for the migration.
+2. Install the **latest patched Active LTS** release of Next.js. At the time this document was authored/re-verified, the official Next.js docs displayed version 16.3.6.
+3. Do not pin to an obsolete version copied from an old tutorial.
+4. Keep React / React DOM on versions compatible with the chosen Next.js release.
+5. Run `pnpm audit` and review advisories before final deployment. Do not apply blind major-version `--force` upgrades solely to silence audit output.
+6. Commit the resulting `pnpm-lock.yaml`; the lockfile is part of the reproducible migration state.
+
+## THIS repository must be converted in place
+
+**Do not run `create-next-app` in a way that creates `Bianca Dept/ekatma-department/` or any other nested second application.** The existing repository is the target. The current Vite source is the reference to be decomposed.
+
+For this repository, update dependencies/configuration in place. A current baseline is conceptually:
+
+```bash
+# Resolve/install the current patched Next.js Active LTS and its compatible React versions.
+pnpm add next@latest react@latest react-dom@latest
+
+# Tailwind v4 with Next.js uses PostCSS, not the Vite Tailwind plugin.
+pnpm add -D @tailwindcss/postcss postcss eslint eslint-config-next
+
+# Remove Vite-only runtime/build integrations only after the Next.js equivalent works.
+pnpm remove vite @vitejs/plugin-react @tailwindcss/vite
+```
+
+If the newest `next@latest` has moved to a new major by the time this guide is executed, first verify the then-current Active LTS and compatibility before changing majors. The objective is a patched supported baseline, not an unnecessary framework upgrade experiment.
+
+Create `postcss.config.mjs` with the Tailwind v4 PostCSS plugin:
+
+```js
+const config = {
+  plugins: {
+    '@tailwindcss/postcss': {},
+  },
+}
+
+export default config
+```
+
+Retain `@import "tailwindcss";` and the existing CSS-first `@theme` tokens when moving `src/index.css` to `src/app/globals.css`.
+
+---
+
+# 4. TARGET FOLDER STRUCTURE
+
+The Department surface is deliberately **URL-scoped to `/department/` from day one**. This is the default even if the Department portal is initially deployed on its own host/subdomain. It prevents future collisions if Entrepreneur + Department later share one origin.
+
+This means:
+
+- login: `/department/login`
+- authenticated home: `/department`
+- manifest scope: `/department/`
+- service-worker scope: `/department/`
+- offline fallback: `/department/offline.html`
+
+Do **not** widen the worker to `/` without an explicit cross-application PWA design decision.
+
+Use the following target structure unless an existing repository convention already supersedes it. The root label below is illustrative only; **do not create a nested project or rename the working repository solely to match this diagram**.
+
+```text
+ekatma-department/
+├── public/
+│   ├── assets/
+│   │   ├── india-emblem.png
+│   │   ├── maha-seal.png
+│   │   └── ekatma-logo.png
+│   ├── department/
+│   │   ├── icons/
+│   │   │   ├── pwa-192x192.png
+│   │   │   ├── pwa-512x512.png
+│   │   │   ├── pwa-maskable-192x192.png
+│   │   │   └── pwa-maskable-512x512.png
+│   │   └── offline.html
+│   └── department-sw.js                # single Department worker; scope=/department/
+│
+├── reference/                           # not imported into production runtime
+│   └── figma/
+│       ├── specs/                       # archived pasted_text/*.md after parity verification
+│       └── notes/
+│
+├── src/
+│   ├── app/
+│   │   ├── layout.tsx                  # root HTML/body + global font setup
+│   │   ├── page.tsx                    # safe redirect into Department surface
+│   │   ├── globals.css
+│   │   ├── not-found.tsx
+│   │   ├── error.tsx
+│   │   │
+│   │   └── department/
+│   │       ├── layout.tsx               # Department-only metadata/PWA registration boundary
+│   │       ├── manifest.ts             # emits Department-scoped manifest
+│   │       ├── (auth)/
+│   │       │   └── login/
+│   │       │       └── page.tsx        # M01
+│   │       │
+│   │       └── (portal)/
+│   │           ├── layout.tsx          # authenticated Department shell
+│   │           ├── loading.tsx
+│   │           ├── error.tsx
+│   │           ├── page.tsx            # M02
+│   │           ├── queue/page.tsx      # M03
+│   │           ├── services/page.tsx   # M05
+│   │           ├── scrutiny/page.tsx   # ScrutinyCommandCentre
+│   │           ├── inspection-queue/page.tsx # M21 department queue
+│   │           ├── inspections/page.tsx      # distinct top-level destination
+│   │           ├── queries/page.tsx          # distinct top-level destination
+│   │           ├── decisions/page.tsx        # DecisionsDashboard
+│   │           ├── sla/page.tsx              # M30
+│   │           ├── grievances/page.tsx       # M31
+│   │           ├── regulatory-assistant/page.tsx # M32
+│   │           ├── regulatory-changes/page.tsx   # M33
+│   │           ├── regulatory-changes/impact/page.tsx # M34
+│   │           ├── analytics/page.tsx        # M35
+│   │           ├── analytics/bottlenecks/page.tsx # M36
+│   │           ├── workload/page.tsx         # M37
+│   │           ├── audit/page.tsx            # M38
+│   │           │
+│   │           └── applications/
+│   │               ├── page.tsx              # M04
+│   │               └── [applicationId]/
+│   │                   ├── layout.tsx
+│   │                   ├── page.tsx           # redirect -> overview
+│   │                   ├── overview/page.tsx  # M06
+│   │                   ├── business-dna/page.tsx # M07
+│   │                   ├── timeline/page.tsx  # M08
+│   │                   ├── pre-check/page.tsx # M09
+│   │                   ├── scrutiny-route/page.tsx # M10
+│   │                   ├── scrutiny/page.tsx  # M11
+│   │                   ├── parameters/[parameterId]/page.tsx # M12
+│   │                   ├── documents/[documentId]/page.tsx   # M13
+│   │                   ├── building-scrutiny/page.tsx # M14
+│   │                   ├── water-scrutiny/page.tsx    # M15
+│   │                   ├── consistency/page.tsx       # M16
+│   │                   ├── dependencies/page.tsx      # M17
+│   │                   ├── queries/new/page.tsx       # M18
+│   │                   ├── queries/page.tsx           # M19
+│   │                   ├── delta-rescrutiny/page.tsx  # M20
+│   │                   ├── inspections/page.tsx       # contextual M21 view
+│   │                   ├── inspections/[inspectionId]/plan/page.tsx # M22
+│   │                   ├── inspections/[inspectionId]/workspace/page.tsx # M23
+│   │                   ├── inspections/[inspectionId]/observations/page.tsx # M24
+│   │                   ├── decision/page.tsx          # M25
+│   │                   ├── decision/record/page.tsx   # M26
+│   │                   ├── dependency-update/page.tsx # M27
+│   │                   ├── compliance/page.tsx        # M28
+│   │                   └── amendments/new/page.tsx    # M29
+│   │
+│   ├── components/
+│   │   ├── government/
+│   │   ├── navigation/
+│   │   ├── notifications/
+│   │   ├── pwa/
+│   │   └── ui/
+│   │
+│   ├── domain/                         # canonical shared identities/states/contracts
+│   │   ├── ids.ts
+│   │   ├── states.ts
+│   │   ├── presentation-labels.ts      # UI labels map FROM canonical states
+│   │   └── contracts/
+│   │       ├── application.ts
+│   │       ├── business-dna.ts
+│   │       ├── document.ts
+│   │       ├── query.ts
+│   │       ├── inspection.ts
+│   │       ├── decision.ts
+│   │       ├── dependency.ts
+│   │       ├── compliance.ts
+│   │       ├── grievance.ts
+│   │       └── regulatory.ts
+│   │
+│   ├── departments/                    # created only in post-parity abstraction phase
+│   │   ├── registry.ts
+│   │   ├── shared/
+│   │   └── midc/
+│   │       ├── pack.ts
+│   │       ├── services.ts
+│   │       └── adapters/
+│   │
+│   ├── features/
+│   │   ├── auth/
+│   │   ├── dashboard/
+│   │   ├── applications/
+│   │   ├── business-dna/
+│   │   ├── scrutiny/
+│   │   ├── queries/
+│   │   ├── inspections/
+│   │   ├── decisions/
+│   │   ├── dependencies/
+│   │   ├── compliance/
+│   │   ├── sla/
+│   │   ├── grievances/
+│   │   ├── regulatory/
+│   │   │   ├── rules/
+│   │   │   └── rag/
+│   │   ├── analytics/
+│   │   ├── workload/
+│   │   └── audit/
+│   │
+│   ├── lib/
+│   │   ├── api/
+│   │   ├── auth/
+│   │   ├── routing/
+│   │   ├── pwa/
+│   │   ├── utils/
+│   │   └── constants/
+│   │
+│   ├── data/
+│   │   └── fixtures/
+│   │
+│   └── providers/
+│       └── accessibility-provider.tsx
+│
+├── tests/
+│   ├── e2e/                            # Playwright
+│   ├── visual/                         # Playwright screenshots
+│   ├── contract/                       # canonical identity/state consistency
+│   └── unit/                           # Vitest pure domain logic
+│
+├── next.config.ts
+├── next-env.d.ts                       # generated by Next.js; do not hand-edit
+├── package.json
+├── pnpm-lock.yaml
+├── tsconfig.json
+├── eslint.config.mjs
+├── postcss.config.mjs
+├── vitest.config.ts
+├── playwright.config.ts
+├── .env.example
+├── src/proxy.ts                        # only if request interception is actually needed
+├── DEPARTMENT_NEXTJS_PWA_MIGRATION.md
+└── DEPARTMENT_ANTIGRAVITY_EXECUTION_PLAYBOOK.md
+```
+
+### Important
+
+- The Department app remains scoped under `/department/` even on a dedicated deployment. This is intentional future-proofing.
+- Use exactly one active Department worker. Default: `public/department-sw.js`, registered with scope `/department/`.
+- In Next.js 16, use `proxy.ts` if request interception is needed. Do not create both `middleware.ts` and `proxy.ts`.
+- Prefer layouts/server-side authorization/data access over Proxy when possible.
+- `error.tsx` boundaries are Client Components and must include `'use client'`; do not turn the surrounding route tree into Client Components.
+- `departments/` is a **post-parity** abstraction target. Do not prematurely rewrite MIDC screens into generic configuration before visual/behavioral parity has been proven.
+
+---
+
+# 5. ROUTE DESIGN — REPLACE IN-MEMORY SCREEN SWITCHING WITH URLs
+
+The current shell uses state such as `activeDeptItem`, `appView`, `appSubPage`, and `notifOpen`. Keep ephemeral drawer/modal state locally, but move meaningful navigation into App Router URLs.
+
+## Route policy
+
+- Major screens must have URLs.
+- Browser back/forward must work.
+- Refreshing a deep page must reopen the same screen.
+- Application-specific pages must carry `applicationId`.
+- Inspection-specific pages must carry `inspectionId`.
+- Document/parameter identities must appear in the URL when the record identity matters.
+- Shareable workflow state belongs in route segments/search params, not hidden component state.
+- Department-wide screens must remain distinct from one-application workflow screens.
+
+## Department-scoped route map
+
+```text
+/
+  -> safe redirect to /department/login or /department based on server-validated session
+
+/department/login
+/department
+/department/queue
+/department/applications
+/department/services
+/department/scrutiny
+/department/inspection-queue
+/department/inspections
+/department/queries
+/department/decisions
+/department/sla
+/department/grievances
+/department/regulatory-assistant
+/department/regulatory-changes
+/department/regulatory-changes/impact
+/department/analytics
+/department/analytics/bottlenecks
+/department/workload
+/department/audit
+
+/department/applications/[applicationId]/overview
+/department/applications/[applicationId]/business-dna
+/department/applications/[applicationId]/timeline
+/department/applications/[applicationId]/pre-check
+/department/applications/[applicationId]/scrutiny-route
+/department/applications/[applicationId]/scrutiny
+/department/applications/[applicationId]/parameters/[parameterId]
+/department/applications/[applicationId]/documents/[documentId]
+/department/applications/[applicationId]/building-scrutiny
+/department/applications/[applicationId]/water-scrutiny
+/department/applications/[applicationId]/consistency
+/department/applications/[applicationId]/dependencies
+/department/applications/[applicationId]/queries
+/department/applications/[applicationId]/queries/new
+/department/applications/[applicationId]/delta-rescrutiny
+/department/applications/[applicationId]/inspections
+/department/applications/[applicationId]/inspections/[inspectionId]/plan
+/department/applications/[applicationId]/inspections/[inspectionId]/workspace
+/department/applications/[applicationId]/inspections/[inspectionId]/observations
+/department/applications/[applicationId]/decision
+/department/applications/[applicationId]/decision/record
+/department/applications/[applicationId]/dependency-update
+/department/applications/[applicationId]/compliance
+/department/applications/[applicationId]/amendments/new
+```
+
+Use the current sample application IDs only in fixtures/links. **Never hard-code a sample ID into route architecture.**
+
+### Do not collapse these route families
+
+```text
+/department/scrutiny
+/department/applications/[applicationId]/scrutiny
+
+/department/queries
+/department/applications/[applicationId]/queries
+
+/department/inspections
+/department/inspection-queue
+/department/applications/[applicationId]/inspections
+/department/applications/[applicationId]/inspections/[inspectionId]/workspace
+
+/department/decisions
+/department/applications/[applicationId]/decision
+```
+
+### Deployment / PWA scope lock
+
+The Department surface uses `/department/` as its route and PWA scope regardless of whether it initially lives on:
+
+- a dedicated Department host/subdomain, or
+- a future unified EKATMA origin.
+
+This avoids a later service-worker collision with Entrepreneur routes. Any future decision to move the Department portal to root scope `/` is a deployment architecture change and must be reviewed explicitly rather than inferred by an agent.
+
+---
+
+# 6. MIGRATION PHASES — EXECUTE IN THIS ORDER
+
+The phase numbering in this document is canonical. The companion `DEPARTMENT_ANTIGRAVITY_EXECUTION_PLAYBOOK.md` uses exactly the same phase numbers.
+
+## PHASE 0 — Freeze and inventory the source
+
+Before changing architecture:
+
+- [ ] Keep the original ZIP untouched.
+- [ ] Create a migration branch.
+- [ ] Commit the untouched working source as the baseline.
+- [ ] Run the current Vite version and capture reference screenshots of all reachable screens.
+- [ ] Record M01–M39, `ScrutinyCommandCentre`, `DecisionsDashboard`, and all sidebar destinations.
+- [ ] Record hard-coded datasets and all current route-like callback relationships.
+- [ ] Record assets, fonts, accessibility behavior, placeholders, and Figma-generated specification material.
+- [ ] Confirm whether any screen is unreachable because of prototype state; document rather than delete it.
+
+**Exit condition:** source/reference coverage is known and rollback is trivial.
+
+---
+
+## PHASE 1 — Convert the existing repository in place to Next.js runtime
+
+### Important: do not bootstrap a nested app
+
+For a fresh project, `create-next-app` is a convenient scaffold. **It is not a requirement for an existing React project.** For this repository, do not run it inside the project in a way that creates a second app.
+
+Instead:
+
+- install/update `next`, compatible `react`, and `react-dom`
+- add App Router files/configuration directly to this repository
+- convert package scripts to `next dev`, `next build`, `next start`
+- create `postcss.config.mjs` for Tailwind v4
+- keep the old Vite entry/config available until Next.js renders successfully
+- then remove Vite-only runtime/build packages after parity is verified
+
+Create/update at minimum:
+
+```text
+src/app/layout.tsx
+src/app/page.tsx
+src/app/globals.css
+next.config.ts
+postcss.config.mjs
+```
+
+Root `/` should server-redirect into `/department/login` or `/department` based on session state when real auth exists. During mock-auth migration, use a deterministic temporary redirect.
+
+**Do not use `output: 'export'`.** This portal requires server-capable authentication/authorization and current workflow data.
+
+**Exit condition:** Next.js boots from the same repository, Tailwind v4 compiles through PostCSS, and a minimal shell can render without Vite.
+
+---
+
+## PHASE 2 — Migrate global styling, assets, and deterministic rendering
+
+Preserve:
+
+- Noto Sans / Noto Sans Devanagari
+- Government theme tokens
+- focus-visible and skip-link behavior
+- table styling
+- sidebar active state
+- government identity assets
+
+Prefer `next/font` where it preserves metrics. Compare against screenshots.
+
+Do not generate SSR-visible `Math.random()`, `Date.now()`, or locale-dependent output differently on server and client.
+
+**Exit condition:** typography, theme, assets, and global styling visually match the Vite source.
+
+---
+
+## PHASE 3 — M01 + shared government shell + M02 + base Department PWA plumbing
+
+Migrate:
+
+- M01 Department Login -> `/department/login`
+- Accessibility Strip
+- Government Header
+- Department Context Bar
+- Department Sidebar
+- Breadcrumb/Footer where applicable
+- M39 notification shell/provider only as needed for shared layout
+- M02 Operational Command Centre -> `/department`
+
+Create a Department-only boundary at `src/app/department/layout.tsx` for Department metadata/PWA registration, and the authenticated shell at:
+
+```text
+src/app/department/(portal)/layout.tsx
+```
+
+Create initial PWA plumbing only:
+
+- `src/app/department/manifest.ts`
+- approved Department PWA icon locations
+- `public/department-sw.js` scaffold
+- `public/department/offline.html`
+- one registration component with scope `/department/`
+
+Do **not** add aggressive runtime caching yet.
+
+**Exit condition:** `/department/login` and `/department` render with parity inside a reusable shell, and the Department PWA plumbing is scoped only to `/department/`.
+
+---
+
+## PHASE 3.5 — CANONICAL DOMAIN CONTRACT LOCK — REQUIRED BEFORE M06+
+
+This is a hard architecture gate. Do not migrate M06+ until it exists.
+
+### 3.5A — Canonical IDs
+
+Define branded/opaque TypeScript identity types in `src/domain/ids.ts` for at least:
+
+- Business ID
+- Project ID
+- Application ID
+- Department ID
+- Service ID
+- Business DNA Version ID/version reference
+- Document ID
+- Document Version ID
+- Query ID
+- Deficiency ID
+- Resubmission Version ID
+- Inspection ID
+- Decision ID
+- Approval ID
+- Dependency Node ID
+- Compliance ID
+- Grievance ID
+- Regulatory Rule Version ID
+
+Add other IDs only when supported by the authoritative workflow/specification.
+
+The purpose is to prevent accidental mixing of unrelated string IDs.
+
+### 3.5B — Canonical state dictionaries
+
+Create separate typed canonical state sets in `src/domain/states.ts`, not one generic `status: string`.
+
+At minimum review and define the authoritative sets for:
+
+- `ApplicationState`
+- `AdaptiveQuestionState`
+- `VerificationState`
+- `RegulatoryApplicabilityState`
+- `PaymentState`
+- `QueryState`
+- `DeficiencyState`
+- `InspectionState`
+- `DecisionState`
+- `DependencyState`
+- `ComplianceState`
+- `GrievanceState`
+
+**Source rule:** populate these from the locked EKATMA master workflow/specification material already available to the project. Do not invent missing canonical values merely to make TypeScript compile.
+
+If the prototype contains a display label that cannot yet be mapped to a canonical state, model it explicitly as a **legacy/presentation mapping gap** and record it in `DOMAIN_CONTRACT_GAPS.md`; do not silently promote the display label into the canonical enum.
+
+### 3.5C — Presentation labels are separate
+
+Create a mapping layer such as `src/domain/presentation-labels.ts`:
+
+```text
+canonical state -> officer-facing label / badge / color
+```
+
+Never reverse that dependency. A badge saying **Under Review** must not itself become the source of truth for application state unless the authoritative contract defines that exact canonical value.
+
+### 3.5D — Shared record contracts
+
+Define minimal contracts for the shared record families used by both Entrepreneur and Department experiences:
+
+- application
+- business/project/business-DNA references
+- document/version
+- query/deficiency/resubmission
+- inspection
+- decision/approval
+- dependency
+- compliance
+- grievance
+- regulatory rule/version
+
+Do not design database tables here. This is a frontend/API contract boundary.
+
+### 3.5E — Contract tests
+
+Add Vitest contract tests that prove fixtures and route loaders preserve canonical identity/state relationships, for example:
+
+- an `ApplicationId` stays the same across overview/scrutiny/query/inspection/decision fixtures
+- an `InspectionId` belongs to the same `ApplicationId` in queue and workspace routes
+- query/deficiency/resubmission relationships do not change between screens
+- dependency nodes reference known application/service/department identities
+
+**Exit condition:** M06+ routes can consume shared typed contracts without inventing route-local status/ID models.
+
+---
+
+## PHASE 4 — M03–M05 + department-wide command surfaces
+
+Migrate:
+
+- M03 Queue
+- M04 Application Search
+- M05 Service Catalogue/Segmentation
+- `ScrutinyCommandCentre` -> `/department/scrutiny`
+- `DecisionsDashboard` -> `/department/decisions`
+- distinct `/department/inspections`
+- distinct `/department/queries`
+
+Replace route-like state callbacks with `Link`/`router.push()` using central route helpers.
+
+**Exit condition:** department-level navigation is URL-driven and survives refresh/back/forward.
+
+---
+
+## PHASE 5 — Application workflow M06–M20
+
+Create/use:
+
+```text
+/department/applications/[applicationId]/...
+```
+
+All M06–M20 route loaders and fixtures must use the Phase 3.5 identity/state contracts.
+
+Do not create route-local variations such as `status: string`, `applicationID`, `appId`, and `applicationId` for the same identity.
+
+Use repository/service functions such as:
+
+```text
+getApplication(applicationId)
+getBusinessDna(applicationId)
+getTimeline(applicationId)
+getPrecheck(applicationId)
+getScrutiny(applicationId)
+```
+
+**Exit condition:** M06–M20 are deep-linkable and preserve the same canonical application identity/state relationships.
+
+---
+
+## PHASE 6 — Inspections M21–M24
+
+Preserve both contexts:
+
+- department-wide: `/department/inspection-queue`
+- application-context: `/department/applications/[applicationId]/inspections/...`
+
+M22–M24 must preserve both `applicationId` and `inspectionId`.
+
+Reuse extracted components rather than cloning inspection implementations.
+
+**Exit condition:** queue -> plan -> workspace -> observations works from canonical IDs and survives refresh/back/forward.
+
+---
+
+## PHASE 7 — Decisions/compliance M25–M29
+
+Migrate M25–M29 using canonical Decision/Approval/Dependency/Compliance identities and states.
+
+These are high-consequence surfaces. Until real mutations exist, prototype behavior must be visibly mock and must not claim server persistence.
+
+**Exit condition:** decision/compliance flows preserve visual behavior and canonical record identity without fake official persistence.
+
+---
+
+## PHASE 8 — Oversight M30–M38 + M39
+
+Migrate:
+
+- SLA Dashboard
+- Grievances
+- Regulatory Assistant / RAG
+- Regulatory Changes
+- Regulatory Impact Analysis
+- Analytics
+- Bottlenecks
+- Workload
+- Audit / History
+- M39 Notification Drawer
+
+Apply the Regulatory/RAG/Dependency boundary defined later in this guide: RAG explains/retrieves; authoritative engines own state/rules/dependency outcomes.
+
+**Exit condition:** M01–M39 plus non-numbered required surfaces are accounted for.
+
+---
+
+## PHASE 9 — Complete fixture extraction + repository/API boundary cleanup
+
+Hard-coded prototype data may move gradually while routes are migrated; Phase 9 completes the cleanup.
+
+- move remaining large arrays/objects out of route JSX into `src/data/fixtures/*`
+- route all data access through repository/service functions
+- reuse the Phase 3.5 domain contracts
+- clearly distinguish fixture/mock persistence from server persistence
+- remove duplicate route-local data shapes
+
+**Exit condition:** UI components do not care whether their records came from fixtures or a future API.
+
+---
+
+## PHASE 10 — PWA hardening + automated parity/contract testing
+
+Now finalize:
+
+- Department-scoped manifest
+- Department-scoped worker
+- safe cache allowlist
+- static offline fallback
+- safe worker update UX
+- install behavior
+- logout/session-expiry behavior in installed mode
+- Playwright route/e2e tests
+- Playwright visual parity baselines
+- Vitest domain/contract tests
+
+Do not widen the service worker to `/`.
+
+**Exit condition:** install/offline/update behavior is safe and testable, and all migrated routes have automated smoke coverage.
+
+---
+
+## PHASE 11 — POST-PARITY DEPARTMENT PACK ABSTRACTION
+
+Do this **only after MIDC parity is complete**.
+
+Target concept:
+
+```text
+Generic Department Shell
+        +
+Generic Application / Query / Inspection / Decision workflows
+        +
+Department + Service Registry
+        +
+Department Pack configuration/adapters
+             │
+             ├── MIDC Pack #1
+             ├── MPCB Pack #2 (future)
+             ├── Fire Pack (future)
+             ├── DISH Pack (future)
+             ├── Boiler Pack (future)
+             └── Legal Metrology / sector packs (future)
+```
+
+Rules:
+
+- do not copy the entire MIDC route tree for each future department
+- keep shared application/query/inspection/decision/dependency contracts generic
+- move only genuinely MIDC-specific service definitions, review parameters, checklists, adapters, and presentation configuration into `src/departments/midc/`
+- department identity should come from authenticated account context/backend, not from a user-selected login dropdown
+- future Department Packs plug into the same shell and canonical shared records
+
+**Exit condition:** MIDC remains functionally identical, but another department can be added through the registry/pack boundary rather than a copied application.
+
+---
+
+## PHASE 12 — Production integration/deployment readiness
+
+Before real backend integration/deployment:
+
+- confirm server-capable Next.js deployment; no `output: 'export'`
+- create `.env.example` with endpoint/deployment keys only; never commit secrets
+- lock API/RAG/rule/dependency adapter boundaries
+- confirm server-side auth/authorization plan
+- confirm service-worker scope remains `/department/`
+- confirm Figma reference material is archived/traceable and not imported into production runtime
+- run full build, test, visual, accessibility, and PWA verification gates
+
+**Exit condition:** frontend architecture can connect to the shared EKATMA backend without another route/domain rewrite.
+
+---
+
+# 7. SERVER COMPONENT VS CLIENT COMPONENT POLICY
+
+Do **not** place `'use client'` at the top of every file.
+
+## Prefer Server Components for
+
+- route `page.tsx`
+- route `layout.tsx`
+- server-side data loading
+- metadata
+- static/read-only screen sections
+- permission-aware data retrieval
+
+## Use Client Components only where needed
+
+- `useState`
+- `useEffect`
+- browser APIs
+- interactive filters
+- modals/drawers
+- tab/accordion state
+- local selection state
+- service worker registration
+- install/network status
+- client-only charts if a chosen library requires it
+
+Pattern:
+
+```tsx
+// Server route
+export default async function Page({ params }) {
+  const { applicationId } = await params
+  const data = await getApplication(applicationId)
+
+  return <ApplicationOverviewClient initialData={data} />
+}
+```
+
+Do not turn the entire department portal into a client bundle merely because the source Vite app was client-only.
+
+---
+
+# 8. ASSET MIGRATION
+
+Preserve these existing assets exactly:
+
+```text
+public/assets/india-emblem.png
+public/assets/maha-seal.png
+public/assets/ekatma-logo.png
+```
+
+Use `next/image` where it does not alter rendering unexpectedly.
+
+Example:
+
+```tsx
+<Image
+  src="/assets/india-emblem.png"
+  alt="National Emblem of India"
+  width={56}
+  height={64}
+  priority
+/>
+```
+
+Do not stretch or recolor government identity assets.
+
+Review `src/imports/image*.png` before deleting them. If an image is used, move it to a meaningful `public/assets/...` name or keep as imported static asset. If unused, document before removal.
+
+---
+
+# 9. ACCESSIBILITY / GIGW-PRESERVATION RULES
+
+The current UI already contains accessibility-oriented behaviors. Preserve and strengthen them.
+
+Must keep:
+
+- Skip to Main Content
+- visible keyboard focus
+- semantic landmarks
+- proper `aria-label` / `aria-current`
+- keyboard-accessible sidebar and controls
+- alt text for identity images
+- English/Marathi language support architecture
+- font-size controls
+- high-contrast control
+- screen-reader access affordance
+
+### Migration correction
+
+The current authenticated shell passes no-op setters for some accessibility controls. During Next.js migration, centralize accessibility preferences in a client provider and restore real behavior across routes.
+
+Suggested:
+
+```text
+src/providers/accessibility-provider.tsx
+```
+
+Persist only non-sensitive preferences such as:
+
+- language
+- font size
+- contrast preference
+
+Use local storage/cookie as appropriate.
+
+Do not store auth tokens or sensitive application data in the same mechanism.
+
+**Important:** preserving GIGW-oriented/accessibility controls during migration is a parity requirement, not a claim of formal GIGW/WCAG compliance. Run a separate accessibility/compliance audit before making any certification/compliance claim.
+
+---
+
+# 10. AUTHENTICATION ARCHITECTURE
+
+The prototype uses local React state:
+
+```ts
+authed: boolean
+```
+
+This is NOT production authentication.
+
+During UI migration, it is acceptable to preserve a temporary mock auth adapter, but it must be isolated so real auth can replace it.
+
+Recommended boundary:
+
+```text
+src/lib/auth/session.ts
+src/lib/auth/permissions.ts
+```
+
+Production requirements later:
+
+- server-validated session
+- HttpOnly secure cookies where applicable
+- role/desk/department/office permissions loaded from backend account mapping
+- no role selection at login
+- route-level authorization
+- server-side authorization for every mutation
+- logout invalidates server session
+
+Never trust a client-side hidden/disabled button as authorization.
+
+### Login CAPTCHA migration rule
+
+The current prototype CAPTCHA is client-generated and is appropriate only as a visual prototype. During migration:
+
+- do not treat a browser-generated CAPTCHA code as a production security control
+- production CAPTCHA/challenge validation must be server/backend issued and validated
+- avoid generating `Math.random()`, timestamps, or locale-dependent values during the initial server/client render when they can cause hydration mismatch
+- if temporary visual parity requires the prototype CAPTCHA before backend integration, initialize it after hydration or pass a stable initial value from the server boundary; mark it clearly as mock/prototype behavior
+
+### Proxy is not the authorization system
+
+If `src/proxy.ts` is used, use it for coarse request-time redirects/checks only. Every protected data read and mutation still requires server-side authorization. In Next.js 16, use `proxy.ts`; do not introduce the older `middleware.ts` convention alongside it.
+
+---
+
+# 11. PWA REQUIREMENTS — MANDATORY
+
+The converted application must be an installable PWA.
+
+Minimum PWA deliverables for **this project**:
+
+- [ ] valid App Router web app manifest
+- [ ] app icons including 192x192 and 512x512
+- [ ] maskable icon with safe-zone padding
+- [ ] approved EKATMA app identity used for app icons; no unapproved government-emblem crop/recolor
+- [ ] HTTPS in production
+- [ ] one controlled service worker registered in production
+- [ ] deliberate service-worker update strategy that does not destroy unsaved form work
+- [ ] self-contained offline navigation fallback
+- [ ] safe caching strategy
+- [ ] installability/add-to-home-screen behavior verified on Chromium
+- [ ] iOS Safari home-screen behavior verified where relevant
+- [ ] desktop installed-mode behavior verified where relevant
+- [ ] Chrome DevTools Application > Manifest and Service Workers inspected
+- [ ] Lighthouse may be used for performance/accessibility quality checks, but must not be treated as the sole proof of PWA correctness/installability
+
+A service worker/offline fallback is a **project requirement here** because the requested deliverable is a controlled PWA experience. Browser installability itself is not defined solely by service-worker presence, so test the actual target browsers rather than relying on one audit score.
+
+---
+
+# 12. WEB APP MANIFEST — DEPARTMENT SCOPED
+
+Create:
+
+```text
+src/app/department/manifest.ts
+```
+
+Baseline:
+
+```ts
+import type { MetadataRoute } from 'next'
+
+export default function manifest(): MetadataRoute.Manifest {
+  return {
+    name: 'EKATMA Department Portal',
+    short_name: 'EKATMA Dept',
+    description: 'Government of Maharashtra department workflow portal',
+    start_url: '/department',
+    scope: '/department/',
+    display: 'standalone',
+    background_color: '#ffffff',
+    theme_color: '#1a3a5c',
+    orientation: 'any',
+    icons: [
+      {
+        src: '/department/icons/pwa-192x192.png',
+        sizes: '192x192',
+        type: 'image/png',
+      },
+      {
+        src: '/department/icons/pwa-512x512.png',
+        sizes: '512x512',
+        type: 'image/png',
+      },
+      {
+        src: '/department/icons/pwa-maskable-512x512.png',
+        sizes: '512x512',
+        type: 'image/png',
+        purpose: 'maskable',
+      },
+    ],
+  }
+}
+```
+
+### Scope rule
+
+Keep `scope: '/department/'` even when the app initially has a dedicated host. This is deliberate isolation from the Entrepreneur surface if both later share one origin.
+
+The worker must use the same logical scope. Do not register a Department worker with root scope `/`.
+
+Do not use government emblems as maskable application icons unless branding approval explicitly permits it. Prefer the approved EKATMA app identity with adequate safe-zone padding.
+
+---
+
+# 13. SERVICE WORKER STRATEGY
+
+There are two acceptable implementation paths.
+
+## Preferred initial path: simple explicit service worker
+
+Use a carefully controlled `public/department-sw.js` if requirements are primarily:
+
+- installability
+- offline fallback
+- static asset caching
+- optional push later
+
+Advantages:
+
+- minimal framework/plugin coupling
+- easy security review
+- easier to understand
+
+## Optional advanced path: Serwist
+
+Use `@serwist/next` only if robust offline precaching/runtime caching is genuinely needed.
+
+Important: verify compatibility with the exact Next.js bundler/configuration being used. The official Next.js PWA guide notes Serwist as an option for offline support, and its integration can depend on bundler support/configuration.
+
+Do not add Serwist only because "PWA" appears in the requirement.
+
+---
+
+# 14. CRITICAL PWA CACHE POLICY FOR THIS GOVERNMENT PORTAL
+
+This is an authenticated government workflow application. **Do not use a blanket cache-first strategy.**
+
+## Safe to cache aggressively
+
+Examples:
+
+- versioned JS/CSS/static chunks handled by framework/browser
+- approved logos/icons
+- fonts
+- static decorative assets
+- offline fallback document
+- static help content that contains no user/session data
+
+## Use network-first or tightly controlled short-lived caching
+
+Potentially:
+
+- publicly available non-sensitive reference content
+- public regulatory guidance if explicitly designed for offline use
+
+## Do NOT persist in service-worker cache by default
+
+- officer profile/context
+- authenticated HTML containing user-specific data
+- application records
+- Business DNA
+- uploaded documents
+- document previews
+- query/deficiency responses
+- inspection records
+- observations
+- decisions
+- compliance conditions
+- audit logs
+- grievance data
+- SLA records tied to applications/officers
+- regulatory impact records containing private workflow context
+- API responses containing confidential or personal data
+- authentication endpoints
+- CAPTCHA responses
+- session/token responses
+
+## Mutations must be network-only
+
+Do not queue/replay high-consequence mutations with generic background sync unless the backend team has explicitly designed idempotency, conflict resolution, audit semantics, and legal workflow behavior.
+
+Examples that should default to network-only:
+
+- submit decision
+- issue approval/rejection
+- raise official query
+- record inspection observation
+- mark compliance status
+- update dependency state
+- submit amendment
+- change workflow status
+- upload official document
+
+If offline, disable the mutation action and show a clear non-destructive message such as:
+
+> Internet connection is required to submit this official action. Your current screen remains open; no submission has been made.
+
+Do not falsely show "Saved" if the server did not acknowledge the operation.
+
+## Next.js server/framework caching is a separate concern from the service worker
+
+Even if the service worker is conservative, do not accidentally expose officer-specific data through inappropriate server/framework caching. For authenticated or authorization-dependent reads:
+
+- default to request-time personalized reads unless a reviewed cache design says otherwise
+- use `cache: 'no-store'` for `fetch` calls when current per-user/per-application state must not be reused
+- do not add `use cache` / shared cached functions around officer-specific or permission-sensitive results by default
+- never let a cache key omit identity/authorization dimensions when those dimensions change the result
+- re-check all data after a mutation instead of presenting stale legal/workflow status as current
+
+Static public/reference data may use appropriate Next.js caching/revalidation after classification.
+
+## Experimental/offline retry features
+
+Current Next.js includes experimental offline APIs/configuration. **Do not enable automatic offline retry/replay behavior for official mutating Server Actions in this portal unless the backend explicitly supports idempotency, conflict handling, audit semantics, and the product/security team approves the behavior.** A failed official mutation should remain visibly unsubmitted rather than being unpredictably replayed later.
+
+---
+
+# 15. SIMPLE SERVICE WORKER BASELINE
+
+A minimal worker may:
+
+1. cache a named static shell set
+2. serve an offline fallback for navigation failures
+3. avoid intercepting sensitive API/auth calls
+4. clean old cache versions on activate
+
+Conceptual example only; adapt paths to the final build:
+
+```js
+const CACHE_PREFIX = 'ekatma-department-static-'
+const STATIC_CACHE = `${CACHE_PREFIX}v1`
+const OFFLINE_URL = '/department/offline.html'
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(STATIC_CACHE).then((cache) =>
+      cache.addAll([
+        OFFLINE_URL,
+        '/assets/ekatma-logo.png',
+        '/department/icons/pwa-192x192.png',
+        '/department/icons/pwa-512x512.png',
+      ])
+    )
+  )
+
+  // Do not force skipWaiting() here by default. A newly installed worker must not
+  // unexpectedly replace/reload an officer's page while unsaved form work exists.
+})
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    Promise.all([
+      caches.keys().then((keys) =>
+        Promise.all(
+          keys
+            .filter((key) => key.startsWith(CACHE_PREFIX) && key !== STATIC_CACHE)
+            .map((key) => caches.delete(key))
+        )
+      ),
+      self.clients.claim(),
+    ])
+  )
+})
+
+self.addEventListener('fetch', (event) => {
+  const request = event.request
+  const url = new URL(request.url)
+
+  if (request.method !== 'GET') return
+  if (url.origin !== self.location.origin) return
+
+  // Never SW-cache authenticated API/auth traffic by default.
+  if (url.pathname.startsWith('/api/')) return
+  if (url.pathname.startsWith('/auth/')) return
+
+  // Navigations remain network-first. If the network is unavailable, return only
+  // the static non-sensitive fallback, not a previously cached officer page.
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request).catch(async () =>
+        (await caches.match(OFFLINE_URL)) || Response.error()
+      )
+    )
+  }
+})
+```
+
+This example is intentionally conservative.
+
+A richer offline strategy must be separately threat-modeled and reviewed.
+
+---
+
+# 16. SERVICE WORKER REGISTRATION
+
+Create a tiny client component, for example:
+
+```text
+src/components/pwa/pwa-register.tsx
+```
+
+Conceptual implementation:
+
+```tsx
+'use client'
+
+import { useEffect } from 'react'
+
+export function PwaRegister() {
+  useEffect(() => {
+    if (
+      process.env.NODE_ENV === 'production' &&
+      'serviceWorker' in navigator
+    ) {
+      navigator.serviceWorker.register('/department-sw.js', {
+        scope: '/department/',
+        updateViaCache: 'none',
+      })
+    }
+  }, [])
+
+  return null
+}
+```
+
+Mount once in `src/app/department/layout.tsx` so registration is associated only with the Department surface.
+
+If a PWA library handles registration automatically, do not register twice.
+
+### Worker update behavior
+
+Do not automatically force a waiting service worker to activate and reload the application while an officer may have unsaved input. Prefer:
+
+1. detect `registration.waiting` / `updatefound`
+2. surface a non-blocking **Update available** UI
+3. activate/reload only after the user chooses a safe moment, or after the product establishes a form-draft preservation policy
+
+If the implementation later uses `skipWaiting()`, make it part of that deliberate update flow rather than an unconditional install-time action.
+
+---
+
+# 17. SERVICE WORKER HEADERS
+
+Configure the Department service worker so browsers do not get stuck on stale worker code, while keeping its registration scope limited to `/department/`.
+
+Recommended intent for `/department-sw.js`:
+
+```text
+Content-Type: application/javascript; charset=utf-8
+Cache-Control: no-cache, no-store, must-revalidate
+```
+
+Add appropriate security headers at the application level as deployment architecture allows.
+
+At minimum review:
+
+- Content-Security-Policy
+- X-Content-Type-Options
+- frame-ancestors / X-Frame-Options strategy
+- Referrer-Policy
+- Permissions-Policy
+- Strict-Transport-Security in HTTPS production
+
+Do not copy a CSP that breaks Next.js without testing. Build the CSP around actual script/font/image/API requirements.
+
+---
+
+# 18. OFFLINE UX
+
+Create the service-worker navigation fallback as:
+
+```text
+public/department/offline.html
+```
+
+Prefer a **self-contained static HTML fallback** with minimal styling and approved static assets. This is more reliable when the network is fully unavailable because it does not depend on an uncached Next.js RSC/JS/CSS response to render the message. Do not include officer/application data in this file. If the production CSP disallows inline styles, use a separately pre-cached static `/department/offline.css` or an approved CSP hash rather than weakening the application CSP.
+
+An additional online `/offline` Next.js route is optional, but the service worker fallback should point to `/department/offline.html`.
+
+Offline page should be branded but simple.
+
+It should explain:
+
+- the device is offline
+- previously loaded sensitive records are not being exposed from an unsafe cache
+- official actions require connectivity
+- user can retry once online
+
+Do not show stale approval/decision/SLA status as if current unless the product explicitly supports timestamped offline snapshots.
+
+Optional shell indicator:
+
+```text
+Offline — view may be limited; official actions require internet.
+```
+
+Do not use alarming red error styling for ordinary temporary loss of connectivity unless the action is blocked.
+
+If `src/proxy.ts` is used for auth redirects, its matcher/logic must allow public PWA/runtime resources such as:
+
+- `/department/login`
+- `/department/offline.html`
+- `/department-sw.js`
+- manifest/metadata routes
+- PWA icons and approved public assets
+- `/_next/static/*`
+- `/_next/image/*` as required
+
+Do not let an offline navigation fallback get redirected into an authenticated page or redirect loop.
+
+---
+
+# 19. PUSH NOTIFICATIONS
+
+PWA installability does **not** require push notifications.
+
+Do not implement Web Push during initial migration unless it is an explicit project requirement.
+
+If added later:
+
+- obtain user permission at an appropriate time, not immediately on first page load
+- associate subscriptions with server-side officer identity securely
+- never include confidential application details in lock-screen notification text unless security/product policy allows it
+- route notification clicks to an authenticated page
+- validate notification payloads
+- store subscriptions in the backend, not memory
+
+M39 Notification Drawer is an in-app feature and does not automatically imply Web Push.
+
+---
+
+# 20. NEXT.JS METADATA
+
+Root layout should define metadata appropriate for an internal/government portal.
+
+Example:
+
+```ts
+export const metadata = {
+  title: {
+    default: 'EKATMA Department Portal',
+    template: '%s | EKATMA',
+  },
+  description: 'Government of Maharashtra department workflow portal',
+}
+```
+
+For authenticated screens, public SEO indexing is generally not useful. Final robots behavior should match deployment policy.
+
+Do not expose private application identifiers in public Open Graph metadata.
+
+---
+
+# 21. NEXT.JS IMAGE / FONT / LINK RULES
+
+Use:
+
+- `next/image` for local raster assets where safe
+- `next/link` for navigational links
+- `next/font` for supported fonts
+
+Do not perform mechanical replacements that change sizing/layout.
+
+For tiny SVG icon components already embedded in source, it is acceptable to preserve them as React components first, then centralize into `components/icons` later.
+
+Do not introduce a large icon library during migration if it changes appearance.
+
+Keep initial Server/Client rendering deterministic. Do not call `Math.random()`, `Date.now()`, or locale/timezone formatting during initial render when the server/client output could differ. Generate action IDs/timestamps on the server, from stable props, or after a user action instead.
+
+---
+
+# 22. DATA FETCHING / API INTEGRATION BOUNDARY
+
+Do not put raw `fetch()` calls throughout JSX.
+
+Create service/repository functions.
+
+Example:
+
+```text
+src/lib/api/server.ts
+src/lib/api/client.ts
+src/features/applications/api.ts
+```
+
+Server reads should prefer server-side fetching when possible.
+
+Client-side revalidation can be introduced later for live queue/SLA/notification features.
+
+### Recommended future API domains
+
+```text
+auth
+users/officer-context
+applications
+workflow
+documents
+scrutiny
+queries
+inspections
+decisions
+dependencies
+compliance
+sla
+grievances
+regulatory
+analytics
+notifications
+audit
+```
+
+Do not create fake endpoint contracts if backend specifications already exist elsewhere in the repository. Inspect and reuse them.
+
+For future authenticated backend reads, explicitly classify caching. Officer/application/permission-sensitive reads should normally be request-time/non-shared (`cache: 'no-store'` where using `fetch`) until the backend/data team defines safe revalidation and cache-key semantics. Do not introduce `use cache` around sensitive personalized reads merely for performance.
+
+---
+
+# 22A. CANONICAL DOMAIN CONTRACT RULES
+
+Phase 3.5 creates the canonical domain contract; every later feature must reuse it.
+
+## Identity rule
+
+Never represent the same identity under different ad-hoc names/types across screens. For example, one Application ID must remain the same record through:
+
+```text
+Queue -> Overview -> Scrutiny -> Query -> Inspection -> Decision -> Dependency -> Compliance -> Audit
+```
+
+Use branded/opaque ID types to reduce accidental mixing of identifiers.
+
+## State rule
+
+Do not use a universal `status: string` model. Each state family has different semantics and must be typed separately.
+
+UI badge labels/colors belong in a presentation mapping. Canonical state is not inferred from badge text.
+
+## Entrepreneur/Department consistency rule
+
+The Department frontend is not allowed to create a second interpretation of application/query/inspection/decision/dependency records. The intended architecture is:
+
+```text
+                 EKATMA SHARED BACKEND / DOMAIN
+
+Business / Project / Business DNA / Dossier
+                 │
+        Regulatory Rule Engine
+                 │
+           Dependency Engine
+                 │
+Applications / Documents / Queries / Inspections
+ Decisions / SLA / Compliance / Audit
+                 │
+       Canonical Shared API Contracts
+              ┌──┴──┐
+              │     │
+      ENTREPRENEUR  DEPARTMENT
+          APP          APP
+```
+
+The two frontends may present different views/actions, but a shared record must keep the same canonical identity/state/version semantics.
+
+---
+
+# 22B. REGULATORY RULE / RAG / DEPENDENCY BOUNDARIES
+
+Keep these as explicit integrations rather than one generic `regulatory` blob.
+
+Recommended feature boundaries:
+
+```text
+src/features/regulatory/rules/
+src/features/regulatory/rag/
+src/features/dependencies/
+```
+
+Conceptual responsibilities:
+
+### Regulatory Rule Engine
+
+- authoritative applicability/rule evaluation result
+- versioned rule references
+- structured conditions/results consumed by UI
+
+### Dependency Engine
+
+- authoritative dependency graph/state
+- prerequisites
+- locked/unlocked/blocking relationships
+- next eligible workflow nodes
+
+### RAG / Knowledge Service
+
+- retrieves GRs/clauses/reference material
+- explains rules in officer-friendly language
+- supports bilingual assistance
+- helps interpret regulatory changes
+- returns citations/provenance where supported
+
+### RAG must NOT own
+
+- canonical application state
+- canonical dependency state
+- regulatory applicability decision
+- payment state
+- department approval/rejection
+- workflow unlocking
+- mutation of official records
+
+The frontend consumes versioned authoritative rule/dependency results from backend services. RAG content is explanatory/retrieval assistance and must not silently mutate authoritative workflow state.
+
+---
+
+# 23. ERROR / LOADING / EMPTY STATES
+
+For each major route group:
+
+- create meaningful `loading.tsx` where data load is non-trivial
+- create route `error.tsx` where appropriate
+- preserve existing empty/filter states
+- do not show raw stack traces to officers
+
+Error states should distinguish:
+
+- network failure
+- unauthorized
+- forbidden
+- not found
+- backend validation error
+- temporary unavailable
+
+High-consequence mutation errors must state whether the server accepted the action.
+
+Next.js App Router `error.tsx` boundaries are Client Components: include `'use client'` in those files and keep that client boundary local to the error UI.
+
+---
+
+# 24. RESPONSIVENESS
+
+The source is desktop/dashboard-heavy and often uses fixed-width sidebars, dense tables, and multi-column layouts.
+
+Migration must preserve desktop layout first, then make it responsive without deleting information.
+
+At minimum verify:
+
+- 1440px desktop reference
+- 1280px laptop
+- 1024px tablet landscape
+- 768px tablet/compact
+- mobile PWA install shell
+
+For dense data tables on small screens:
+
+- allow horizontal scroll where needed
+- freeze important identifiers if useful
+- do not hide legally/operationally important fields solely to fit width
+- use detail drawers/cards only when they preserve the complete data
+
+Sidebar may become a drawer on small screens.
+
+---
+
+# 25. STATE MANAGEMENT
+
+Do not introduce Redux/Zustand/etc. automatically.
+
+Use:
+
+- URL for navigational state
+- server data for persistent domain state
+- local component state for ephemeral UI state
+- context/provider for narrow cross-route UI preferences such as accessibility or notification drawer state
+
+Introduce a global client state library only if actual requirements justify it.
+
+---
+
+# 26. SECURITY RULES
+
+Because this is a department/officer portal:
+
+- Never trust route visibility as authorization.
+- Validate permissions on server/API.
+- Do not store auth tokens in service-worker cache.
+- Avoid long-lived sensitive data in `localStorage`.
+- Sanitize/validate uploaded file metadata and rendered content.
+- Use server-generated audit events for official changes.
+- Do not let a PWA background task replay official mutations unexpectedly.
+- Ensure logout clears appropriate local in-memory client state.
+- Do not cache CAPTCHA.
+- Do not log secrets/tokens/document contents to console in production.
+- Do not persist application payloads, document bodies, decisions, inspections, or other sensitive workflow data in `localStorage`, IndexedDB, or service-worker caches by default.
+- Treat PWA installability as a delivery mode, not permission to create a local copy of authenticated government records.
+- Treat external department/RAG/API content as untrusted input when rendered.
+- Prevent open redirects in login/notification routing.
+
+---
+
+# 26A. PRODUCTION DEPLOYMENT / ENVIRONMENT BOUNDARY
+
+This authenticated portal is **not** a static-export application.
+
+### Prohibited
+
+```ts
+// Do not use this for production Department Portal
+output: 'export'
+```
+
+Production must run on a server-capable Next.js target (for example Node/Docker/Vercel-equivalent infrastructure) that can support server-side session/authorization and current workflow reads.
+
+Create `.env.example` with names only, for example:
+
+```dotenv
+# Shared EKATMA APIs — values supplied by deployment environment
+EKATMA_API_BASE_URL=
+EKATMA_RULES_API_BASE_URL=
+EKATMA_DEPENDENCY_API_BASE_URL=
+EKATMA_RAG_API_BASE_URL=
+
+# Public non-secret frontend settings only
+NEXT_PUBLIC_DEPARTMENT_BASE_PATH=/department
+NEXT_PUBLIC_PWA_ENABLED=true
+```
+
+Rules:
+
+- do not commit secrets/tokens/passwords
+- do not expose server-only secrets with `NEXT_PUBLIC_`
+- endpoint names are integration boundaries, not permission to invent backend endpoints
+- if one backend gateway fronts rules/dependency/RAG, adapters may share a base URL while remaining separate logical modules
+- CI/deployment must run `pnpm build` and the test gates defined here
+
+---
+
+# 27. TESTING REQUIREMENTS — LOCKED STACK
+
+Use:
+
+- **Playwright** for route/e2e flows and screenshot-based visual parity
+- **Vitest** for pure domain/state/contract logic
+- add React Testing Library only where component-level interaction tests materially help; do not duplicate Playwright coverage without reason
+
+Recommended dev dependencies:
+
+```bash
+pnpm add -D @playwright/test vitest
+```
+
+If browser binaries are not already available:
+
+```bash
+pnpm exec playwright install
+```
+
+## Build quality gates
+
+Run at each phase:
+
+```bash
+pnpm typecheck
+pnpm lint
+pnpm build
+```
+
+Run relevant automated tests for the phase as they are introduced. No phase is complete with migration-caused TypeScript/build failures.
+
+## Contract tests — mandatory from Phase 3.5
+
+At minimum test that:
+
+- application identity/state is consistent across route fixtures/loaders
+- query/deficiency/resubmission records preserve parent application identity
+- inspection queue and inspection workspace reference the same `InspectionId` + `ApplicationId`
+- decision/dependency/compliance records reference the same canonical application/service records
+- presentation labels map from canonical states rather than replacing them
+
+When the Entrepreneur app/shared API becomes available, extend contract verification to ensure both surfaces consume compatible canonical API records.
+
+## Functional Playwright coverage
+
+Test at minimum:
+
+- `/department/login`
+- authenticated shell/logout behavior
+- sidebar navigation
+- queue -> application
+- M06–M20 deep-link workflow
+- inspection queue -> plan -> workspace -> observations
+- decision -> record -> dependency -> compliance/amendment
+- SLA/grievance/regulatory/analytics/workload/audit flows
+- notification drawer links
+- browser back/forward
+- deep-link refresh
+- unauthorized/forbidden behavior once real auth exists
+
+## Visual parity
+
+For every migrated screen/surface:
+
+- compare reference screenshot to Next.js version
+- check typography, spacing, borders, tables, status colors, government header, sidebar state, drawers/modals
+- use stable fixture data and deterministic viewport sizes for screenshots
+
+Do not accept “same functionality” if visual hierarchy changed unintentionally.
+
+## PWA tests
+
+Verify:
+
+- `/department/manifest.webmanifest` or the generated nested manifest resolves correctly
+- Department icons resolve and maskable safe zone is correct
+- installed app launches to `/department`
+- unauthenticated navigation reaches `/department/login`
+- exactly one Department worker controls only `/department/`
+- Entrepreneur/root routes are not controlled by the Department worker if they coexist on the same origin
+- worker update does not reload over unsaved form work
+- old Department static caches are removed
+- `/department/offline.html` renders with network disabled
+- sensitive API/auth/page responses are not served from unsafe worker caches
+- non-GET official mutations are not cached/replayed by default
+- logout/session expiry behaves correctly in installed mode
+- iOS Safari home-screen behavior is manually checked where in scope
+
+For secure-context local testing, use an HTTPS-capable local setup such as current Next.js `next dev --experimental-https` when appropriate.
+
+---
+
+# 28. PERFORMANCE TARGETS
+
+After functional parity:
+
+- minimize unnecessary `'use client'`
+- route-split naturally using App Router
+- move large fixture/data objects out of client bundles when possible
+- lazy-load heavy optional client components
+- optimize fonts/images
+- avoid rendering all 39 modules in a hidden single component tree
+- avoid one monolithic component owning all state
+
+Measure instead of guessing.
+
+Important: performance optimization must not change behavior or remove data.
+
+---
+
+# 29. CODE ORGANIZATION RULES FOR ANTIGRAVITY
+
+### Maximum migration discipline
+
+When extracting a component:
+
+1. copy its existing implementation faithfully
+2. make it compile
+3. verify parity
+4. only then clean naming/types/duplication
+
+Do not combine extraction + redesign + data-model rewrite in one step.
+
+### File sizing
+
+There is no rigid line limit, but a 14,000-line `App.tsx` must not survive as the final architecture.
+
+Split by domain and route, not arbitrary 300-line chunks.
+
+### Naming
+
+Prefer names that describe business role:
+
+```text
+application-overview.tsx
+business-dna-panel.tsx
+scrutiny-workbench.tsx
+regulatory-dependency-view.tsx
+query-builder.tsx
+inspection-workspace.tsx
+```
+
+Avoid meaningless names such as:
+
+```text
+Component1.tsx
+Card2.tsx
+NewPage.tsx
+Temp.tsx
+```
+
+---
+
+# 30. WHAT TO DO WITH CURRENT FIGMA MAKE / REFERENCE FILES
+
+The following are Vite/Figma Make build infrastructure and may leave the production runtime after Next.js parity is proven:
+
+```text
+.figma/make/*
+vite.config.ts
+src/main.tsx
+index.html
+src/vite-env.d.ts
+```
+
+However, the ZIP also contains Figma-generated specification/reference material such as:
+
+```text
+src/imports/pasted_text/*.md
+```
+
+and may contain Phase-0/showcase/reference components or imported images that are useful evidence during migration.
+
+### Archival rule
+
+1. **Do not delete reference/spec material before parity verification.**
+2. Confirm whether each item is imported by runtime code.
+3. After the corresponding screens pass visual/behavioral parity, move non-runtime specification material to `reference/figma/specs/` (or preserve it in a dedicated reference branch if the repository policy prefers that).
+4. Keep reference files out of the production import graph/bundle.
+5. Document any intentionally removed obsolete showcase component in the migration report/commit.
+6. Preserve source history so the original Figma Make implementation remains traceable.
+
+The goal is a clean production Next.js app **without destroying the migration evidence**.
+
+---
+
+# 31. WHAT TO DO WITH `AGENTS.md`
+
+The current `AGENTS.md` describes the Vite/Figma Make runtime, so it will become misleading after migration.
+
+Replace it with a repository-specific agent guide after Next.js conversion.
+
+It should state:
+
+- Next.js App Router
+- pnpm commands
+- directory conventions
+- UI parity rule
+- route map
+- PWA safety/caching rules
+- typecheck/lint/build requirements
+- no destructive screen deletion
+
+Do not leave instructions saying "a Vite server is already running" after Vite has been removed.
+
+---
+
+# 32. PROPOSED NEW `AGENTS.md` CORE RULES
+
+Antigravity may create/update `AGENTS.md` with rules such as:
+
+```md
+# EKATMA Department Portal Agent Rules
+
+- Framework: Next.js App Router + TypeScript + Tailwind CSS v4.
+- Package manager: pnpm.
+- Preserve existing department UI, M01-M39 behavior, `ScrutinyCommandCentre`, `DecisionsDashboard`, and all current sidebar destinations unless an explicit product instruction changes them.
+- Do not replace route pages with generic placeholders.
+- Use URL routes for navigational state; preserve canonical application and inspection IDs in contextual inspection routes.
+- Canonical IDs/states live in `src/domain`; do not create route-local `status: string` contracts.
+- Keep `/department/` as the Department URL/PWA scope; never widen the Department worker to `/` without explicit architecture approval.
+- MIDC is Department Pack #1, not the generic architecture; perform pack abstraction only after parity.
+- RAG may explain/retrieve but must not own applicability, dependency unlocking, workflow state, or decisions.
+- Production is server-capable Next.js; do not use static `output: 'export'`.
+- Keep client components as small as practical.
+- Never cache authenticated/sensitive API responses in the PWA service worker by default.
+- Never queue official mutations offline by default.
+- Run `pnpm typecheck`, `pnpm lint`, and `pnpm build` after structural changes.
+- Preserve Government of India emblem, Government of Maharashtra seal, and EKATMA identity exactly.
+- Maintain keyboard accessibility, skip link, font controls, contrast controls, and bilingual architecture.
+```
+
+---
+
+# 33. RECOMMENDED MIGRATION CHECKLIST
+
+## Phase gates
+
+- [ ] Phase 0 — source frozen, screenshots/inventory/reference material captured
+- [ ] Phase 1 — in-place Next.js runtime works; no nested app; no static export
+- [ ] Phase 2 — global visual/assets/font parity
+- [ ] Phase 3 — M01 + shell + M02 + Department-scoped base PWA plumbing
+- [ ] Phase 3.5 — canonical IDs/states/contracts + contract tests locked
+- [ ] Phase 4 — M03–M05 + department command surfaces routed
+- [ ] Phase 5 — M06–M20 migrated using canonical contracts
+- [ ] Phase 6 — M21–M24 inspection identities/routes preserved
+- [ ] Phase 7 — M25–M29 decision/compliance flows migrated
+- [ ] Phase 8 — M30–M39 + required non-numbered surfaces complete
+- [ ] Phase 9 — fixtures/repositories/API boundaries cleaned
+- [ ] Phase 10 — PWA hardening + Playwright/Vitest gates complete
+- [ ] Phase 11 — post-parity Department Pack abstraction complete
+- [ ] Phase 12 — production integration/deployment readiness complete
+
+## Domain contract
+
+- [ ] canonical Business/Project/Application/Department/Service IDs
+- [ ] Business DNA version identity
+- [ ] Document + Document Version IDs
+- [ ] Query/Deficiency/Resubmission IDs
+- [ ] Inspection ID
+- [ ] Decision/Approval IDs
+- [ ] Dependency Node ID
+- [ ] Compliance/Grievance IDs
+- [ ] Regulatory Rule Version identity
+- [ ] separate typed state families; no generic `status: string`
+- [ ] UI labels map from canonical states
+- [ ] contract tests pass
+
+## Screen coverage
+
+- [ ] M01–M39
+- [ ] `ScrutinyCommandCentre`
+- [ ] `DecisionsDashboard`
+- [ ] distinct top-level `Inspections`
+- [ ] distinct top-level `Queries / Deficiencies`
+
+## Routing
+
+- [ ] `/department/login`
+- [ ] Department-wide routes remain distinct from application routes
+- [ ] `[applicationId]`, `[inspectionId]`, `[documentId]`, `[parameterId]` used where applicable
+- [ ] deep links / refresh / back / forward work
+- [ ] notification links navigate correctly
+
+## PWA isolation/safety
+
+- [ ] manifest lives under Department route and uses scope `/department/`
+- [ ] Department worker registered once with scope `/department/`
+- [ ] worker does not control Entrepreneur/root routes
+- [ ] safe update UX
+- [ ] static offline fallback
+- [ ] sensitive data not persisted in worker cache by default
+- [ ] official mutations not queued/replayed offline
+- [ ] install and installed-mode auth/logout tested
+
+## Department-pack readiness
+
+- [ ] generic shell/workflows do not depend on MIDC-only constants
+- [ ] MIDC-specific services/checklists/adapters isolated after parity
+- [ ] department/service registry exists
+- [ ] future departments do not require copied route trees
+
+## Regulatory boundaries
+
+- [ ] rules adapter separate from RAG adapter
+- [ ] dependency adapter separate from RAG adapter
+- [ ] RAG cannot mutate canonical workflow/applicability/dependency/decision state
+- [ ] rule/dependency versions represented in shared contracts
+
+## Deployment
+
+- [ ] no `output: 'export'`
+- [ ] `.env.example` exists without secrets
+- [ ] server-capable target documented
+- [ ] Figma reference material archived/traceable, not runtime-imported
+
+## Quality
+
+- [ ] `pnpm typecheck`
+- [ ] `pnpm lint`
+- [ ] `pnpm build`
+- [ ] Vitest contract/unit tests
+- [ ] Playwright e2e tests
+- [ ] Playwright visual parity checks
+- [ ] no Vite runtime dependency remains
+- [ ] no screen silently removed
+
+---
+
+# 34. ANTI-PATTERNS — DO NOT DO THESE
+
+Do not:
+
+- paste the entire old `App.tsx` into `src/app/page.tsx` and call migration complete
+- mark the entire application `'use client'`
+- keep all navigation as `useState`
+- hard-code a single application ID into every page
+- use one generic `status: string` for application, verification, inspection, dependency, decision, payment, and compliance states
+- derive canonical backend state from officer-facing badge text
+- create a second Department-specific copy of shared EKATMA application/query/inspection/decision records
+- make RAG output directly approve/reject, change applicability, unlock dependencies, or mutate application state
+- copy the MIDC route tree to create MPCB/Fire/DISH/etc.
+- delete M-screens that are difficult to route
+- replace existing UI with a component-library dashboard theme
+- replace real government assets with generic icons
+- let service worker cache everything
+- register the Department service worker with root scope `/`
+- use `/login` as an unscoped Department login when the Department surface is standardized under `/department/`
+- cache officer-specific Next.js data/pages with shared framework caches without a reviewed policy
+- cache auth/session/CAPTCHA responses
+- use stale-while-revalidate for official decision data without explicit approval
+- enable experimental automatic offline mutation retry/replay for official actions without backend idempotency/audit design
+- replay official POST/PUT/PATCH/DELETE operations from background sync automatically
+- use unconditional `skipWaiting()` + forced reload that can discard unsaved officer input
+- use older `middleware.ts` alongside Next.js 16 `proxy.ts`
+- generate initial SSR-visible CAPTCHA/random/time values differently on server and client
+- store sensitive records in localStorage merely to support offline mode
+- request notification permission immediately on first page load
+- use `any` everywhere to make TypeScript compile
+- suppress build errors instead of fixing them
+- retain Figma Make Vite plugins in production Next.js config
+- delete `src/imports/pasted_text`/Figma specification evidence before corresponding parity is verified
+- configure `output: 'export'` for the production authenticated portal
+- create a second React router inside Next.js
+- use hash routing (`#/...`) for major application screens
+- duplicate the government shell in every page
+- mix mock persistence with production persistence without visual indication
+
+---
+
+# 35. DEFINITION OF DONE
+
+The migration is complete only when all of the following are true:
+
+1. `pnpm dev`, `pnpm build`, `pnpm typecheck`, and `pnpm lint` succeed.
+2. The existing repository was converted in place; no nested second app is required.
+3. Vite is no longer required for production/development runtime after parity.
+4. M01–M39 plus `ScrutinyCommandCentre`, `DecisionsDashboard`, and distinct top-level sidebar destinations are accounted for.
+5. Meaningful navigation uses App Router URLs under `/department/`.
+6. Application/inspection/document/parameter routes preserve canonical IDs.
+7. Canonical shared domain IDs/states/contracts exist and are reused across routes.
+8. UI labels/badges do not replace canonical states.
+9. Contract tests prove record identity/state consistency across workflows.
+10. Government shell, typography, accessibility controls, and visual hierarchy remain faithful.
+11. The Department PWA manifest/worker/offline flow is scoped to `/department/` and does not take control of unrelated Entrepreneur/root routes.
+12. Sensitive authenticated workflow data is not indiscriminately persisted in Cache Storage/localStorage/IndexedDB.
+13. Official mutations are not silently queued/replayed offline.
+14. Worker updates do not unexpectedly destroy unsaved officer work.
+15. RAG is isolated from authoritative rule/dependency/workflow mutation responsibilities.
+16. MIDC is represented as Department Pack #1 after the post-parity abstraction; future departments can reuse the generic shell/workflows without copied route trees.
+17. Production remains server-capable; `output: 'export'` is not used for the authenticated portal.
+18. `.env.example` documents integration boundaries without secrets.
+19. Playwright e2e/visual and Vitest domain/contract gates pass for the agreed coverage.
+20. Figma Make reference/specification material remains traceable after cleanup.
+21. The frontend can transition from fixtures to the shared EKATMA backend without another route/domain redesign.
+
+---
+
+# 36. ANTIGRAVITY EXECUTION / PROGRESS FILE
+
+Do not duplicate phase prompts inside this architecture contract.
+
+Use the companion file:
+
+```text
+DEPARTMENT_ANTIGRAVITY_EXECUTION_PLAYBOOK.md
+```
+
+It contains:
+
+- exact copy/paste Antigravity prompts for each phase
+- the authoritative progress checklist
+- phase exit gates
+- expected reports
+- recommended Git commits
+- rules for when to stop instead of proceeding
+
+If the two files ever conflict, **this migration file controls architecture/product safety**, while the playbook controls execution sequencing.
+
+---
+
+# 37. OFFICIAL REFERENCES USED FOR MIGRATION BASELINE
+
+Use current official documentation when implementation details differ from this guide:
+
+- Next.js documentation: https://nextjs.org/docs
+- Next.js support policy: https://nextjs.org/support-policy
+- Next.js React Foundations migration/install example (shows installing Next.js into an existing React project without requiring create-next-app): https://nextjs.org/learn/react-foundations/installation
+- Next.js installation/runtime requirements: https://nextjs.org/docs/app/getting-started/installation
+- Next.js 16 Proxy convention: https://nextjs.org/docs/app/api-reference/file-conventions/proxy
+- Next.js App Router project structure: https://nextjs.org/docs/app/getting-started/project-structure
+- Next.js PWA guide: https://nextjs.org/docs/app/guides/progressive-web-apps
+- Next.js manifest convention: https://nextjs.org/docs/app/api-reference/file-conventions/metadata/manifest
+- Next.js app icons: https://nextjs.org/docs/app/api-reference/file-conventions/metadata/app-icons
+- Tailwind CSS v4 + Next.js: https://tailwindcss.com/docs/installation/framework-guides/nextjs
+- Serwist Next.js integration (only if advanced offline support is selected): https://serwist.pages.dev/docs/next
+
+If framework documentation has changed by the time the migration is executed, prefer the current patched official Next.js behavior while preserving the architectural and product-safety requirements of this document.
+
+---
+
+# FINAL MIGRATION PRINCIPLE
+
+**The purpose of this migration is to change the application architecture, not the product design.**
+
+First achieve **1:1 department-side feature and visual parity** in Next.js while locking shared domain identity/state contracts before M06+. Then complete the post-parity Department Pack abstraction so MIDC is implementation #1 rather than the architecture. Then connect real authentication/shared backend services and optimize. PWA capability must remain scoped to `/department/` and enhance installability **without creating stale, unsafe, misleading, or cross-application workflow behavior**.
