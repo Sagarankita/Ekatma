@@ -3564,7 +3564,7 @@ function EventDetailDrawer({ ev, onClose }: { ev: TimelineEvent; onClose: () => 
   )
 }
 
-export function M08TimelinePage({ onBackToOverview }: { onBackToOverview: () => void }) {
+export function M08TimelinePage({ onBackToOverview, onOpenAudit }: { onBackToOverview: () => void; onOpenAudit?: () => void }) {
   const [filter, setFilter] = useState<string>('all')
   const [selectedEvent, setSelectedEvent] = useState<TimelineEvent | null>(null)
 
@@ -3705,7 +3705,7 @@ export function M08TimelinePage({ onBackToOverview }: { onBackToOverview: () => 
           </div>
 
           <div className="pb-4">
-            <button className="text-xs text-[#1a56db] hover:underline">View detailed audit history → M38</button>
+            <button onClick={onOpenAudit} className="text-xs text-[#1a56db] hover:underline">View detailed audit history → M38</button>
           </div>
         </div>
       </div>
@@ -3726,7 +3726,7 @@ export function M08TimelinePage({ onBackToOverview }: { onBackToOverview: () => 
 
 
 
-export function M06AppOverviewPage({ onBack, onOpenDna, onOpenTimeline, onOpenPrecheck, onOpenDeltaRescrutiny, onOpenInspectionQueue, onOpenDecision, onOpenCompliance }: { onBack: () => void; onOpenDna?: () => void; onOpenTimeline?: () => void; onOpenPrecheck?: () => void; onOpenDeltaRescrutiny?: () => void; onOpenInspectionQueue?: () => void; onOpenDecision?: () => void; onOpenCompliance?: () => void }) {
+export function M06AppOverviewPage({ onBack, onOpenDna, onOpenTimeline, onOpenPrecheck, onOpenDeltaRescrutiny, onOpenInspectionQueue, onOpenDecision, onOpenCompliance, onOpenConsistency, onOpenDocuments, onOpenDependencyView, onOpenQueries, onOpenRegAssistant, onOpenAudit }: { onBack: () => void; onOpenDna?: () => void; onOpenTimeline?: () => void; onOpenPrecheck?: () => void; onOpenDeltaRescrutiny?: () => void; onOpenInspectionQueue?: () => void; onOpenDecision?: () => void; onOpenCompliance?: () => void; onOpenConsistency?: () => void; onOpenDocuments?: () => void; onOpenDependencyView?: () => void; onOpenQueries?: () => void; onOpenRegAssistant?: () => void; onOpenAudit?: () => void }) {
   const [activeTab, setActiveTab] = useState('Overview')
   const [showDnaDetails, setShowDnaDetails] = useState(false)
 
@@ -3869,7 +3869,10 @@ export function M06AppOverviewPage({ onBack, onOpenDna, onOpenTimeline, onOpenPr
                   key={tab}
                   role="tab"
                   aria-selected={activeTab === tab}
-                  onClick={() => { if (tab === 'Business DNA') { onOpenDna?.(); return; } if (tab === 'Timeline') { onOpenTimeline?.(); return; } setActiveTab(tab) }}
+                  onClick={() => {
+                    const destinations: Record<string, (() => void) | undefined> = { 'Business DNA': onOpenDna, Timeline: onOpenTimeline, Application: onOpenPrecheck, Documents: onOpenDocuments, Consistency: onOpenConsistency, Dependencies: onOpenDependencyView, Queries: onOpenQueries, Inspection: onOpenInspectionQueue, 'Regulatory Reference': onOpenRegAssistant, Audit: onOpenAudit }
+                    if (destinations[tab]) destinations[tab]?.(); else setActiveTab(tab)
+                  }}
                   className={`px-4 py-2.5 text-xs font-medium whitespace-nowrap border-b-2 transition-colors focus-visible:ring-2 focus-visible:ring-[#1a56db] ${
                     activeTab === tab
                       ? 'border-[#1a56db] text-[#1a56db] bg-[#ebf3ff]'
@@ -3928,7 +3931,7 @@ export function M06AppOverviewPage({ onBack, onOpenDna, onOpenTimeline, onOpenPr
                                 <span>{flag.ts}</span>
                               </div>
                             </div>
-                            <button className="shrink-0 text-[11px] text-[#1a56db] hover:underline whitespace-nowrap">Review → {flag.drill}</button>
+                            <button onClick={() => { if (flag.drill === 'M16') onOpenConsistency?.(); else if (flag.drill === 'M07') onOpenDna?.(); else onOpenDocuments?.() }} className="shrink-0 text-[11px] text-[#1a56db] hover:underline whitespace-nowrap">Review → {flag.drill}</button>
                           </div>
                         </div>
                       ))}
@@ -3955,7 +3958,7 @@ export function M06AppOverviewPage({ onBack, onOpenDna, onOpenTimeline, onOpenPr
                           <span className="text-amber-700 font-medium">Potential MIDC impact detected — officer review required</span>
                         </div>
                       </div>
-                      <button className="text-[11px] text-[#1a56db] hover:underline mt-1.5">Review delta → M20</button>
+                      <button onClick={onOpenDeltaRescrutiny} className="text-[11px] text-[#1a56db] hover:underline mt-1.5">Review delta → M20</button>
                     </div>
 
                     {/* Prerequisite state */}
@@ -3971,13 +3974,13 @@ export function M06AppOverviewPage({ onBack, onOpenDna, onOpenTimeline, onOpenPr
                           </div>
                         ))}
                       </div>
-                      <button className="text-[11px] text-[#1a56db] hover:underline mt-2">View full dependency map → M17</button>
+                      <button onClick={onOpenDependencyView} className="text-[11px] text-[#1a56db] hover:underline mt-2">View full dependency map → M17</button>
                     </div>
 
                     {/* Inspection trigger */}
                     <div className="px-4 py-3 border-t border-[#f0f4f8] text-xs text-[#1a2533]">
                       <span className="font-semibold text-[#1a2533]">Inspection: </span>Not triggered — Enhanced Review route does not require mandatory inspection for current configuration. Officer may initiate if warranted.
-                      <button className="ml-2 text-[11px] text-[#1a56db] hover:underline">Inspection workspace → M21</button>
+                      <button onClick={onOpenInspectionQueue} className="ml-2 text-[11px] text-[#1a56db] hover:underline">Inspection workspace → M21</button>
                     </div>
                   </div>
 
@@ -4010,7 +4013,7 @@ export function M06AppOverviewPage({ onBack, onOpenDna, onOpenTimeline, onOpenPr
                   <div className="border border-[#d1d9e0] rounded overflow-hidden">
                     <div className="flex items-center justify-between px-4 py-2.5 bg-[#f8f9fb] border-b border-[#d1d9e0]">
                       <h2 className="text-sm font-semibold text-[#1a2533]">Document Status</h2>
-                      <button className="text-[11px] text-[#1a56db] hover:underline">View Documents</button>
+                      <button onClick={onOpenDocuments} className="text-[11px] text-[#1a56db] hover:underline">View Documents</button>
                     </div>
                     <div className="px-4 py-3 flex flex-wrap gap-4 text-xs">
                       {[['12', 'Submitted', 'text-[#1a2533]'], ['10', 'Valid', 'text-green-700'], ['1', 'Expired', 'text-red-700 font-semibold'], ['1', 'Needs Verification', 'text-amber-700']].map(([n, l, c]) => (
@@ -4043,7 +4046,7 @@ export function M06AppOverviewPage({ onBack, onOpenDna, onOpenTimeline, onOpenPr
                           ['Review consistency findings', 'secondary'],
                           ['Review documents', 'secondary'],
                         ].map(([label, variant]) => (
-                          <button key={label} onClick={() => { if (label === 'Review automated pre-check') onOpenPrecheck?.() }} className={`w-full text-left px-3 py-2 rounded text-xs font-semibold transition-colors ${
+                          <button key={label} onClick={() => { if (label === 'Review automated pre-check') onOpenPrecheck?.(); else if (label === 'Review consistency findings') onOpenConsistency?.(); else onOpenDocuments?.() }} className={`w-full text-left px-3 py-2 rounded text-xs font-semibold transition-colors ${
                             variant === 'primary'
                               ? 'bg-[#1a3a5c] text-white hover:bg-[#0f2540]'
                               : 'bg-white text-[#1a2533] border border-[#d1d9e0] hover:bg-[#f8f9fb]'
