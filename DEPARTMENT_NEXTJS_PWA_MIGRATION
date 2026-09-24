@@ -2240,3 +2240,9 @@ If framework documentation has changed by the time the migration is executed, pr
 **The purpose of this migration is to change the application architecture, not the product design.**
 
 First achieve **1:1 department-side feature and visual parity** in Next.js while locking shared domain identity/state contracts before M06+. Then complete the post-parity Department Pack abstraction so MIDC is implementation #1 rather than the architecture. Then connect real authentication/shared backend services and optimize. PWA capability must remain scoped to `/department/` and enhance installability **without creating stale, unsafe, misleading, or cross-application workflow behavior**.
+
+---
+
+## Local merge verification note — 24 September 2026
+
+Local `main` now points to `16dd92a`, the same commit as `ankita`; `origin/main` is unchanged at `8404c93`. The merged route changes passed TypeScript checking, 96 Vitest tests, 8 Chromium Playwright tests, and a webpack production build. The Playwright tests use prototype local-storage authentication; they do not verify real authentication or backend behavior. The default Turbopack build and real ESLint check remain unverified because of the local port restriction and the existing ESLint configuration error, respectively. No migration checklist item has been marked complete without its full exit gate.

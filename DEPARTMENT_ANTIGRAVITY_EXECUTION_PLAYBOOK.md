@@ -1094,3 +1094,14 @@ Never replace this with:
 ```
 
 The project is too large and interconnected for a safe one-shot migration.
+
+---
+
+## Local integration check — 24 September 2026
+
+- Local `main` was fast-forwarded from `8404c93` to `16dd92a` (`ankita`). `origin/main` remains at `8404c93`; nothing was pushed.
+- The branch changed 46 tracked files and deleted no tracked files. The local working tree was clean immediately after the fast-forward.
+- Verified on the merged tree: `pnpm typecheck`; `pnpm exec vitest run` (96 tests passed); `pnpm exec playwright test --reporter=list` (8 tests passed); and `pnpm exec next build --webpack` (production build completed).
+- The browser tests cover department navigation and record-specific links using prototype authentication in local storage. Safari showed the login page and returned an unauthenticated application visit to login. Real authentication and backend integration were not verified.
+- The default `pnpm build` did not complete in this environment because Turbopack could not bind a local port. `pnpm lint` only echoes a success message; `pnpm exec eslint .` fails in the existing ESLint configuration. These are open verification gaps.
+- No phase status above was changed to COMPLETE: the full phase exit gates, including visual and PWA checks, have not been proven.
