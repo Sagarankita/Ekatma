@@ -44,35 +44,35 @@ body {
 }
 
 /* ── Table row borders — darker, more legible ────────────────────────────── */
-table tbody tr {
+.department-app table tbody tr {
   border-bottom: 1px solid #94a3b8 !important;
 }
-table tbody tr:last-child {
+.department-app table tbody tr:last-child {
   border-bottom: none !important;
 }
 
 /* ── Global table chrome enhancement ──────────────────────────────────────── */
 
 /* Navy header on all data tables */
-table thead tr {
+.department-app table thead tr {
   background: #1a3a5c !important;
 }
-table thead tr th {
+.department-app table thead tr th {
   color: rgba(255,255,255,0.90) !important;
   font-weight: 600 !important;
   letter-spacing: 0.01em;
 }
 /* Override any specific bg that was already set inline */
-table thead {
+.department-app table thead {
   background: #1a3a5c !important;
   border-bottom-color: #0f2540 !important;
 }
 
 /* Subtle alternating row stripe using a very light blue tint */
-table tbody tr:nth-child(even) {
+.department-app table tbody tr:nth-child(even) {
   background-color: #f4f8ff !important;
 }
-table tbody tr:hover {
+.department-app table tbody tr:hover {
   background-color: #eaf2ff !important;
 }
 

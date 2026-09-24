@@ -16,8 +16,8 @@ const notoSansDevanagari = Noto_Sans_Devanagari({
 });
 
 export const metadata = {
-  title: "EKATMA Department Portal",
-  description: "Next.js migration",
+  title: "EKATMA Portal",
+  description: "Government of Maharashtra industrial and entrepreneurship portal",
 };
 
 export default function RootLayout({

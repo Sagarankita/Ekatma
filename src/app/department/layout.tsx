@@ -23,7 +23,7 @@ export default function DepartmentRootLayout({
   return (
     <>
       <ServiceWorkerRegister />
-      {children}
+      <div className="department-app">{children}</div>
     </>
   );
 }

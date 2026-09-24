@@ -1,6 +1,5 @@
-import { redirect } from "next/navigation";
+import EntrepreneurApp from '@/components/entrepreneur/EntrepreneurApp';
 
-export default function RootPage() {
-  // Deterministic root redirect foundation toward /department/login
-  redirect("/department/login");
+export default function HomePage() {
+  return <EntrepreneurApp initialPage="portal" />;
 }
