@@ -15,12 +15,12 @@ export default function Page() {
     <M28CompliancePage 
       
       onBack={() => router.push(`/department/applications/${appId}`)}
-      onOpenM26={() => router.push(`/department/applications/${appId}/decisions/default`)}
-      onOpenM27={() => router.push(`/department/applications/${appId}/dependencies/default/update`)}
+      onOpenM26={(id: string) => router.push(`/department/applications/${appId}/decisions/${id}`)}
+      onOpenM27={(id: string) => router.push(`/department/applications/${appId}/dependencies/${id}/update`)}
       onOpenM29={() => router.push(`/department/applications/${appId}/amendment-intake`)}
-      onOpenInspection={() => router.push(`/department/applications/${appId}/inspections/default/workspace`)}
+      onOpenInspection={(id: string) => router.push(`/department/applications/${appId}/inspections/${id}/workspace`)}
       onOpenDepView={() => router.push(`/department/applications/${appId}/dependency-view`)}
-      onOpenDocReview={() => router.push(`/department/applications/${appId}/document/default`)}
+      onOpenDocReview={(id: string) => router.push(`/department/applications/${appId}/document/${id}`)}
     
     />
   );

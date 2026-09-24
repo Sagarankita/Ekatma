@@ -3726,7 +3726,7 @@ export function M08TimelinePage({ onBackToOverview, onOpenAudit }: { onBackToOve
 
 
 
-export function M06AppOverviewPage({ onBack, onOpenDna, onOpenTimeline, onOpenPrecheck, onOpenDeltaRescrutiny, onOpenInspectionQueue, onOpenDecision, onOpenCompliance, onOpenConsistency, onOpenDocuments, onOpenDependencyView, onOpenQueries, onOpenRegAssistant, onOpenAudit }: { onBack: () => void; onOpenDna?: () => void; onOpenTimeline?: () => void; onOpenPrecheck?: () => void; onOpenDeltaRescrutiny?: () => void; onOpenInspectionQueue?: () => void; onOpenDecision?: () => void; onOpenCompliance?: () => void; onOpenConsistency?: () => void; onOpenDocuments?: () => void; onOpenDependencyView?: () => void; onOpenQueries?: () => void; onOpenRegAssistant?: () => void; onOpenAudit?: () => void }) {
+export function M06AppOverviewPage({ onBack, onOpenDna, onOpenTimeline, onOpenPrecheck, onOpenDeltaRescrutiny, onOpenInspectionQueue, onOpenDecision, onOpenCompliance, onOpenConsistency, onOpenDependencyView, onOpenQueries, onOpenRegAssistant, onOpenAudit }: { onBack: () => void; onOpenDna?: () => void; onOpenTimeline?: () => void; onOpenPrecheck?: () => void; onOpenDeltaRescrutiny?: () => void; onOpenInspectionQueue?: () => void; onOpenDecision?: () => void; onOpenCompliance?: () => void; onOpenConsistency?: () => void;  onOpenDependencyView?: () => void; onOpenQueries?: () => void; onOpenRegAssistant?: () => void; onOpenAudit?: () => void }) {
   const [activeTab, setActiveTab] = useState('Overview')
   const [showDnaDetails, setShowDnaDetails] = useState(false)
 
@@ -3870,7 +3870,7 @@ export function M06AppOverviewPage({ onBack, onOpenDna, onOpenTimeline, onOpenPr
                   role="tab"
                   aria-selected={activeTab === tab}
                   onClick={() => {
-                    const destinations: Record<string, (() => void) | undefined> = { 'Business DNA': onOpenDna, Timeline: onOpenTimeline, Application: onOpenPrecheck, Documents: onOpenDocuments, Consistency: onOpenConsistency, Dependencies: onOpenDependencyView, Queries: onOpenQueries, Inspection: onOpenInspectionQueue, 'Regulatory Reference': onOpenRegAssistant, Audit: onOpenAudit }
+                    const destinations: Record<string, (() => void) | undefined> = { 'Business DNA': onOpenDna, Timeline: onOpenTimeline, Application: onOpenPrecheck, Documents: undefined, Consistency: onOpenConsistency, Dependencies: onOpenDependencyView, Queries: onOpenQueries, Inspection: onOpenInspectionQueue, 'Regulatory Reference': onOpenRegAssistant, Audit: onOpenAudit }
                     if (destinations[tab]) destinations[tab]?.(); else setActiveTab(tab)
                   }}
                   className={`px-4 py-2.5 text-xs font-medium whitespace-nowrap border-b-2 transition-colors focus-visible:ring-2 focus-visible:ring-[#1a56db] ${
@@ -3931,7 +3931,7 @@ export function M06AppOverviewPage({ onBack, onOpenDna, onOpenTimeline, onOpenPr
                                 <span>{flag.ts}</span>
                               </div>
                             </div>
-                            <button onClick={() => { if (flag.drill === 'M16') onOpenConsistency?.(); else if (flag.drill === 'M07') onOpenDna?.(); else onOpenDocuments?.() }} className="shrink-0 text-[11px] text-[#1a56db] hover:underline whitespace-nowrap">Review → {flag.drill}</button>
+                            <button onClick={() => { if (flag.drill === 'M16') onOpenConsistency?.(); else if (flag.drill === 'M07') onOpenDna?.(); else { /* disabled */ } }} className="shrink-0 text-[11px] text-[#1a56db] hover:underline whitespace-nowrap">Review → {flag.drill}</button>
                           </div>
                         </div>
                       ))}
@@ -4013,7 +4013,7 @@ export function M06AppOverviewPage({ onBack, onOpenDna, onOpenTimeline, onOpenPr
                   <div className="border border-[#d1d9e0] rounded overflow-hidden">
                     <div className="flex items-center justify-between px-4 py-2.5 bg-[#f8f9fb] border-b border-[#d1d9e0]">
                       <h2 className="text-sm font-semibold text-[#1a2533]">Document Status</h2>
-                      <button onClick={onOpenDocuments} className="text-[11px] text-[#1a56db] hover:underline">View Documents</button>
+                      <button disabled className="text-[11px] text-[#1a56db] hover:underline opacity-50 cursor-not-allowed">View Documents (Disabled: No ID)</button>
                     </div>
                     <div className="px-4 py-3 flex flex-wrap gap-4 text-xs">
                       {[['12', 'Submitted', 'text-[#1a2533]'], ['10', 'Valid', 'text-green-700'], ['1', 'Expired', 'text-red-700 font-semibold'], ['1', 'Needs Verification', 'text-amber-700']].map(([n, l, c]) => (
@@ -4046,7 +4046,7 @@ export function M06AppOverviewPage({ onBack, onOpenDna, onOpenTimeline, onOpenPr
                           ['Review consistency findings', 'secondary'],
                           ['Review documents', 'secondary'],
                         ].map(([label, variant]) => (
-                          <button key={label} onClick={() => { if (label === 'Review automated pre-check') onOpenPrecheck?.(); else if (label === 'Review consistency findings') onOpenConsistency?.(); else onOpenDocuments?.() }} className={`w-full text-left px-3 py-2 rounded text-xs font-semibold transition-colors ${
+                          <button key={label} onClick={() => { if (label === 'Review automated pre-check') onOpenPrecheck?.(); else if (label === 'Review consistency findings') onOpenConsistency?.(); else { /* disabled */ } }} className={`w-full text-left px-3 py-2 rounded text-xs font-semibold transition-colors ${
                             variant === 'primary'
                               ? 'bg-[#1a3a5c] text-white hover:bg-[#0f2540]'
                               : 'bg-white text-[#1a2533] border border-[#d1d9e0] hover:bg-[#f8f9fb]'
@@ -5007,7 +5007,7 @@ const M11_SECTIONS: ScrutinySection[] = [
 ]
 
 export function M11ScrutinyWorkbenchPage({ onBack, onBackToOverview, onOpenDna, onOpenTimeline, onOpenParamDetail, onOpenDocReview, onOpenBldgScrutiny, onOpenWaterScrutiny, onOpenDepView, onOpenQueryBuilder }: {
-  onBack: () => void; onBackToOverview: () => void; onOpenDna?: () => void; onOpenTimeline?: () => void; onOpenParamDetail?: () => void; onOpenDocReview?: () => void; onOpenBldgScrutiny?: () => void; onOpenWaterScrutiny?: () => void; onOpenDepView?: () => void; onOpenQueryBuilder?: () => void
+  onBack: () => void; onBackToOverview: () => void; onOpenDna?: () => void; onOpenTimeline?: () => void; onOpenParamDetail?: (id: string) => void; onOpenDocReview?: (id: string) => void; onOpenBldgScrutiny?: () => void; onOpenWaterScrutiny?: () => void; onOpenDepView?: () => void; onOpenQueryBuilder?: () => void
 }) {
   const [activeSectionId, setActiveSectionId] = useState('land')
   const [activeParamId, setActiveParamId] = useState('plotarea')
@@ -5252,7 +5252,7 @@ export function M11ScrutinyWorkbenchPage({ onBack, onBackToOverview, onOpenDna, 
                           </div>
                           <div className="flex gap-2 shrink-0">
                             <button className="text-[10px] text-[#1a56db] hover:underline font-semibold">Preview</button>
-                            <button onClick={onOpenDocReview} className="text-[10px] text-[#1a56db] hover:underline font-semibold">Open Document Review → M13</button>
+                            <button disabled={!param.document.id} title={!param.document.id ? 'No document ID available' : undefined} onClick={() => { if (param.document?.id) onOpenDocReview?.(param.document.id) }} className="text-[10px] text-[#1a56db] hover:underline font-semibold">Open Document Review → M13</button>
                           </div>
                         </div>
                         <p className="text-[10px] text-[#374151] mt-2 italic">Previously verified — reused from Business Document Repository. Do not overwrite master document.</p>
@@ -5305,7 +5305,7 @@ export function M11ScrutinyWorkbenchPage({ onBack, onBackToOverview, onOpenDna, 
 
                       {/* Action bar */}
                       <div className="flex flex-wrap gap-2 pt-1 border-t border-[#f0f4f8]">
-                        <button onClick={onOpenParamDetail} className="px-3 py-1.5 text-xs border border-[#1a56db] text-[#1a56db] rounded hover:bg-[#ebf3ff] transition-colors font-semibold">View Parameter Details → M12</button>
+                        <button onClick={() => onOpenParamDetail?.(param.id)} className="px-3 py-1.5 text-xs border border-[#1a56db] text-[#1a56db] rounded hover:bg-[#ebf3ff] transition-colors font-semibold">View Parameter Details → M12</button>
                         <button onClick={() => setReview(param.id, rs)}
                           className="px-3 py-1.5 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a56db]">Save Review</button>
                         <button className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb]">Flag</button>
@@ -5390,7 +5390,7 @@ export function M11ScrutinyWorkbenchPage({ onBack, onBackToOverview, onOpenDna, 
 // ─── M12 Parameter Detail ────────────────────────────────────────────────────
 
 export function M12ParameterDetailPage({ onBack, onBackToOverview, onOpenDna, onOpenDocReview, onOpenDepView }: {
-  onBack: () => void; onBackToOverview: () => void; onOpenDna?: () => void; onOpenDocReview?: () => void; onOpenDepView?: () => void
+  onBack: () => void; onBackToOverview: () => void; onOpenDna?: () => void; onOpenDocReview?: (id: string) => void; onOpenDepView?: () => void
 }) {
   const [officerFinding, setOfficerFinding] = useState<OfficerReviewState>('needs-verification')
   const [officerNote, setOfficerNote] = useState('Supporting evidence requires officer confirmation against the current project record.')
@@ -5622,7 +5622,7 @@ export function M12ParameterDetailPage({ onBack, onBackToOverview, onOpenDna, on
                 <p className="text-[10px] text-[#374151]">Used by: MIDC Land / Plot</p>
                 <div className="flex gap-3 mt-2">
                   <button className="text-[10px] text-[#1a56db] hover:underline font-semibold">Preview</button>
-                  <button onClick={onOpenDocReview} className="text-[10px] text-[#1a56db] hover:underline font-semibold">Open Document Review → M13</button>
+                  <button onClick={() => onOpenDocReview?.('DOC-LAND-00418')} className="text-[10px] text-[#1a56db] hover:underline font-semibold">Open Document Review → M13</button>
                 </div>
               </div>
             </div>
@@ -5692,7 +5692,7 @@ export function M12ParameterDetailPage({ onBack, onBackToOverview, onOpenDna, on
 // ─── M13 Document Review ──────────────────────────────────────────────────────
 
 export function M13DocumentReviewPage({ onBack, onOpenParamDetail }: {
-  onBack: () => void; onOpenParamDetail?: () => void
+  onBack: () => void; onOpenParamDetail?: (id: string) => void
 }) {
   const [docAction, setDocAction] = useState<'none'|'accept'|'correction'|'invalid'|'evidence'|'verify'>('none')
   const [officerNote, setOfficerNote] = useState('')
@@ -5910,7 +5910,7 @@ export function M13DocumentReviewPage({ onBack, onOpenParamDetail }: {
               <div className="p-4 space-y-1.5 text-[11px]">
                 <p className="text-[10px] text-[#374151] mb-2">This document supports:</p>
                 {['Plot Area','Allotment Status','Possession Status'].map(p => (
-                  <button key={p} onClick={() => p === 'Plot Area' ? onOpenParamDetail?.() : undefined}
+                  <button key={p} onClick={() => p === 'Plot Area' ? onOpenParamDetail?.('plotarea') : undefined}
                     className={`block w-full text-left text-[11px] font-semibold py-1 px-2 rounded hover:bg-[#f0f4f8] transition-colors ${p === 'Plot Area' ? 'text-[#1a56db]' : 'text-[#1a2533]'}`}>
                     {p} {p === 'Plot Area' && '→ M12'}
                   </button>
@@ -5964,7 +5964,7 @@ export function M13DocumentReviewPage({ onBack, onOpenParamDetail }: {
 
 
 export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamDetail, onOpenDocReview, onOpenConsistency, onOpenDepView }: {
-  onBack: () => void; onBackToOverview: () => void; onOpenParamDetail?: () => void; onOpenDocReview?: () => void; onOpenConsistency?: () => void; onOpenDepView?: () => void
+  onBack: () => void; onBackToOverview: () => void; onOpenParamDetail?: (id: string) => void; onOpenDocReview?: (id: string) => void; onOpenConsistency?: () => void; onOpenDepView?: () => void
 }) {
   const [activeSection, setActiveSection] = useState('identity')
   const [reviewStates, setReviewStates] = useState<Record<string, OfficerReviewState>>(() => {
@@ -6096,7 +6096,7 @@ export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamD
                     const rm = OFFICER_REVIEW_META[rs]
                     return (
                       <div key={p.name} className="grid grid-cols-6 gap-2 px-4 py-2.5 items-center hover:bg-[#f8f9fb] group">
-                        <button onClick={onOpenParamDetail} className="text-[11px] font-semibold text-[#1a56db] hover:underline text-left group-hover:text-[#0f2540]">{p.name}</button>
+                        <button disabled title="No parameter ID available" className="text-[11px] font-semibold text-[#1a56db] hover:underline text-left group-hover:text-[#0f2540]">{p.name}</button>
                         <p className="text-[11px] text-[#1a2533] font-medium">{p.value}</p>
                         <p className="text-[10px] text-[#374151]">{p.source}</p>
                         <p className="text-[10px] text-[#1a2533]">{p.verify.replace(/_/g,' ')}</p>
@@ -6104,7 +6104,7 @@ export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamD
                           <ReviewBadge state={rs} />
                         </div>
                         <div className="flex items-center gap-2">
-                          {p.evidence && <button onClick={onOpenDocReview} className="text-[9px] text-[#1a56db] hover:underline truncate">{p.evidence}</button>}
+                          {p.evidence && <button disabled title="No document ID available" className="text-[9px] text-[#1a56db] hover:underline truncate">{p.evidence}</button>}
                           <button onClick={() => setQueryModal(p.name)} className="text-[9px] text-amber-600 hover:underline shrink-0">Query</button>
                         </div>
                       </div>
@@ -6115,7 +6115,7 @@ export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamD
               <div className="flex flex-wrap gap-2 pt-1">
                 <button onClick={() => {}} className="px-3 py-1.5 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540]">Save Review</button>
                 <button className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb]">Flag for Attention</button>
-                <button onClick={onOpenParamDetail} className="px-3 py-1.5 text-xs border border-[#1a56db] text-[#1a56db] rounded hover:bg-[#ebf3ff] font-semibold">Open Parameter Detail → M12</button>
+                <button disabled title="No parameter selected" className="px-3 py-1.5 text-xs border border-[#1a56db] text-[#1a56db] rounded hover:bg-[#ebf3ff] font-semibold">Open Parameter Detail → M12</button>
                 <button onClick={onOpenConsistency} className="px-3 py-1.5 text-xs border border-[#1a56db] text-[#1a56db] rounded hover:bg-[#ebf3ff] font-semibold">Open Cross-form Consistency → M16</button>
               </div>
             </>
@@ -6139,7 +6139,7 @@ export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamD
                     const rs = reviewStates[key] ?? p.finding
                     return (
                       <div key={p.name} className="grid grid-cols-5 gap-2 px-4 py-2.5 items-center hover:bg-[#f8f9fb]">
-                        <button onClick={onOpenParamDetail} className="text-[11px] font-semibold text-[#1a56db] hover:underline text-left">{p.name}</button>
+                        <button disabled title="No parameter ID available" className="text-[11px] font-semibold text-[#1a56db] hover:underline text-left">{p.name}</button>
                         <p className="text-[11px] text-[#1a2533] font-medium">{p.value}</p>
                         <p className="text-[10px] text-[#374151]">{p.source}</p>
                         <p className={`text-[10px] ${p.verify === 'NEEDS_VERIFICATION' ? 'text-amber-700 font-semibold' : 'text-[#1a2533]'}`}>{p.verify.replace(/_/g,' ')}</p>
@@ -6154,7 +6154,7 @@ export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamD
               </div>
               <div className="flex flex-wrap gap-2 pt-1">
                 <button className="px-3 py-1.5 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540]">Save Review</button>
-                <button onClick={onOpenParamDetail} className="px-3 py-1.5 text-xs border border-[#1a56db] text-[#1a56db] rounded hover:bg-[#ebf3ff] font-semibold">Open Parameter Detail → M12</button>
+                <button disabled title="No parameter selected" className="px-3 py-1.5 text-xs border border-[#1a56db] text-[#1a56db] rounded hover:bg-[#ebf3ff] font-semibold">Open Parameter Detail → M12</button>
                 <button onClick={() => setQueryModal('Building Parameters')} className="px-3 py-1.5 text-xs border border-amber-200 rounded text-amber-700 bg-amber-50 hover:bg-amber-100 font-semibold">Raise Query</button>
               </div>
             </>
@@ -6180,7 +6180,7 @@ export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamD
                   <div className="px-4 py-3 grid grid-cols-3 gap-4 text-[11px]">
                     <div><p className="text-[#374151]">Verification</p><p className="font-semibold text-[#1a2533]">{d.verify.replace(/_/g,' ')}</p></div>
                     <div><p className="text-[#374151]">Dependency type</p><p className="font-semibold text-[#1a2533]">External / Upstream</p></div>
-                    <div><p className="text-[#374151]">MIDC action</p><button onClick={onOpenDocReview} className="text-[10px] text-[#1a56db] hover:underline font-semibold">View evidence → M13</button></div>
+                    <div><p className="text-[#374151]">MIDC action</p><button disabled title="No document ID available" className="text-[10px] text-[#1a56db] hover:underline font-semibold">View evidence → M13</button></div>
                   </div>
                   <div className="px-4 py-2 border-t border-[#f0f4f8] bg-[#f8f9fb]">
                     <p className="text-[10px] text-[#374151] italic">{d.note}</p>
@@ -6204,7 +6204,7 @@ export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamD
                     const rs = reviewStates[key] ?? d.finding
                     return (
                       <div key={d.id} className="grid grid-cols-6 gap-2 px-4 py-2.5 items-center hover:bg-[#f8f9fb]">
-                        <button onClick={onOpenDocReview} className="text-[11px] font-semibold text-[#1a56db] hover:underline text-left">{d.name}</button>
+                        <button onClick={() => onOpenDocReview?.(d.id)} className="text-[11px] font-semibold text-[#1a56db] hover:underline text-left">{d.name}</button>
                         <p className="text-[10px] font-mono text-[#374151]">{d.id}</p>
                         <p className="text-[10px] text-[#1a2533]">{d.ver}</p>
                         <p className={`text-[10px] ${d.verify==='SELF_DECLARED'?'text-amber-700':'text-[#1a2533]'}`}>{d.verify.replace(/_/g,' ')}</p>
@@ -6220,7 +6220,7 @@ export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamD
               </div>
               <div className="flex flex-wrap gap-2 pt-1">
                 <button className="px-3 py-1.5 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540]">Save Review</button>
-                <button onClick={onOpenDocReview} className="px-3 py-1.5 text-xs border border-[#1a56db] text-[#1a56db] rounded hover:bg-[#ebf3ff] font-semibold">Open Document Review → M13</button>
+                <button disabled title="No document selected" className="px-3 py-1.5 text-xs border border-[#1a56db] text-[#1a56db] rounded hover:bg-[#ebf3ff] font-semibold">Open Document Review → M13</button>
                 <button className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb]">Request Additional Evidence</button>
               </div>
             </>
@@ -6247,7 +6247,7 @@ export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamD
                       </span>
                     </div>
                     <div className="flex gap-2 mt-3">
-                      <button onClick={onOpenDocReview} className="text-[10px] text-[#1a56db] hover:underline font-semibold">Open Document Review → M13</button>
+                      <button disabled title="No document ID available" className="text-[10px] text-[#1a56db] hover:underline font-semibold">Open Document Review → M13</button>
                       <button onClick={() => setQueryModal(d.name)} className="text-[10px] text-amber-600 hover:underline font-semibold">Request Evidence</button>
                     </div>
                   </div>
@@ -6388,7 +6388,7 @@ export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamD
 
 
 export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDetail, onOpenDocReview, onOpenConsistency, onOpenDepView }: {
-  onBack: () => void; onBackToOverview: () => void; onOpenParamDetail?: () => void; onOpenDocReview?: () => void; onOpenConsistency?: () => void; onOpenDepView?: () => void
+  onBack: () => void; onBackToOverview: () => void; onOpenParamDetail?: (id: string) => void; onOpenDocReview?: (id: string) => void; onOpenConsistency?: () => void; onOpenDepView?: () => void
 }) {
   const [activeSection, setActiveSection] = useState('applicability')
   const [reviewStates, setReviewStates] = useState<Record<string, OfficerReviewState>>(() => {
@@ -6556,7 +6556,7 @@ export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDeta
                     const mismatch = p.appVal !== p.dnaVal && p.dnaVal !== '—'
                     return (
                       <div key={p.name} className={`grid grid-cols-6 gap-2 px-4 py-2.5 items-center hover:bg-[#f8f9fb] ${mismatch ? 'bg-amber-50' : ''}`}>
-                        <button onClick={onOpenParamDetail} className="text-[11px] font-semibold text-[#1a56db] hover:underline text-left">{p.name}</button>
+                        <button disabled title="No parameter ID available" className="text-[11px] font-semibold text-[#1a56db] hover:underline text-left">{p.name}</button>
                         <p className="text-[11px] text-[#1a2533] font-medium">{p.appVal}</p>
                         <div className="flex items-center gap-1">
                           <p className="text-[11px] text-[#1a2533]">{p.dnaVal}</p>
@@ -6575,7 +6575,7 @@ export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDeta
               </div>
               <div className="flex gap-2">
                 <button className="px-3 py-1.5 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540]">Save Review</button>
-                <button onClick={onOpenParamDetail} className="px-3 py-1.5 text-xs border border-[#1a56db] text-[#1a56db] rounded hover:bg-[#ebf3ff] font-semibold">Open Parameter Detail → M12</button>
+                <button disabled title="No parameter selected" className="px-3 py-1.5 text-xs border border-[#1a56db] text-[#1a56db] rounded hover:bg-[#ebf3ff] font-semibold">Open Parameter Detail → M12</button>
                 <button onClick={onOpenConsistency} className="px-3 py-1.5 text-xs border border-[#1a56db] text-[#1a56db] rounded hover:bg-[#ebf3ff] font-semibold">Open Cross-form Consistency → M16</button>
               </div>
             </>
@@ -6598,7 +6598,7 @@ export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDeta
                     const rs = reviewStates[key] ?? p.finding
                     return (
                       <div key={p.name} className="grid grid-cols-5 gap-2 px-4 py-2.5 items-center hover:bg-[#f8f9fb]">
-                        <button onClick={onOpenParamDetail} className="text-[11px] font-semibold text-[#1a56db] hover:underline text-left">{p.name}</button>
+                        <button disabled title="No parameter ID available" className="text-[11px] font-semibold text-[#1a56db] hover:underline text-left">{p.name}</button>
                         <p className="text-[11px] text-[#1a2533] font-medium">{p.value}</p>
                         <p className="text-[10px] text-[#374151]">{p.source}</p>
                         <p className={`text-[10px] ${p.verify === 'SELF_DECLARED' ? 'text-amber-700' : 'text-[#1a2533]'}`}>{p.verify.replace(/_/g,' ')}</p>
@@ -6613,7 +6613,7 @@ export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDeta
               </div>
               <div className="flex gap-2">
                 <button className="px-3 py-1.5 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540]">Save Review</button>
-                <button onClick={onOpenParamDetail} className="px-3 py-1.5 text-xs border border-[#1a56db] text-[#1a56db] rounded hover:bg-[#ebf3ff] font-semibold">Open Parameter Detail → M12</button>
+                <button disabled title="No parameter selected" className="px-3 py-1.5 text-xs border border-[#1a56db] text-[#1a56db] rounded hover:bg-[#ebf3ff] font-semibold">Open Parameter Detail → M12</button>
                 <button onClick={() => setQueryModal('Water Parameters')} className="px-3 py-1.5 text-xs border border-amber-200 rounded text-amber-700 bg-amber-50 hover:bg-amber-100 font-semibold">Raise Query</button>
               </div>
             </>
@@ -6639,7 +6639,7 @@ export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDeta
                     const rs = reviewStates[key] ?? row.finding
                     return (
                       <div key={row.name} className="grid grid-cols-4 gap-2 px-4 py-2.5 items-center hover:bg-[#f8f9fb]">
-                        <button onClick={onOpenParamDetail} className="text-[11px] font-semibold text-[#1a56db] hover:underline text-left">{row.name}</button>
+                        <button disabled title="No parameter ID available" className="text-[11px] font-semibold text-[#1a56db] hover:underline text-left">{row.name}</button>
                         <p className="text-[11px] text-[#1a2533]">{row.val}</p>
                         <p className="text-[10px] text-[#374151]">{row.src} · {row.verify.replace(/_/g,' ')}</p>
                         <div className="flex items-center gap-1"><ReviewBadge state={rs} /><button onClick={() => setQueryModal(row.name)} className="text-[9px] text-amber-600 hover:underline ml-1">Query</button></div>
@@ -6673,7 +6673,7 @@ export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDeta
                     const rs = reviewStates[key] ?? d.finding
                     return (
                       <div key={d.id} className="grid grid-cols-7 gap-2 px-4 py-2.5 items-center hover:bg-[#f8f9fb]">
-                        <button onClick={onOpenDocReview} className="text-[11px] font-semibold text-[#1a56db] hover:underline text-left">{d.name}</button>
+                        <button onClick={() => onOpenDocReview?.(d.id)} className="text-[11px] font-semibold text-[#1a56db] hover:underline text-left">{d.name}</button>
                         <p className="text-[10px] font-mono text-[#374151]">{d.id}</p>
                         <p className="text-[10px] text-[#1a2533]">{d.cat}</p>
                         <p className="text-[10px] text-[#1a2533]">{d.ver}</p>
@@ -6690,7 +6690,7 @@ export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDeta
               </div>
               <div className="flex gap-2">
                 <button className="px-3 py-1.5 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540]">Save Review</button>
-                <button onClick={onOpenDocReview} className="px-3 py-1.5 text-xs border border-[#1a56db] text-[#1a56db] rounded hover:bg-[#ebf3ff] font-semibold">Open Document Review → M13</button>
+                <button disabled title="No document selected" className="px-3 py-1.5 text-xs border border-[#1a56db] text-[#1a56db] rounded hover:bg-[#ebf3ff] font-semibold">Open Document Review → M13</button>
                 <button className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb]">Request Additional Evidence</button>
               </div>
             </>
@@ -6905,7 +6905,7 @@ const M16_FIELDS: ConsistencyField[] = [
 
 
 export function M16ConsistencyPage({ onBack, onBackToOverview, onOpenParamDetail, onOpenDocReview }: {
-  onBack: () => void; onBackToOverview: () => void; onOpenParamDetail?: () => void; onOpenDocReview?: () => void
+  onBack: () => void; onBackToOverview: () => void; onOpenParamDetail?: (id: string) => void; onOpenDocReview?: (id: string) => void
 }) {
   const [selectedField, setSelectedField] = useState<ConsistencyField>(M16_FIELDS[0])
   const [filter, setFilter] = useState<'all'|'mismatch'|'match'|'needs-verification'|'not-applicable'|'resolved'>('all')
@@ -7044,7 +7044,7 @@ export function M16ConsistencyPage({ onBack, onBackToOverview, onOpenParamDetail
                     {fieldLCS && fieldLCS !== 'detected' && (
                       <span className="text-[9px] text-[#374151] italic capitalize">{fieldLCS.replace(/-/g,' ')}</span>
                     )}
-                    <button onClick={onOpenParamDetail} className="text-[10px] text-[#1a56db] hover:underline font-semibold">View Parameter Detail → M12</button>
+                    <button disabled={selectedField.id !== 'plot-area'} title={selectedField.id !== 'plot-area' ? 'No linked parameter ID available' : undefined} onClick={() => { if (selectedField.id === 'plot-area') onOpenParamDetail?.('plotarea') }} className="text-[10px] text-[#1a56db] hover:underline font-semibold">View Parameter Detail → M12</button>
                   </div>
                 </div>
                 {selectedField.status === 'mismatch' && (
@@ -7076,7 +7076,7 @@ export function M16ConsistencyPage({ onBack, onBackToOverview, onOpenParamDetail
                         <p className="text-[10px] text-[#374151]">{row.version}</p>
                         <div className="flex items-center gap-1">
                           <StatusBadge status={row.status} />
-                          {row.status === 'mismatch' && <button onClick={onOpenDocReview} className="text-[9px] text-[#1a56db] hover:underline ml-1">Doc</button>}
+                          {row.status === 'mismatch' && <button disabled title="No document ID available" className="text-[9px] text-[#1a56db] hover:underline ml-1">Doc</button>}
                         </div>
                       </div>
                     )
@@ -8501,7 +8501,7 @@ const CHANGE_TYPE_LABEL: Record<ChangedItem['changeType'], string> = {
 }
 
 export function M20DeltaRescrutinyPage({ onBackToOverview, onOpenDna, onOpenDocReview, onOpenConsistency, onOpenDepView, onOpenQueryBuilder, onOpenQueryHistory, onOpenTimeline }: {
-  onBackToOverview: () => void; onOpenDna: () => void; onOpenDocReview: () => void
+  onBackToOverview: () => void; onOpenDna: () => void; onOpenDocReview: (id: string) => void
   onOpenConsistency: () => void; onOpenDepView: () => void; onOpenQueryBuilder: () => void
   onOpenQueryHistory: () => void; onOpenTimeline: () => void
 }) {
@@ -8765,7 +8765,7 @@ export function M20DeltaRescrutinyPage({ onBackToOverview, onOpenDna, onOpenDocR
                     <button onClick={onOpenConsistency} className="text-left text-xs text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">Open Cross-form Consistency → M16</button>
                     <button onClick={onOpenDepView}    className="text-left text-xs text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">Open Regulatory Dependency → M17</button>
                     {selectedChanged.changeType === 'document' && (
-                      <button onClick={onOpenDocReview} className="text-left text-xs text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">Open Document Review → M13</button>
+                      <button disabled title="No document ID available" className="text-left text-xs text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">Open Document Review → M13</button>
                     )}
                     <button onClick={onOpenQueryBuilder} className="text-left text-xs text-[#9a3412] hover:underline px-2 py-1 bg-[#fff7ed] rounded">Raise Query → M18</button>
                     <button onClick={() => markChangedReviewed(selectedChanged.id)} className="text-left text-xs text-[#065f46] hover:underline px-2 py-1 bg-[#ecfdf5] rounded font-semibold">✓ Mark Reviewed</button>
@@ -8943,7 +8943,7 @@ export function M20DeltaRescrutinyPage({ onBackToOverview, onOpenDna, onOpenDocR
               <div>
                 <div className="text-xs font-semibold text-[#1a2533]">Building Plan v1 → v2</div>
                 <div className="text-[10px] text-[#374151]">Needs Verification · Affects Building Review</div>
-                <button onClick={onOpenDocReview} className="text-[10px] text-[#1a56db] hover:underline">Open M13</button>
+                <button disabled title="No document ID available" className="text-[10px] text-[#1a56db] hover:underline">Open M13</button>
               </div>
             </div>
             <div className="flex items-start gap-2">
@@ -9269,7 +9269,7 @@ export function M21InspectionQueuePage({ applicationId, onBack, onPlanInspection
 
 
 export function M22InspectionPlanningPage({ onBack, onBackToQueue, onOpenDna, onOpenDocReview, onOpenDepView, onOpenDelta, onOpenQueryHistory, onOpenWorkspace }: {
-  onBack: () => void; onBackToQueue: () => void; onOpenDna: () => void; onOpenDocReview: () => void
+  onBack: () => void; onBackToQueue: () => void; onOpenDna: () => void; onOpenDocReview: (id: string) => void
   onOpenDepView: () => void; onOpenDelta: () => void; onOpenQueryHistory: () => void; onOpenWorkspace?: () => void
 }) {
   const [view, setView] = useState<CalendarView>('calendar')
@@ -9573,7 +9573,7 @@ export function M22InspectionPlanningPage({ onBack, onBackToQueue, onOpenDna, on
             {['Building Plan v2','Land / Plot Record','MIDC Application Documents'].map(d => (
               <div key={d} className="flex items-center justify-between py-1 border-b border-[#f0f4f8] last:border-0">
                 <span className="text-[11px] text-[#1a2533]">{d}</span>
-                <button onClick={onOpenDocReview} className="text-[10px] text-[#1a56db] hover:underline">View</button>
+                <button disabled title="No document ID available" className="text-[10px] text-[#1a56db] hover:underline">View</button>
               </div>
             ))}
           </div>
@@ -9653,7 +9653,7 @@ const CHECK_STATUS_STYLE: Record<CheckStatus, { bg: string; text: string }> = {
 
 export function M23InspectionWorkspacePage({ onBack, onBackToQueue, onOpenM24, onOpenDocReview, onOpenDna, onOpenDepView, onOpenQueryHistory, onOpenDelta, onOpenConsistency }: {
   onBack: () => void; onBackToQueue: () => void; onOpenM24: () => void
-  onOpenDocReview: () => void; onOpenDna: () => void; onOpenDepView: () => void
+  onOpenDocReview: (id: string) => void; onOpenDna: () => void; onOpenDepView: () => void
   onOpenQueryHistory: () => void; onOpenDelta: () => void; onOpenConsistency: () => void
 }) {
   const [checklist, setChecklist] = useState<CheckItem[]>(M23_CHECKLIST)
@@ -9747,7 +9747,7 @@ export function M23InspectionWorkspacePage({ onBack, onBackToQueue, onOpenM24, o
                 {d.note && <div className="text-[9px] text-[#92400e] italic">{d.note}</div>}
                 <div className="flex items-center justify-between mt-0.5">
                   <span className={`text-[9px] font-semibold ${d.status === 'Needs Verification' ? 'text-[#1e40af]' : 'text-[#065f46]'}`}>{d.status}</span>
-                  <button onClick={onOpenDocReview} className="text-[9px] text-[#1a56db] hover:underline">View</button>
+                  <button disabled title="No document ID available" className="text-[9px] text-[#1a56db] hover:underline">View</button>
                 </div>
               </div>
             ))}
@@ -9969,7 +9969,7 @@ const EVENT_TYPE_STYLE: Record<string, { bg: string; text: string; dot: string }
 
 export function M24ObservationReinspectionPage({ onBack, onBackToM23, onOpenM22, onOpenDocReview, onOpenQueryHistory, onOpenDelta, onOpenDepView }: {
   onBack: () => void; onBackToM23: () => void; onOpenM22: () => void
-  onOpenDocReview: () => void; onOpenQueryHistory: () => void; onOpenDelta: () => void; onOpenDepView: () => void
+  onOpenDocReview: (id: string) => void; onOpenQueryHistory: () => void; onOpenDelta: () => void; onOpenDepView: () => void
 }) {
   const [obsFilter, setObsFilter] = useState<'All' | ObsState>('All')
   const [selectedEvent, setSelectedEvent] = useState<M24Event | null>(M24_TIMELINE[1])
@@ -10135,7 +10135,7 @@ export function M24ObservationReinspectionPage({ onBack, onBackToM23, onOpenM22,
             {/* Cross-system links */}
             <div className="flex flex-col gap-1.5 pt-2 border-t border-[#e5eaf0]">
               <div className="text-[9px] font-bold text-[#374151] uppercase tracking-wider mb-1">Navigate</div>
-              <button onClick={onOpenDocReview}    className="text-left text-[10px] text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">View Document → M13</button>
+              <button disabled title="No document ID available" className="text-left text-[10px] text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">View Document → M13</button>
               <button onClick={onOpenQueryHistory} className="text-left text-[10px] text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">View Query History → M19</button>
               <button onClick={onOpenDelta}        className="text-left text-[10px] text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">View Delta → M20</button>
               <button onClick={onOpenDepView}      className="text-left text-[10px] text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">View Dependencies → M17</button>
@@ -10236,7 +10236,7 @@ export function DecisionsDashboard({ onOpenApp, onOpenCompliance, onOpenDependen
 // ─── M25 Decision Workspace ────────────────────────────────────────────────────
 
 export function M25DecisionWorkspacePage({ onBack, onOpenDocReview, onOpenConsistency, onOpenDna, onOpenDepView, onOpenQueryHistory, onOpenDelta, onOpenInspection, onOpenM24, onOpenScrutiny, onRecordDecision }: {
-  onBack: () => void; onOpenDocReview: () => void; onOpenConsistency: () => void; onOpenDna: () => void; onOpenDepView: () => void; onOpenQueryHistory: () => void; onOpenDelta: () => void; onOpenInspection: () => void; onOpenM24: () => void; onOpenScrutiny: () => void; onRecordDecision: () => void
+  onBack: () => void; onOpenDocReview: (id: string) => void; onOpenConsistency: () => void; onOpenDna: () => void; onOpenDepView: () => void; onOpenQueryHistory: () => void; onOpenDelta: () => void; onOpenInspection?: (id: string) => void; onOpenM24?: (id: string) => void; onOpenScrutiny: () => void; onRecordDecision?: (id: string) => void
 }) {
   const [selectedOutcome, setSelectedOutcome] = useState<'APPROVE' | 'CORRECTION_REQUIRED' | 'REJECT' | null>(null)
   const [decisionStep, setDecisionStep] = useState<'evidence' | 'form' | 'confirm'>('evidence')
@@ -10257,13 +10257,13 @@ export function M25DecisionWorkspacePage({ onBack, onOpenDocReview, onOpenConsis
 
   const DEPT_CHECKS = [
     { label: 'Scrutiny modules reviewed', status: 'ok', action: onOpenScrutiny },
-    { label: 'Required documents reviewed', status: 'ok', action: onOpenDocReview },
+    { label: 'Required documents reviewed', status: 'ok', action: undefined },
     { label: 'Cross-form consistency reviewed', status: 'ok', action: onOpenConsistency },
     { label: 'Queries resolved (QRY-2026-0042)', status: 'ok', action: onOpenQueryHistory },
     { label: 'Latest resubmission reviewed (v2)', status: 'ok', action: onOpenDelta },
-    { label: 'Inspection completed (INSP-2026-00418 — Re-inspection Resolved)', status: 'ok', action: onOpenInspection },
+    { label: 'Inspection completed (INSP-2026-00418 — Re-inspection Resolved)', status: 'ok', action: onOpenInspection ? () => onOpenInspection('INSP-2026-00418') : undefined },
     { label: 'Required dependencies checked', status: 'ok', action: onOpenDepView },
-    { label: 'One item marked Needs Verification (Building Plan v2)', status: 'warn', action: onOpenDocReview },
+    { label: 'One item marked Needs Verification (Building Plan v2)', status: 'warn', action: undefined },
   ]
 
   const EVIDENCE_SECTIONS = [
@@ -10274,7 +10274,7 @@ export function M25DecisionWorkspacePage({ onBack, onOpenDocReview, onOpenConsis
         <p><span className="font-semibold">Findings:</span> Plot area flag resolved, building area query raised and resolved</p>
       </div>
     )},
-    { id: 'documents', title: 'DOCUMENTS', action: onOpenDocReview, content: (
+    { id: 'documents', title: 'DOCUMENTS', action: undefined, content: (
       <div className="text-xs space-y-1">
         <div className="flex items-center gap-2"><span className="text-amber-600 font-semibold">⚠</span><span>Building Plan v2 — Needs Verification</span></div>
         <div className="flex items-center gap-2"><span className="text-green-700">✓</span><span>Land Record v3 — Verified</span></div>
@@ -10301,7 +10301,7 @@ export function M25DecisionWorkspacePage({ onBack, onOpenDocReview, onOpenConsis
         <p>Plan version: v1 → v2</p>
       </div>
     )},
-    { id: 'inspection', title: 'INSPECTION', action: onOpenM24, content: (
+    { id: 'inspection', title: 'INSPECTION', action: onOpenM24 ? () => onOpenM24('INSP-2026-00418') : undefined, content: (
       <div className="text-xs space-y-1">
         <p><span className="font-semibold">ID:</span> INSP-2026-00418 — 25 Sep 2026</p>
         <p><span className="font-semibold">Module:</span> Building / Planning</p>
@@ -10364,7 +10364,7 @@ export function M25DecisionWorkspacePage({ onBack, onOpenDocReview, onOpenConsis
           <span className="text-[#93c5fd]">·</span>
           <button onClick={() => { setSelectedOutcome('REJECT'); setDecisionStep('form') }} className="text-[#991b1b] font-semibold hover:underline">Reject Flow →</button>
           <span className="text-[#93c5fd]">·</span>
-          <button onClick={onRecordDecision} className="ml-auto bg-[#1a3a5c] text-white font-bold px-3 py-1 rounded hover:bg-[#0f2540]">Skip to M26 Decision Record →</button>
+          <button onClick={() => onRecordDecision?.('DEC-2026-00418')} className="ml-auto bg-[#1a3a5c] text-white font-bold px-3 py-1 rounded hover:bg-[#0f2540]">Skip to M26 Decision Record →</button>
         </div>
 
         {/* Decision Readiness */}
@@ -10375,7 +10375,7 @@ export function M25DecisionWorkspacePage({ onBack, onOpenDocReview, onOpenConsis
           </div>
           <div className="divide-y divide-[#94a3b8]">
             {DEPT_CHECKS.map((c, i) => (
-              <button key={i} onClick={c.action} className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-[#f8f9fb] transition-colors">
+              <button key={i} onClick={c.action} disabled={!c.action} title={!c.action ? 'No linked record ID available' : undefined} className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-[#f8f9fb] transition-colors">
                 <span className={`text-base ${c.status === 'ok' ? 'text-green-600' : 'text-amber-500'}`}>{c.status === 'ok' ? '✓' : '⚠'}</span>
                 <span className="text-xs text-[#1a2533] flex-1">{c.label}</span>
                 <span className="text-[10px] text-[#1a56db]">View →</span>
@@ -10395,7 +10395,7 @@ export function M25DecisionWorkspacePage({ onBack, onOpenDocReview, onOpenConsis
                 <button onClick={() => setOpenSection(openSection === s.id ? null : s.id)} className="w-full flex items-center justify-between px-4 py-2.5 text-left hover:bg-[#f8f9fb]">
                   <span className="text-xs font-semibold text-[#1a2533]">{s.title}</span>
                   <div className="flex items-center gap-3">
-                    <button onClick={e => { e.stopPropagation(); s.action() }} className="text-[10px] text-[#1a56db]">View →</button>
+                    <button disabled={!s.action} title={!s.action ? 'No linked record ID available' : undefined} onClick={e => { e.stopPropagation(); s.action?.() }} className="text-[10px] text-[#1a56db]">View →</button>
                     <span className="text-[#374151] text-xs">{openSection === s.id ? '▲' : '▼'}</span>
                   </div>
                 </button>
@@ -10599,7 +10599,7 @@ export function M25DecisionWorkspacePage({ onBack, onOpenDocReview, onOpenConsis
               </div>
               <div className="flex gap-3">
                 <button onClick={() => setDecisionStep('evidence')} className="flex-1 border border-[#d1d9e0] bg-white text-[#1a2533] text-xs font-semibold py-2.5 rounded hover:bg-[#f0f4f8]">Cancel — Return to Review</button>
-                <button onClick={onRecordDecision} className="flex-1 bg-[#1a56db] text-white text-xs font-semibold py-2.5 rounded hover:bg-[#1246b5]">Confirm & Record Decision (Mock Persistence)</button>
+                <button onClick={() => onRecordDecision?.('DEC-2026-00418')} className="flex-1 bg-[#1a56db] text-white text-xs font-semibold py-2.5 rounded hover:bg-[#1246b5]">Confirm & Record Decision (Mock Persistence)</button>
               </div>
             </div>
           </div>
@@ -10612,7 +10612,7 @@ export function M25DecisionWorkspacePage({ onBack, onOpenDocReview, onOpenConsis
 // ─── M26 Decision Record ───────────────────────────────────────────────────────
 
 export function M26DecisionRecordPage({ onBack, onBackToOverview, onOpenDepView, onOpenDna }: {
-  onBack: () => void; onBackToOverview: () => void; onOpenDepView: () => void; onOpenDna: () => void
+  onBack: () => void; onBackToOverview: () => void; onOpenDepView: (id: string) => void; onOpenDna: () => void
 }) {
   const [activeTab, setActiveTab] = useState<'record' | 'dependencies' | 'audit' | 'version-history'>('record')
 
@@ -10705,7 +10705,7 @@ export function M26DecisionRecordPage({ onBack, onBackToOverview, onOpenDepView,
           <div className="bg-white border border-[#e5eaf0] rounded-lg overflow-hidden">
             <div className="px-4 py-2.5 bg-[#f8f9fb] border-b border-[#e5eaf0] flex items-center gap-3">
               <h2 className="text-sm font-semibold text-[#1a2533]">Dependency Impact (M27 Update)</h2>
-              <button onClick={onOpenDepView} className="ml-auto text-xs text-[#1a56db]">Open Dependency View →</button>
+              <button onClick={() => onOpenDepView('midc-bldg')} className="ml-auto text-xs text-[#1a56db]">Open Dependency View →</button>
             </div>
             <div className="p-4 space-y-3 text-xs">
               <div className="flex items-center gap-3 p-3 bg-[#ecfdf5] border border-green-200 rounded">
@@ -10777,7 +10777,7 @@ export function M26DecisionRecordPage({ onBack, onBackToOverview, onOpenDepView,
         <div className="flex gap-3 flex-wrap pb-4">
           <button onClick={onBackToOverview} className="text-xs border border-[#d1d9e0] bg-white text-[#1a2533] px-4 py-2 rounded hover:bg-[#f0f4f8]">View Application</button>
           <button onClick={onBack} className="text-xs border border-[#d1d9e0] bg-white text-[#1a2533] px-4 py-2 rounded hover:bg-[#f0f4f8]">View Evidence</button>
-          <button onClick={onOpenDepView} className="text-xs border border-[#d1d9e0] bg-white text-[#1a2533] px-4 py-2 rounded hover:bg-[#f0f4f8]">View Dependency Impact</button>
+          <button onClick={() => onOpenDepView('midc-bldg')} className="text-xs border border-[#d1d9e0] bg-white text-[#1a2533] px-4 py-2 rounded hover:bg-[#f0f4f8]">View Dependency Impact</button>
           <button onClick={() => setActiveTab('audit')} className="text-xs border border-[#d1d9e0] bg-white text-[#1a2533] px-4 py-2 rounded hover:bg-[#f0f4f8]">View Audit History</button>
         </div>
       </div>
@@ -10814,9 +10814,9 @@ const SYNC_RESULT_STYLE: Record<string, string> = {
   'Not Required':'bg-[#f3f4f6] text-[#1a2533]',
 }
 
-export function M27DependencyUpdatePage({ onBack, onOpenM26, onOpenM25, onOpenDepView, onOpenQueryHistory, onOpenDelta, onOpenM28 }: {
-  onBack: () => void; onOpenM26: () => void; onOpenM25: () => void
-  onOpenDepView: () => void; onOpenQueryHistory: () => void; onOpenDelta: () => void; onOpenM28: () => void
+export function M27DependencyUpdatePage({ onBack, onOpenM25, onOpenM26, onOpenM28, onOpenDepView, onOpenQueryHistory, onOpenDelta }: {
+  onBack: () => void; onOpenM25: () => void; onOpenM26: (id: string) => void; onOpenM28: (id: string) => void
+  onOpenDepView: () => void; onOpenQueryHistory: () => void; onOpenDelta: () => void
 }) {
   const [activeTab, setActiveTab] = useState<'overview'|'sync'|'notifications'|'versions'>('overview')
 
@@ -10835,7 +10835,7 @@ export function M27DependencyUpdatePage({ onBack, onOpenM26, onOpenM25, onOpenDe
         <span>/</span>
         <button onClick={onBack} className="hover:text-[#1a3a5c] hover:underline">Decisions</button>
         <span>/</span>
-        <button onClick={onOpenM26} className="hover:text-[#1a3a5c] hover:underline">Decision Record</button>
+        <button onClick={() => onOpenM26?.('DEC-2026-00418')} className="hover:text-[#1a3a5c] hover:underline">Decision Record</button>
         <span>/</span>
         <span className="text-[#1a2533] font-semibold">M27 — Dependency Update</span>
       </div>
@@ -10850,7 +10850,7 @@ export function M27DependencyUpdatePage({ onBack, onOpenM26, onOpenM25, onOpenDe
           </div>
           <div className="flex gap-2 flex-wrap text-xs">
             <button onClick={onOpenM25} className="border border-[#4b7ab5] text-[#bfdbfe] px-3 py-1.5 rounded hover:bg-[#0f2540]">← Decision Workspace</button>
-            <button onClick={onOpenM26} className="border border-[#4b7ab5] text-[#bfdbfe] px-3 py-1.5 rounded hover:bg-[#0f2540]">View Decision Record</button>
+            <button onClick={() => onOpenM26?.('DEC-2026-00418')} className="border border-[#4b7ab5] text-[#bfdbfe] px-3 py-1.5 rounded hover:bg-[#0f2540]">View Decision Record</button>
           </div>
         </div>
         <div className="mt-3 grid grid-cols-2 gap-x-8 gap-y-1 text-xs md:grid-cols-4">
@@ -10892,7 +10892,7 @@ export function M27DependencyUpdatePage({ onBack, onOpenM26, onOpenM25, onOpenDe
               </div>
             </div>
             <div className="flex flex-col gap-2 shrink-0">
-              <button onClick={onOpenM26} className="text-xs font-semibold bg-[#1a3a5c] text-white px-3 py-1.5 rounded hover:bg-[#0f2540]">View Decision Record → M26</button>
+              <button onClick={() => onOpenM26?.('DEC-2026-00418')} className="text-xs font-semibold bg-[#1a3a5c] text-white px-3 py-1.5 rounded hover:bg-[#0f2540]">View Decision Record → M26</button>
               <div className="text-[9px] text-[#374151] italic">Decision cannot be edited from M27.</div>
             </div>
           </div>
@@ -11134,7 +11134,7 @@ export function M27DependencyUpdatePage({ onBack, onOpenM26, onOpenM25, onOpenDe
           <div className="bg-white border border-[#e5eaf0] rounded-lg overflow-hidden">
             <div className="px-4 py-2.5 border-b border-[#e5eaf0] flex items-center justify-between">
               <div className="text-xs font-bold text-[#1a2533]">Approval Conditions → Compliance Engine</div>
-              <button onClick={onOpenM28} className="text-[10px] text-[#1a56db] hover:underline">View Compliance Context → M28</button>
+              <button onClick={() => onOpenM28?.('COND-001')} className="text-[10px] text-[#1a56db] hover:underline">View Compliance Context → M28</button>
             </div>
             <div className="p-4 space-y-3">
               {[
@@ -11207,9 +11207,9 @@ export function M27DependencyUpdatePage({ onBack, onOpenM26, onOpenM25, onOpenDe
 
           {/* Actions footer */}
           <div className="flex gap-3 flex-wrap pb-6">
-            <button onClick={onOpenM26}      className="px-4 py-2 text-xs font-bold bg-[#1a3a5c] text-white rounded hover:bg-[#0f2540]">View Decision Record → M26</button>
+            <button onClick={() => onOpenM26?.('DEC-2026-00418')}      className="px-4 py-2 text-xs font-bold bg-[#1a3a5c] text-white rounded hover:bg-[#0f2540]">View Decision Record → M26</button>
             <button onClick={onOpenDepView}  className="px-4 py-2 text-xs font-semibold border border-[#d1d9e0] text-[#1a2533] rounded hover:bg-[#f8f9fb]">View Dependency Journey → M17</button>
-            <button onClick={onOpenM28}      className="px-4 py-2 text-xs font-semibold border border-[#d1d9e0] text-[#1a2533] rounded hover:bg-[#f8f9fb]">View Compliance Context → M28</button>
+            <button onClick={() => onOpenM28?.('COND-001')}      className="px-4 py-2 text-xs font-semibold border border-[#d1d9e0] text-[#1a2533] rounded hover:bg-[#f8f9fb]">View Compliance Context → M28</button>
           </div>
         </>}
 
@@ -11322,9 +11322,9 @@ const ENT_STATUS_STYLE: Record<string, string> = {
   'Overdue':     'text-[#991b1b]',
 }
 
-export function M28CompliancePage({ onBack, onOpenM26, onOpenM27, onOpenM29, onOpenInspection, onOpenDepView, onOpenDocReview }: {
-  onBack: () => void; onOpenM26: () => void; onOpenM27: () => void; onOpenM29: () => void
-  onOpenInspection: () => void; onOpenDepView: () => void; onOpenDocReview: () => void
+export function M28CompliancePage({ onBack, onOpenM26, onOpenM29, onOpenInspection, onOpenDepView, onOpenDocReview }: {
+  onBack: () => void; onOpenM26: (id: string) => void; onOpenM27: (id: string) => void; onOpenM29: () => void
+  onOpenInspection?: (id: string) => void; onOpenDepView: () => void; onOpenDocReview: (id: string) => void
 }) {
   const [selectedObl, setSelectedObl] = useState<ComplianceObligation | null>(null)
   const [activeTab, setActiveTab] = useState<'conditions'|'renewal'|'inspection'|'amendments'|'timeline'>('conditions')
@@ -11345,7 +11345,7 @@ export function M28CompliancePage({ onBack, onOpenM26, onOpenM27, onOpenM29, onO
         <span>/</span>
         <button onClick={onBack} className="hover:text-[#1a3a5c] hover:underline">Applications</button>
         <span>/</span>
-        <button onClick={onOpenM26} className="hover:text-[#1a3a5c] hover:underline">Decision</button>
+        <button onClick={() => onOpenM26?.('DEC-2026-00418')} className="hover:text-[#1a3a5c] hover:underline">Decision</button>
         <span>/</span>
         <span className="text-[#1a2533] font-semibold">M28 — Conditions / Compliance</span>
       </div>
@@ -11358,8 +11358,8 @@ export function M28CompliancePage({ onBack, onOpenM26, onOpenM27, onOpenM29, onO
             <p className="text-xs text-[#1a2533] mt-0.5">Post-decision obligations and follow-up generated from the recorded MIDC decision.</p>
           </div>
           <div className="flex gap-2">
-            <button onClick={onOpenM27} className="text-xs border border-[#d1d9e0] text-[#1a2533] px-3 py-1.5 rounded hover:bg-[#f8f9fb]">← M27 Dependency Update</button>
-            <button onClick={onOpenM26} className="text-xs bg-[#1a3a5c] text-white px-3 py-1.5 rounded hover:bg-[#0f2540]">View Formal Decision → M26</button>
+            <button disabled className="text-xs border border-[#d1d9e0] text-[#1a2533] px-3 py-1.5 rounded opacity-50 cursor-not-allowed">← M27 Dependency Update (Disabled: No ID)</button>
+            <button onClick={() => onOpenM26?.('DEC-2026-00418')} className="text-xs bg-[#1a3a5c] text-white px-3 py-1.5 rounded hover:bg-[#0f2540]">View Formal Decision → M26</button>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-xs md:grid-cols-4">
@@ -11386,7 +11386,7 @@ export function M28CompliancePage({ onBack, onOpenM26, onOpenM27, onOpenM29, onO
             <Row label="DNA Version" value="v4" />
             <Row label="Approval Version" value="v1" />
           </div>
-          <button onClick={onOpenM26} className="mt-3 text-[10px] text-[#1a56db] hover:underline font-semibold">View Formal Decision → M26</button>
+          <button onClick={() => onOpenM26?.('DEC-2026-00418')} className="mt-3 text-[10px] text-[#1a56db] hover:underline font-semibold">View Formal Decision → M26</button>
           <div className="mt-1 text-[9px] text-[#374151] italic">Decision cannot be edited from M28.</div>
         </div>
 
@@ -11492,8 +11492,8 @@ export function M28CompliancePage({ onBack, onOpenM26, onOpenM27, onOpenM29, onO
                   <Row label="Observation Status" value="OBS-2026-00418-01 — Resolved" />
                 </div>
                 <div className="flex gap-2 flex-wrap">
-                  <button onClick={onOpenInspection} className="text-[10px] text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">Inspection Workspace → M23</button>
-                  <button onClick={onOpenInspection} className="text-[10px] text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">Observation / Re-inspection → M24</button>
+                  <button onClick={() => onOpenInspection?.('INSP-2026-00418')} className="text-[10px] text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">Inspection Workspace → M23</button>
+                  <button onClick={() => onOpenInspection?.('INSP-2026-00418')} className="text-[10px] text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">Observation / Re-inspection → M24</button>
                 </div>
                 <div className="text-[9px] text-[#374151] italic">Inspection completion is an input to compliance context only. It does not automatically determine application outcome.</div>
               </div>
@@ -11586,8 +11586,8 @@ export function M28CompliancePage({ onBack, onOpenM26, onOpenM27, onOpenM29, onO
               </div>
             </div>
             <div className="flex flex-col gap-1.5">
-              <button onClick={onOpenM26}      className="text-left text-[10px] text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">View Approval → M26</button>
-              <button onClick={onOpenDocReview} className="text-left text-[10px] text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">View Evidence → M13</button>
+              <button onClick={() => onOpenM26?.('DEC-2026-00418')}      className="text-left text-[10px] text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">View Approval → M26</button>
+              <button disabled title="No document ID available for this evidence" className="text-left text-[10px] text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">View Evidence → M13</button>
               <button onClick={onOpenDepView}   className="text-left text-[10px] text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">View Dependency → M17</button>
             </div>
           </div>
@@ -11608,10 +11608,10 @@ const M29_CHANGES: ChangeField[] = [
   { field:'Plot Area',           current:'4,800 sq. m.',      proposed:'4,800 sq. m.',       delta:'No change',         source:'Entrepreneur Business DNA', verification:'DEPARTMENT_VERIFIED', changed:false },
 ]
 
-export function M29AmendmentIntakePage({ onBack, onOpenM28, onOpenM26, onOpenDocReview, onOpenConsistency, onOpenDepView, onOpenDelta, onOpenInspection, onOpenDna }: {
-  onBack: () => void; onOpenM28: () => void; onOpenM26: () => void
-  onOpenDocReview: () => void; onOpenConsistency: () => void; onOpenDepView: () => void
-  onOpenDelta: () => void; onOpenInspection: () => void; onOpenDna: () => void
+export function M29AmendmentIntakePage({ onBack, onOpenM26, onOpenM28, onOpenDocReview, onOpenConsistency, onOpenDepView, onOpenDelta, onOpenInspection, onOpenDna }: {
+  onBack: () => void; onOpenM26: (id: string) => void; onOpenM28: (id: string) => void
+  onOpenDocReview: (id: string) => void; onOpenConsistency: () => void; onOpenDepView: () => void
+  onOpenDelta: () => void; onOpenInspection?: (id: string) => void; onOpenDna: () => void
 }) {
   const [activeTab, setActiveTab] = useState<'comparison'|'impact'|'documents'|'history'>('comparison')
   const [changeStatus] = useState<string>('Impact Review')
@@ -11629,7 +11629,7 @@ export function M29AmendmentIntakePage({ onBack, onOpenM28, onOpenM26, onOpenDoc
       <div className="bg-white border-b border-[#e5eaf0] px-6 py-2 flex items-center gap-1.5 text-xs text-[#1a2533]">
         <button onClick={onBack} className="hover:text-[#1a3a5c] hover:underline">Department Home</button>
         <span>/</span>
-        <button onClick={onOpenM28} className="hover:text-[#1a3a5c] hover:underline">Conditions / Compliance</button>
+        <button onClick={() => onOpenM28?.('COND-001')} className="hover:text-[#1a3a5c] hover:underline">Conditions / Compliance</button>
         <span>/</span>
         <span className="text-[#1a2533] font-semibold">M29 — Expansion / Amendment Intake</span>
       </div>
@@ -11642,7 +11642,7 @@ export function M29AmendmentIntakePage({ onBack, onOpenM28, onOpenM26, onOpenDoc
             <p className="text-xs text-[#1a2533] mt-0.5">Review proposed Business DNA changes and their impact on the existing MIDC approval and regulatory journey.</p>
           </div>
           <div className="flex gap-2 flex-wrap">
-            <button onClick={onOpenM28} className="text-xs border border-[#d1d9e0] text-[#1a2533] px-3 py-1.5 rounded hover:bg-[#f8f9fb]">← Conditions / Compliance</button>
+            <button onClick={() => onOpenM28?.('COND-001')} className="text-xs border border-[#d1d9e0] text-[#1a2533] px-3 py-1.5 rounded hover:bg-[#f8f9fb]">← Conditions / Compliance</button>
             <span className={`text-xs font-bold px-3 py-1.5 rounded border bg-[#fffbeb] text-[#92400e] border-[#fcd34d]`}>Change / Amendment: {changeStatus}</span>
           </div>
         </div>
@@ -11745,7 +11745,7 @@ export function M29AmendmentIntakePage({ onBack, onOpenM28, onOpenM26, onOpenDoc
                 <div className="text-xs font-bold text-[#1e40af]">Original Approval History is Preserved</div>
                 <div className="text-[10px] text-[#1a2533] mt-0.5">Proposed changes create a new change/amendment version (CHG-2026-00019) and do not overwrite the historical decision DEC-2026-00418 or approval MIDC-ORD-2026-00418.</div>
                 <div className="flex gap-3 mt-2">
-                  <button onClick={onOpenM26}  className="text-[10px] text-[#1a56db] hover:underline">View Original Approval → M26</button>
+                  <button onClick={() => onOpenM26?.('DEC-2026-00418')}  className="text-[10px] text-[#1a56db] hover:underline">View Original Approval → M26</button>
                   <button className="text-[10px] text-[#1a56db] hover:underline">View Audit History → M38</button>
                 </div>
               </div>
@@ -11781,13 +11781,13 @@ export function M29AmendmentIntakePage({ onBack, onOpenM28, onOpenM26, onOpenDoc
                 { label:'Reason', value:'Built-up area changed +600 sq. m.' },
                 { label:'Source', value:'Business DNA Version 4' },
                 { label:'Status', value:'Needs Review' },
-              ], links:[{ label:'View Scrutiny → M14', fn: onOpenDocReview }] },
+              ], links:[{ label:'View Scrutiny → M14', fn: undefined }] },
               { title:'Inspection Impact', content: [
                 { label:'Existing Inspection', value:'INSP-2026-00418 — Resolved' },
                 { label:'Proposed', value:'New inspection scope may be required for expanded building area' },
                 { label:'Status', value:'Inspection scope may change — officer determination required' },
                 { label:'Affected Checklist', value:'MIDC Building / Planning Checklist v2026.09' },
-              ], links:[{ label:'Inspection Queue → M21', fn: onOpenInspection }] },
+              ], links:[{ label:'Inspection Queue → M21', fn: () => onOpenInspection?.('INSP-2026-00418') }] },
               { title:'External Dependency Impact', content: [
                 { label:'Business Change', value:'Water Requirement increased 40 → 65 KLD' },
                 { label:'Department', value:'Water Utility / MIDC Water Services' },
@@ -11805,7 +11805,7 @@ export function M29AmendmentIntakePage({ onBack, onOpenM28, onOpenM26, onOpenDoc
                   {section.content.map(item => <Row key={item.label} label={item.label} value={item.value} />)}
                   <div className="flex gap-2 pt-1.5">
                     {section.links.map(link => (
-                      <button key={link.label} onClick={link.fn} className="text-[10px] text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">{link.label}</button>
+                      <button key={link.label} onClick={link.fn} disabled={!link.fn} title={!link.fn ? 'No document ID available' : undefined} className="text-[10px] text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">{link.label}</button>
                     ))}
                   </div>
                 </div>
@@ -11836,7 +11836,7 @@ export function M29AmendmentIntakePage({ onBack, onOpenM28, onOpenM26, onOpenDoc
                   { label:'Open Consistency → M16', fn:onOpenConsistency },
                   { label:'View Delta → M20', fn:onOpenDelta },
                   { label:'Open Dependency → M17', fn:onOpenDepView },
-                  { label:'View Decision → M25/M26', fn:onOpenM26 },
+                  { label:'View Decision → M25/M26', fn: () => onOpenM26?.('DEC-2026-00418') },
                 ].map(action => (
                   <button key={action.label} onClick={action.fn} className="text-xs border border-[#d1d9e0] text-[#1a2533] px-3 py-1.5 rounded hover:bg-[#f8f9fb]">{action.label}</button>
                 ))}
@@ -11870,7 +11870,7 @@ export function M29AmendmentIntakePage({ onBack, onOpenM28, onOpenM26, onOpenDoc
                     <td className="px-3 py-2.5 font-semibold text-[#9a3412]">{row.req}</td>
                     <td className="px-3 py-2.5 text-[10px] text-[#1a2533]">{row.reason}</td>
                     <td className="px-3 py-2.5"><span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${row.changed ? 'bg-[#fff7ed] text-[#9a3412] border-[#fdba74]' : 'bg-[#ecfdf5] text-[#065f46] border-[#6ee7b7]'}`}>{row.ver}</span></td>
-                    <td className="px-3 py-2.5"><button onClick={onOpenDocReview} className="text-[10px] text-[#1a56db] hover:underline">{row.action}</button></td>
+                    <td className="px-3 py-2.5"><button disabled title="No document ID available" className="text-[10px] text-[#1a56db] hover:underline">{row.action}</button></td>
                   </tr>
                 ))}
               </tbody>
@@ -13087,7 +13087,7 @@ export function M34ImpactPage({ onBack, onOpenApp, onOpenRegChange }: { onBack: 
 
 
 
-export function M35AnalyticsPage({ onBack, onOpenSLA, onOpenInspection, onOpenBottleneck }: { onBack: () => void; onOpenSLA?: () => void; onOpenInspection?: () => void; onOpenBottleneck?: () => void }) {
+export function M35AnalyticsPage({ onBack, onOpenSLA, onOpenInspection, onOpenBottleneck }: { onBack: () => void; onOpenSLA?: () => void; onOpenInspection?: (id: string) => void; onOpenBottleneck?: () => void }) {
   const [tab, setTab] = useState<'Trend'|'Funnel'|'Queue Ageing'|'Drill-down'>('Funnel')
   const [scope, setScope] = useState<'My Desk'|'My Office'|'Department'>('My Office')
 
@@ -13206,7 +13206,7 @@ export function M35AnalyticsPage({ onBack, onOpenSLA, onOpenInspection, onOpenBo
                     <span><span className="text-[#374151]">Breached </span><span className={`font-bold ${Number(breaches) > 0 ? 'text-red-700' : 'text-emerald-700'}`}>{String(breaches)}</span></span>
                     <span><span className="text-[#374151]">Avg Time </span><span className="font-bold">{String(avg)}</span></span>
                   </div>
-                  <button onClick={onOpenInspection} className="text-[10px] text-[#1a56db] hover:underline">Inspect Queue →</button>
+                  <button onClick={() => onOpenInspection?.('INSP-2026-00418')} className="text-[10px] text-[#1a56db] hover:underline">Inspect Queue →</button>
                 </div>
               ))}
             </div>
@@ -13220,7 +13220,7 @@ export function M35AnalyticsPage({ onBack, onOpenSLA, onOpenInspection, onOpenBo
 // ─── M36 Bottleneck Analytics ──────────────────────────────────────────────────
 
 
-export function M36BottleneckPage({ onBack, onOpenSLA, onOpenInspection, onOpenAnalytics }: { onBack: () => void; onOpenSLA?: () => void; onOpenInspection?: () => void; onOpenAnalytics?: () => void }) {
+export function M36BottleneckPage({ onBack, onOpenSLA, onOpenInspection, onOpenAnalytics }: { onBack: () => void; onOpenSLA?: () => void; onOpenInspection?: (id: string) => void; onOpenAnalytics?: () => void }) {
   const [selected, setSelected] = useState(M36_BREAKDOWN[1])
 
   return (
@@ -13274,7 +13274,7 @@ export function M36BottleneckPage({ onBack, onOpenSLA, onOpenInspection, onOpenA
                     </div>
                   </td>
                   <td className="px-3 py-2.5">
-                    {r.stage === 'Inspection Waiting' && <button onClick={onOpenInspection} className="text-[10px] text-[#1a56db] hover:underline">Inspection Queue →</button>}
+                    {r.stage === 'Inspection Waiting' && <button onClick={() => onOpenInspection?.('INSP-2026-00418')} className="text-[10px] text-[#1a56db] hover:underline">Inspection Queue →</button>}
                     {r.stage !== 'Inspection Waiting' && <button onClick={onOpenSLA} className="text-[10px] text-[#1a56db] hover:underline">View SLA →</button>}
                   </td>
                 </tr>
@@ -13309,7 +13309,7 @@ export function M36BottleneckPage({ onBack, onOpenSLA, onOpenInspection, onOpenA
 
 // ─── M37 Workload / Capacity ──────────────────────────────────────────────────
 
-export function M37WorkloadPage({ onBack, onOpenSLA, onOpenInspection, onOpenAnalytics }: { onBack: () => void; onOpenSLA?: () => void; onOpenInspection?: () => void; onOpenAnalytics?: () => void }) {
+export function M37WorkloadPage({ onBack, onOpenSLA, onOpenInspection, onOpenAnalytics }: { onBack: () => void; onOpenSLA?: () => void; onOpenInspection?: (id: string) => void; onOpenAnalytics?: () => void }) {
   const [view, setView] = useState<'office'|'service'|'desk'|'age'>('service')
 
   return (
@@ -13443,7 +13443,7 @@ export function M37WorkloadPage({ onBack, onOpenSLA, onOpenInspection, onOpenAna
           </div>
           <div className="flex gap-2 mt-3">
             <button onClick={onOpenSLA} className="text-xs border border-[#d1d9e0] bg-white px-3 py-1.5 rounded text-[#1a2533] hover:bg-[#f8f9fb]">SLA Dashboard → M30</button>
-            <button onClick={onOpenInspection} className="text-xs border border-[#d1d9e0] bg-white px-3 py-1.5 rounded text-[#1a2533] hover:bg-[#f8f9fb]">Inspection Queue → M21</button>
+            <button onClick={() => onOpenInspection?.('INSP-2026-00418')} className="text-xs border border-[#d1d9e0] bg-white px-3 py-1.5 rounded text-[#1a2533] hover:bg-[#f8f9fb]">Inspection Queue → M21</button>
             <button onClick={onOpenAnalytics} className="text-xs border border-[#d1d9e0] bg-white px-3 py-1.5 rounded text-[#1a2533] hover:bg-[#f8f9fb]">Dept Analytics → M35</button>
           </div>
         </div>

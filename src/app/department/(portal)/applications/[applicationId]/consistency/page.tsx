@@ -16,8 +16,8 @@ export default function Page() {
       
       onBack={() => router.back()}
       onBackToOverview={() => router.push(`/department/applications/${appId}`)}
-      onOpenParamDetail={() => router.push(`/department/applications/${appId}/parameter/default`)}
-      onOpenDocReview={() => router.push(`/department/applications/${appId}/document/default`)}
+      onOpenParamDetail={(id: string) => router.push(`/department/applications/${appId}/parameter/${id}`)}
+      onOpenDocReview={(id: string) => router.push(`/department/applications/${appId}/document/${id}`)}
     
     />
   );

@@ -15,13 +15,13 @@ export default function Page() {
     <M29AmendmentIntakePage 
       
       onBack={() => router.push(`/department/applications/${appId}`)}
-      onOpenM28={() => router.push(`/department/applications/${appId}/compliance/default`)}
-      onOpenM26={() => router.push(`/department/applications/${appId}/decisions/default`)}
-      onOpenDocReview={() => router.push(`/department/applications/${appId}/document/default`)}
+      onOpenM28={(id: string) => router.push(`/department/applications/${appId}/compliance/${id}`)}
+      onOpenM26={(id: string) => router.push(`/department/applications/${appId}/decisions/${id}`)}
+      onOpenDocReview={(id: string) => router.push(`/department/applications/${appId}/document/${id}`)}
       onOpenConsistency={() => router.push(`/department/applications/${appId}/consistency`)}
       onOpenDepView={() => router.push(`/department/applications/${appId}/dependency-view`)}
       onOpenDelta={() => router.push(`/department/applications/${appId}/delta-rescrutiny`)}
-      onOpenInspection={() => router.push(`/department/applications/${appId}/inspections/default/workspace`)}
+      onOpenInspection={(id: string) => router.push(`/department/applications/${appId}/inspections/${id}/workspace`)}
       onOpenDna={() => router.push(`/department/applications/${appId}/dna`)}
     
     />

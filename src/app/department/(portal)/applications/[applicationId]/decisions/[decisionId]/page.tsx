@@ -16,7 +16,7 @@ export default function Page() {
       
       onBack={() => router.push(`/department/applications/${appId}/decision-workspace`)}
       onBackToOverview={() => router.push(`/department/applications/${appId}`)}
-      onOpenDepView={() => router.push(`/department/applications/${appId}/dependencies/default/update`)}
+      onOpenDepView={(id: string) => router.push(`/department/applications/${appId}/dependencies/${id}/update`)}
       onOpenDna={() => router.push(`/department/applications/${appId}/dna`)}
     
     />

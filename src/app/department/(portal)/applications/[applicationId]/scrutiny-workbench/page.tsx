@@ -18,8 +18,8 @@ export default function Page() {
       onBackToOverview={() => router.push(`/department/applications/${appId}`)}
       onOpenDna={() => router.push(`/department/applications/${appId}/dna`)}
       onOpenTimeline={() => router.push(`/department/applications/${appId}/timeline`)}
-      onOpenParamDetail={() => router.push(`/department/applications/${appId}/parameter/default`)}
-      onOpenDocReview={() => router.push(`/department/applications/${appId}/document/default`)}
+      onOpenParamDetail={(id: string) => router.push(`/department/applications/${appId}/parameter/${id}`)}
+      onOpenDocReview={(id: string) => router.push(`/department/applications/${appId}/document/${id}`)}
       onOpenBldgScrutiny={() => router.push(`/department/applications/${appId}/building-scrutiny`)}
       onOpenWaterScrutiny={() => router.push(`/department/applications/${appId}/water-scrutiny`)}
       onOpenDepView={() => router.push(`/department/applications/${appId}/dependency-view`)}

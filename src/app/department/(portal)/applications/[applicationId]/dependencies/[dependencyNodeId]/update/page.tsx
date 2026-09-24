@@ -15,12 +15,12 @@ export default function Page() {
     <M27DependencyUpdatePage 
       
       onBack={() => router.push(`/department/applications/${appId}`)}
-      onOpenM26={() => router.push(`/department/applications/${appId}/decisions/default`)}
+      onOpenM26={(id: string) => router.push(`/department/applications/${appId}/decisions/${id}`)}
       onOpenM25={() => router.push(`/department/applications/${appId}/decision-workspace`)}
       onOpenDepView={() => router.push(`/department/applications/${appId}/dependency-view`)}
       onOpenQueryHistory={() => router.push(`/department/applications/${appId}/query-history`)}
       onOpenDelta={() => router.push(`/department/applications/${appId}/delta-rescrutiny`)}
-      onOpenM28={() => router.push(`/department/applications/${appId}/compliance/default`)}
+      onOpenM28={(id: string) => router.push(`/department/applications/${appId}/compliance/${id}`)}
     
     />
   );

@@ -15,16 +15,16 @@ export default function Page() {
     <M25DecisionWorkspacePage 
       
       onBack={() => router.push(`/department/applications/${appId}`)}
-      onOpenDocReview={() => router.push(`/department/applications/${appId}/document/default`)}
+      onOpenDocReview={(id: string) => router.push(`/department/applications/${appId}/document/${id}`)}
       onOpenConsistency={() => router.push(`/department/applications/${appId}/consistency`)}
       onOpenDna={() => router.push(`/department/applications/${appId}/dna`)}
       onOpenDepView={() => router.push(`/department/applications/${appId}/dependency-view`)}
       onOpenQueryHistory={() => router.push(`/department/applications/${appId}/query-history`)}
       onOpenDelta={() => router.push(`/department/applications/${appId}/delta-rescrutiny`)}
-      onOpenInspection={() => router.push(`/department/applications/${appId}/inspections/default/workspace`)}
-      onOpenM24={() => router.push(`/department/applications/${appId}/inspections/default/observations`)}
+      onOpenInspection={(id: string) => router.push(`/department/applications/${appId}/inspections/${id}/workspace`)}
+      onOpenM24={(id: string) => router.push(`/department/applications/${appId}/inspections/${id}/observations`)}
       onOpenScrutiny={() => router.push(`/department/applications/${appId}/scrutiny-workbench`)}
-      onRecordDecision={() => router.push(`/department/applications/${appId}/decisions/default`)}
+      onRecordDecision={(id: string) => router.push(`/department/applications/${appId}/decisions/${id}`)}
     
     />
   );

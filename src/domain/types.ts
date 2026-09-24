@@ -113,7 +113,7 @@ export interface ScrutinyParam {
   prevValue?: string
   prevChanged: boolean
   crossForm?: { label: string; value: string; match: boolean }[]
-  document?: { name: string; status: string; version: string; source: string }
+  document?: { id?: string; name: string; status: string; version: string; source: string }
   dependency?: string
   reviewState: OfficerReviewState
   reviewNote?: string

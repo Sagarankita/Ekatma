@@ -17,7 +17,7 @@ export default function Page() {
       onBack={() => router.push(`/department/applications/${appId}/inspections/${inspId}/plan`)}
       onBackToQueue={() => router.push('/department/inspection-queue')}
       onOpenM24={() => router.push(`/department/applications/${appId}/inspections/${inspId}/observations`)}
-      onOpenDocReview={() => router.push(`/department/applications/${appId}/document/default`)}
+      onOpenDocReview={(id: string) => router.push(`/department/applications/${appId}/document/${id}`)}
       onOpenDna={() => router.push(`/department/applications/${appId}/dna`)}
       onOpenDepView={() => router.push(`/department/applications/${appId}/dependency-view`)}
       onOpenQueryHistory={() => router.push(`/department/applications/${appId}/query-history`)}

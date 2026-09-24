@@ -17,7 +17,7 @@ export default function Page() {
       onBack={() => router.back()}
       onBackToOverview={() => router.push(`/department/applications/${appId}`)}
       onOpenDna={() => router.push(`/department/applications/${appId}/dna`)}
-      onOpenDocReview={() => router.push(`/department/applications/${appId}/document/default`)}
+      onOpenDocReview={(id: string) => router.push(`/department/applications/${appId}/document/${id}`)}
       onOpenDepView={() => router.push(`/department/applications/${appId}/dependency-view`)}
     
     />
