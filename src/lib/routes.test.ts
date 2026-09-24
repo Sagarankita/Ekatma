@@ -92,8 +92,11 @@ describe('Department route contract', () => {
     ['consistency', '/consistency'], ['dependency-view', '/dependency-view'],
     ['query-builder', '/query-builder'], ['query-history', '/query-history'],
     ['delta-rescrutiny', '/delta-rescrutiny'], ['inspection-queue', '/inspections'],
-    ['doc-review', '/document/default'],
   ])('maps scrutiny destination %s without losing application identity', (destination, suffix) => {
     expect(departmentScrutinyRoute('APP-SECOND', destination)).toBe(`/department/applications/APP-SECOND${suffix}`);
+  });
+
+  it('never manufactures a document ID for the legacy scrutiny destination', () => {
+    expect(departmentScrutinyRoute('APP-SECOND', 'doc-review')).toBe(department.application('APP-SECOND'));
   });
 });

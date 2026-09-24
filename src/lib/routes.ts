@@ -119,9 +119,6 @@ const scrutinyDestinations: Readonly<Record<string, (applicationId: string) => s
   'query-history': ROUTES.department.applicationQueryHistory,
   'delta-rescrutiny': ROUTES.department.applicationDeltaRescrutiny,
   'inspection-queue': ROUTES.department.applicationInspections,
-  // The legacy document action has no document ID. Keep its existing default
-  // route convention until Prompt 2 supplies the selected document contract.
-  'doc-review': applicationId => ROUTES.department.applicationDocument(applicationId, 'default'),
 };
 
 export function departmentScrutinyRoute(applicationId: string, destination: string): string {

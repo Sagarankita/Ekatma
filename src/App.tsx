@@ -4046,7 +4046,7 @@ export function M06AppOverviewPage({ onBack, onOpenDna, onOpenTimeline, onOpenPr
                           ['Review consistency findings', 'secondary'],
                           ['Review documents', 'secondary'],
                         ].map(([label, variant]) => (
-                          <button key={label} onClick={() => { if (label === 'Review automated pre-check') onOpenPrecheck?.(); else if (label === 'Review consistency findings') onOpenConsistency?.(); else { /* disabled */ } }} className={`w-full text-left px-3 py-2 rounded text-xs font-semibold transition-colors ${
+                          <button key={label} disabled={label === 'Review documents'} title={label === 'Review documents' ? 'No document selected' : undefined} onClick={() => { if (label === 'Review automated pre-check') onOpenPrecheck?.(); else if (label === 'Review consistency findings') onOpenConsistency?.(); }} className={`w-full text-left px-3 py-2 rounded text-xs font-semibold transition-colors ${
                             variant === 'primary'
                               ? 'bg-[#1a3a5c] text-white hover:bg-[#0f2540]'
                               : 'bg-white text-[#1a2533] border border-[#d1d9e0] hover:bg-[#f8f9fb]'
@@ -4054,7 +4054,7 @@ export function M06AppOverviewPage({ onBack, onOpenDna, onOpenTimeline, onOpenPr
                         ))}
                         <button onClick={() => onOpenDeltaRescrutiny?.()} className="w-full text-left px-3 py-2 rounded text-xs font-semibold transition-colors bg-[#fffbeb] text-[#92400e] border border-[#fcd34d] hover:bg-[#fef3c7]">⬆ Delta Re-scrutiny — Resubmission v2 (M20)</button>
                         <button onClick={() => onOpenInspectionQueue?.()} className="w-full text-left px-3 py-2 rounded text-xs font-semibold transition-colors bg-[#eff6ff] text-[#1e40af] border border-[#93c5fd] hover:bg-[#dbeafe]">🔍 Inspection Queue / Planning → M21</button>
-                        <button onClick={() => onOpenCompliance?.()} className="w-full text-left px-3 py-2 rounded text-xs font-semibold transition-colors bg-[#f5f3ff] text-[#5b21b6] border border-[#c4b5fd] hover:bg-[#ede9fe]">📋 Conditions / Compliance → M28</button>
+                        <button disabled={!onOpenCompliance} title={!onOpenCompliance ? 'No linked compliance record ID available' : undefined} onClick={() => onOpenCompliance?.()} className="w-full text-left px-3 py-2 rounded text-xs font-semibold transition-colors bg-[#f5f3ff] text-[#5b21b6] border border-[#c4b5fd] hover:bg-[#ede9fe]">📋 Conditions / Compliance → M28</button>
                         <button onClick={() => onOpenDecision?.()} className="w-full text-left px-3 py-2 rounded text-xs font-semibold bg-[#fef2f2] text-[#991b1b] border border-[#fca5a5] hover:bg-[#fee2e2]">⚖ Final Decision Workspace → M25</button>
                       </div>
                       <p className="text-[10px] text-[#374151] pt-1">Decision actions (M25/M26) become available when all scrutiny workflow steps are resolved and configured permissions allow.</p>
@@ -8442,7 +8442,7 @@ export function ScrutinyCommandCentre({ onOpenScrutinyApp }: { onOpenScrutinyApp
                     <div className="text-xs text-[#1a2533]">{item.event}</div>
                     <div className="text-[10px] text-[#1a2533] italic">→ {item.action}</div>
                   </div>
-                  <button onClick={() => onOpenScrutinyApp(item.appId, item.dest)} className="shrink-0 text-[10px] text-[#1a56db] hover:underline font-semibold">Open</button>
+                  <button disabled={item.dest === 'doc-review'} title={item.dest === 'doc-review' ? 'No document ID available for this activity' : undefined} onClick={() => { if (item.dest !== 'doc-review') onOpenScrutinyApp(item.appId, item.dest) }} className="shrink-0 text-[10px] text-[#1a56db] hover:underline font-semibold">Open</button>
                 </div>
               ))}
             </div>

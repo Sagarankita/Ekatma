@@ -3,6 +3,7 @@
 import { useParams, useRouter } from 'next/navigation';
 import { M06AppOverviewPage } from '@/App';
 import { ApplicationId } from '@/domain/ids';
+import { ROUTES } from '@/lib/routes';
 
 export default function Page() {
   const params = useParams();
@@ -19,9 +20,13 @@ export default function Page() {
       onOpenTimeline={() => router.push(`/department/applications/${appId}/timeline`)}
       onOpenPrecheck={() => router.push(`/department/applications/${appId}/precheck`)}
       onOpenDeltaRescrutiny={() => router.push(`/department/applications/${appId}/delta-rescrutiny`)}
-      onOpenInspectionQueue={() => router.push('/department/inspection-queue')}
-      onOpenDecision={() => router.push('/department/decisions')}
-      onOpenCompliance={() => router.push('/department/compliance-context')}
+      onOpenInspectionQueue={() => router.push(ROUTES.department.applicationInspections(appId))}
+      onOpenDecision={() => router.push(ROUTES.department.applicationDecisionWorkspace(appId))}
+      onOpenConsistency={() => router.push(ROUTES.department.applicationConsistency(appId))}
+      onOpenDependencyView={() => router.push(ROUTES.department.applicationDependencyView(appId))}
+      onOpenQueries={() => router.push(ROUTES.department.applicationQueryHistory(appId))}
+      onOpenRegAssistant={() => router.push(ROUTES.department.regAssistant)}
+      onOpenAudit={() => router.push(ROUTES.department.audit)}
     
     />
   );
