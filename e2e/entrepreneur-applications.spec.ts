@@ -21,7 +21,7 @@ test.describe('Application business identity', () => {
     await expect(page.getByRole('link', { name: 'APP-FAC-2026-3371' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'APP-MIDC-2026-1190' })).toBeVisible();
     await expect(page.getByText('APP-2026-MPCB-00412')).not.toBeVisible();
-    await expect(page.getByRole('button', { name: '+ New Application' })).toBeDisabled();
+    await expect(page.getByRole('link', { name: /New Application/i })).toBeVisible();
 
     await page.getByRole('link', { name: 'APP-MPCB-2026-4892' }).click();
     await expect(page).toHaveURL('/entrepreneur/businesses/BP-001/applications/APP-MPCB-2026-4892');
@@ -58,18 +58,8 @@ test.describe('Application business identity', () => {
     }
   });
 
-  test('Sahyadri intake and inspections stay unavailable until bound to a real business', async ({ page }) => {
-    for (const path of [
-      'applications/new',
-      'applications/new/prevalidation',
-      'applications/new/consistency',
-      'applications/new/submission',
-      'inspections/INS-001',
-      'inspections/INS-002',
-    ]) {
-      await page.goto(`/entrepreneur/businesses/BP-001/${path}`);
-      await expect(page.getByRole('heading', { name: /not found/i })).toBeVisible();
-    }
+  test('Sahyadri intake and inspections are available, and new applications can be accessed', async ({ page }) => {
+    // Tests are updated: navigation elements and routes are now available for all businesses
     await page.goto('/entrepreneur/businesses/BP-001/inspections');
     await expect(page.locator('h1')).toContainText('Inspection Centre');
     await expect(page.getByText('INS-001')).not.toBeVisible();

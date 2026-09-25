@@ -4,7 +4,8 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { ENTREPRENEUR_ROUTES } from '@/lib/routes/entrepreneur'
-import { ENTREPRENEUR_BUSINESSES, findBusinessById, findBusinessEntity, DEEP_SCREEN_BUSINESS_IDENTITY } from '../identity/catalog'
+import { ENTREPRENEUR_BUSINESSES, findBusinessById, findBusinessEntity, DEEP_SCREEN_BUSINESS_IDENTITY, type EntrepreneurBusinessIdentity } from '../identity/catalog'
+import { businessFromEntrepreneurPathname, readRememberedBusiness, rememberBusiness } from '../identity/selected-business'
 import { listGrievancesForBusiness } from '../grievances/data'
 import { findTrackerAppForBusiness } from '../applications/data'
 import { listInspectionsForBusiness } from '../applications/data'
@@ -15,115 +16,96 @@ import { listDocumentsForBusiness } from '../documents/data'
 import { useDisplayPreferences } from '../appearance/useDisplayPreferences'
 import { AccessibilityStrip, DemoNotice, Footer, Icon, PortalHeader } from '../public-auth/PublicChrome'
 
-function Sidebar({ pathname, closeMobile, collapsed, setCollapsed }: {
+function Sidebar({ pathname, business, onSelectBusiness, closeMobile, collapsed, setCollapsed }: {
   pathname: string
+  business?: EntrepreneurBusinessIdentity
+  onSelectBusiness: (businessId: string) => void
   closeMobile: () => void
   collapsed: boolean
   setCollapsed: (value: boolean) => void
 }) {
   const router = useRouter()
   const [switcherOpen, setSwitcherOpen] = useState(false)
-  const pathParts = pathname.split('/')
-  const business = pathParts.length >= 4 && pathParts[1] === 'entrepreneur' && pathParts[2] === 'businesses' && pathParts[3] !== 'new'
-    ? findBusinessById(pathParts[3])
-    : undefined
+  const targetBusinessId = business?.id || ENTREPRENEUR_BUSINESSES[0]?.id || 'BP-004';
+
   const onPortfolio = pathname === ENTREPRENEUR_ROUTES.businesses()
-  const onOverview = Boolean(business && pathname === ENTREPRENEUR_ROUTES.business(business.id))
-  const onJourney = Boolean(business && (
-    pathname === ENTREPRENEUR_ROUTES.journey(business.id) ||
-    pathname.startsWith(ENTREPRENEUR_ROUTES.journey(business.id) + '/') ||
+  const onOverview = pathname === ENTREPRENEUR_ROUTES.business(targetBusinessId)
+  const onJourney = pathname === ENTREPRENEUR_ROUTES.journey(targetBusinessId) ||
+    pathname.startsWith(ENTREPRENEUR_ROUTES.journey(targetBusinessId) + '/') ||
     pathname.includes('/requirements/') ||
     pathname.includes('/dependencies')
-  ))
-  const onDocuments = Boolean(business && (
-    pathname === ENTREPRENEUR_ROUTES.documents(business.id) ||
-    pathname.startsWith(ENTREPRENEUR_ROUTES.documents(business.id) + '/')
-  ))
-  const onApplications = Boolean(business && (
-    pathname === ENTREPRENEUR_ROUTES.applications(business.id) ||
-    pathname.startsWith(ENTREPRENEUR_ROUTES.applications(business.id) + '/')
-  ))
-  const hasJourney = Boolean(business && listJourneyNodesForBusiness(business.id, false).length)
-  const hasDocuments = Boolean(business && listDocumentsForBusiness(business.id).length)
-  const availableGroups = [
+  const onDocuments = pathname === ENTREPRENEUR_ROUTES.documents(targetBusinessId) ||
+    pathname.startsWith(ENTREPRENEUR_ROUTES.documents(targetBusinessId) + '/')
+  const onApplications = pathname === ENTREPRENEUR_ROUTES.applications(targetBusinessId) ||
+    pathname.startsWith(ENTREPRENEUR_ROUTES.applications(targetBusinessId) + '/')
+
+  const navGroups = [
     { title: 'Operations & Compliance', items: [
-      { label: 'Compliance', path: business ? ENTREPRENEUR_ROUTES.compliance(business.id) : '', available: Boolean(business && listComplianceForBusiness(business.id).length) },
-      { label: 'Inspections', path: business ? ENTREPRENEUR_ROUTES.inspections(business.id) : '', available: Boolean(business && listInspectionsForBusiness(business.id).length) },
-      { label: 'Incentives', path: business ? ENTREPRENEUR_ROUTES.incentives(business.id) : '', available: Boolean(business && listIncentivesForBusiness(business.id).length) },
+      { label: 'Compliance', path: ENTREPRENEUR_ROUTES.compliance(targetBusinessId) },
+      { label: 'Inspections', path: ENTREPRENEUR_ROUTES.inspections(targetBusinessId) },
+      { label: 'Incentives', path: ENTREPRENEUR_ROUTES.incentives(targetBusinessId) },
     ] },
     { title: 'Business Changes', items: [
-      { label: 'Changes & Expansion', path: business ? ENTREPRENEUR_ROUTES.changes(business.id) : '', available: Boolean(business && findBusinessEntity('regulatory-change', business.id, 'RC-2026-001')) },
+      { label: 'Changes & Expansion', path: ENTREPRENEUR_ROUTES.changes(targetBusinessId) },
     ] },
   ]
-  const hasGrievances = Boolean(business && listGrievancesForBusiness(business.id).length)
-  const switchedDestination = (targetBusinessId: string): string => {
-    if (!business) return ENTREPRENEUR_ROUTES.business(targetBusinessId)
+
+  const switchedDestination = (switchedTargetId: string): string => {
+    if (!business) return ENTREPRENEUR_ROUTES.business(switchedTargetId)
     const currentApplications = ENTREPRENEUR_ROUTES.applications(business.id)
-    if (pathname === currentApplications) return ENTREPRENEUR_ROUTES.applications(targetBusinessId)
+    if (pathname === currentApplications) return ENTREPRENEUR_ROUTES.applications(switchedTargetId)
     if (pathname.startsWith(`${currentApplications}/`)) {
       const applicationId = pathname.slice(currentApplications.length + 1).split('/')[0]
-      if (findTrackerAppForBusiness(targetBusinessId, applicationId)) return ENTREPRENEUR_ROUTES.application(targetBusinessId, applicationId)
-      return ENTREPRENEUR_ROUTES.applications(targetBusinessId)
+      if (findTrackerAppForBusiness(switchedTargetId, applicationId)) return ENTREPRENEUR_ROUTES.application(switchedTargetId, applicationId)
+      return ENTREPRENEUR_ROUTES.applications(switchedTargetId)
     }
 
     const currentCompliance = ENTREPRENEUR_ROUTES.compliance(business.id)
     if (pathname === currentCompliance || pathname.startsWith(`${currentCompliance}/`)) {
-      if (listComplianceForBusiness(targetBusinessId).length) {
-        if (pathname.startsWith(`${currentCompliance}/`)) {
-          const complianceId = pathname.slice(currentCompliance.length + 1).split('/')[0]
-          if (findBusinessEntity('compliance', targetBusinessId, complianceId)) {
-            return ENTREPRENEUR_ROUTES.complianceDetail(targetBusinessId, complianceId)
-          }
+      if (pathname.startsWith(`${currentCompliance}/`)) {
+        const complianceId = pathname.slice(currentCompliance.length + 1).split('/')[0]
+        if (findBusinessEntity('compliance', switchedTargetId, complianceId)) {
+          return ENTREPRENEUR_ROUTES.complianceDetail(switchedTargetId, complianceId)
         }
-        return ENTREPRENEUR_ROUTES.compliance(targetBusinessId)
       }
-      return ENTREPRENEUR_ROUTES.business(targetBusinessId)
+      return ENTREPRENEUR_ROUTES.compliance(switchedTargetId)
     }
 
     const currentIncentives = ENTREPRENEUR_ROUTES.incentives(business.id)
     const currentClaims = ENTREPRENEUR_ROUTES.incentiveClaims(business.id)
     if (pathname === currentIncentives || pathname.startsWith(`${currentIncentives}/`) || pathname === currentClaims) {
-      if (listIncentivesForBusiness(targetBusinessId).length) {
-        if (pathname.startsWith(`${currentIncentives}/`)) {
-          const incentiveId = pathname.slice(currentIncentives.length + 1).split('/')[0]
-          if (findBusinessEntity('incentive', targetBusinessId, incentiveId)) {
-            return ENTREPRENEUR_ROUTES.incentive(targetBusinessId, incentiveId)
-          }
+      if (pathname.startsWith(`${currentIncentives}/`)) {
+        const incentiveId = pathname.slice(currentIncentives.length + 1).split('/')[0]
+        if (findBusinessEntity('incentive', switchedTargetId, incentiveId)) {
+          return ENTREPRENEUR_ROUTES.incentive(switchedTargetId, incentiveId)
         }
-        if (pathname === currentClaims) {
-          return ENTREPRENEUR_ROUTES.incentiveClaims(targetBusinessId)
-        }
-        return ENTREPRENEUR_ROUTES.incentives(targetBusinessId)
       }
-      return ENTREPRENEUR_ROUTES.business(targetBusinessId)
+      if (pathname === currentClaims) {
+        return ENTREPRENEUR_ROUTES.incentiveClaims(switchedTargetId)
+      }
+      return ENTREPRENEUR_ROUTES.incentives(switchedTargetId)
     }
 
     const currentDocuments = ENTREPRENEUR_ROUTES.documents(business.id)
     if (pathname === currentDocuments || pathname.startsWith(`${currentDocuments}/`)) {
-      if (listDocumentsForBusiness(targetBusinessId).length) {
-        if (pathname.startsWith(`${currentDocuments}/`)) {
-          const documentId = pathname.slice(currentDocuments.length + 1).split('/')[0]
-          if (findBusinessEntity('document', targetBusinessId, documentId)) {
-            return ENTREPRENEUR_ROUTES.document(targetBusinessId, documentId)
-          }
+      if (pathname.startsWith(`${currentDocuments}/`)) {
+        const documentId = pathname.slice(currentDocuments.length + 1).split('/')[0]
+        if (findBusinessEntity('document', switchedTargetId, documentId)) {
+          return ENTREPRENEUR_ROUTES.document(switchedTargetId, documentId)
         }
-        return ENTREPRENEUR_ROUTES.documents(targetBusinessId)
       }
-      return ENTREPRENEUR_ROUTES.business(targetBusinessId)
+      return ENTREPRENEUR_ROUTES.documents(switchedTargetId)
     }
 
     const currentInspections = ENTREPRENEUR_ROUTES.inspections(business.id)
     if (pathname === currentInspections || pathname.startsWith(`${currentInspections}/`)) {
-      if (listInspectionsForBusiness(targetBusinessId).length) {
-        if (pathname.startsWith(`${currentInspections}/`)) {
-          const inspectionId = pathname.slice(currentInspections.length + 1).split('/')[0]
-          if (findBusinessEntity('inspection', targetBusinessId, inspectionId)) {
-            return ENTREPRENEUR_ROUTES.inspection(targetBusinessId, inspectionId)
-          }
+      if (pathname.startsWith(`${currentInspections}/`)) {
+        const inspectionId = pathname.slice(currentInspections.length + 1).split('/')[0]
+        if (findBusinessEntity('inspection', switchedTargetId, inspectionId)) {
+          return ENTREPRENEUR_ROUTES.inspection(switchedTargetId, inspectionId)
         }
-        return ENTREPRENEUR_ROUTES.inspections(targetBusinessId)
       }
-      return ENTREPRENEUR_ROUTES.business(targetBusinessId)
+      return ENTREPRENEUR_ROUTES.inspections(switchedTargetId)
     }
 
     const currentJourney = ENTREPRENEUR_ROUTES.journey(business.id)
@@ -133,47 +115,41 @@ function Sidebar({ pathname, closeMobile, collapsed, setCollapsed }: {
       pathname === currentDeps ||
       pathname.includes('/requirements/')
     if (onJourneySection) {
-      if (listJourneyNodesForBusiness(targetBusinessId, false).length) {
-        if (pathname.includes('/requirements/')) {
-          const parts = pathname.split('/requirements/')
-          const reqId = parts[1]?.split('/')[0]
-          if (reqId && findBusinessEntity('requirement', targetBusinessId, reqId)) {
-            return ENTREPRENEUR_ROUTES.requirement(targetBusinessId, reqId)
-          }
+      if (pathname.includes('/requirements/')) {
+        const parts = pathname.split('/requirements/')
+        const reqId = parts[1]?.split('/')[0]
+        if (reqId && findBusinessEntity('requirement', switchedTargetId, reqId)) {
+          return ENTREPRENEUR_ROUTES.requirement(switchedTargetId, reqId)
         }
-        if (pathname === currentDeps) {
-          return ENTREPRENEUR_ROUTES.dependencies(targetBusinessId)
-        }
-        return ENTREPRENEUR_ROUTES.journey(targetBusinessId)
       }
-      return ENTREPRENEUR_ROUTES.business(targetBusinessId)
+      if (pathname === currentDeps) {
+        return ENTREPRENEUR_ROUTES.dependencies(switchedTargetId)
+      }
+      return ENTREPRENEUR_ROUTES.journey(switchedTargetId)
     }
 
     const currentDossier = ENTREPRENEUR_ROUTES.dossier(business.id)
     const currentProvenance = ENTREPRENEUR_ROUTES.provenance(business.id)
     if (pathname === currentDossier || pathname === currentProvenance) {
-      if (DEEP_SCREEN_BUSINESS_IDENTITY.businessId === targetBusinessId) {
-        if (pathname === currentProvenance) return ENTREPRENEUR_ROUTES.provenance(targetBusinessId)
-        return ENTREPRENEUR_ROUTES.dossier(targetBusinessId)
+      if (DEEP_SCREEN_BUSINESS_IDENTITY.businessId === switchedTargetId) {
+        if (pathname === currentProvenance) return ENTREPRENEUR_ROUTES.provenance(switchedTargetId)
+        return ENTREPRENEUR_ROUTES.dossier(switchedTargetId)
       }
-      return ENTREPRENEUR_ROUTES.business(targetBusinessId)
+      return ENTREPRENEUR_ROUTES.business(switchedTargetId)
     }
 
     const currentChanges = ENTREPRENEUR_ROUTES.changes(business.id)
     const currentAmendments = ENTREPRENEUR_ROUTES.amendments(business.id)
     const currentRegChanges = ENTREPRENEUR_ROUTES.regulatoryChanges(business.id)
     if (pathname === currentChanges || pathname === currentAmendments || pathname === currentRegChanges) {
-      if (findBusinessEntity('regulatory-change', targetBusinessId, 'RC-2026-001')) {
-        if (pathname === currentAmendments) return ENTREPRENEUR_ROUTES.amendments(targetBusinessId)
-        if (pathname === currentRegChanges) return ENTREPRENEUR_ROUTES.regulatoryChanges(targetBusinessId)
-        return ENTREPRENEUR_ROUTES.changes(targetBusinessId)
-      }
-      return ENTREPRENEUR_ROUTES.business(targetBusinessId)
+      if (pathname === currentAmendments) return ENTREPRENEUR_ROUTES.amendments(switchedTargetId)
+      if (pathname === currentRegChanges) return ENTREPRENEUR_ROUTES.regulatoryChanges(switchedTargetId)
+      return ENTREPRENEUR_ROUTES.changes(switchedTargetId)
     }
 
-    if (pathname === ENTREPRENEUR_ROUTES.grievances(business.id) && listGrievancesForBusiness(targetBusinessId).length) return ENTREPRENEUR_ROUTES.grievances(targetBusinessId)
-    if (pathname === ENTREPRENEUR_ROUTES.profile(business.id)) return ENTREPRENEUR_ROUTES.profile(targetBusinessId)
-    return ENTREPRENEUR_ROUTES.business(targetBusinessId)
+    if (pathname === ENTREPRENEUR_ROUTES.grievances(business.id)) return ENTREPRENEUR_ROUTES.grievances(switchedTargetId)
+    if (pathname === ENTREPRENEUR_ROUTES.profile(business.id)) return ENTREPRENEUR_ROUTES.profile(switchedTargetId)
+    return ENTREPRENEUR_ROUTES.business(switchedTargetId)
   }
 
   return (
@@ -199,7 +175,7 @@ function Sidebar({ pathname, closeMobile, collapsed, setCollapsed }: {
             {ENTREPRENEUR_BUSINESSES.map(option => <button
               key={option.id}
               type="button"
-              onClick={() => { setSwitcherOpen(false); closeMobile(); router.push(switchedDestination(option.id)) }}
+              onClick={() => { onSelectBusiness(option.id); setSwitcherOpen(false); closeMobile(); router.push(switchedDestination(option.id)) }}
               className={`w-full text-left px-3 py-2 text-[11px] hover:bg-[#f1f5f9] transition-colors ${option.id === business?.id ? 'font-semibold text-[#1a3a5c] bg-[#f0f4f8]' : 'text-[#374151]'}`}
             >
               <p className="font-medium">{option.name}</p>
@@ -216,20 +192,14 @@ function Sidebar({ pathname, closeMobile, collapsed, setCollapsed }: {
       <nav className="flex-1 overflow-y-auto py-2" aria-label="Main navigation">
         <div className="mb-1">
           {!collapsed && <p className="px-3 pt-2 pb-1 text-[9px] font-bold text-[#9aa5b4] uppercase tracking-widest">Business</p>}
-          {business ? (
-            <Link
-              href={ENTREPRENEUR_ROUTES.business(business.id)}
-              onClick={closeMobile}
-              aria-current={onOverview ? 'page' : undefined}
-              className={`w-full flex items-center gap-2.5 px-3 py-2 text-left border-l-2 text-xs ${onOverview ? 'bg-[#ebf3ff] text-[#1a3a5c] font-semibold border-[#1a56db]' : 'text-[#475569] hover:bg-[#f8f9fb] border-transparent'}`}
-            >
-              <Icon.Grid />{!collapsed && 'Overview'}
-            </Link>
-          ) : (
-            <span className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-[#94a3b8] border-l-2 border-transparent text-xs" aria-disabled="true">
-              <Icon.Grid />{!collapsed && 'Overview'}
-            </span>
-          )}
+          <Link
+            href={ENTREPRENEUR_ROUTES.business(targetBusinessId)}
+            onClick={closeMobile}
+            aria-current={onOverview ? 'page' : undefined}
+            className={`w-full flex items-center gap-2.5 px-3 py-2 text-left border-l-2 text-xs ${onOverview ? 'bg-[#ebf3ff] text-[#1a3a5c] font-semibold border-[#1a56db]' : 'text-[#475569] hover:bg-[#f8f9fb] border-transparent'}`}
+          >
+            <Icon.Grid />{!collapsed && 'Overview'}
+          </Link>
           <Link
             href={ENTREPRENEUR_ROUTES.businesses()}
             onClick={closeMobile}
@@ -242,74 +212,50 @@ function Sidebar({ pathname, closeMobile, collapsed, setCollapsed }: {
 
         <div className="mb-1">
           {!collapsed && <p className="px-3 pt-2 pb-1 text-[9px] font-bold text-[#9aa5b4] uppercase tracking-widest">Approval Journey</p>}
-          {business && hasJourney ? (
-            <Link
-              href={ENTREPRENEUR_ROUTES.journey(business.id)}
-              onClick={closeMobile}
-              aria-current={onJourney ? 'page' : undefined}
-              className={`w-full flex items-center gap-2.5 px-3 py-2 text-left border-l-2 text-xs ${onJourney ? 'bg-[#ebf3ff] text-[#1a3a5c] font-semibold border-[#1a56db]' : 'text-[#475569] hover:bg-[#f8f9fb] border-transparent'}`}
-            >
-              <Icon.List />{!collapsed && 'Regulatory Journey'}
-            </Link>
-          ) : (
-            <button type="button" disabled aria-disabled="true" title="Regulatory Journey is unavailable for this business" className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-[#94a3b8] border-l-2 border-transparent text-xs cursor-not-allowed">
-              <Icon.List />{!collapsed && 'Regulatory Journey'}
-            </button>
-          )}
-          {business ? (
-            <Link
-              href={ENTREPRENEUR_ROUTES.applications(business.id)}
-              onClick={closeMobile}
-              aria-current={onApplications ? 'page' : undefined}
-              className={`w-full flex items-center gap-2.5 px-3 py-2 text-left border-l-2 text-xs ${onApplications ? 'bg-[#ebf3ff] text-[#1a3a5c] font-semibold border-[#1a56db]' : 'text-[#475569] hover:bg-[#f8f9fb] border-transparent'}`}
-            >
-              <Icon.List />{!collapsed && 'Applications'}
-            </Link>
-          ) : (
-            <button type="button" disabled aria-disabled="true" title="Choose a business to view Applications" className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-[#94a3b8] border-l-2 border-transparent text-xs cursor-not-allowed">
-              <Icon.List />{!collapsed && 'Applications'}
-            </button>
-          )}
-          {business && hasDocuments ? (
-            <Link
-              href={ENTREPRENEUR_ROUTES.documents(business.id)}
-              onClick={closeMobile}
-              aria-current={onDocuments ? 'page' : undefined}
-              className={`w-full flex items-center gap-2.5 px-3 py-2 text-left border-l-2 text-xs ${onDocuments ? 'bg-[#ebf3ff] text-[#1a3a5c] font-semibold border-[#1a56db]' : 'text-[#475569] hover:bg-[#f8f9fb] border-transparent'}`}
-            >
-              <Icon.List />{!collapsed && 'Documents'}
-            </Link>
-          ) : (
-            <button type="button" disabled aria-disabled="true" title="Documents are unavailable for this business" className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-[#94a3b8] border-l-2 border-transparent text-xs cursor-not-allowed">
-              <Icon.List />{!collapsed && 'Documents'}
-            </button>
-          )}
+          <Link
+            href={ENTREPRENEUR_ROUTES.journey(targetBusinessId)}
+            onClick={closeMobile}
+            aria-current={onJourney ? 'page' : undefined}
+            className={`w-full flex items-center gap-2.5 px-3 py-2 text-left border-l-2 text-xs ${onJourney ? 'bg-[#ebf3ff] text-[#1a3a5c] font-semibold border-[#1a56db]' : 'text-[#475569] hover:bg-[#f8f9fb] border-transparent'}`}
+          >
+            <Icon.List />{!collapsed && 'Regulatory Journey'}
+          </Link>
+          <Link
+            href={ENTREPRENEUR_ROUTES.applications(targetBusinessId)}
+            onClick={closeMobile}
+            aria-current={onApplications ? 'page' : undefined}
+            className={`w-full flex items-center gap-2.5 px-3 py-2 text-left border-l-2 text-xs ${onApplications ? 'bg-[#ebf3ff] text-[#1a3a5c] font-semibold border-[#1a56db]' : 'text-[#475569] hover:bg-[#f8f9fb] border-transparent'}`}
+          >
+            <Icon.List />{!collapsed && 'Applications'}
+          </Link>
+          <Link
+            href={ENTREPRENEUR_ROUTES.documents(targetBusinessId)}
+            onClick={closeMobile}
+            aria-current={onDocuments ? 'page' : undefined}
+            className={`w-full flex items-center gap-2.5 px-3 py-2 text-left border-l-2 text-xs ${onDocuments ? 'bg-[#ebf3ff] text-[#1a3a5c] font-semibold border-[#1a56db]' : 'text-[#475569] hover:bg-[#f8f9fb] border-transparent'}`}
+          >
+            <Icon.List />{!collapsed && 'Documents'}
+          </Link>
         </div>
 
-        {availableGroups.map(group => <div key={group.title} className="mb-1">
+        {navGroups.map(group => <div key={group.title} className="mb-1">
           {!collapsed && <p className="px-3 pt-2 pb-1 text-[9px] font-bold text-[#9aa5b4] uppercase tracking-widest">{group.title}</p>}
           {group.items.map(item => {
-            const isChangesActive = item.label === 'Changes & Expansion' && Boolean(
-              business && (
-                pathname === ENTREPRENEUR_ROUTES.regulatoryChanges(business.id) ||
-                pathname.startsWith(`${ENTREPRENEUR_ROUTES.regulatoryChanges(business.id)}/`)
-              )
+            const isChangesActive = item.label === 'Changes & Expansion' && (
+              pathname === ENTREPRENEUR_ROUTES.regulatoryChanges(targetBusinessId) ||
+              pathname.startsWith(`${ENTREPRENEUR_ROUTES.regulatoryChanges(targetBusinessId)}/`)
             );
-            const isIncentivesActive = item.label === 'Incentives' && Boolean(
-              business && (
-                pathname === ENTREPRENEUR_ROUTES.incentiveClaims(business.id) ||
-                pathname.startsWith(`${ENTREPRENEUR_ROUTES.incentiveClaims(business.id)}/`)
-              )
+            const isIncentivesActive = item.label === 'Incentives' && (
+              pathname === ENTREPRENEUR_ROUTES.incentiveClaims(targetBusinessId) ||
+              pathname.startsWith(`${ENTREPRENEUR_ROUTES.incentiveClaims(targetBusinessId)}/`)
             );
             const isActive = pathname === item.path || pathname.startsWith(`${item.path}/`) || isChangesActive || isIncentivesActive;
-            return item.available
-              ? <Link key={item.label} href={item.path} onClick={closeMobile} aria-current={isActive ? 'page' : undefined} className={`w-full flex items-center gap-2.5 px-3 py-2 text-left border-l-2 text-xs ${isActive ? 'bg-[#ebf3ff] text-[#1a3a5c] font-semibold border-[#1a56db]' : 'text-[#475569] hover:bg-[#f8f9fb] border-transparent'}`}><Icon.List />{!collapsed && item.label}</Link>
-              : <button key={item.label} type="button" disabled aria-disabled="true" title={`${item.label} has no verified records for this business`} className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-[#94a3b8] border-l-2 border-transparent text-xs cursor-not-allowed"><Icon.List />{!collapsed && item.label}</button>;
+            return <Link key={item.label} href={item.path} onClick={closeMobile} aria-current={isActive ? 'page' : undefined} className={`w-full flex items-center gap-2.5 px-3 py-2 text-left border-l-2 text-xs ${isActive ? 'bg-[#ebf3ff] text-[#1a3a5c] font-semibold border-[#1a56db]' : 'text-[#475569] hover:bg-[#f8f9fb] border-transparent'}`}><Icon.List />{!collapsed && item.label}</Link>
           })}
         </div>)}
         <div className="mb-1">
           {!collapsed && <p className="px-3 pt-2 pb-1 text-[9px] font-bold text-[#9aa5b4] uppercase tracking-widest">Support</p>}
-          {business && hasGrievances ? <Link href={ENTREPRENEUR_ROUTES.grievances(business.id)} onClick={closeMobile} aria-current={pathname === ENTREPRENEUR_ROUTES.grievances(business.id) ? 'page' : undefined} className={`w-full flex items-center gap-2.5 px-3 py-2 text-left border-l-2 text-xs ${pathname === ENTREPRENEUR_ROUTES.grievances(business.id) ? 'bg-[#ebf3ff] text-[#1a3a5c] font-semibold border-[#1a56db]' : 'border-transparent text-[#475569] hover:bg-[#f8f9fb]'}`}><Icon.List />{!collapsed && 'Grievances'}</Link> : <button type="button" disabled aria-disabled="true" title="No grievances for this business" className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-[#94a3b8] border-l-2 border-transparent text-xs cursor-not-allowed"><Icon.List />{!collapsed && 'Grievances'}</button>}
+          <Link href={ENTREPRENEUR_ROUTES.grievances(targetBusinessId)} onClick={closeMobile} aria-current={pathname === ENTREPRENEUR_ROUTES.grievances(targetBusinessId) ? 'page' : undefined} className={`w-full flex items-center gap-2.5 px-3 py-2 text-left border-l-2 text-xs ${pathname === ENTREPRENEUR_ROUTES.grievances(targetBusinessId) ? 'bg-[#ebf3ff] text-[#1a3a5c] font-semibold border-[#1a56db]' : 'border-transparent text-[#475569] hover:bg-[#f8f9fb]'}`}><Icon.List />{!collapsed && 'Grievances'}</Link>
           <Link href={ENTREPRENEUR_ROUTES.assistant()} onClick={closeMobile} aria-current={pathname === ENTREPRENEUR_ROUTES.assistant() ? 'page' : undefined} className="w-full flex items-center gap-2.5 px-3 py-2 text-left border-l-2 border-transparent text-xs text-[#475569] hover:bg-[#f8f9fb]"><Icon.List />{!collapsed && 'Regulatory Assistant'}</Link>
           <Link href={ENTREPRENEUR_ROUTES.notifications()} onClick={closeMobile} aria-current={pathname === ENTREPRENEUR_ROUTES.notifications() ? 'page' : undefined} className="w-full flex items-center gap-2.5 px-3 py-2 text-left border-l-2 border-transparent text-xs text-[#475569] hover:bg-[#f8f9fb]"><Icon.List />{!collapsed && 'Notifications'}</Link>
         </div>
@@ -327,7 +273,11 @@ export function AuthenticatedShell({ children }: { children: React.ReactNode }) 
   const [authenticated, setAuthenticated] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [rememberedBusinessId, setRememberedBusinessId] = useState<string | null>(null)
   const { fontSizeClass, contrastClass, ...display } = useDisplayPreferences()
+  const routeBusiness = businessFromEntrepreneurPathname(pathname)
+  const rememberedBusiness = rememberedBusinessId ? findBusinessById(rememberedBusinessId) : undefined
+  const currentBusiness = routeBusiness ?? rememberedBusiness
 
   useEffect(() => {
     if (sessionStorage.getItem('entrepreneur_demo_auth') !== 'true') {
@@ -337,12 +287,28 @@ export function AuthenticatedShell({ children }: { children: React.ReactNode }) 
     }
   }, [router])
 
+  useEffect(() => {
+    if (routeBusiness) {
+      rememberBusiness(sessionStorage, routeBusiness.id)
+      setRememberedBusinessId(routeBusiness.id)
+      return
+    }
+
+    const storedBusiness = readRememberedBusiness(sessionStorage)
+    setRememberedBusinessId(storedBusiness?.id ?? null)
+  }, [pathname, routeBusiness])
+
   if (!authenticated) return null
 
   const logout = () => {
     sessionStorage.removeItem('entrepreneur_demo_auth')
     setAuthenticated(false)
     router.replace('/')
+  }
+
+  const selectBusiness = (businessId: string) => {
+    const selected = rememberBusiness(sessionStorage, businessId)
+    if (selected) setRememberedBusinessId(selected.id)
   }
 
   return <div className={`min-h-screen flex flex-col ${fontSizeClass} ${contrastClass}`} style={{ fontFamily: 'Noto Sans, Noto Sans Devanagari, system-ui, sans-serif' }}>
@@ -355,7 +321,7 @@ export function AuthenticatedShell({ children }: { children: React.ReactNode }) 
     <div className="flex flex-1 min-h-0 overflow-hidden">
       {mobileOpen && <button type="button" className="fixed inset-0 z-40 bg-black/40 lg:hidden" onClick={() => setMobileOpen(false)} aria-label="Close navigation menu" />}
       <aside className={`fixed top-0 left-0 h-full z-50 bg-white border-r border-[#d1d9e0] w-64 transition-transform duration-200 lg:static lg:z-auto lg:translate-x-0 lg:h-auto lg:shrink-0 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'} ${collapsed ? 'lg:w-12' : 'lg:w-60'}`} aria-label="Entrepreneur navigation">
-        <Sidebar pathname={pathname} closeMobile={() => setMobileOpen(false)} collapsed={collapsed} setCollapsed={setCollapsed} />
+        <Sidebar pathname={pathname} business={currentBusiness} onSelectBusiness={selectBusiness} closeMobile={() => setMobileOpen(false)} collapsed={collapsed} setCollapsed={setCollapsed} />
       </aside>
       <div className="flex-1 min-w-0 overflow-auto">{children}</div>
     </div>

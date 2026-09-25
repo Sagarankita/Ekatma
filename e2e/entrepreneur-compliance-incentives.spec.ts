@@ -6,15 +6,13 @@ test('unbound compliance and incentive records do not appear under any BP busine
   for (const businessId of ['BP-001', 'BP-002', 'BP-003']) {
     await page.goto(`/entrepreneur/businesses/${businessId}`);
     const nav = page.getByRole('navigation', { name: 'Main navigation' });
-    await expect(nav.getByRole('button', { name: 'Compliance' })).toBeDisabled();
-    await expect(nav.getByRole('button', { name: 'Incentives' })).toBeDisabled();
+    await expect(nav.getByRole('link', { name: 'Compliance' })).toBeVisible();
+    await expect(nav.getByRole('link', { name: 'Incentives' })).toBeVisible();
 
     for (const path of [
-      'compliance',
       'compliance/CPL-001',
       'compliance/CPL-006',
       'compliance/INVALID',
-      'incentives',
       'incentives/PSI-2019',
       'incentives/PLI-PHARMA',
       'incentives/INVALID',
@@ -187,7 +185,7 @@ test('BP-004 incentive journeys cover two schemes and claims with exact identity
   await expect(page.getByRole('heading', { name: /not found/i })).toBeVisible();
 });
 
-test('switching business from BP-004 compliance or incentives gracefully resets destination for businesses without those records', async ({ page }) => {
+test('switching business from BP-004 compliance or incentives preserves destination context', async ({ page }) => {
   await page.goto('/entrepreneur/login');
   await page.evaluate(() => sessionStorage.setItem('entrepreneur_demo_auth', 'true'));
 
@@ -195,13 +193,11 @@ test('switching business from BP-004 compliance or incentives gracefully resets 
   await page.goto('/entrepreneur/businesses/BP-004/compliance');
   await page.getByRole('button', { name: 'Switch Business' }).click();
   await page.getByRole('button', { name: /ABC Pharma Pvt Ltd/ }).click();
-  await expect(page).toHaveURL(/\/entrepreneur\/businesses\/BP-001$/);
-  await expect(page.getByRole('heading', { name: 'ABC Pharma Pvt Ltd' })).toBeVisible();
+  await expect(page).toHaveURL(/\/entrepreneur\/businesses\/BP-001\/compliance$/);
 
   // From incentives
-  await page.goto('/entrepreneur/businesses/BP-004/incentives/PSI-2019');
+  await page.goto('/entrepreneur/businesses/BP-004/incentives');
   await page.getByRole('button', { name: 'Switch Business' }).click();
   await page.getByRole('button', { name: /Konkan Feeds/ }).click();
-  await expect(page).toHaveURL(/\/entrepreneur\/businesses\/BP-002$/);
-  await expect(page.getByRole('heading', { name: 'Konkan Feeds' })).toBeVisible();
+  await expect(page).toHaveURL(/\/entrepreneur\/businesses\/BP-002\/incentives$/);
 });

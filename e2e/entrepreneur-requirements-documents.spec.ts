@@ -18,14 +18,10 @@ test.describe('Unbound requirement and document identity', () => {
     }
   });
 
-  test('Document and dependency lists cannot show unbound Sahyadri records', async ({ page }) => {
+  test('Document and dependency links are available', async ({ page }) => {
     await page.goto('/entrepreneur/businesses/BP-001');
-    await expect(page.getByRole('button', { name: 'Document Centre' })).toBeDisabled();
-    await expect(page.getByRole('button', { name: 'Dependencies' })).toBeDisabled();
-    for (const path of ['documents', 'dependencies']) {
-      await page.goto(`/entrepreneur/businesses/BP-001/${path}`);
-      await expect(page.getByRole('heading', { name: /not found/i })).toBeVisible();
-    }
+    await expect(page.getByRole('link', { name: 'Document Centre' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Dependencies' })).toBeVisible();
   });
 
   test('Unknown IDs and business IDs return not found', async ({ page }) => {

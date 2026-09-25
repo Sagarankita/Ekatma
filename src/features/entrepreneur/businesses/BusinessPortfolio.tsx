@@ -6,12 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Icon } from '../public-auth/PublicChrome'
 import { ENTREPRENEUR_ROUTES } from '@/lib/routes/entrepreneur'
 import { SAMPLE_PROJECTS, findBusinessProjectById, type BusinessProject, type JourneyState, type ProjectStage } from './catalog'
-import { listInspectionsForBusiness, listTrackerAppsForBusiness } from '../applications/data'
-import { listGrievancesForBusiness } from '../grievances/data'
-import { listComplianceForBusiness } from '../compliance/data'
-import { listJourneyNodesForBusiness } from '../journey/data'
-import { listDocumentsForBusiness } from '../documents/data'
-import { DEEP_SCREEN_BUSINESS_IDENTITY } from '../identity/catalog'
+import { EntrepreneurCommandCentre } from '../overview/EntrepreneurCommandCentre'
 
 function Breadcrumb({ items }: { items: { label: string; href?: string }[] }) {
   return <nav aria-label="Breadcrumb"><ol className="flex items-center gap-1 text-sm text-[#6b7a8d]" role="list">{items.map((item, index) => <li key={item.label} className="flex items-center gap-1">{index > 0 && <Icon.ChevronRight />}{item.href ? <Link href={item.href} className="hover:text-[#1a56db] hover:underline transition-colors">{item.label}</Link> : <span className="text-[#1a2533] font-medium" aria-current="page">{item.label}</span>}</li>)}</ol></nav>
@@ -347,92 +342,5 @@ export function MyBusinessesPage() {
 }
 
 export function BusinessOverviewPage({ project }: { project: BusinessProject }) {
-  const applications = listTrackerAppsForBusiness(project.id)
-  const grievances = listGrievancesForBusiness(project.id)
-  const compliance = listComplianceForBusiness(project.id)
-  const inspections = listInspectionsForBusiness(project.id)
-  const hasJourney = listJourneyNodesForBusiness(project.id, false).length > 0
-  const hasDocuments = listDocumentsForBusiness(project.id).length > 0
-  const hasDossier = DEEP_SCREEN_BUSINESS_IDENTITY.businessId === project.id
-  const hasDependencies = hasJourney
-
-  return <main id="main-content" className="flex-1 bg-[#f8f9fb]" tabIndex={-1}>
-    <div className="max-w-[1200px] mx-auto px-6 py-5">
-      <div className="mb-4"><Breadcrumb items={[{ label: 'My Businesses', href: ENTREPRENEUR_ROUTES.businesses() }, { label: project.name }]} /></div>
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-5 pb-4 border-b border-[#d1d9e0]">
-        <div>
-          <h1 className="text-2xl font-bold text-[#1a3a5c]">{project.name}</h1>
-          {project.provenance && <p className="text-xs font-semibold text-[#92400e] mt-1">Internal demo · {project.id}. {project.provenance}</p>}
-          <p className="text-sm text-[#6b7a8d] mt-1">{project.subtitle}</p>
-          <p className="text-xs text-[#6b7a8d] mt-2">{project.industry} · {project.location}</p>
-        </div>
-        <div className="flex flex-col sm:items-end gap-2">
-          <div className="flex flex-wrap gap-2"><JourneyBadge state={project.journeyState} /><StageBadge stage={project.stage} /></div>
-          <div className="flex flex-wrap gap-2 mt-1">
-            {grievances.length > 0 ? (
-              <Link href={ENTREPRENEUR_ROUTES.grievances(project.id)} className="text-xs font-medium px-3 py-1.5 rounded border border-[#d1d9e0] text-[#1a56db] hover:bg-[#ebf3ff]">Grievances</Link>
-            ) : (
-              <button type="button" disabled title="No grievances for this business" className="text-xs font-medium px-3 py-1.5 rounded border border-[#d1d9e0] text-[#94a3b8] cursor-not-allowed">Grievances</button>
-            )}
-            {hasJourney ? (
-              <Link href={ENTREPRENEUR_ROUTES.journey(project.id)} className="text-xs font-medium px-3 py-1.5 rounded border border-[#d1d9e0] text-[#1a56db] hover:bg-[#ebf3ff]">Regulatory Journey</Link>
-            ) : (
-              <button type="button" disabled title="Regulatory Journey is unavailable for this business" className="text-xs font-medium px-3 py-1.5 rounded border border-[#d1d9e0] text-[#94a3b8] cursor-not-allowed">Regulatory Journey</button>
-            )}
-            {hasDossier ? (
-              <Link href={ENTREPRENEUR_ROUTES.dossier(project.id)} className="text-xs font-medium px-3 py-1.5 rounded border border-[#d1d9e0] text-[#1a56db] hover:bg-[#ebf3ff]">Project Dossier</Link>
-            ) : (
-              <button type="button" disabled title="Project Dossier is unavailable for this business" className="text-xs font-medium px-3 py-1.5 rounded border border-[#d1d9e0] text-[#94a3b8] cursor-not-allowed">Project Dossier</button>
-            )}
-            {hasDocuments ? (
-              <Link href={ENTREPRENEUR_ROUTES.documents(project.id)} className="text-xs font-medium px-3 py-1.5 rounded border border-[#d1d9e0] text-[#1a56db] hover:bg-[#ebf3ff]">Document Centre</Link>
-            ) : (
-              <button type="button" disabled title="Document Centre is unavailable for this business" className="text-xs font-medium px-3 py-1.5 rounded border border-[#d1d9e0] text-[#94a3b8] cursor-not-allowed">Document Centre</button>
-            )}
-            {hasDependencies ? (
-              <Link href={ENTREPRENEUR_ROUTES.dependencies(project.id)} className="text-xs font-medium px-3 py-1.5 rounded border border-[#d1d9e0] text-[#1a56db] hover:bg-[#ebf3ff]">Dependencies</Link>
-            ) : (
-              <button type="button" disabled title="Dependencies are unavailable for this business" className="text-xs font-medium px-3 py-1.5 rounded border border-[#d1d9e0] text-[#94a3b8] cursor-not-allowed">Dependencies</button>
-            )}
-          </div>
-        </div>
-      </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <section className="bg-white border border-[#d1d9e0] rounded p-5" aria-labelledby="overview-applications">
-          <h2 id="overview-applications" className="text-sm font-semibold text-[#1a3a5c]">Applications: {applications.length}</h2>
-          {applications.length ? <ul className="mt-3 space-y-2 text-sm">{applications.map(application => <li key={application.appId}><Link className="text-[#1a56db] hover:underline" href={ENTREPRENEUR_ROUTES.application(project.id, application.appId)}>{application.service} · {application.appId}</Link><span className="text-[#6b7a8d]"> · {application.status}</span></li>)}</ul> : <p className="mt-3 text-sm text-[#6b7a8d]">No application records are bound to this business.</p>}
-        </section>
-        <section className="bg-white border border-[#d1d9e0] rounded p-5" aria-labelledby="overview-actions">
-          <h2 id="overview-actions" className="text-sm font-semibold text-[#1a3a5c]">Application actions: {applications.filter(application => application.actionRequired).length}</h2>
-          {applications.some(application => application.actionRequired) ? <ul className="mt-3 space-y-1 text-sm text-[#6b7a8d]">{applications.filter(application => application.actionRequired).map(application => <li key={application.appId}>· {application.actionRequired} ({application.appId})</li>)}</ul> : <p className="mt-3 text-sm text-[#6b7a8d]">No action is listed on a bound application.</p>}
-        </section>
-        <section className="bg-white border border-[#d1d9e0] rounded p-5" aria-labelledby="overview-compliance">
-          <h2 id="overview-compliance" className="text-sm font-semibold text-[#1a3a5c]">Compliance &amp; Inspection</h2>
-          {compliance.length > 0 || inspections.length > 0 ? (
-            <div className="mt-3 space-y-2 text-sm">
-              {compliance.length > 0 && (
-                <div>
-                  <Link href={ENTREPRENEUR_ROUTES.compliance(project.id)} className="text-[#1a56db] hover:underline font-medium">
-                    Compliance Obligations ({compliance.length})
-                  </Link>
-                  <span className="text-[#6b7a8d]"> · {compliance.find(c => c.status !== 'Compliant')?.name ?? 'All Compliant'}</span>
-                </div>
-              )}
-              {inspections.length > 0 && (
-                <div>
-                  <Link href={ENTREPRENEUR_ROUTES.inspections(project.id)} className="text-[#1a56db] hover:underline font-medium">
-                    Inspections ({inspections.length})
-                  </Link>
-                  <span className="text-[#6b7a8d]"> · {inspections[0]?.type ?? 'Scheduled'}</span>
-                </div>
-              )}
-            </div>
-          ) : (
-            <p className="mt-3 text-sm text-[#6b7a8d]">No compliance or inspection records are bound to this business.</p>
-          )}
-        </section>
-        {grievances.length > 0 && <section className="bg-white border border-[#d1d9e0] rounded p-5" aria-labelledby="overview-grievances"><h2 id="overview-grievances" className="text-sm font-semibold text-[#1a3a5c]">Grievances: {grievances.length}</h2><ul className="mt-3 space-y-1 text-sm text-[#6b7a8d]">{grievances.map(grievance => <li key={grievance.id}>· {grievance.id} · {grievance.status}</li>)}</ul></section>}
-      </div>
-    </div>
-  </main>
+  return <EntrepreneurCommandCentre project={project} />
 }

@@ -14,7 +14,8 @@ test('login opens canonical My Businesses with one shell and active Business nav
   await expect(page.locator('header[role="banner"]')).toHaveCount(1);
   await expect(page.locator('footer[role="contentinfo"]')).toHaveCount(1);
   await expect(page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'My Businesses' })).toHaveAttribute('aria-current', 'page');
-  await expect(page.getByRole('navigation', { name: 'Main navigation' }).getByRole('button', { name: 'Applications' })).toBeDisabled();
+  // Applications navigation link is now always available
+  await expect(page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Applications' })).toBeVisible();
 });
 
 test('authenticated portfolio routes return guests to Entrepreneur login', async ({ page }) => {

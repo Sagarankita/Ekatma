@@ -44,7 +44,7 @@ export function ApplicationTrackerScreen({
               <h1 className="text-xl font-bold text-[#1a3a5c]">Application Tracker</h1>
               <p className="text-xs text-[#6b7a8d] mt-0.5">{project.name} — {project.location}</p>
             </div>
-            <button type="button" disabled title="Application intake for this business is not available" className="text-xs bg-[#e2e8f0] text-[#64748b] px-3 py-1.5 rounded font-medium cursor-not-allowed">+ New Application</button>
+            <Link href={ENTREPRENEUR_ROUTES.newApplication(project.id)} className="text-xs bg-[#1a3a5c] text-white hover:bg-[#0f2540] transition-colors px-3 py-1.5 rounded font-medium">+ New Application</Link>
           </div>
         </div>
       </div>
@@ -187,7 +187,7 @@ export function ApplicationTrackerScreen({
         </div>
 
         <div className="flex gap-2">
-          <button type="button" disabled title="Regulatory Journey is unavailable for this business" className="text-sm border border-[#d1d9e0] text-[#94a3b8] px-3 py-1.5 rounded cursor-not-allowed">View Regulatory Journey (E09)</button>
+          <Link href={ENTREPRENEUR_ROUTES.journey(project.id)} className="text-sm border border-[#d1d9e0] hover:bg-[#e2e8f0] hover:text-[#1a2533] text-[#475569] px-3 py-1.5 rounded transition-colors">View Regulatory Journey (E09)</Link>
         </div>
       </div>
     </main>

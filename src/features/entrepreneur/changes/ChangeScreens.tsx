@@ -2,10 +2,11 @@
 
 import React, { useState } from 'react';
 import { RegAssistantTrigger, type RegAssistantContext } from '../regulatory-assistant/Trigger';
+import { findBusinessEntity } from '../identity/catalog';
 
 // ─── E29 — Regulatory Change Impact ──────────────────────────────────────────
 
-type RegulatoryChangeImpact =
+export type RegulatoryChangeImpact =
   | 'No action'
   | 'Review recommended'
   | 'New document'
@@ -14,9 +15,9 @@ type RegulatoryChangeImpact =
   | 'Compliance affected'
   | 'New requirement potentially triggered'
 
-type RegulatoryChangeVerification = 'Validated' | 'Needs Verification' | 'Under Review'
+export type RegulatoryChangeVerification = 'Validated' | 'Needs Verification' | 'Under Review'
 
-interface RegulatoryChange {
+export interface RegulatoryChange {
   id: string
   title: string
   effectiveDate: string
@@ -31,7 +32,7 @@ interface RegulatoryChange {
   detail: string
 }
 
-const REGULATORY_CHANGES: RegulatoryChange[] = [
+export const REGULATORY_CHANGES: RegulatoryChange[] = [
   {
     id: 'RC-2026-001',
     title: 'MPCB Revised Effluent Standards — Pharmaceutical Sector',
@@ -96,6 +97,10 @@ const REGULATORY_CHANGES: RegulatoryChange[] = [
     detail: 'The Maharashtra Factory Rules have been amended to revise the mandatory welfare officer appointment threshold. The revised threshold is 250 workers (reduced from 500). Current declared workforce for this unit is below the threshold. No immediate action is required. The change should be tracked at the next workforce review.',
   },
 ]
+
+export function listRegulatoryChangesForBusiness(businessId: string): RegulatoryChange[] {
+  return REGULATORY_CHANGES.filter(change => Boolean(findBusinessEntity('regulatory-change', businessId, change.id)))
+}
 
 function regChangeBadge(v: RegulatoryChangeVerification) {
   const map: Record<RegulatoryChangeVerification, string> = {

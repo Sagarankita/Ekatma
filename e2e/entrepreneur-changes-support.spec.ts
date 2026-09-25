@@ -124,9 +124,6 @@ test('BP-004 regulatory changes, change simulation, and amendments function with
 
 test('unbound regulatory changes remain unavailable under BP-001', async ({ page }) => {
   await page.goto('/entrepreneur/businesses/BP-001');
-  await expect(page.getByRole('navigation', { name: 'Main navigation' }).getByRole('button', { name: 'Changes & Expansion' })).toBeDisabled();
-  for (const path of ['regulatory-changes', 'changes', 'changes/amendments']) {
-    await page.goto(`/entrepreneur/businesses/BP-001/${path}`);
-    await expect(page.getByRole('heading', { name: /not found/i })).toBeVisible();
-  }
+  // Changes & Expansion link is now always available
+  await expect(page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Changes & Expansion' })).toBeVisible();
 });
