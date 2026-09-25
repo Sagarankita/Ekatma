@@ -5,6 +5,12 @@ const segment = (id: string) => {
   return encodeURIComponent(id);
 };
 const applicationPath = (applicationId: string) => `/department/applications/${segment(applicationId)}`;
+const withQuery = (path: string, values: Record<string, string | undefined>) => {
+  const query = new URLSearchParams();
+  Object.entries(values).forEach(([key, value]) => { if (value) query.set(key, value); });
+  const suffix = query.toString();
+  return suffix ? `${path}?${suffix}` : path;
+};
 const inspectionPath = (applicationId: string, inspectionId: string) =>
   `${applicationPath(applicationId)}/inspections/${segment(inspectionId)}`;
 
@@ -33,6 +39,10 @@ export const ROUTES = {
       ? `/department/search?q=${encodeURIComponent(query.trim())}`
       : '/department/search',
     application: applicationPath,
+    applicationTab: (applicationId: string, tab: string, from?: string) =>
+      withQuery(applicationPath(applicationId), { tab, from }),
+    queueFilter: (service?: string, status?: string) =>
+      withQuery('/department/queue', { service, status, from: 'services' }),
     applicationDna: (applicationId: string) => `${applicationPath(applicationId)}/dna`,
     applicationTimeline: (applicationId: string) => `${applicationPath(applicationId)}/timeline`,
     applicationPrecheck: (applicationId: string) => `${applicationPath(applicationId)}/precheck`,
@@ -82,11 +92,49 @@ export const DEPARTMENT_DESTINATIONS: Readonly<Record<string, string>> = {
 };
 
 export function departmentActiveItem(pathname: string): string {
-  const path = pathname.replace(/\/$/, '');
+  const path = pathname.split(/[?#]/)[0].replace(/\/$/, '');
+  
+  if (path.includes('/query-builder') || path.includes('/query-history') || path.includes('/queries')) {
+    return 'dept-queries';
+  }
+
+  if (
+    path.includes('/decision-workspace') || 
+    path.includes('/decisions') || 
+    path.includes('/dependencies/') || 
+    path.includes('/compliance/') || 
+    path.includes('/amendment-intake')
+  ) {
+    return 'dept-decisions';
+  }
+
+  if (path.includes('/inspection-queue')) {
+    return 'dept-insp-queue';
+  }
+
+  if (path.includes('/inspections')) {
+    return 'dept-inspect';
+  }
+  
+  if (
+    path.includes('/scrutiny') || 
+    path.includes('/consistency') || 
+    path.includes('/dependency-view') || 
+    path.includes('/delta-rescrutiny') || 
+    path.includes('/parameter') || 
+    path.includes('/document') ||
+    path.includes('/building-scrutiny') ||
+    path.includes('/water-scrutiny')
+  ) {
+    return 'dept-scrutiny';
+  }
+  
   if (path.startsWith(`${ROUTES.department.home}/applications/`)) return 'dept-apps';
+  
   // These child destinations have no separate sidebar item.
   if (path === ROUTES.department.regImpact) return 'dept-regchng';
   if (path === ROUTES.department.bottleneck) return 'dept-analytics';
+  
   return Object.entries(DEPARTMENT_DESTINATIONS).find(([, route]) => route === path)?.[0] ?? '';
 }
 

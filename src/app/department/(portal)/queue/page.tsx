@@ -1,10 +1,16 @@
 'use client';
 
 import { M03QueuePage } from '@/App';
-import { useRouter } from 'next/navigation';
+import { Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ROUTES } from '@/lib/routes';
 
-export default function QueuePage() {
+function QueueContent() {
   const router = useRouter();
-  return <M03QueuePage onOpenApp={applicationId => router.push(ROUTES.department.application(applicationId))} />;
+  const searchParams = useSearchParams();
+  return <M03QueuePage initialService={searchParams.get('service') ?? undefined} initialStatus={searchParams.get('status') ?? 'all'} onOpenApp={applicationId => router.push(ROUTES.department.applicationTab(applicationId, 'overview', 'queue'))} />;
+}
+
+export default function QueuePage() {
+  return <Suspense fallback={null}><QueueContent /></Suspense>;
 }

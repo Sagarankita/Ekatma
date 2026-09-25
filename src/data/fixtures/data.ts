@@ -127,7 +127,7 @@ export const DNA_SNAPSHOT = [
   { group: 'Utilities', items: [['Power', '480 kVA (Needs Verification)'], ['Water', '200 KLD (Configured)'], ['Wastewater', 'ETP planned']] },
   { group: 'Regulatory', items: [['MPCB CTE', 'Pending'], ['Fire NOC', 'Expired — re-verify'], ['Boiler', 'Not applicable']] },
 ]
-export const APP_TABS = ['Overview','Business DNA','Application','Documents','Consistency','Dependencies','Queries','Inspection','Timeline','Regulatory Reference','Audit']
+export const APP_TABS = ['Overview', 'Business DNA', 'Timeline']
 export const M10_APP = {
   id: 'MIDC-APP-2026-00418',
   business: 'Aster Precision Components Pvt. Ltd.',

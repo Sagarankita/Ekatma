@@ -11,10 +11,10 @@ export default function Page() {
     <M31GrievancePage 
       
       onBack={() => router.push(ROUTES.department.home)}
-      onOpenApp={appId => router.push(ROUTES.department.application(appId))}
+      onOpenApp={appId => router.push(ROUTES.department.applicationTab(appId, 'overview', 'grievances'))}
       onOpenSLA={() => router.push(ROUTES.department.sla)}
-      onOpenQuery={appId => router.push(ROUTES.department.applicationQueryHistory(appId))}
-      onOpenInspection={(appId, inspectionId) => router.push(ROUTES.department.inspectionPlan(appId, inspectionId))}
+      onOpenQuery={appId => router.push(ROUTES.department.applicationTab(appId, 'queries', 'grievances'))}
+      onOpenInspection={(appId) => router.push(ROUTES.department.applicationTab(appId, 'inspections', 'grievances'))}
     
     />
   );

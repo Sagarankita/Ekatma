@@ -15,11 +15,11 @@ describe('Domain Contracts', () => {
       projectId: Ids.createProjectId('PROJ-999'),
       serviceId: Ids.createServiceId('SRV-1'),
       businessDnaVersion: Ids.createBusinessDnaVersion('DNA-V2'),
-      state: 'under_scrutiny',
+      state: 'TECHNICAL_SCRUTINY',
       updatedAt: '2026-09-23T00:00:00Z',
     };
 
     expect(mockApp.id).toBe('APP-123');
-    expect(mockApp.state).toBe('under_scrutiny');
+    expect(mockApp.state).toBe('TECHNICAL_SCRUTINY');
   });
 });

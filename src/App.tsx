@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import Link from "next/link"
 import { LoginState, Service, AdaptiveState, DnaHistoryEntry, DnaConsistencyEntry, DnaField, DnaSection, EventCategory, EventSource, TimelineEvent, PreCheckResult, PreCheck, PreCheckGroup, ScrutinyFactor, OfficerReviewState, ScrutinyParam, ScrutinySection, ConsistencyStatus, ConsistencyRow, ConsistencyField, MismatchLifecycle, DepNodeStatus, DepNode, DefStatus, Deficiency, ScrutinyApp, ScrutinyModule, DeltaTab, ReviewStatus, ChangedItem, AffectedItem, UnchangedItem, InspStatus, InspRow, PlanStatus, CalendarView, InspOutcome, CheckStatus, CheckItem, ObsRecord, ObsState, M24Event, SyncEvent, ComplianceObligation, ChangeField, QueryRecord } from '@/domain/types';
 import { QUEUE_APPS, Q_TABS, SERVICES, TIMING_BREAKDOWN, APP_SAMPLE, APP_FLAGS, APP_DEPS, APP_TIMELINE, DNA_SNAPSHOT, APP_TABS, M10_APP, M14_SECTIONS, M14_IDENTITY_PARAMS, M14_BUILDING_PARAMS, M14_PREREQ_DOCS, M14_TECH_DOCS, M14_CONDITIONAL_DOCS, M14_CONSISTENCY, M14_DEPS, M15_SECTIONS, M15_WATER_PARAMS, M15_DOCS, M15_DEPS, M15_CONSISTENCY, M16_CATEGORIES, M17_PREREQUISITES, M18_CATEGORIES, WORKFLOW_STAGES, M22_SLOTS, M22_CHECKLIST, BEFORE_NODES, AFTER_NODES, M30_SLA_ROWS, M31_GRIEVANCES, M31_TIMELINE, M39_NOTIFICATIONS, M32_SOURCES, M32_CONVERSATION, M32_CHIPS, M33_CHANGES, M34_APPS, M35_FUNNEL, M35_TREND_DATA, M36_BREAKDOWN, M38_EVENTS } from '@/data/fixtures/data';
+import { CytoscapeDependencyGraph, DepEdge, M17_DEFAULT_EDGES } from '@/components/dependency/CytoscapeDependencyGraph';
 
 
 import { createContext, useContext } from 'react';
@@ -10,7 +11,7 @@ export const MonolithContext = createContext<any>({});
 export function useMonolithData() {
   const ctx = useContext(MonolithContext);
   return {
-    APP_SAMPLE: ctx.APP_SAMPLE || APP_SAMPLE,
+    APP_SAMPLE: { ...APP_SAMPLE, ...(ctx.APP_SAMPLE || {}) },
     M14_SECTIONS: ctx.M14_SECTIONS || M14_SECTIONS,
     M15_SECTIONS: ctx.M15_SECTIONS || M15_SECTIONS
   };
@@ -203,7 +204,7 @@ const navItems = [
   { id: 'nav-5', label: 'Navigation Section', icon: Icon.Grid },
   { id: 'nav-6', label: 'Navigation Section', icon: Icon.Help },
   { id: 'nav-7', label: 'Navigation Section', icon: Icon.Settings },
-  { id: 'nav-m01', label: 'M01 — Dept Login', icon: Icon.Shield },
+  { id: 'nav-m01', label: 'Dept Login', icon: Icon.Shield },
 ]
 
 function PrimaryNav({ activeNav, setActiveNav }: { activeNav: string, setActiveNav: (n: string) => void }) {
@@ -327,15 +328,172 @@ function Sidebar({ collapsed, setCollapsed, activeSideItem, setActiveSideItem }:
   )
 }
 
+import { useParams, usePathname } from 'next/navigation';
+import { ROUTES } from '@/lib/routes';
+
 // ─── Breadcrumb ───────────────────────────────────────────────────────────────
 function Breadcrumb({ items }: { items: { label: string, href?: string, onClick?: () => void }[] }) {
+  const params = useParams();
+  const pathname = usePathname() || '';
+  const appId = (params?.applicationId as string) || '';
+
+  // Determine active module workflow from URL pathname
+  const isDecisionFlow = pathname.includes('/decision') || pathname.includes('/dependencies/') || pathname.includes('/compliance/') || pathname.includes('/amendment-intake');
+  const isQueryFlow = pathname.includes('/query-builder') || pathname.includes('/query-history') || pathname.includes('/queries');
+  const isScrutinyFlow = pathname.includes('/scrutiny') || pathname.includes('/consistency') || pathname.includes('/dependency-view') || pathname.includes('/delta-rescrutiny') || pathname.includes('/parameter') || pathname.includes('/document') || pathname.includes('/building-scrutiny') || pathname.includes('/water-scrutiny');
+  const isInspectionFlow = pathname.includes('/inspection');
+
+  let filteredItems = [...items];
+
+  if (isDecisionFlow) {
+    filteredItems = filteredItems.filter(item => item.label !== 'Applications' && item.label !== 'Application Overview' && item.label !== 'Application');
+    const hasDecisions = filteredItems.some(item => item.label === 'Decisions');
+    if (!hasDecisions && filteredItems.length > 0) {
+      const homeIdx = filteredItems.findIndex(i => i.label === 'Department Home' || i.label === 'MIDC Department');
+      if (homeIdx !== -1) {
+        filteredItems.splice(homeIdx + 1, 0, { label: 'Decisions', href: ROUTES.department.decisions });
+      } else {
+        filteredItems.unshift({ label: 'Decisions', href: ROUTES.department.decisions });
+      }
+    }
+  } else if (isQueryFlow) {
+    filteredItems = filteredItems.filter(item => item.label !== 'Applications' && item.label !== 'Application Overview' && item.label !== 'Application');
+    const hasQueries = filteredItems.some(item => item.label === 'Queries / Deficiencies');
+    if (!hasQueries && filteredItems.length > 0) {
+      const homeIdx = filteredItems.findIndex(i => i.label === 'Department Home' || i.label === 'MIDC Department');
+      if (homeIdx !== -1) {
+        filteredItems.splice(homeIdx + 1, 0, { label: 'Queries / Deficiencies', href: ROUTES.department.queries });
+      } else {
+        filteredItems.unshift({ label: 'Queries / Deficiencies', href: ROUTES.department.queries });
+      }
+    }
+  } else if (isScrutinyFlow) {
+    filteredItems = filteredItems.filter(item => item.label !== 'Applications' && item.label !== 'Application Overview' && item.label !== 'Application');
+    const hasScrutiny = filteredItems.some(item => item.label === 'Scrutiny');
+    if (!hasScrutiny && filteredItems.length > 0) {
+      const homeIdx = filteredItems.findIndex(i => i.label === 'Department Home' || i.label === 'MIDC Department');
+      if (homeIdx !== -1) {
+        filteredItems.splice(homeIdx + 1, 0, { label: 'Scrutiny', href: ROUTES.department.scrutiny });
+      } else {
+        filteredItems.unshift({ label: 'Scrutiny', href: ROUTES.department.scrutiny });
+      }
+    }
+  } else if (isInspectionFlow) {
+    filteredItems = filteredItems.filter(item => item.label !== 'Applications' && item.label !== 'Application Overview' && item.label !== 'Application' && item.label !== 'Department');
+    const hasInsp = filteredItems.some(item => item.label.includes('Inspection'));
+    if (!hasInsp && filteredItems.length > 0) {
+      const homeIdx = filteredItems.findIndex(i => i.label === 'Department Home' || i.label === 'MIDC Department');
+      if (homeIdx !== -1) {
+        filteredItems.splice(homeIdx + 1, 0, { label: 'Inspection Queue', href: ROUTES.department.inspectionQueue });
+      } else {
+        filteredItems.unshift({ label: 'Inspection Queue', href: ROUTES.department.inspectionQueue });
+      }
+    }
+  }
+
+  // Ensure Department Home is the initial root breadcrumb item
+  if (filteredItems.length > 0 && filteredItems[0].label !== 'Department Home' && filteredItems[0].label !== 'MIDC Department') {
+    filteredItems.unshift({ label: 'Department Home', href: ROUTES.department.home });
+  }
+
+  const mappedItems = filteredItems.map((item, index) => {
+    let newHref = item.href;
+    let newOnClick = item.onClick;
+    const isLast = index === filteredItems.length - 1;
+
+    switch (item.label) {
+      case 'Department Home':
+      case 'MIDC Department':
+        newHref = ROUTES.department.home;
+        newOnClick = undefined;
+        break;
+      case 'Decisions':
+        newHref = ROUTES.department.decisions;
+        newOnClick = undefined;
+        break;
+      case 'Decision Workspace':
+        if (!isLast && appId) {
+          newHref = ROUTES.department.applicationDecisionWorkspace(appId);
+          newOnClick = undefined;
+        }
+        break;
+      case 'Decision Record':
+        if (!isLast && appId) {
+          newHref = ROUTES.department.decisionRecord(appId, 'DEC-2026-00418');
+          newOnClick = undefined;
+        }
+        break;
+      case 'Applications':
+      case 'Application Search':
+        newHref = ROUTES.department.search;
+        newOnClick = undefined;
+        break;
+      case 'Queue / Inbox':
+        newHref = ROUTES.department.queue;
+        newOnClick = undefined;
+        break;
+      case 'Service Catalogue':
+        newHref = ROUTES.department.services;
+        newOnClick = undefined;
+        break;
+      case 'Queries / Deficiencies':
+        newHref = ROUTES.department.queries;
+        newOnClick = undefined;
+        break;
+      case 'Query Builder':
+        if (!isLast && appId) {
+          newHref = ROUTES.department.applicationQueryBuilder(appId);
+          newOnClick = undefined;
+        }
+        break;
+      case 'Query / Response History':
+        if (!isLast && appId) {
+          newHref = ROUTES.department.applicationQueryHistory(appId);
+          newOnClick = undefined;
+        }
+        break;
+      case 'Scrutiny':
+        newHref = ROUTES.department.scrutiny;
+        newOnClick = undefined;
+        break;
+      case 'Scrutiny Workbench':
+        if (!isLast && appId) {
+          newHref = ROUTES.department.applicationScrutinyWorkbench(appId);
+          newOnClick = undefined;
+        }
+        break;
+      case 'Inspection Queue':
+        newHref = ROUTES.department.inspectionQueue;
+        newOnClick = undefined;
+        break;
+      case 'Inspections':
+        newHref = ROUTES.department.inspections;
+        newOnClick = undefined;
+        break;
+      case 'Application Overview':
+        if (appId) {
+          newHref = ROUTES.department.application(appId);
+          newOnClick = undefined;
+        }
+        break;
+      case 'Conditions / Compliance':
+        if (!isLast && appId) {
+          newHref = ROUTES.department.compliance(appId, 'COND-001');
+          newOnClick = undefined;
+        }
+        break;
+    }
+
+    return { ...item, href: newHref, onClick: newOnClick };
+  });
+
   return (
     <nav aria-label="Breadcrumb">
       <ol className="flex items-center gap-1 text-sm text-[#1a2533]" role="list">
-        {items.map((item, i) => (
+        {mappedItems.map((item, i) => (
           <li key={i} className="flex items-center gap-1">
             {i > 0 && <span aria-hidden="true" className="text-[#6b7280]"><Icon.ChevronRight /></span>}
-            {i === items.length - 1 ? (
+            {i === mappedItems.length - 1 ? (
               <span className="text-[#1a2533] font-medium" aria-current="page">{item.label}</span>
             ) : item.onClick ? (
               <button onClick={item.onClick} className="hover:text-[#1a56db] hover:underline transition-colors">{item.label}</button>
@@ -346,7 +504,7 @@ function Breadcrumb({ items }: { items: { label: string, href?: string, onClick?
         ))}
       </ol>
     </nav>
-  )
+  );
 }
 
 // ─── Metric Summary ───────────────────────────────────────────────────────────
@@ -703,9 +861,9 @@ function TabsShowcase() {
 
 // ─── Accordion ────────────────────────────────────────────────────────────────
 const accordionItems = [
-  { q: 'Accordion Item — Heading One', a: 'This is the expanded body text for the first accordion item. It can contain paragraph text, lists, or any inline content relevant to the heading.' },
-  { q: 'Accordion Item — Heading Two', a: 'Body text for the second accordion panel. Accordions are suitable for FAQ sections, collapsible detail rows, and progressive disclosure patterns.' },
-  { q: 'Accordion Item — Heading Three', a: 'A third accordion item demonstrating the collapsed-by-default behaviour. Clicking the header toggles visibility of this panel.' },
+  { q: 'Accordion Item - Heading One', a: 'This is the expanded body text for the first accordion item. It can contain paragraph text, lists, or any inline content relevant to the heading.' },
+  { q: 'Accordion Item - Heading Two', a: 'Body text for the second accordion panel. Accordions are suitable for FAQ sections, collapsible detail rows, and progressive disclosure patterns.' },
+  { q: 'Accordion Item - Heading Three', a: 'A third accordion item demonstrating the collapsed-by-default behaviour. Clicking the header toggles visibility of this panel.' },
 ]
 
 function AccordionShowcase() {
@@ -861,7 +1019,7 @@ export function Footer() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// M01 — MIDC DEPARTMENT LOGIN + AUTHENTICATED OFFICER SHELL
+// M01 - MIDC DEPARTMENT LOGIN + AUTHENTICATED OFFICER SHELL
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const MIcon = {
@@ -1099,7 +1257,7 @@ export function M01LoginPage({ onSuccess, lang, fontSize, highContrast }: {
                   onClick={refreshCaptcha}
                   disabled={busy}
                   className="flex items-center gap-1 text-xs text-[#1a56db] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a56db] rounded px-1"
-                  aria-label="Refresh CAPTCHA — generate a new CAPTCHA image"
+                  aria-label="Refresh CAPTCHA - generate a new CAPTCHA image"
                 >
                   <MIcon.Refresh /> Refresh CAPTCHA
                 </button>
@@ -1162,7 +1320,7 @@ export function M01LoginPage({ onSuccess, lang, fontSize, highContrast }: {
 
           {/* Prototype state preview */}
           <div className="mt-8 border border-dashed border-[#c8d4de] rounded p-3 bg-white/60">
-            <p className="text-[10px] font-semibold text-[#1a2533] uppercase tracking-wider mb-2">Prototype — State preview</p>
+            <p className="text-[10px] font-semibold text-[#1a2533] uppercase tracking-wider mb-2">Prototype - State preview</p>
             <div className="flex flex-wrap gap-1.5">
               {(['default', 'invalid-creds', 'incorrect-captcha', 'captcha-refreshed', 'authenticating'] as LoginState[]).map(s => (
                 <button
@@ -1257,7 +1415,7 @@ export function DeptContextBar({ onLogout, onNotif, onRegAssistant, onSearch }: 
   return (
     <div className="bg-[#1a3a5c] border-b border-[#0f2540]" role="navigation" aria-label="Department context and utilities">
       <div className="max-w-[1440px] mx-auto px-4 flex items-center gap-4 h-11">
-        {/* Officer context — read-only */}
+        {/* Officer context - read-only */}
         <div className="flex items-center gap-4 text-xs text-white/70 shrink-0">
           <span className="flex items-center gap-1.5">
             <span className="text-white/40 font-medium">Dept</span>
@@ -1299,7 +1457,7 @@ export function DeptContextBar({ onLogout, onNotif, onRegAssistant, onSearch }: 
         <div className="flex items-center gap-1 ml-auto shrink-0">
           {/* Notifications M39 */}
           <button
-            aria-label="Notifications — 4 unread"
+            aria-label="Notifications - 4 unread"
             onClick={onNotif}
             className="relative p-2 rounded text-white/70 hover:text-white hover:bg-white/10 transition-colors focus-visible:ring-2 focus-visible:ring-white/60"
           >
@@ -1309,7 +1467,7 @@ export function DeptContextBar({ onLogout, onNotif, onRegAssistant, onSearch }: 
 
           {/* Regulatory Assistant */}
           <button
-            aria-label="Regulatory Assistant — AI-assisted regulatory reference"
+            aria-label="Regulatory Assistant - AI-assisted regulatory reference"
             onClick={onRegAssistant}
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-white/70 hover:text-white hover:bg-white/10 transition-colors text-xs focus-visible:ring-2 focus-visible:ring-white/60"
           >
@@ -1320,16 +1478,16 @@ export function DeptContextBar({ onLogout, onNotif, onRegAssistant, onSearch }: 
           <div className="w-px h-5 bg-white/20 mx-1" aria-hidden="true" />
 
           {/* User profile */}
-          <button
-            aria-label="Officer profile — A. Deshmukh, Scrutiny Officer"
-            className="flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10 transition-colors focus-visible:ring-2 focus-visible:ring-white/60"
+          <div
+            aria-label="Officer profile - A. Deshmukh, Scrutiny Officer"
+            className="flex items-center gap-2 px-2 py-1"
           >
             <div className="w-7 h-7 rounded-full bg-[#f5c842] text-[#0f2540] flex items-center justify-center text-xs font-bold shrink-0" aria-hidden="true">AD</div>
             <div className="hidden md:block text-left">
               <div className="text-xs font-semibold text-white leading-none">A. Deshmukh</div>
               <div className="text-[10px] text-white/50 leading-none mt-0.5">Scrutiny Officer</div>
             </div>
-          </button>
+          </div>
 
           <div className="w-px h-5 bg-white/20 mx-1" aria-hidden="true" />
 
@@ -1348,7 +1506,7 @@ export function DeptContextBar({ onLogout, onNotif, onRegAssistant, onSearch }: 
 
 // ─── M01 Department Home ──────────────────────────────────────────────────────
 
-// ─── M02 — Operational Command Centre ────────────────────────────────────────
+// ─── M02 - Operational Command Centre ────────────────────────────────────────
 
 function SlaChip({ state }: { state: 'normal' | 'approaching' | 'breached' | 'escalated' }) {
   const map = {
@@ -1385,15 +1543,15 @@ export function DeptHome({ onNavigate, onOpenApp }: { onNavigate: (dest: string)
   const [activeFilter, setActiveFilter] = useState('all')
 
   const kpis = [
-    { id: 'new',         label: 'New Applications',              value: 24, sub: '+6 since yesterday',         color: 'text-[#1a3a5c]',  bg: 'bg-white',      border: 'border-[#a0aec0]', accent: 'border-l-[4px] border-l-[#1a3a5c]',    dest: '→ M03 Queue / New',  nav: 'dept-queue' },
-    { id: 'scrutiny',    label: 'Awaiting Scrutiny',             value: 17, sub: '5 approaching SLA',          color: 'text-[#1a56db]',  bg: 'bg-[#f0f7ff]',  border: 'border-[#93c5fd]', accent: 'border-l-[4px] border-l-[#1a56db]',    dest: '→ M03 Queue',        nav: 'dept-queue' },
-    { id: 'entrepreneur',label: 'Awaiting Entrepreneur Response', value: 11, sub: 'Median 2.1 days',           color: 'text-[#1a3a5c]',  bg: 'bg-white',      border: 'border-[#a0aec0]', accent: 'border-l-[4px] border-l-[#1a3a5c]',    dest: '→ M03 Queue',        nav: 'dept-queue' },
-    { id: 'resubmit',   label: 'Resubmissions Received',         value:  8, sub: '3 received today',          color: 'text-teal-700',   bg: 'bg-teal-50',    border: 'border-teal-400',  accent: 'border-l-[4px] border-l-teal-600',      dest: '→ M03 Queue',        nav: 'dept-queue' },
-    { id: 'inspect',    label: 'Inspection Required',            value:  9, sub: '4 need scheduling',         color: 'text-[#1a56db]',  bg: 'bg-[#f0f7ff]',  border: 'border-[#93c5fd]', accent: 'border-l-[4px] border-l-[#1a56db]',    dest: '→ M21',              nav: 'dept-insp-queue' },
+    { id: 'new',         label: 'New Applications',              value: 24, sub: '+6 since yesterday',         color: 'text-[#1a3a5c]',  bg: 'bg-white',      border: 'border-[#a0aec0]', accent: 'border-l-[4px] border-l-[#1a3a5c]',    dest: 'Queue / New',  nav: 'dept-queue' },
+    { id: 'scrutiny',    label: 'Awaiting Scrutiny',             value: 17, sub: '5 approaching SLA',          color: 'text-[#1a56db]',  bg: 'bg-[#f0f7ff]',  border: 'border-[#93c5fd]', accent: 'border-l-[4px] border-l-[#1a56db]',    dest: 'Queue',        nav: 'dept-queue' },
+    { id: 'entrepreneur',label: 'Awaiting Entrepreneur Response', value: 11, sub: 'Median 2.1 days',           color: 'text-[#1a3a5c]',  bg: 'bg-white',      border: 'border-[#a0aec0]', accent: 'border-l-[4px] border-l-[#1a3a5c]',    dest: 'Queue',        nav: 'dept-queue' },
+    { id: 'resubmit',   label: 'Resubmissions Received',         value:  8, sub: '3 received today',          color: 'text-teal-700',   bg: 'bg-teal-50',    border: 'border-teal-400',  accent: 'border-l-[4px] border-l-teal-600',      dest: 'Queue',        nav: 'dept-queue' },
+    { id: 'inspect',    label: 'Inspection Required',            value:  9, sub: '4 need scheduling',         color: 'text-[#1a56db]',  bg: 'bg-[#f0f7ff]',  border: 'border-[#93c5fd]', accent: 'border-l-[4px] border-l-[#1a56db]',    dest: 'Inspection Queue',              nav: 'dept-insp-queue' },
     { id: 'decision',   label: 'Decision Pending',               value:  6, sub: '2 approaching SLA',         color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-400', accent: 'border-l-[4px] border-l-emerald-600', dest: '→ Decisions',        nav: 'dept-decisions' },
-    { id: 'slarisk',    label: 'SLA Risk',                       value:  7, sub: '3 due within 24h',          color: 'text-amber-700',  bg: 'bg-amber-50',   border: 'border-amber-400', accent: 'border-l-[4px] border-l-amber-600',    dest: '→ M30 SLA',          nav: 'dept-sla' },
-    { id: 'slabreach',  label: 'SLA Breached',                   value:  2, sub: 'Requires escalation review', color: 'text-red-700',   bg: 'bg-red-50',     border: 'border-red-400',   accent: 'border-l-[4px] border-l-red-600',      dest: '→ M30 SLA',          nav: 'dept-sla' },
-    { id: 'escalated',  label: 'Escalated',                      value:  3, sub: '1 new today',               color: 'text-purple-700', bg: 'bg-purple-50',  border: 'border-purple-400', accent: 'border-l-[4px] border-l-purple-600',   dest: '→ M31 Grievances',   nav: 'dept-grievances' },
+    { id: 'slarisk',    label: 'SLA Risk',                       value:  7, sub: '3 due within 24h',          color: 'text-amber-700',  bg: 'bg-amber-50',   border: 'border-amber-400', accent: 'border-l-[4px] border-l-amber-600',    dest: 'SLA Dashboard',          nav: 'dept-sla' },
+    { id: 'slabreach',  label: 'SLA Breached',                   value:  2, sub: 'Requires escalation review', color: 'text-red-700',   bg: 'bg-red-50',     border: 'border-red-400',   accent: 'border-l-[4px] border-l-red-600',      dest: 'SLA Dashboard',          nav: 'dept-sla' },
+    { id: 'escalated',  label: 'Escalated',                      value:  3, sub: '1 new today',               color: 'text-purple-700', bg: 'bg-purple-50',  border: 'border-purple-400', accent: 'border-l-[4px] border-l-purple-600',   dest: 'Grievances',   nav: 'dept-grievances' },
   ]
 
   const myActions = [
@@ -1521,7 +1679,7 @@ export function DeptHome({ onNavigate, onOpenApp }: { onNavigate: (dest: string)
         {/* Row 1: My Actions | SLA Risk */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
 
-          {/* Panel A — My Actions */}
+          {/* Panel A - My Actions */}
           <section className="bg-white border border-[#d1d9e0] rounded" aria-labelledby="panel-actions">
             <PanelHeader title="My Actions" linkLabel="View My Queue →" onLinkClick={() => onNavigate('dept-queue')} icon={<MIcon.Inbox />} />
             <div className="overflow-x-auto">
@@ -1560,7 +1718,7 @@ export function DeptHome({ onNavigate, onOpenApp }: { onNavigate: (dest: string)
             </div>
           </section>
 
-          {/* Panel B — SLA Risk */}
+          {/* Panel B - SLA Risk */}
           <section className="bg-white border border-[#d1d9e0] rounded" aria-labelledby="panel-sla">
             <PanelHeader title="SLA Risk" linkLabel="View SLA Dashboard →" onLinkClick={() => onNavigate('dept-sla')} icon={<Icon.Warning />} />
             <div className="overflow-x-auto">
@@ -1597,7 +1755,7 @@ export function DeptHome({ onNavigate, onOpenApp }: { onNavigate: (dest: string)
         {/* Row 2: Inspection Queue | Current Bottlenecks */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
 
-          {/* Panel C — Inspection Queue */}
+          {/* Panel C - Inspection Queue */}
           <section className="bg-white border border-[#d1d9e0] rounded" aria-labelledby="panel-inspections">
             <PanelHeader title="Inspection Queue" linkLabel="View All Inspections →" onLinkClick={() => onNavigate('dept-insp-queue')} icon={<MIcon.MapPin />} />
             <div className="divide-y divide-[#94a3b8]">
@@ -1631,7 +1789,7 @@ export function DeptHome({ onNavigate, onOpenApp }: { onNavigate: (dest: string)
             </div>
           </section>
 
-          {/* Panel D — Current Bottlenecks */}
+          {/* Panel D - Current Bottlenecks */}
           <section className="bg-white border border-[#d1d9e0] rounded" aria-labelledby="panel-bottlenecks">
             <PanelHeader title="Current Process Insights" linkLabel="View Bottleneck Analytics →" onLinkClick={() => onNavigate('dept-bottleneck')} icon={<MIcon.Activity />} />
             <div className="px-4 py-2 bg-[#f8f9fb] border-b border-[#e8edf2]">
@@ -1661,7 +1819,7 @@ export function DeptHome({ onNavigate, onOpenApp }: { onNavigate: (dest: string)
         {/* Row 3: Workload | Service Mix */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
 
-          {/* Panel E — Workload */}
+          {/* Panel E - Workload */}
           <section className="bg-white border border-[#d1d9e0] rounded" aria-labelledby="panel-workload">
             <PanelHeader title="Workload" linkLabel="View Workload & Capacity →" onLinkClick={() => onNavigate('dept-workload')} icon={<MIcon.TrendingUp />} />
             <div className="p-4 space-y-4">
@@ -1709,7 +1867,7 @@ export function DeptHome({ onNavigate, onOpenApp }: { onNavigate: (dest: string)
             </div>
           </section>
 
-          {/* Panel F — Service Mix */}
+          {/* Panel F - Service Mix */}
           <section className="bg-white border border-[#d1d9e0] rounded" aria-labelledby="panel-servicemix">
             <PanelHeader title="Service Mix" linkLabel="View Service Queues →" onLinkClick={() => onNavigate('dept-queue')} icon={<MIcon.Clipboard />} />
             <div className="px-4 py-2 bg-[#f8f9fb] border-b border-[#e8edf2]">
@@ -1757,7 +1915,7 @@ export function DeptHome({ onNavigate, onOpenApp }: { onNavigate: (dest: string)
 // ─── M03 / M04 Shared Data ───────────────────────────────────────────────────
 
 
-// ─── M03 — MIDC Queue / Inbox ─────────────────────────────────────────────────
+// ─── M03 - MIDC Queue / Inbox ─────────────────────────────────────────────────
 
 
 function AppIdCell({ id, onOpenApp }: { id: string; onOpenApp?: (applicationId: string) => void }) {
@@ -1786,7 +1944,7 @@ function RouteCell({ route, factors }: { route: string; factors: string[] }) {
 }
 
 function DepCell({ dep }: { dep: string }) {
-  if (dep === 'None') return <span className="text-[11px] text-[#374151]">—</span>
+  if (dep === 'None') return <span className="text-[11px] text-[#374151]">-</span>
   const isBlocking = dep.includes('pending') || dep.includes('dependency')
   return <span className={`text-[11px] font-medium ${isBlocking ? 'text-amber-700' : 'text-[#1a2533]'}`}>{dep}</span>
 }
@@ -1825,7 +1983,7 @@ function QueueTable({ apps, onOpenApp }: { apps: typeof QUEUE_APPS; onOpenApp?: 
           <col className="w-28" />   {/* Stage */}
           <col className="w-36" />   {/* Desk */}
           <col className="w-28" />   {/* Received */}
-          <col className="w-36" />   {/* SLA — generous width */}
+          <col className="w-36" />   {/* SLA - generous width */}
           <col className="w-36" />   {/* Route */}
           <col className="w-28" />   {/* Dependency */}
           <col className="w-36" />   {/* Status */}
@@ -1900,10 +2058,10 @@ function QueueTable({ apps, onOpenApp }: { apps: typeof QUEUE_APPS; onOpenApp?: 
   )
 }
 
-export function M03QueuePage({ onOpenApp }: { onOpenApp?: (applicationId: string) => void }) {
-  const [activeTab, setActiveTab] = useState('all')
+export function M03QueuePage({ onOpenApp, initialService, initialStatus = 'all' }: { onOpenApp?: (applicationId: string) => void; initialService?: string; initialStatus?: string }) {
+  const [activeTab, setActiveTab] = useState(initialStatus)
   const [sortBy, setSortBy] = useState('sla-risk')
-  const [activeFilters, setActiveFilters] = useState<{label: string; key: string}[]>([])
+  const [activeFilters, setActiveFilters] = useState<{label: string; key: string}[]>(() => initialService ? [{ label: `Service: ${initialService}`, key: `service:${initialService}` }] : [])
 
   const tabFilter = (tab: string, apps: typeof QUEUE_APPS) => {
     if (tab === 'all') return apps
@@ -1921,7 +2079,9 @@ export function M03QueuePage({ onOpenApp }: { onOpenApp?: (applicationId: string
   }
 
   const removeFilter = (key: string) => setActiveFilters(f => f.filter(x => x.key !== key))
-  const filtered = tabFilter(activeTab, QUEUE_APPS)
+  const serviceFilters = activeFilters.filter(filter => filter.key.startsWith('service:')).map(filter => filter.key.slice('service:'.length))
+  const normalizeService = (value: string) => value.replace('Building / Planning', 'Planning / Building').replace('Water / Utilities', 'Water / Utility')
+  const filtered = tabFilter(activeTab, QUEUE_APPS).filter(app => serviceFilters.length === 0 || serviceFilters.some(service => normalizeService(service) === normalizeService(app.service)))
 
   const summary = {
     total: QUEUE_APPS.length,
@@ -1957,7 +2117,7 @@ export function M03QueuePage({ onOpenApp }: { onOpenApp?: (applicationId: string
           </div>
         </div>
 
-        {/* Summary strip — dark themed */}
+        {/* Summary strip - dark themed */}
         <div className="flex flex-wrap gap-0 text-xs bg-[#0f2540] border border-[#0a1a2e] rounded overflow-hidden" style={{ color: 'white' }}>
           {[
             { l: 'Total Visible', v: summary.total, vc: '#ffffff', fw: 'bold', bg: 'bg-[#1a3a5c]' },
@@ -2059,7 +2219,7 @@ export function M03QueuePage({ onOpenApp }: { onOpenApp?: (applicationId: string
   )
 }
 
-// ─── M04 — Application Search ─────────────────────────────────────────────────
+// ─── M04 - Application Search ─────────────────────────────────────────────────
 
 export function M04SearchPage({ onOpenApp, initialQuery = '' }: { onOpenApp?: (applicationId: string) => void; initialQuery?: string }) {
   const [query, setQuery] = useState(initialQuery)
@@ -2127,7 +2287,7 @@ export function M04SearchPage({ onOpenApp, initialQuery = '' }: { onOpenApp?: (a
           {/* Search scope */}
           <p className="text-[11px] text-[#374151] flex items-center gap-1">
             <Icon.Info />
-            Search scope: MIDC / Thane Regional Office — Land / Plot Scrutiny desk authorised scope
+            Search scope: MIDC / Thane Regional Office - Land / Plot Scrutiny desk authorised scope
           </p>
 
           {/* Advanced filters */}
@@ -2255,11 +2415,11 @@ export function M04SearchPage({ onOpenApp, initialQuery = '' }: { onOpenApp?: (a
   )
 }
 
-// ─── M05 — Service / Queue Segmentation ──────────────────────────────────────
+// ─── M05 - Service / Queue Segmentation ──────────────────────────────────────
 
 
 function ServiceStatusCell({ count, type }: { count: number; type: 'new' | 'review' | 'query' | 'resubmit' | 'inspect' | 'decision' | 'slaRisk' | 'slaBreached' }) {
-  if (count === 0) return <span className="text-[#6b7280] text-xs">—</span>
+  if (count === 0) return <span className="text-[#6b7280] text-xs">-</span>
   const colors: Record<string, string> = {
     new: 'text-[#1a56db] font-semibold',
     review: 'text-[#1a2533]',
@@ -2290,7 +2450,7 @@ function RoutingChain() {
   )
 }
 
-export function M05ServicePage() {
+export function M05ServicePage({ onOpenQueue }: { onOpenQueue?: (service: string, status?: string) => void } = {}) {
   const [selected, setSelected] = useState<Service | null>(null)
   const [showRouting, setShowRouting] = useState(false)
   const [activeFilters, setActiveFilters] = useState<string[]>([])
@@ -2408,7 +2568,7 @@ export function M05ServicePage() {
                       <td className="px-3 py-3 text-right">
                         {svc.slaRisk > 0
                           ? <span className="inline-flex items-center gap-1 text-amber-700 font-semibold">{svc.slaRisk}{svc.slaBreached > 0 && <span className="text-red-700 text-[10px]">+{svc.slaBreached}B</span>}</span>
-                          : <span className="text-[#6b7280]">—</span>}
+                          : <span className="text-[#6b7280]">-</span>}
                       </td>
                       <td className="px-3 py-3">
                         {svc.deps[0] !== 'None'
@@ -2417,7 +2577,7 @@ export function M05ServicePage() {
                       </td>
                       <td className="px-3 py-3">
                         <button className="text-[11px] text-[#1a56db] hover:underline whitespace-nowrap focus-visible:ring-2 focus-visible:ring-[#1a56db] rounded" onClick={e => { e.stopPropagation(); setSelected(svc) }}>
-                          View Queue →
+                          View Details →
                         </button>
                       </td>
                     </tr>
@@ -2444,7 +2604,7 @@ export function M05ServicePage() {
             </div>
           </div>
 
-          {/* Routing Context — expandable */}
+          {/* Routing Context - expandable */}
           {showRouting && (
             <div className="bg-white border border-[#d1d9e0] rounded overflow-hidden">
               <div className="px-4 py-3 border-b border-[#d1d9e0] bg-[#f8f9fb]">
@@ -2589,8 +2749,8 @@ export function M05ServicePage() {
 
           {/* Actions */}
           <div className="px-4 py-3 border-t border-[#d1d9e0] space-y-2">
-            <button className="w-full bg-[#1a3a5c] text-white text-xs font-semibold py-2 rounded hover:bg-[#0f2540] transition-colors">
-              View Queue — {selected.name} →
+            <button onClick={() => onOpenQueue?.(selected.name)} className="w-full bg-[#1a3a5c] text-white text-xs font-semibold py-2 rounded hover:bg-[#0f2540] transition-colors">
+              View Queue - {selected.name} →
             </button>
             <div className="grid grid-cols-2 gap-2">
               <button className="border border-[#d1d9e0] text-[#1a2533] text-[11px] py-1.5 rounded hover:bg-[#f0f4f8] transition-colors">Routing Context</button>
@@ -2603,7 +2763,7 @@ export function M05ServicePage() {
   )
 }
 
-// ─── M07 — Business DNA / Adaptive Profile Context ───────────────────────────
+// ─── M07 - Business DNA / Adaptive Profile Context ───────────────────────────
 
 type VerifyState   = 'SELF_DECLARED'|'USER_CONFIRMED'|'SYSTEM_VERIFIED'|'DEPARTMENT_VERIFIED'|'NEEDS_VERIFICATION'|'INVALID'|'EXPIRED'
 type FieldClass    = 'APPLICATION'|'CONTEXT'|'MASTER_DATA'|'OTHER_DEPT'
@@ -2615,7 +2775,7 @@ type FieldClass    = 'APPLICATION'|'CONTEXT'|'MASTER_DATA'|'OTHER_DEPT'
 const DNA_SECTIONS: DnaSection[] = [
   { id:'project', title:'PROJECT', desc:'Project type, classification and stage', fields:[
     { id:'proj-type',  name:'Project Type',     value:'Expansion',      cls:'APPLICATION', source:'Entrepreneur Adaptive Profile', adaptive:'CONFIRMED',     verify:'USER_CONFIRMED',      updated:'12 Aug 2026', usedBy:['MIDC service routing','Regulatory journey'], branchNote:'Determines which expansion-specific workflow is activated.' },
-    { id:'proj-class', name:'Classification',   value:'Manufacturing — Pharmaceutical', cls:'CONTEXT', source:'Entrepreneur Adaptive Profile', adaptive:'CONFIRMED', verify:'USER_CONFIRMED', updated:'12 Aug 2026', usedBy:['Regulatory engine','Dependency evaluation'] },
+    { id:'proj-class', name:'Classification',   value:'Manufacturing - Pharmaceutical', cls:'CONTEXT', source:'Entrepreneur Adaptive Profile', adaptive:'CONFIRMED', verify:'USER_CONFIRMED', updated:'12 Aug 2026', usedBy:['Regulatory engine','Dependency evaluation'] },
     { id:'proj-stage', name:'Project Stage',    value:'Construction',   cls:'APPLICATION', source:'Entrepreneur Adaptive Profile', adaptive:'CONFIRMED',     verify:'USER_CONFIRMED',      updated:'5 Sep 2026',  usedBy:['MIDC Building / Planning','SLA calculation'], prev:'Pre-establishment', changeReason:'Entrepreneur updated after construction commencement.' },
   ]},
   { id:'identity', title:'IDENTITY', desc:'Entity and industry identity', fields:[
@@ -2645,13 +2805,13 @@ const DNA_SECTIONS: DnaSection[] = [
       ],
     },
     { id:'allotment', name:'Allotment Status',  value:'Confirmed',                            cls:'APPLICATION', source:'MIDC allotment record',        adaptive:'CONFIRMED',   verify:'SYSTEM_VERIFIED',   updated:'18 Sep 2026', usedBy:['Land / Plot'] },
-    { id:'possession',name:'Possession',        value:'Possession Taken',                     cls:'APPLICATION', source:'Entrepreneur Adaptive Profile', adaptive:'CONFIRMED',   verify:'USER_CONFIRMED',    updated:'12 Aug 2026', usedBy:['Land / Plot'], branchNote:'Possession = YES — acquisition route branch not activated.' },
+    { id:'possession',name:'Possession',        value:'Possession Taken',                     cls:'APPLICATION', source:'Entrepreneur Adaptive Profile', adaptive:'CONFIRMED',   verify:'USER_CONFIRMED',    updated:'12 Aug 2026', usedBy:['Land / Plot'], branchNote:'Possession = YES - acquisition route branch not activated.' },
   ]},
   { id:'land', title:'LAND', desc:'Land type, ownership and land-use state', fields:[
     { id:'land-type', name:'Land Type',         value:'MIDC Industrial Plot',                 cls:'APPLICATION', source:'MIDC allotment record',        adaptive:'CONFIRMED',   verify:'SYSTEM_VERIFIED',   updated:'18 Sep 2026', usedBy:['Land / Plot'] },
     { id:'land-own',  name:'Ownership / Lease', value:'Lease from MIDC',                     cls:'APPLICATION', source:'MIDC allotment record',        adaptive:'CONFIRMED',   verify:'SYSTEM_VERIFIED',   updated:'18 Sep 2026', usedBy:['Land / Plot'] },
-    { id:'land-use',  name:'Land-use State',    value:'Industrial — Configured',              cls:'CONTEXT',   source:'Entrepreneur Adaptive Profile', adaptive:'CONFIRMED',        verify:'USER_CONFIRMED',    updated:'12 Aug 2026', usedBy:['Regulatory journey'] },
-    { id:'acq',       name:'Acquisition Route', value:'Not applicable',                       cls:'CONTEXT',   source:'Adaptive profile branch',      adaptive:'NOT_APPLICABLE',   verify:'USER_CONFIRMED',    updated:'12 Aug 2026', usedBy:[], branchNote:'Possession = YES — acquisition branch not activated. Not treated as missing.' },
+    { id:'land-use',  name:'Land-use State',    value:'Industrial - Configured',              cls:'CONTEXT',   source:'Entrepreneur Adaptive Profile', adaptive:'CONFIRMED',        verify:'USER_CONFIRMED',    updated:'12 Aug 2026', usedBy:['Regulatory journey'] },
+    { id:'acq',       name:'Acquisition Route', value:'Not applicable',                       cls:'CONTEXT',   source:'Adaptive profile branch',      adaptive:'NOT_APPLICABLE',   verify:'USER_CONFIRMED',    updated:'12 Aug 2026', usedBy:[], branchNote:'Possession = YES - acquisition branch not activated. Not treated as missing.' },
   ]},
   { id:'scale', title:'SCALE', desc:'Investment, workforce and production capacity', fields:[
     { id:'invest',    name:'Investment',        value:'₹42 Cr',  unit:'Crore INR',             cls:'CONTEXT',   source:'Entrepreneur Adaptive Profile', adaptive:'ANSWERED',         verify:'SELF_DECLARED',     updated:'12 Aug 2026', usedBy:['Regulatory routing','Incentive context'] },
@@ -2663,37 +2823,37 @@ const DNA_SECTIONS: DnaSection[] = [
     { id:'built-area', name:'Built-up Area',     value:'2,700 m²',                            cls:'APPLICATION', source:'Entrepreneur Adaptive Profile', adaptive:'ANSWERED',    verify:'SELF_DECLARED',     updated:'5 Sep 2026',  usedBy:['Building / Planning'] },
     { id:'floors',     name:'Floors',            value:'3',                                   cls:'APPLICATION', source:'Entrepreneur Adaptive Profile', adaptive:'ANSWERED',    verify:'SELF_DECLARED',     updated:'5 Sep 2026',  usedBy:['Building / Planning'] },
     { id:'height',     name:'Height',            value:'14 m (approx)',                       cls:'APPLICATION', source:'Entrepreneur Adaptive Profile', adaptive:'ANSWERED',    verify:'NEEDS_VERIFICATION', updated:'5 Sep 2026', usedBy:['Building / Planning'] },
-    { id:'occupancy',  name:'Occupancy Type',    value:'Industrial — Manufacturing',          cls:'CONTEXT',   source:'Entrepreneur Adaptive Profile', adaptive:'CONFIRMED',        verify:'USER_CONFIRMED',    updated:'5 Sep 2026',  usedBy:['Building / Planning','Fire context'] },
+    { id:'occupancy',  name:'Occupancy Type',    value:'Industrial - Manufacturing',          cls:'CONTEXT',   source:'Entrepreneur Adaptive Profile', adaptive:'CONFIRMED',        verify:'USER_CONFIRMED',    updated:'5 Sep 2026',  usedBy:['Building / Planning','Fire context'] },
   ]},
   { id:'utilities', title:'UTILITIES', desc:'Power, water, wastewater and drainage', fields:[
-    { id:'power',     name:'Power',             value:'1.2 MW',                               cls:'APPLICATION', source:'Entrepreneur Adaptive Profile', adaptive:'ANSWERED',    verify:'NEEDS_VERIFICATION', updated:'12 Aug 2026', usedBy:['Water / Utility','Drainage / Infrastructure'], branchNote:'Electricity load flagged for verification — see Automated Review.' },
+    { id:'power',     name:'Power',             value:'1.2 MW',                               cls:'APPLICATION', source:'Entrepreneur Adaptive Profile', adaptive:'ANSWERED',    verify:'NEEDS_VERIFICATION', updated:'12 Aug 2026', usedBy:['Water / Utility','Drainage / Infrastructure'], branchNote:'Electricity load flagged for verification - see Automated Review.' },
     { id:'water',     name:'Water Requirement', value:'120 KLD',                              cls:'APPLICATION', source:'Entrepreneur Adaptive Profile', adaptive:'ANSWERED',    verify:'SELF_DECLARED',     updated:'12 Aug 2026', usedBy:['Water / Utility'] },
     { id:'water-src', name:'Water Source',      value:'MIDC supply',                          cls:'APPLICATION', source:'Entrepreneur Adaptive Profile', adaptive:'CONFIRMED',   verify:'USER_CONFIRMED',    updated:'12 Aug 2026', usedBy:['Water / Utility'] },
-    { id:'waste-w',   name:'Wastewater',        value:'80 KLD — ETP planned',                cls:'APPLICATION', source:'Entrepreneur Adaptive Profile', adaptive:'ANSWERED',    verify:'SELF_DECLARED',     updated:'12 Aug 2026', usedBy:['Drainage / Infrastructure'] },
+    { id:'waste-w',   name:'Wastewater',        value:'80 KLD - ETP planned',                cls:'APPLICATION', source:'Entrepreneur Adaptive Profile', adaptive:'ANSWERED',    verify:'SELF_DECLARED',     updated:'12 Aug 2026', usedBy:['Drainage / Infrastructure'] },
     { id:'drainage',  name:'Drainage',          value:'Connected to MIDC drainage',           cls:'CONTEXT',   source:'Entrepreneur Adaptive Profile', adaptive:'ANSWERED',         verify:'SELF_DECLARED',     updated:'12 Aug 2026', usedBy:['Drainage / Infrastructure'] },
   ]},
   { id:'env', title:'ENVIRONMENT / SAFETY CONTEXT', desc:'Environmental context, hazardous materials and safety flags', fields:[
-    { id:'air-emit',  name:'Air Emissions',     value:'Yes — scrubbing system planned',       cls:'CONTEXT',   source:'Entrepreneur Adaptive Profile', adaptive:'ANSWERED',         verify:'SELF_DECLARED',     updated:'12 Aug 2026', usedBy:['MPCB dependency context'] },
+    { id:'air-emit',  name:'Air Emissions',     value:'Yes - scrubbing system planned',       cls:'CONTEXT',   source:'Entrepreneur Adaptive Profile', adaptive:'ANSWERED',         verify:'SELF_DECLARED',     updated:'12 Aug 2026', usedBy:['MPCB dependency context'] },
     { id:'haz-mat',   name:'Hazardous Material',value:'Yes',                                  cls:'CONTEXT',   source:'Entrepreneur Adaptive Profile', adaptive:'ANSWERED',         verify:'USER_CONFIRMED',    updated:'12 Aug 2026', usedBy:['MPCB dependency','Safety context'] },
     { id:'haz-waste', name:'Hazardous Waste',   value:'Under characterisation',               cls:'CONTEXT',   source:'Entrepreneur Adaptive Profile', adaptive:'NEEDS_REVIEW',     verify:'NEEDS_VERIFICATION', updated:'12 Aug 2026', usedBy:['MPCB dependency'] },
-    { id:'boiler',    name:'Boiler',            value:'Yes',                                  cls:'CONTEXT',   source:'Entrepreneur Adaptive Profile', adaptive:'ANSWERED',         verify:'SELF_DECLARED',     updated:'12 Aug 2026', usedBy:['DISH context'], branchNote:'Boiler = Yes — DISH dependency branch activated.' },
+    { id:'boiler',    name:'Boiler',            value:'Yes',                                  cls:'CONTEXT',   source:'Entrepreneur Adaptive Profile', adaptive:'ANSWERED',         verify:'SELF_DECLARED',     updated:'12 Aug 2026', usedBy:['DISH context'], branchNote:'Boiler = Yes - DISH dependency branch activated.' },
     { id:'pressure',  name:'Pressure Vessel',   value:'Not applicable',                       cls:'CONTEXT',   source:'Adaptive profile branch',      adaptive:'NOT_APPLICABLE',   verify:'USER_CONFIRMED',    updated:'12 Aug 2026', usedBy:[], branchNote:'Pressure vessel = No. Not treated as missing.' },
-    { id:'fire',      name:'Fire-related Flags', value:'Fire NOC required',                   cls:'OTHER_DEPT',source:'Regulatory engine — Fire context', adaptive:'CONFIRMED',   verify:'DEPARTMENT_VERIFIED',updated:'12 Aug 2026', usedBy:['Fire NOC dependency'], branchNote:'Building > 500 m² — fire context branch activated.' },
+    { id:'fire',      name:'Fire-related Flags', value:'Fire NOC required',                   cls:'OTHER_DEPT',source:'Regulatory engine - Fire context', adaptive:'CONFIRMED',   verify:'DEPARTMENT_VERIFIED',updated:'12 Aug 2026', usedBy:['Fire NOC dependency'], branchNote:'Building > 500 m² - fire context branch activated.' },
     { id:'poll-cls',  name:'Pollution Classification', value:'To be determined by MPCB',     cls:'OTHER_DEPT',source:'Competent external department (MPCB)', adaptive:'VISIBLE', verify:'DEPARTMENT_VERIFIED',updated:'Not available', usedBy:['MPCB dependency'] },
   ]},
   { id:'storage', title:'STORAGE / LOGISTICS / TRADE', desc:'Warehouse, import/export and logistics context', fields:[
     { id:'warehouse', name:'Warehouse / Storage',value:'On-site cold storage planned',        cls:'CONTEXT',   source:'Entrepreneur Adaptive Profile', adaptive:'ANSWERED',         verify:'SELF_DECLARED',     updated:'12 Aug 2026', usedBy:['Regulatory context'] },
     { id:'import',    name:'Import / Export',   value:'Export-oriented',                      cls:'CONTEXT',   source:'Entrepreneur Adaptive Profile', adaptive:'ANSWERED',         verify:'USER_CONFIRMED',    updated:'12 Aug 2026', usedBy:['Incentive attributes','Regulatory routing'] },
-    { id:'logistics', name:'Logistics',         value:'Third-party logistics — configured',   cls:'CONTEXT',   source:'Entrepreneur Adaptive Profile', adaptive:'ANSWERED',         verify:'SELF_DECLARED',     updated:'12 Aug 2026', usedBy:[] },
+    { id:'logistics', name:'Logistics',         value:'Third-party logistics - configured',   cls:'CONTEXT',   source:'Entrepreneur Adaptive Profile', adaptive:'ANSWERED',         verify:'SELF_DECLARED',     updated:'12 Aug 2026', usedBy:[] },
   ]},
-  { id:'incentive', title:'INCENTIVE ATTRIBUTES', desc:'Scheme-defined attributes — context only unless MIDC is the administering authority', fields:[
+  { id:'incentive', title:'INCENTIVE ATTRIBUTES', desc:'Scheme-defined attributes - context only unless MIDC is the administering authority', fields:[
     { id:'startup',   name:'Startup / MSME',    value:'Not applicable',                       cls:'CONTEXT',   source:'Adaptive profile branch',      adaptive:'NOT_APPLICABLE',   verify:'USER_CONFIRMED',    updated:'12 Aug 2026', usedBy:[] },
-    { id:'export-or', name:'Export Orientation', value:'Yes',                                 cls:'CONTEXT',   source:'Entrepreneur Adaptive Profile', adaptive:'ANSWERED',         verify:'SELF_DECLARED',     updated:'12 Aug 2026', usedBy:['Incentive routing — context'] },
+    { id:'export-or', name:'Export Orientation', value:'Yes',                                 cls:'CONTEXT',   source:'Entrepreneur Adaptive Profile', adaptive:'ANSWERED',         verify:'SELF_DECLARED',     updated:'12 Aug 2026', usedBy:['Incentive routing - context'] },
     { id:'employ',    name:'Employment Intensity',value:'Medium',                             cls:'CONTEXT',   source:'Entrepreneur Adaptive Profile', adaptive:'ANSWERED',         verify:'SELF_DECLARED',     updated:'12 Aug 2026', usedBy:['Incentive context'] },
   ]},
   { id:'regulatory', title:'EXISTING REGULATORY CONTEXT', desc:'Existing approvals, applications and verified documents', fields:[
-    { id:'mpcb-cte',  name:'MPCB CTE',          value:'Applied — Pending decision',           cls:'OTHER_DEPT',source:'External department (MPCB)',    adaptive:'VISIBLE',          verify:'DEPARTMENT_VERIFIED',updated:'10 Sep 2026', usedBy:['MPCB prerequisite dependency'], issueDate:'10 Sep 2026' },
-    { id:'fire-noc',  name:'Fire NOC',           value:'Expired — 31 Aug 2026',               cls:'OTHER_DEPT',source:'External department (Fire Authority)', adaptive:'VISIBLE',  verify:'EXPIRED',            updated:'31 Aug 2026', usedBy:['Fire NOC dependency'], expiryDate:'31 Aug 2026' },
+    { id:'mpcb-cte',  name:'MPCB CTE',          value:'Applied - Pending decision',           cls:'OTHER_DEPT',source:'External department (MPCB)',    adaptive:'VISIBLE',          verify:'DEPARTMENT_VERIFIED',updated:'10 Sep 2026', usedBy:['MPCB prerequisite dependency'], issueDate:'10 Sep 2026' },
+    { id:'fire-noc',  name:'Fire NOC',           value:'Expired - 31 Aug 2026',               cls:'OTHER_DEPT',source:'External department (Fire Authority)', adaptive:'VISIBLE',  verify:'EXPIRED',            updated:'31 Aug 2026', usedBy:['Fire NOC dependency'], expiryDate:'31 Aug 2026' },
     { id:'dish-reg',  name:'DISH Registration',  value:'Pending',                             cls:'OTHER_DEPT',source:'External department (DISH)',     adaptive:'VISIBLE',          verify:'SELF_DECLARED',     updated:'12 Aug 2026', usedBy:['DISH dependency context'] },
   ]},
 ]
@@ -2889,11 +3049,11 @@ function ProvenanceDrawer({ field, onClose }: { field: DnaField; onClose: () => 
           </div>
           {field.verify === 'NEEDS_VERIFICATION' && (
             <div className="bg-amber-50 border border-amber-200 rounded p-2 text-[10px] text-amber-800">
-              <span className="font-semibold">Needs officer verification.</span> This value is the entrepreneur's self-declared data. Not treated as invalid — verification required.
+              <span className="font-semibold">Needs officer verification.</span> This value is the entrepreneur's self-declared data. Not treated as invalid - verification required.
             </div>
           )}
           {field.adaptive === 'NOT_APPLICABLE' && (
-            <p className="text-[10px] text-[#374151]">NOT_APPLICABLE means this branch was not activated — not that information is missing.</p>
+            <p className="text-[10px] text-[#374151]">NOT_APPLICABLE means this branch was not activated - not that information is missing.</p>
           )}
         </div>
 
@@ -2974,7 +3134,7 @@ function ProvenanceDrawer({ field, onClose }: { field: DnaField; onClose: () => 
               {field.changeReason && <p className="text-[#1a2533] italic">{field.changeReason}</p>}
             </div>
           ) : (
-            <p className="text-[10px] text-[#6b7280]">First recorded value — no previous version available.</p>
+            <p className="text-[10px] text-[#6b7280]">First recorded value - no previous version available.</p>
           )}
           {hasChange && <p className="text-[10px] text-[#374151]">Change reason: {field.changeReason ?? 'Not provided'}</p>}
         </div>
@@ -2991,7 +3151,7 @@ function ProvenanceDrawer({ field, onClose }: { field: DnaField; onClose: () => 
                 <div key={i} className={`flex items-center justify-between py-1 px-2 rounded ${!c.match ? 'bg-amber-50 border border-amber-200' : 'bg-[#f8f9fb]'}`}>
                   <div>
                     <p className="text-[11px] text-[#1a2533]">{c.source}</p>
-                    {c.dept && c.dept !== 'MIDC' && <p className="text-[9px] text-[#374151]">Auth: {c.dept} — view only</p>}
+                    {c.dept && c.dept !== 'MIDC' && <p className="text-[9px] text-[#374151]">Auth: {c.dept} - view only</p>}
                   </div>
                   <div className="flex items-center gap-1.5">
                     <span className={`font-semibold ${!c.match ? 'text-amber-700' : 'text-[#1a2533]'}`}>{c.value}</span>
@@ -3006,7 +3166,6 @@ function ProvenanceDrawer({ field, onClose }: { field: DnaField; onClose: () => 
                 <p>MIDC can identify this inconsistency. MIDC cannot modify another authority's record. Officer review required.</p>
               </div>
             )}
-            <button className="text-[10px] text-[#1a56db] hover:underline">View consistency details → M16</button>
           </div>
         )}
 
@@ -3020,27 +3179,14 @@ function ProvenanceDrawer({ field, onClose }: { field: DnaField; onClose: () => 
               <p className="text-[#374151] mt-1">Affected: {field.usedBy.slice(0, 2).join(', ')}</p>
             </div>
             <p className="text-[9px] text-[#374151]">System fact only. The officer determines the statutory consequence.</p>
-            <button className="text-[10px] text-[#1a56db] hover:underline">View delta impact → M20</button>
           </div>
         )}
 
         {/* ── Actions ── */}
         <div className="px-4 py-3 space-y-2">
           <ProvenanceSectionLabel>Actions</ProvenanceSectionLabel>
-          <div className="grid grid-cols-2 gap-1.5">
-            {[
-              ['View source',       '#'],
-              ['View consistency → M16', '#'],
-              ['View delta → M20',  '#'],
-              ['View audit → M38',  '#'],
-            ].map(([label]) => (
-              <button key={label} className="text-[10px] text-[#1a2533] border border-[#d1d9e0] rounded px-2 py-1.5 hover:bg-[#f8f9fb] transition-colors text-left focus-visible:ring-2 focus-visible:ring-[#1a56db]">
-                {label}
-              </button>
-            ))}
-          </div>
 
-          {/* Propose correction — controlled */}
+          {/* Propose correction - controlled */}
           {!showCorrectionForm ? (
             <button
               onClick={() => setShowCorrectionForm(true)}
@@ -3096,6 +3242,7 @@ function ProvenanceDrawer({ field, onClose }: { field: DnaField; onClose: () => 
 }
 
 export function M07DnaPage({ onBackToOverview }: { onBackToOverview: () => void }) {
+  const app = useMonolithData().APP_SAMPLE
   const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set())
   const [expanded, setExpanded] = useState<Set<string>>(new Set(['project','identity','location']))
   const [selectedField, setSelectedField] = useState<DnaField | null>(null)
@@ -3140,11 +3287,11 @@ export function M07DnaPage({ onBackToOverview }: { onBackToOverview: () => void 
           {/* App context strip */}
           <div className="bg-white border border-[#d1d9e0] rounded px-4 py-2.5 flex flex-wrap gap-x-6 gap-y-1 text-[11px]">
             {[
-              ['Application', APP_SAMPLE.id],
-              ['Business', APP_SAMPLE.business],
-              ['Service', APP_SAMPLE.service],
-              ['State', APP_SAMPLE.state],
-              ['Project Stage', APP_SAMPLE.stage],
+              ['Application', app.id],
+              ['Business', app.business],
+              ['Service', app.service],
+              ['State', app.state],
+              ['Project Stage', app.stage],
             ].map(([k, v]) => (
               <span key={k}><span className="text-[#374151]">{k}:</span> <span className="font-semibold text-[#1a2533]">{v}</span></span>
             ))}
@@ -3260,7 +3407,7 @@ export function M07DnaPage({ onBackToOverview }: { onBackToOverview: () => void 
   )
 }
 
-// ─── M08 — Application Timeline ──────────────────────────────────────────────
+// ─── M08 - Application Timeline ──────────────────────────────────────────────
 
 
 const TIMELINE_EVENTS: TimelineEvent[] = [
@@ -3279,14 +3426,14 @@ const TIMELINE_EVENTS: TimelineEvent[] = [
   {
     id:'e3', date:'14 Aug 2026', time:'11:42', title:'Fee Confirmed', category:'fee', source:'officer',
     state:'FEE_CONFIRMED', desk:'Fee Verification', role:'Fee Verification Officer',
-    action:'Fee payment verified and confirmed', comment:'CHN-2026-00482 — payment confirmed.',
+    action:'Fee payment verified and confirmed', comment:'CHN-2026-00482 - payment confirmed.',
     timeSpent:'2d 2h', slaEffect:'MIDC processing',
   },
   {
     id:'e4', date:'14 Aug 2026', time:'14:10', title:'Application Routed to Document Scrutiny', category:'routing', source:'system',
     state:'FEE_CONFIRMED', desk:'Fee Verification',
     action:'Application routed using configured workflow rule',
-    routing:{ from:'Fee Verification', to:'Document Scrutiny', reason:'Fee confirmed — configured routing rule applied.' },
+    routing:{ from:'Fee Verification', to:'Document Scrutiny', reason:'Fee confirmed - configured routing rule applied.' },
     timeSpent:'<1h', slaEffect:'System',
   },
   {
@@ -3298,7 +3445,7 @@ const TIMELINE_EVENTS: TimelineEvent[] = [
   {
     id:'e6', date:'16 Aug 2026', time:'15:00', title:'Document Scrutiny Completed', category:'documents', source:'officer',
     state:'DOCUMENT_SCRUTINY', desk:'Document Scrutiny', role:'Document Scrutiny Officer',
-    action:'Document review completed — routed to initial scrutiny',
+    action:'Document review completed - routed to initial scrutiny',
     comment:'12 documents reviewed. 1 document flagged for validity check.',
     timeSpent:'1d 6h', slaEffect:'MIDC processing',
   },
@@ -3306,13 +3453,13 @@ const TIMELINE_EVENTS: TimelineEvent[] = [
     id:'e7', date:'16 Aug 2026', time:'15:05', title:'Application Routed to Initial Scrutiny', category:'routing', source:'system',
     state:'INITIAL_SCRUTINY', desk:'Document Scrutiny',
     action:'Routing rule applied',
-    routing:{ from:'Document Scrutiny', to:'Initial Scrutiny Desk', reason:'Documents complete — configured routing rule applied.' },
+    routing:{ from:'Document Scrutiny', to:'Initial Scrutiny Desk', reason:'Documents complete - configured routing rule applied.' },
     timeSpent:'<1h', slaEffect:'System',
   },
   {
     id:'e8', date:'18 Aug 2026', time:'10:00', title:'Initial Scrutiny Completed', category:'scrutiny', source:'officer',
     state:'INITIAL_SCRUTINY', desk:'Initial Scrutiny Desk', role:'Scrutiny Officer',
-    action:'Initial scrutiny completed — application forwarded to technical scrutiny',
+    action:'Initial scrutiny completed - application forwarded to technical scrutiny',
     comment:'Application data reviewed. Routing to Building / Planning Scrutiny.',
     timeSpent:'1d 19h', slaEffect:'MIDC processing',
   },
@@ -3326,16 +3473,16 @@ const TIMELINE_EVENTS: TimelineEvent[] = [
   {
     id:'e10', date:'25 Aug 2026', time:'15:20', title:'Query Raised', category:'queries', source:'officer',
     state:'QUERY_RAISED', desk:'Planning / Building Scrutiny', role:'Technical Officer',
-    action:'Query raised — plot area inconsistency',
+    action:'Query raised - plot area inconsistency',
     comment:'Plot area in application form differs from submitted layout plan. Entrepreneur requested to provide revised building plan and plot record.',
     timeSpent:'7d 5h', slaEffect:'MIDC processing',
   },
   {
     id:'e11', date:'25 Aug 2026', time:'15:22', title:'Awaiting Entrepreneur Response', category:'entrepreneur', source:'system',
     state:'QUERY_RAISED', desk:'Planning / Building Scrutiny',
-    action:'Application paused — awaiting entrepreneur response',
+    action:'Application paused - awaiting entrepreneur response',
     comment:'MIDC processing timer paused per configured SLA rule during entrepreneur response period.',
-    timeSpent:'—', slaEffect:'Entrepreneur response time',
+    timeSpent:'-', slaEffect:'Entrepreneur response time',
   },
   {
     id:'e12', date:'2 Sep 2026', time:'11:05', title:'Entrepreneur Response Received', category:'entrepreneur', source:'entrepreneur',
@@ -3347,7 +3494,7 @@ const TIMELINE_EVENTS: TimelineEvent[] = [
   {
     id:'e13', date:'5 Sep 2026', time:'09:20', title:'Resubmission Received', category:'application', source:'entrepreneur',
     state:'RESUBMITTED', desk:'Planning / Building Scrutiny', role:'System',
-    action:'Application resubmitted — version v2',
+    action:'Application resubmitted - version v2',
     resubmission:{ version:'v2', prevVersion:'v1', changes:2, docs:1 },
     comment:'Plot area updated. Revised layout plan submitted.',
     timeSpent:'2d 22h', slaEffect:'Entrepreneur response time',
@@ -3360,14 +3507,14 @@ const TIMELINE_EVENTS: TimelineEvent[] = [
     timeSpent:'3d 0h', slaEffect:'MIDC processing',
   },
   {
-    id:'e15', date:'10 Sep 2026', time:'11:00', title:'MPCB Prerequisite — Status Update', category:'dependencies', source:'external',
+    id:'e15', date:'10 Sep 2026', time:'11:00', title:'MPCB Prerequisite - Status Update', category:'dependencies', source:'external',
     state:'TECHNICAL_SCRUTINY', desk:'Planning / Building Scrutiny',
     action:'External dependency status received',
-    dependency:{ name:'MPCB CTE', before:'Applied', after:'Pending — additional information requested by MPCB' },
-    timeSpent:'—', slaEffect:'External dependency wait',
+    dependency:{ name:'MPCB CTE', before:'Applied', after:'Pending - additional information requested by MPCB' },
+    timeSpent:'-', slaEffect:'External dependency wait',
   },
   {
-    id:'e16', date:'16 Sep 2026', time:'09:30', title:'Technical Scrutiny — Active', category:'scrutiny', source:'officer',
+    id:'e16', date:'16 Sep 2026', time:'09:30', title:'Technical Scrutiny - Active', category:'scrutiny', source:'officer',
     state:'TECHNICAL_SCRUTINY', desk:'Planning / Building Scrutiny', role:'Technical Officer',
     action:'Technical scrutiny in progress', comment:'Building plan under review. Cross-form consistency findings under officer review.',
     current:true, timeSpent:'2d 6h (continuing)', timeSpentLabel:'and counting', slaEffect:'MIDC processing',
@@ -3462,7 +3609,6 @@ function TimelineEventCard({ ev, onSelect, isSelected }: { ev: TimelineEvent; on
               <span className="bg-[#ebf3ff] text-[#1a56db] font-semibold px-1.5 py-0.5 rounded">{ev.resubmission.version}</span>
               <span className="text-[#374151]">prev: {ev.resubmission.prevVersion}</span>
               <span className="text-[#1a2533]">{ev.resubmission.changes} changes · {ev.resubmission.docs} new doc</span>
-              <button className="text-[#1a56db] hover:underline" onClick={e => e.stopPropagation()}>View delta → M20</button>
             </div>
           )}
 
@@ -3502,8 +3648,8 @@ function EventDetailDrawer({ ev, onClose }: { ev: TimelineEvent; onClose: () => 
           </div>
           {[
             ['Date / Time', `${ev.date} · ${ev.time}`],
-            ['Desk', ev.desk ?? '—'],
-            ['Role', ev.role ?? '—'],
+            ['Desk', ev.desk ?? '-'],
+            ['Role', ev.role ?? '-'],
           ].map(([k, v]) => (
             <div key={k} className="flex justify-between py-1 border-b border-[#f8f9fb]">
               <span className="text-[#374151]">{k}</span>
@@ -3536,7 +3682,7 @@ function EventDetailDrawer({ ev, onClose }: { ev: TimelineEvent; onClose: () => 
             <div className="flex justify-between"><span className="text-[#374151]">Dependency</span><span className="font-semibold text-[#1a2533]">{ev.dependency.name}</span></div>
             <div className="flex justify-between"><span className="text-[#374151]">Before</span><span className="text-[#1a2533]">{ev.dependency.before}</span></div>
             <div className="flex justify-between"><span className="text-[#374151]">After</span><span className="text-amber-700 font-medium">{ev.dependency.after}</span></div>
-            <p className="text-[10px] text-[#374151]">MIDC can record this status — cannot modify MPCB's decision.</p>
+            <p className="text-[10px] text-[#374151]">MIDC can record this status - cannot modify MPCB's decision.</p>
           </div>
         )}
         {ev.entrepreneurResponse && (
@@ -3547,24 +3693,13 @@ function EventDetailDrawer({ ev, onClose }: { ev: TimelineEvent; onClose: () => 
             <p className="text-[10px] text-[#374151]">{ev.entrepreneurResponse.date} · {ev.entrepreneurResponse.time}</p>
           </div>
         )}
-        <div className="px-4 py-3 space-y-2">
-          <p className="text-[10px] font-bold text-[#374151] uppercase tracking-widest">Related Workspaces</p>
-          {[
-            ev.category === 'scrutiny' && 'Scrutiny workspace',
-            ev.category === 'queries' && 'Queries → M18/M19',
-            ev.resubmission && 'Delta re-scrutiny → M20',
-            ev.dependency && 'Dependency map → M17',
-            'View audit details → M38',
-          ].filter(Boolean).map(label => (
-            <button key={String(label)} className="w-full text-left text-[11px] text-[#1a56db] hover:underline border border-[#d1d9e0] rounded px-2 py-1.5 hover:bg-[#f8f9fb]">{String(label)}</button>
-          ))}
-        </div>
       </div>
     </div>
   )
 }
 
 export function M08TimelinePage({ onBackToOverview, onOpenAudit }: { onBackToOverview: () => void; onOpenAudit?: () => void }) {
+  const app = useMonolithData().APP_SAMPLE
   const [filter, setFilter] = useState<string>('all')
   const [selectedEvent, setSelectedEvent] = useState<TimelineEvent | null>(null)
 
@@ -3598,12 +3733,12 @@ export function M08TimelinePage({ onBackToOverview, onOpenAudit }: { onBackToOve
           {/* App context strip */}
           <div className="bg-white border border-[#d1d9e0] rounded px-4 py-2.5 flex flex-wrap gap-x-6 gap-y-1 text-[11px]">
             {[
-              ['Application', APP_SAMPLE.id],
-              ['Business', APP_SAMPLE.business],
-              ['Service', APP_SAMPLE.service],
-              ['State', APP_SAMPLE.state],
-              ['Desk', APP_SAMPLE.desk],
-              ['Office', APP_SAMPLE.office],
+              ['Application', app.id],
+              ['Business', app.business],
+              ['Service', app.service],
+              ['State', app.state],
+              ['Desk', app.desk],
+              ['Office', app.office],
             ].map(([k, v]) => (
               <span key={k}><span className="text-[#374151]">{k}:</span> <span className="font-semibold text-[#1a2533]">{v}</span></span>
             ))}
@@ -3616,8 +3751,8 @@ export function M08TimelinePage({ onBackToOverview, onOpenAudit }: { onBackToOve
             <div className="bg-white border border-[#1a3a5c] rounded p-3 space-y-2">
               <p className="text-[10px] font-bold text-[#374151] uppercase tracking-widest">Current Position</p>
               <div className="space-y-1 text-xs">
-                <div className="flex justify-between"><span className="text-[#374151]">State</span><span className="font-mono font-semibold text-[#1a3a5c]">{APP_SAMPLE.state}</span></div>
-                <div className="flex justify-between"><span className="text-[#374151]">Desk</span><span className="font-semibold text-[#1a2533]">{APP_SAMPLE.desk}</span></div>
+                <div className="flex justify-between"><span className="text-[#374151]">State</span><span className="font-mono font-semibold text-[#1a3a5c]">{app.state}</span></div>
+                <div className="flex justify-between"><span className="text-[#374151]">Desk</span><span className="font-semibold text-[#1a2533]">{app.desk}</span></div>
                 <div className="flex justify-between"><span className="text-[#374151]">Desk started</span><span className="text-[#1a2533]">16 Sep 2026</span></div>
                 <div className="flex justify-between"><span className="text-[#374151]">Desk time</span><span className="text-amber-700 font-semibold">2d 6h</span></div>
                 <div className="flex justify-between"><span className="text-[#374151]">Next configured step</span><span className="text-[#1a2533]">Decision / Inspection</span></div>
@@ -3637,7 +3772,7 @@ export function M08TimelinePage({ onBackToOverview, onOpenAudit }: { onBackToOve
               <div className="w-full bg-[#f0f4f8] rounded-full h-2">
                 <div className="h-full bg-amber-500 rounded-full" style={{ width:'70%' }} />
               </div>
-              <p className="text-[10px] text-[#374151]">9 days remaining · Due: {APP_SAMPLE.slaDue} · SLA basis: Configured service SLA</p>
+              <p className="text-[10px] text-[#374151]">9 days remaining · Due: {app.slaDue} · SLA basis: Configured service SLA</p>
             </div>
 
             {/* Timing breakdown summary */}
@@ -3700,12 +3835,8 @@ export function M08TimelinePage({ onBackToOverview, onOpenAudit }: { onBackToOve
             {/* End marker */}
             <div className="flex gap-4 items-center">
               <div className="w-6 flex justify-center"><div className="w-2 h-2 rounded-full bg-[#d1d9e0] border-2 border-white" /></div>
-              <p className="text-xs text-[#374151] italic">Application ongoing — timeline continues as events occur.</p>
+              <p className="text-xs text-[#374151] italic">Application ongoing - timeline continues as events occur.</p>
             </div>
-          </div>
-
-          <div className="pb-4">
-            <button onClick={onOpenAudit} className="text-xs text-[#1a56db] hover:underline">View detailed audit history → M38</button>
           </div>
         </div>
       </div>
@@ -3718,7 +3849,7 @@ export function M08TimelinePage({ onBackToOverview, onOpenAudit }: { onBackToOve
   )
 }
 
-// ─── M06 — Application Overview ──────────────────────────────────────────────
+// ─── M06 - Application Overview ──────────────────────────────────────────────
 
 
 
@@ -3727,6 +3858,7 @@ export function M08TimelinePage({ onBackToOverview, onOpenAudit }: { onBackToOve
 
 
 export function M06AppOverviewPage({ onBack, onOpenDna, onOpenTimeline, onOpenPrecheck, onOpenDeltaRescrutiny, onOpenInspectionQueue, onOpenDecision, onOpenCompliance, onOpenConsistency, onOpenDependencyView, onOpenQueries, onOpenRegAssistant, onOpenAudit }: { onBack: () => void; onOpenDna?: () => void; onOpenTimeline?: () => void; onOpenPrecheck?: () => void; onOpenDeltaRescrutiny?: () => void; onOpenInspectionQueue?: () => void; onOpenDecision?: () => void; onOpenCompliance?: () => void; onOpenConsistency?: () => void;  onOpenDependencyView?: () => void; onOpenQueries?: () => void; onOpenRegAssistant?: () => void; onOpenAudit?: () => void }) {
+  const app = useMonolithData().APP_SAMPLE
   const [activeTab, setActiveTab] = useState('Overview')
   const [showDnaDetails, setShowDnaDetails] = useState(false)
 
@@ -3754,7 +3886,6 @@ export function M06AppOverviewPage({ onBack, onOpenDna, onOpenTimeline, onOpenPr
             <button onClick={onBack} className="flex items-center gap-1.5 text-xs border border-[#d1d9e0] bg-white text-[#1a2533] px-3 py-1.5 rounded hover:bg-[#f0f4f8] transition-colors">
               ← Back to Applications
             </button>
-            <span className="text-[10px] bg-amber-50 border border-amber-200 text-amber-700 px-2 py-0.5 rounded">Prototype data</span>
           </div>
         </div>
 
@@ -3765,48 +3896,48 @@ export function M06AppOverviewPage({ onBack, onOpenDna, onOpenTimeline, onOpenPr
             {/* Left: ID + Business */}
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <span className="font-mono text-sm font-bold text-[#1a56db]">{APP_SAMPLE.id}</span>
-                <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ${slaColors[APP_SAMPLE.slaState]}`}>SLA Risk</span>
+                <span className="font-mono text-sm font-bold text-[#1a56db]">{app.id}</span>
+                <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ${slaColors[app.slaState as keyof typeof slaColors]}`}>SLA Risk</span>
               </div>
-              <p className="text-base font-bold text-[#1a2533] mt-0.5 leading-tight">{APP_SAMPLE.business}</p>
-              <p className="text-sm text-[#1a2533]">{APP_SAMPLE.project}</p>
+              <p className="text-base font-bold text-[#1a2533] mt-0.5 leading-tight">{app.business}</p>
+              <p className="text-sm text-[#1a2533]">{app.project}</p>
             </div>
 
             {/* Center: Service + Office */}
             <div className="space-y-1 text-xs">
               <div className="flex items-center gap-2">
                 <span className="text-[#374151] w-20">Service</span>
-                <span className="font-semibold text-[#1a3a5c] bg-[#ebf3ff] px-1.5 py-0.5 rounded">{APP_SAMPLE.service}</span>
+                <span className="font-semibold text-[#1a3a5c] bg-[#ebf3ff] px-1.5 py-0.5 rounded">{app.service}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-[#374151] w-20">Office</span>
-                <span className="text-[#1a2533]">{APP_SAMPLE.office}</span>
+                <span className="text-[#1a2533]">{app.office}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-[#374151] w-20">Route</span>
-                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-purple-100 text-purple-800">{APP_SAMPLE.scrutinyRoute}</span>
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-purple-100 text-purple-800">{app.scrutinyRoute}</span>
               </div>
             </div>
 
             {/* Right: Status + Desk + SLA */}
             <div className="ml-auto space-y-1.5 text-xs text-right">
               <div>
-                <span className="font-mono text-[11px] font-bold text-[#1a3a5c] bg-[#f0f4f8] px-2 py-0.5 rounded">{APP_SAMPLE.state}</span>
+                <span className="font-mono text-[11px] font-bold text-[#1a3a5c] bg-[#f0f4f8] px-2 py-0.5 rounded">{app.state}</span>
               </div>
-              <p className="text-[#1a2533]">Desk: <span className="font-semibold text-[#1a2533]">{APP_SAMPLE.desk}</span></p>
-              <p className="text-amber-700 font-semibold">SLA: {APP_SAMPLE.slaElapsed} / {APP_SAMPLE.slaTarget} · {APP_SAMPLE.slaRemaining} remaining</p>
+              <p className="text-[#1a2533]">Desk: <span className="font-semibold text-[#1a2533]">{app.desk}</span></p>
+              <p className="text-amber-700 font-semibold">SLA: {app.slaElapsed} / {app.slaTarget} · {app.slaRemaining} remaining</p>
             </div>
           </div>
 
           {/* Secondary metadata row */}
           <div className="px-5 py-2.5 flex flex-wrap items-center gap-x-6 gap-y-1 text-[11px] text-[#1a2533] bg-[#f8f9fb]">
             {[
-              ['Project Stage', APP_SAMPLE.stage],
-              ['Version', APP_SAMPLE.version],
-              ['Submitted', APP_SAMPLE.submitted],
-              ['Last Updated', APP_SAMPLE.lastUpdated],
-              ['Applicant', APP_SAMPLE.applicant],
-              ['Entity', APP_SAMPLE.entity],
+              ['Project Stage', app.stage],
+              ['Version', app.version],
+              ['Submitted', app.submitted],
+              ['Last Updated', app.lastUpdated],
+              ['Applicant', app.applicant],
+              ['Entity', app.entity],
             ].map(([k, v]) => (
               <span key={k}><span className="text-[#374151]">{k}:</span> <span className="font-medium text-[#1a2533]">{v}</span></span>
             ))}
@@ -3819,8 +3950,8 @@ export function M06AppOverviewPage({ onBack, onOpenDna, onOpenTimeline, onOpenPr
           <div className="bg-white border border-[#d1d9e0] rounded p-3 space-y-1.5 text-xs">
             <p className="font-semibold text-[#1a2533] text-[11px] uppercase tracking-wide border-b border-[#f0f4f8] pb-1.5">Business</p>
             <div className="space-y-1">
-              <div className="flex justify-between gap-2"><span className="text-[#374151]">Industry</span><span className="text-right text-[#1a2533] text-[10px]">{APP_SAMPLE.industry}</span></div>
-              <div className="flex justify-between gap-2"><span className="text-[#374151]">Applicant</span><span className="text-[#1a2533]">{APP_SAMPLE.applicant}</span></div>
+              <div className="flex justify-between gap-2"><span className="text-[#374151]">Industry</span><span className="text-right text-[#1a2533] text-[10px]">{app.industry}</span></div>
+              <div className="flex justify-between gap-2"><span className="text-[#374151]">Applicant</span><span className="text-[#1a2533]">{app.applicant}</span></div>
             </div>
           </div>
 
@@ -3828,11 +3959,11 @@ export function M06AppOverviewPage({ onBack, onOpenDna, onOpenTimeline, onOpenPr
           <div className="bg-white border border-[#d1d9e0] rounded p-3 space-y-1.5 text-xs">
             <p className="font-semibold text-[#1a2533] text-[11px] uppercase tracking-wide border-b border-[#f0f4f8] pb-1.5">Location & MIDC Estate</p>
             <div className="space-y-1">
-              <div className="flex justify-between gap-2"><span className="text-[#374151]">District</span><span className="text-[#1a2533]">{APP_SAMPLE.district}</span></div>
-              <div className="flex justify-between gap-2"><span className="text-[#374151]">Estate</span><span className="text-[#1a2533] text-[10px] text-right">{APP_SAMPLE.estate}</span></div>
-              <div className="flex justify-between gap-2"><span className="text-[#374151]">Plot</span><span className="text-[#1a2533] font-medium">{APP_SAMPLE.plot}</span></div>
-              <div className="flex justify-between gap-2"><span className="text-[#374151]">Area</span><span className="text-[#1a2533]">{APP_SAMPLE.plotArea}</span></div>
-              <div className="flex justify-between gap-2"><span className="text-[#374151]">Possession</span><span className="text-green-700 font-medium">{APP_SAMPLE.possession}</span></div>
+              <div className="flex justify-between gap-2"><span className="text-[#374151]">District</span><span className="text-[#1a2533]">{app.district}</span></div>
+              <div className="flex justify-between gap-2"><span className="text-[#374151]">Estate</span><span className="text-[#1a2533] text-[10px] text-right">{app.estate}</span></div>
+              <div className="flex justify-between gap-2"><span className="text-[#374151]">Plot</span><span className="text-[#1a2533] font-medium">{app.plot}</span></div>
+              <div className="flex justify-between gap-2"><span className="text-[#374151]">Area</span><span className="text-[#1a2533]">{app.plotArea}</span></div>
+              <div className="flex justify-between gap-2"><span className="text-[#374151]">Possession</span><span className="text-green-700 font-medium">{app.possession}</span></div>
             </div>
           </div>
 
@@ -3840,11 +3971,11 @@ export function M06AppOverviewPage({ onBack, onOpenDna, onOpenTimeline, onOpenPr
           <div className="bg-white border border-[#d1d9e0] rounded p-3 space-y-1.5 text-xs">
             <p className="font-semibold text-[#1a2533] text-[11px] uppercase tracking-wide border-b border-[#f0f4f8] pb-1.5">Fee & SLA</p>
             <div className="space-y-1">
-              <div className="flex justify-between gap-2"><span className="text-[#374151]">Fee status</span><span className="text-green-700 font-medium">{APP_SAMPLE.feeStatus}</span></div>
-              <div className="flex justify-between gap-2"><span className="text-[#374151]">Challan</span><span className="text-[#1a2533] font-mono">{APP_SAMPLE.challan}</span></div>
-              <div className="flex justify-between gap-2"><span className="text-[#374151]">SLA target</span><span className="text-[#1a2533]">{APP_SAMPLE.slaTarget}</span></div>
-              <div className="flex justify-between gap-2"><span className="text-[#374151]">Elapsed</span><span className="text-amber-700 font-medium">{APP_SAMPLE.slaElapsed}</span></div>
-              <div className="flex justify-between gap-2"><span className="text-[#374151]">Due</span><span className="text-amber-700">{APP_SAMPLE.slaDue}</span></div>
+              <div className="flex justify-between gap-2"><span className="text-[#374151]">Fee status</span><span className="text-green-700 font-medium">{app.feeStatus}</span></div>
+              <div className="flex justify-between gap-2"><span className="text-[#374151]">Challan</span><span className="text-[#1a2533] font-mono">{app.challan}</span></div>
+              <div className="flex justify-between gap-2"><span className="text-[#374151]">SLA target</span><span className="text-[#1a2533]">{app.slaTarget}</span></div>
+              <div className="flex justify-between gap-2"><span className="text-[#374151]">Elapsed</span><span className="text-amber-700 font-medium">{app.slaElapsed}</span></div>
+              <div className="flex justify-between gap-2"><span className="text-[#374151]">Due</span><span className="text-amber-700">{app.slaDue}</span></div>
             </div>
           </div>
 
@@ -3863,42 +3994,42 @@ export function M06AppOverviewPage({ onBack, onOpenDna, onOpenTimeline, onOpenPr
         {/* Tab bar */}
         <div className="bg-white border border-[#d1d9e0] rounded overflow-hidden">
           <div className="overflow-x-auto">
-            <div className="flex border-b border-[#d1d9e0] min-w-max" role="tablist">
+            <div className="flex space-x-6 border-b border-[#d1d9e0] min-w-max px-2" role="tablist">
               {APP_TABS.map(tab => (
                 <button
                   key={tab}
                   role="tab"
                   aria-selected={activeTab === tab}
                   onClick={() => {
-                    const destinations: Record<string, (() => void) | undefined> = { 'Business DNA': onOpenDna, Timeline: onOpenTimeline, Application: onOpenPrecheck, Documents: undefined, Consistency: onOpenConsistency, Dependencies: onOpenDependencyView, Queries: onOpenQueries, Inspection: onOpenInspectionQueue, 'Regulatory Reference': onOpenRegAssistant, Audit: onOpenAudit }
+                    const destinations: Record<string, (() => void) | undefined> = { 'Business DNA': onOpenDna, Timeline: onOpenTimeline }
                     if (destinations[tab]) destinations[tab]?.(); else setActiveTab(tab)
                   }}
-                  className={`px-4 py-2.5 text-xs font-medium whitespace-nowrap border-b-2 transition-colors focus-visible:ring-2 focus-visible:ring-[#1a56db] ${
+                  className={`px-2 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a56db] ${
                     activeTab === tab
-                      ? 'border-[#1a56db] text-[#1a56db] bg-[#ebf3ff]'
-                      : 'border-transparent text-[#1a2533] hover:text-[#1a2533] hover:bg-[#f8f9fb]'
+                      ? 'border-[#1a56db] text-[#1a56db]'
+                      : 'border-transparent text-[#374151] hover:text-[#1a2533] hover:border-[#9ca3af]'
                   }`}
                 >
                   {tab}
-                  {tab === 'Overview' && <span className="ml-1.5 inline-flex items-center justify-center w-4 h-4 text-[9px] rounded-full bg-amber-100 text-amber-700 font-bold">{APP_FLAGS.length}</span>}
+                  {tab === 'Overview' && <span className="ml-2 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] rounded-full bg-amber-100 text-amber-700 font-bold">{APP_FLAGS.length}</span>}
                 </button>
               ))}
             </div>
           </div>
 
           {/* Tab content */}
-          <div className="p-5 space-y-5" role="tabpanel">
+          <div className="p-6 space-y-6" role="tabpanel">
             {activeTab !== 'Overview' && (
               <div className="flex flex-col items-center py-10 text-center text-[#374151]">
                 <p className="text-sm font-medium text-[#1a2533]">{activeTab}</p>
-                <p className="text-xs mt-1">This tab connects to a dedicated workspace ({activeTab === 'Business DNA' ? 'M07' : activeTab === 'Timeline' ? 'M08' : activeTab === 'Consistency' ? 'M16' : activeTab === 'Dependencies' ? 'M17' : activeTab === 'Queries' ? 'M18/M19' : activeTab === 'Inspection' ? 'M21–M24' : activeTab === 'Audit' ? 'M38' : 'future phase'}) — to be implemented in a future sprint.</p>
+                <p className="text-xs mt-2">Content for {activeTab} will load here.</p>
               </div>
             )}
 
             {activeTab === 'Overview' && (
               <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
 
-                {/* Left column — Automated Review + DNA + Documents + Deps */}
+                {/* Left column - Automated Review + DNA + Documents + Deps */}
                 <div className="xl:col-span-2 space-y-4">
 
                   {/* Automated Review Summary */}
@@ -3923,7 +4054,7 @@ export function M06AppOverviewPage({ onBack, onOpenDna, onOpenTimeline, onOpenPr
                           <div className="flex items-start justify-between gap-4">
                             <div className="flex-1 min-w-0">
                               <p className="text-xs font-semibold text-[#1a2533]">{flag.title}</p>
-                              <p className="text-[11px] text-[#1a2533] mt-0.5">{flag.detail}</p>
+                              <p className="text-[11px] text-[#1a2533] mt-0.5">{flag.detail.replace(/-/g, '-')}</p>
                               <div className="flex flex-wrap gap-3 mt-1.5 text-[10px] text-[#374151]">
                                 <span>Automated finding</span>
                                 <span>Source: {flag.source}</span>
@@ -3931,7 +4062,6 @@ export function M06AppOverviewPage({ onBack, onOpenDna, onOpenTimeline, onOpenPr
                                 <span>{flag.ts}</span>
                               </div>
                             </div>
-                            <button onClick={() => { if (flag.drill === 'M16') onOpenConsistency?.(); else if (flag.drill === 'M07') onOpenDna?.(); else { /* disabled */ } }} className="shrink-0 text-[11px] text-[#1a56db] hover:underline whitespace-nowrap">Review → {flag.drill}</button>
                           </div>
                         </div>
                       ))}
@@ -3955,10 +4085,9 @@ export function M06AppOverviewPage({ onBack, onOpenDna, onOpenTimeline, onOpenPr
                         </div>
                         <div className="flex gap-4">
                           <span className="text-[#374151] w-24">Impact</span>
-                          <span className="text-amber-700 font-medium">Potential MIDC impact detected — officer review required</span>
+                          <span className="text-amber-700 font-medium">Potential MIDC impact detected - officer review required</span>
                         </div>
                       </div>
-                      <button onClick={onOpenDeltaRescrutiny} className="text-[11px] text-[#1a56db] hover:underline mt-1.5">Review delta → M20</button>
                     </div>
 
                     {/* Prerequisite state */}
@@ -3974,13 +4103,11 @@ export function M06AppOverviewPage({ onBack, onOpenDna, onOpenTimeline, onOpenPr
                           </div>
                         ))}
                       </div>
-                      <button onClick={onOpenDependencyView} className="text-[11px] text-[#1a56db] hover:underline mt-2">View full dependency map → M17</button>
                     </div>
 
                     {/* Inspection trigger */}
                     <div className="px-4 py-3 border-t border-[#f0f4f8] text-xs text-[#1a2533]">
-                      <span className="font-semibold text-[#1a2533]">Inspection: </span>Not triggered — Enhanced Review route does not require mandatory inspection for current configuration. Officer may initiate if warranted.
-                      <button onClick={onOpenInspectionQueue} className="ml-2 text-[11px] text-[#1a56db] hover:underline">Inspection workspace → M21</button>
+                      <span className="font-semibold text-[#1a2533]">Inspection: </span>Not triggered - Enhanced Review route does not require mandatory inspection for current configuration. Officer may initiate if warranted.
                     </div>
                   </div>
 
@@ -3989,7 +4116,7 @@ export function M06AppOverviewPage({ onBack, onOpenDna, onOpenTimeline, onOpenPr
                     <div className="flex items-center justify-between px-4 py-2.5 bg-[#f8f9fb] border-b border-[#d1d9e0]">
                       <h2 className="text-sm font-semibold text-[#1a2533]">Business DNA Snapshot</h2>
                       <button onClick={() => setShowDnaDetails(v => !v)} className="text-[11px] text-[#1a56db] hover:underline">
-                        {showDnaDetails ? 'Collapse' : <span onClick={e => { e.stopPropagation(); onOpenDna?.() }} className="cursor-pointer">View full Business DNA → M07</span>}
+                        {showDnaDetails ? 'Collapse' : 'Expand Details'}
                       </button>
                     </div>
                     <div className={`grid grid-cols-2 gap-0 divide-x divide-[#94a3b8] ${showDnaDetails ? '' : ''}`}>
@@ -4000,7 +4127,7 @@ export function M06AppOverviewPage({ onBack, onOpenDna, onOpenTimeline, onOpenPr
                             {group.items.map(([k, v]) => (
                               <div key={k} className="flex items-start justify-between gap-2 text-[11px]">
                                 <span className="text-[#374151] shrink-0">{k}</span>
-                                <span className={`text-right font-medium ${v.includes('Needs Verification') ? 'text-amber-700' : v.includes('Pending') || v.includes('expired') ? 'text-amber-700' : v === 'Not applicable' ? 'text-[#6b7280]' : 'text-[#1a2533]'}`}>{v}</span>
+                                <span className={`text-right font-medium ${v.includes('Needs Verification') ? 'text-amber-700' : v.includes('Pending') || v.includes('expired') ? 'text-amber-700' : v === 'Not applicable' ? 'text-[#6b7280]' : 'text-[#1a2533]'}`}>{v.replace(/-/g, '-')}</span>
                               </div>
                             ))}
                           </div>
@@ -4011,9 +4138,8 @@ export function M06AppOverviewPage({ onBack, onOpenDna, onOpenTimeline, onOpenPr
 
                   {/* Document status */}
                   <div className="border border-[#d1d9e0] rounded overflow-hidden">
-                    <div className="flex items-center justify-between px-4 py-2.5 bg-[#f8f9fb] border-b border-[#d1d9e0]">
+                    <div className="px-4 py-2.5 bg-[#f8f9fb] border-b border-[#d1d9e0]">
                       <h2 className="text-sm font-semibold text-[#1a2533]">Document Status</h2>
-                      <button disabled className="text-[11px] text-[#1a56db] hover:underline opacity-50 cursor-not-allowed">View Documents (Disabled: No ID)</button>
                     </div>
                     <div className="px-4 py-3 flex flex-wrap gap-4 text-xs">
                       {[['12', 'Submitted', 'text-[#1a2533]'], ['10', 'Valid', 'text-green-700'], ['1', 'Expired', 'text-red-700 font-semibold'], ['1', 'Needs Verification', 'text-amber-700']].map(([n, l, c]) => (
@@ -4024,42 +4150,13 @@ export function M06AppOverviewPage({ onBack, onOpenDna, onOpenTimeline, onOpenPr
                       ))}
                     </div>
                     <div className="px-4 pb-3 text-[11px] text-[#1a2533] border-t border-[#f0f4f8] pt-2">
-                      <span className="font-medium text-red-700">Fire NOC</span> — Validity expired 31 Aug 2026 · Requires officer review. Document validity issue is a scrutiny flag; it does not automatically determine the outcome.
+                      <span className="font-medium text-red-700">Fire NOC</span> - Validity expired 31 Aug 2026 · Requires officer review. Document validity issue is a scrutiny flag; it does not automatically determine the outcome.
                     </div>
                   </div>
                 </div>
 
-                {/* Right column — Timeline + Current Action + Workflow Context */}
+                {/* Right column - Timeline + Current Action + Workflow Context */}
                 <div className="space-y-4">
-
-                  {/* Current Action */}
-                  <div className="border border-[#1a3a5c] rounded overflow-hidden bg-[#f0f4f8]">
-                    <div className="px-4 py-2.5 bg-[#1a3a5c]">
-                      <h2 className="text-sm font-semibold text-white">Current Action</h2>
-                    </div>
-                    <div className="p-4 space-y-2 text-xs">
-                      <p className="text-[#1a2533]">Application is in <span className="font-semibold text-[#1a3a5c]">TECHNICAL_SCRUTINY</span> at <span className="font-semibold">{APP_SAMPLE.desk}</span>.</p>
-                      <p className="text-[#1a2533]">SLA risk: <span className="text-amber-700 font-semibold">{APP_SAMPLE.slaRemaining} remaining</span></p>
-                      <div className="space-y-2 pt-2">
-                        {[
-                          ['Review automated pre-check', 'primary'],
-                          ['Review consistency findings', 'secondary'],
-                          ['Review documents', 'secondary'],
-                        ].map(([label, variant]) => (
-                          <button key={label} disabled={label === 'Review documents'} title={label === 'Review documents' ? 'No document selected' : undefined} onClick={() => { if (label === 'Review automated pre-check') onOpenPrecheck?.(); else if (label === 'Review consistency findings') onOpenConsistency?.(); }} className={`w-full text-left px-3 py-2 rounded text-xs font-semibold transition-colors ${
-                            variant === 'primary'
-                              ? 'bg-[#1a3a5c] text-white hover:bg-[#0f2540]'
-                              : 'bg-white text-[#1a2533] border border-[#d1d9e0] hover:bg-[#f8f9fb]'
-                          }`}>{label}</button>
-                        ))}
-                        <button onClick={() => onOpenDeltaRescrutiny?.()} className="w-full text-left px-3 py-2 rounded text-xs font-semibold transition-colors bg-[#fffbeb] text-[#92400e] border border-[#fcd34d] hover:bg-[#fef3c7]">⬆ Delta Re-scrutiny — Resubmission v2 (M20)</button>
-                        <button onClick={() => onOpenInspectionQueue?.()} className="w-full text-left px-3 py-2 rounded text-xs font-semibold transition-colors bg-[#eff6ff] text-[#1e40af] border border-[#93c5fd] hover:bg-[#dbeafe]">🔍 Inspection Queue / Planning → M21</button>
-                        <button disabled={!onOpenCompliance} title={!onOpenCompliance ? 'No linked compliance record ID available' : undefined} onClick={() => onOpenCompliance?.()} className="w-full text-left px-3 py-2 rounded text-xs font-semibold transition-colors bg-[#f5f3ff] text-[#5b21b6] border border-[#c4b5fd] hover:bg-[#ede9fe]">📋 Conditions / Compliance → M28</button>
-                        <button onClick={() => onOpenDecision?.()} className="w-full text-left px-3 py-2 rounded text-xs font-semibold bg-[#fef2f2] text-[#991b1b] border border-[#fca5a5] hover:bg-[#fee2e2]">⚖ Final Decision Workspace → M25</button>
-                      </div>
-                      <p className="text-[10px] text-[#374151] pt-1">Decision actions (M25/M26) become available when all scrutiny workflow steps are resolved and configured permissions allow.</p>
-                    </div>
-                  </div>
 
                   {/* Workflow context */}
                   <div className="border border-[#d1d9e0] rounded overflow-hidden">
@@ -4068,12 +4165,12 @@ export function M06AppOverviewPage({ onBack, onOpenDna, onOpenTimeline, onOpenPr
                     </div>
                     <div className="px-4 py-3 text-xs space-y-2">
                       {[
-                        ['Route', APP_SAMPLE.scrutinyRoute],
-                        ['Current state', APP_SAMPLE.state],
-                        ['Current desk', APP_SAMPLE.desk],
-                        ['Dept processing', APP_SAMPLE.deptTime],
-                        ['Entrepreneur time', APP_SAMPLE.entrepreneurTime],
-                        ['Total elapsed', APP_SAMPLE.slaElapsed],
+                        ['Route', app.scrutinyRoute],
+                        ['Current state', app.state],
+                        ['Current desk', app.desk],
+                        ['Dept processing', app.deptTime],
+                        ['Entrepreneur time', app.entrepreneurTime],
+                        ['Total elapsed', app.slaElapsed],
                       ].map(([k, v]) => (
                         <div key={k} className="flex justify-between gap-2 py-1 border-b border-[#f8f9fb]">
                           <span className="text-[#374151]">{k}</span>
@@ -4087,7 +4184,7 @@ export function M06AppOverviewPage({ onBack, onOpenDna, onOpenTimeline, onOpenPr
                   <div className="border border-[#d1d9e0] rounded overflow-hidden">
                     <div className="flex items-center justify-between px-4 py-2.5 bg-[#f8f9fb] border-b border-[#d1d9e0]">
                       <h2 className="text-sm font-semibold text-[#1a2533]">Recent Timeline</h2>
-                      <button onClick={() => onOpenTimeline?.()} className="text-[11px] text-[#1a56db] hover:underline">Full timeline → M08</button>
+                      <button onClick={() => onOpenTimeline?.()} className="text-[11px] text-[#1a56db] hover:underline">Full timeline</button>
                     </div>
                     <div className="px-4 py-3 space-y-0">
                       {APP_TIMELINE.slice(-4).reverse().map((ev, i) => (
@@ -4144,7 +4241,7 @@ const M09_GROUPS: PreCheckGroup[] = [
       { id:'d2', name:'CTE Certificate (MPCB)', result:'verified', explanation:'Document present. Verification: DEPARTMENT_VERIFIED. Valid through 31 Dec 2027.', source:'Document workspace', checkedAt:'18 Sep 2026, 14:32', rule:'DOC-CTE-01',
         detail:{ values:[{ label:'Present', value:'Yes' }, { label:'Verification', value:'DEPARTMENT_VERIFIED' }, { label:'Expiry', value:'31 Dec 2027' }] } },
       { id:'d3', name:'Fire NOC (Provisional)', result:'warning', explanation:'Document present but expiry date has passed (10 Sep 2026). Officer review required.', source:'Document workspace', checkedAt:'18 Sep 2026, 14:32', rule:'DOC-FIRE-01',
-        detail:{ values:[{ label:'Present', value:'Yes' }, { label:'Verification', value:'SELF_DECLARED' }, { label:'Expiry', value:'10 Sep 2026 (Expired)', match:false }], impact:'Expired document — review required', nextReview:'Document workspace' } },
+        detail:{ values:[{ label:'Present', value:'Yes' }, { label:'Verification', value:'SELF_DECLARED' }, { label:'Expiry', value:'10 Sep 2026 (Expired)', match:false }], impact:'Expired document - review required', nextReview:'Document workspace' } },
       { id:'d4', name:'Environmental Clearance', result:'verified', explanation:'Document present. Verification: USER_CONFIRMED. Valid.', source:'Document workspace', checkedAt:'18 Sep 2026, 14:32', rule:'DOC-EC-01',
         detail:{ values:[{ label:'Present', value:'Yes' }, { label:'Verification', value:'USER_CONFIRMED' }, { label:'Expiry', value:'18 Mar 2028' }] } },
     ],
@@ -4152,11 +4249,11 @@ const M09_GROUPS: PreCheckGroup[] = [
   {
     id: 'dna', title: 'Business DNA', desc: 'Checks that required Business DNA fields are available, NOT_APPLICABLE branches are correctly handled, and NEEDS_REVIEW items are surfaced.',
     checks: [
-      { id:'b1', name:'Required profile fields available', result:'verified', explanation:'All configured mandatory Business DNA fields for this service are present and answered.', source:'Business DNA — Adaptive Profile', checkedAt:'18 Sep 2026, 14:32', rule:'DNA-REQ-01' },
-      { id:'b2', name:'Boiler branch — NOT_APPLICABLE', result:'verified', explanation:'Boiler-related branch is not applicable based on current Business DNA. No missing-data warning raised.', source:'Business DNA — Adaptive Profile', checkedAt:'18 Sep 2026, 14:32', rule:'DNA-NA-01' },
-      { id:'b3', name:'Effluent branch — NOT_APPLICABLE', result:'verified', explanation:'Effluent treatment branch is not applicable for this process type. No missing-data warning raised.', source:'Business DNA — Adaptive Profile', checkedAt:'18 Sep 2026, 14:32', rule:'DNA-NA-02' },
-      { id:'b4', name:'Hazardous Waste — NEEDS_VERIFICATION', result:'judgment', explanation:'Hazardous Waste field is CONFIRMED (Yes) but verification state is NEEDS_VERIFICATION. Source information requires officer verification.', source:'Business DNA — Adaptive Profile', checkedAt:'18 Sep 2026, 14:32', rule:'DNA-VERIFY-01',
-        detail:{ values:[{ label:'Field', value:'Hazardous Waste' }, { label:'Value', value:'Yes' }, { label:'Adaptive state', value:'CONFIRMED' }, { label:'Verification', value:'NEEDS_VERIFICATION', match:false }], impact:'Verification required — field used by MPCB context', nextReview:'M07 — Business DNA' } },
+      { id:'b1', name:'Required profile fields available', result:'verified', explanation:'All configured mandatory Business DNA fields for this service are present and answered.', source:'Business DNA - Adaptive Profile', checkedAt:'18 Sep 2026, 14:32', rule:'DNA-REQ-01' },
+      { id:'b2', name:'Boiler branch - NOT_APPLICABLE', result:'verified', explanation:'Boiler-related branch is not applicable based on current Business DNA. No missing-data warning raised.', source:'Business DNA - Adaptive Profile', checkedAt:'18 Sep 2026, 14:32', rule:'DNA-NA-01' },
+      { id:'b3', name:'Effluent branch - NOT_APPLICABLE', result:'verified', explanation:'Effluent treatment branch is not applicable for this process type. No missing-data warning raised.', source:'Business DNA - Adaptive Profile', checkedAt:'18 Sep 2026, 14:32', rule:'DNA-NA-02' },
+      { id:'b4', name:'Hazardous Waste - NEEDS_VERIFICATION', result:'judgment', explanation:'Hazardous Waste field is CONFIRMED (Yes) but verification state is NEEDS_VERIFICATION. Source information requires officer verification.', source:'Business DNA - Adaptive Profile', checkedAt:'18 Sep 2026, 14:32', rule:'DNA-VERIFY-01',
+        detail:{ values:[{ label:'Field', value:'Hazardous Waste' }, { label:'Value', value:'Yes' }, { label:'Adaptive state', value:'CONFIRMED' }, { label:'Verification', value:'NEEDS_VERIFICATION', match:false }], impact:'Verification required - field used by MPCB context', nextReview:'Business DNA' } },
     ],
   },
   {
@@ -4166,17 +4263,17 @@ const M09_GROUPS: PreCheckGroup[] = [
       { id:'l2', name:'Plot', result:'verified', explanation:'Plot number confirmed. Plot record available and SYSTEM_VERIFIED.', source:'MIDC allotment record', checkedAt:'18 Sep 2026, 14:32', rule:'LAND-PLOT-01' },
       { id:'l3', name:'Possession', result:'verified', explanation:'Possession information available and consistent with MIDC record.', source:'MIDC allotment record', checkedAt:'18 Sep 2026, 14:32', rule:'LAND-POSS-01' },
       { id:'l4', name:'Land information consistency', result:'warning', explanation:'Plot area in the submitted Building / Planning form (4,200 m²) differs from the verified MIDC allotment record (4,800 m²). Review required.', source:'Cross-reference: allotment vs form', checkedAt:'18 Sep 2026, 14:32', rule:'LAND-CONS-01',
-        detail:{ values:[{ label:'Allotment record', value:'4,800 m²', match:true }, { label:'Building/Planning form', value:'4,200 m²', match:false }], impact:'Potential cross-form inconsistency', nextReview:'M16 — Cross-form Consistency' } },
+        detail:{ values:[{ label:'Allotment record', value:'4,800 m²', match:true }, { label:'Building/Planning form', value:'4,200 m²', match:false }], impact:'Potential cross-form inconsistency', nextReview:'Cross-form Consistency' } },
     ],
   },
   {
     id: 'crossform', title: 'Cross-form', desc: 'Compares shared data fields across the application, Business DNA and connected records to identify configured mismatches.',
     checks: [
       { id:'x1', name:'Plot area consistency', result:'warning', explanation:'Plot area differs across records. Business DNA and MIDC application match, but Fire context shows a different value.', source:'Configured connected records', checkedAt:'18 Sep 2026, 14:32', rule:'XFORM-PLOT-01',
-        detail:{ values:[{ label:'Master Business Profile', value:'4,800 m²', match:true }, { label:'MIDC Application', value:'4,800 m²', match:true }, { label:'Fire context', value:'4,600 m²', match:false }], impact:'Cross-form inconsistency — source of truth not yet established', nextReview:'M16 — Cross-form Consistency' } },
+        detail:{ values:[{ label:'Master Business Profile', value:'4,800 m²', match:true }, { label:'MIDC Application', value:'4,800 m²', match:true }, { label:'Fire context', value:'4,600 m²', match:false }], impact:'Cross-form inconsistency - source of truth not yet established', nextReview:'Cross-form Consistency' } },
       { id:'x2', name:'Building area', result:'verified', explanation:'Building area is consistent across all connected records.', source:'Configured connected records', checkedAt:'18 Sep 2026, 14:32', rule:'XFORM-BLDG-01' },
       { id:'x3', name:'Investment', result:'warning', explanation:'Investment value changed since previous version. Current: ₹42 Cr, Previous: ₹40 Cr. Review required.', source:'Business DNA vs previous version', checkedAt:'18 Sep 2026, 14:32', rule:'XFORM-INV-01',
-        detail:{ prevValue:'₹40 Cr', currValue:'₹42 Cr', changedAt:'18 Sep 2026', impact:'Material change — may affect scrutiny scope', nextReview:'M20 — Delta Re-scrutiny' } },
+        detail:{ prevValue:'₹40 Cr', currValue:'₹42 Cr', changedAt:'18 Sep 2026', impact:'Material change - may affect scrutiny scope', nextReview:'Delta Re-scrutiny' } },
       { id:'x4', name:'Project location', result:'verified', explanation:'Project location is consistent across all configured sources.', source:'Configured connected records', checkedAt:'18 Sep 2026, 14:32', rule:'XFORM-LOC-01' },
       { id:'x5', name:'Company identity', result:'verified', explanation:'Business identity matches between Business DNA and submitted application.', source:'Business DNA vs application form', checkedAt:'18 Sep 2026, 14:32', rule:'XFORM-ID-01',
         detail:{ values:[{ label:'Business DNA', value:'Aster BioTech Manufacturing Pvt. Ltd.', match:true }, { label:'MIDC Application', value:'Aster BioTech Manufacturing Pvt. Ltd.', match:true }] } },
@@ -4185,11 +4282,11 @@ const M09_GROUPS: PreCheckGroup[] = [
   {
     id: 'dependencies', title: 'Dependencies', desc: 'Reports the current state of configured prerequisite and external department dependencies.',
     checks: [
-      { id:'dep1', name:'MPCB — Consent to Establish', result:'warning', explanation:'External prerequisite (MPCB CTE) is pending. Application can proceed to scrutiny; dependency must be resolved before final decision.', source:'Connected regulatory record', checkedAt:'18 Sep 2026, 14:32', rule:'DEP-MPCB-01',
-        detail:{ values:[{ label:'Dependency', value:'MPCB — Consent to Establish' }, { label:'Authority', value:'MPCB' }, { label:'Current state', value:'Pending', match:false }, { label:'Last updated', value:'18 Sep 2026' }], impact:'Prerequisite pending — detailed status in M17', nextReview:'M17 — Dependencies' } },
-      { id:'dep2', name:'Fire Authority — NOC', result:'warning', explanation:'Fire Authority NOC dependency is pending. Associated document has also expired — review required.', source:'Connected regulatory record', checkedAt:'18 Sep 2026, 14:32', rule:'DEP-FIRE-01',
-        detail:{ values:[{ label:'Dependency', value:'Fire Authority — NOC' }, { label:'Authority', value:'Fire Authority' }, { label:'Current state', value:'Pending', match:false }, { label:'Last updated', value:'15 Sep 2026' }], impact:'Prerequisite pending — expired document flagged separately', nextReview:'M17 — Dependencies' } },
-      { id:'dep3', name:'MIDC Utilities — Connection', result:'verified', explanation:'MIDC Utilities context is available. No blocking condition identified.', source:'Connected regulatory record', checkedAt:'18 Sep 2026, 14:32', rule:'DEP-UTIL-01' },
+      { id:'dep1', name:'MPCB - Consent to Establish', result:'warning', explanation:'External prerequisite (MPCB CTE) is pending. Application can proceed to scrutiny; dependency must be resolved before final decision.', source:'Connected regulatory record', checkedAt:'18 Sep 2026, 14:32', rule:'DEP-MPCB-01',
+        detail:{ values:[{ label:'Dependency', value:'MPCB - Consent to Establish' }, { label:'Authority', value:'MPCB' }, { label:'Current state', value:'Pending', match:false }, { label:'Last updated', value:'18 Sep 2026' }], impact:'Prerequisite pending - see Regulatory Dependencies', nextReview:'Dependencies' } },
+      { id:'dep2', name:'Fire Authority - NOC', result:'warning', explanation:'Fire Authority NOC dependency is pending. Associated document has also expired - review required.', source:'Connected regulatory record', checkedAt:'18 Sep 2026, 14:32', rule:'DEP-FIRE-01',
+        detail:{ values:[{ label:'Dependency', value:'Fire Authority - NOC' }, { label:'Authority', value:'Fire Authority' }, { label:'Current state', value:'Pending', match:false }, { label:'Last updated', value:'15 Sep 2026' }], impact:'Prerequisite pending - expired document flagged separately', nextReview:'Dependencies' } },
+      { id:'dep3', name:'MIDC Utilities - Connection', result:'verified', explanation:'MIDC Utilities context is available. No blocking condition identified.', source:'Connected regulatory record', checkedAt:'18 Sep 2026, 14:32', rule:'DEP-UTIL-01' },
     ],
   },
   {
@@ -4197,9 +4294,9 @@ const M09_GROUPS: PreCheckGroup[] = [
     checks: [
       { id:'c1', name:'Plot area', result:'verified', explanation:'Plot area is unchanged since previous version. Current: 4,800 m².', source:'Business DNA version comparison', checkedAt:'18 Sep 2026, 14:32', rule:'CHANGE-PLOT-01' },
       { id:'c2', name:'Investment', result:'warning', explanation:'Investment changed after submission. Previous: ₹40 Cr → Current: ₹42 Cr.', source:'Business DNA version comparison', checkedAt:'18 Sep 2026, 14:32', rule:'CHANGE-INV-01',
-        detail:{ prevValue:'₹40 Cr', currValue:'₹42 Cr', changedAt:'18 Sep 2026', impact:'Material change since previous version', nextReview:'M20 — Delta Re-scrutiny' } },
+        detail:{ prevValue:'₹40 Cr', currValue:'₹42 Cr', changedAt:'18 Sep 2026', impact:'Material change since previous version', nextReview:'Delta Re-scrutiny' } },
       { id:'c3', name:'Capacity', result:'warning', explanation:'Production capacity figure changed after submission. Previous: 500 MT/yr → Current: 550 MT/yr.', source:'Business DNA version comparison', checkedAt:'18 Sep 2026, 14:32', rule:'CHANGE-CAP-01',
-        detail:{ prevValue:'500 MT/yr', currValue:'550 MT/yr', changedAt:'18 Sep 2026', impact:'Capacity change may affect regulatory thresholds', nextReview:'M20 — Delta Re-scrutiny' } },
+        detail:{ prevValue:'500 MT/yr', currValue:'550 MT/yr', changedAt:'18 Sep 2026', impact:'Capacity change may affect regulatory thresholds', nextReview:'Delta Re-scrutiny' } },
       { id:'c4', name:'Project location', result:'verified', explanation:'Project location is unchanged since previous version.', source:'Business DNA version comparison', checkedAt:'18 Sep 2026, 14:32', rule:'CHANGE-LOC-01' },
       { id:'c5', name:'Building area', result:'verified', explanation:'Building area is unchanged since previous version.', source:'Business DNA version comparison', checkedAt:'18 Sep 2026, 14:32', rule:'CHANGE-BLDG-01' },
     ],
@@ -4295,7 +4392,7 @@ function PreCheckDrawer({ check, onClose }: { check: PreCheck; onClose: () => vo
             </div>
           )}
           <div className="pt-2 border-t border-[#d1d9e0]">
-            <p className="text-[10px] text-[#374151] italic">System finding — officer scrutiny determines the regulatory conclusion.</p>
+            <p className="text-[10px] text-[#374151] italic">System finding - officer scrutiny determines the regulatory conclusion.</p>
           </div>
         </div>
       </div>
@@ -4365,6 +4462,7 @@ function PreCheckGroupCard({ group, defaultExpanded }: { group: PreCheckGroup; d
 }
 
 export function M09PreCheckPage({ onBackToOverview, onOpenDna, onOpenTimeline, onOpenScrutinyRoute }: { onBackToOverview: () => void; onOpenDna?: () => void; onOpenTimeline?: () => void; onOpenScrutinyRoute?: () => void }) {
+  const app = useMonolithData().APP_SAMPLE
   const totalVerified = M09_GROUPS.flatMap(g => g.checks).filter(c => c.result === 'verified').length
   const totalWarning  = M09_GROUPS.flatMap(g => g.checks).filter(c => c.result === 'warning').length
   const totalJudgment = M09_GROUPS.flatMap(g => g.checks).filter(c => c.result === 'judgment').length
@@ -4395,12 +4493,12 @@ export function M09PreCheckPage({ onBackToOverview, onOpenDna, onOpenTimeline, o
         <div className="bg-white border border-[#d1d9e0] rounded p-4">
           <div className="grid grid-cols-2 gap-x-8 gap-y-2 sm:grid-cols-3">
             {[
-              ['Application ID', APP_SAMPLE.id],
-              ['Business / Project', APP_SAMPLE.business],
-              ['MIDC Service', APP_SAMPLE.service],
-              ['Current state', APP_SAMPLE.state],
-              ['Current desk', APP_SAMPLE.desk],
-              ['Office / Region', APP_SAMPLE.office],
+              ['Application ID', app.id],
+              ['Business / Project', app.business],
+              ['MIDC Service', app.service],
+              ['Current state', app.state],
+              ['Current desk', app.desk],
+              ['Office / Region', app.office],
             ].map(([k, v]) => (
               <div key={k}>
                 <p className="text-[9px] text-[#374151] uppercase tracking-wider font-semibold">{k}</p>
@@ -4448,8 +4546,8 @@ export function M09PreCheckPage({ onBackToOverview, onOpenDna, onOpenTimeline, o
 
         {/* System check vs officer review legend */}
         <div className="flex items-center gap-6 text-[10px] text-[#374151]">
-          <span className="flex items-center gap-1.5"><span className="inline-block w-2.5 h-2.5 rounded-sm bg-[#ebf3ff] border border-[#bdd4f5]" />System check — objective automated finding</span>
-          <span className="flex items-center gap-1.5"><span className="inline-block w-2.5 h-2.5 rounded-sm bg-[#f8f9fb] border border-[#d1d9e0]" />Officer review — statutory judgment required</span>
+          <span className="flex items-center gap-1.5"><span className="inline-block w-2.5 h-2.5 rounded-sm bg-[#ebf3ff] border border-[#bdd4f5]" />System check - objective automated finding</span>
+          <span className="flex items-center gap-1.5"><span className="inline-block w-2.5 h-2.5 rounded-sm bg-[#f8f9fb] border border-[#d1d9e0]" />Officer review - statutory judgment required</span>
         </div>
 
         {/* Sample data notice */}
@@ -4462,18 +4560,6 @@ export function M09PreCheckPage({ onBackToOverview, onOpenDna, onOpenTimeline, o
           ))}
         </div>
 
-        {/* Secondary actions */}
-        <div className="bg-white border border-[#d1d9e0] rounded p-4">
-          <p className="text-[10px] text-[#374151] uppercase tracking-wider font-semibold mb-3">Related Workspaces</p>
-          <div className="flex flex-wrap gap-2">
-            <button onClick={onOpenDna} className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb] transition-colors">View Business DNA → M07</button>
-            <button onClick={onOpenTimeline} className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb] transition-colors">View Timeline → M08</button>
-            <button className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#374151] cursor-default">View Consistency → M16</button>
-            <button className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#374151] cursor-default">View Dependencies → M17</button>
-            <button className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#374151] cursor-default">View Delta Re-scrutiny → M20</button>
-          </div>
-        </div>
-
         {/* Primary CTA */}
         <div className="bg-white border border-[#d1d9e0] rounded p-4 flex items-center justify-between gap-4">
           <div>
@@ -4481,7 +4567,7 @@ export function M09PreCheckPage({ onBackToOverview, onOpenDna, onOpenTimeline, o
             <p className="text-[11px] text-[#374151] mt-0.5">{totalWarning} warning{totalWarning !== 1 ? 's' : ''} and {totalJudgment} officer-review item{totalJudgment !== 1 ? 's' : ''} identified. Application can proceed to manual scrutiny.</p>
           </div>
           <button onClick={onOpenScrutinyRoute} className="px-4 py-2 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540] transition-colors shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a56db]">
-            Proceed to Scrutiny → M10
+            Proceed to Scrutiny
           </button>
         </div>
 
@@ -4494,16 +4580,16 @@ export function M09PreCheckPage({ onBackToOverview, onOpenDna, onOpenTimeline, o
 
 
 const SCRUTINY_FACTORS: ScrutinyFactor[] = [
-  { id:'sf1', name:'Service type', result:'verified', condition:'Service type is Land / Plot — configured as a factor for this scrutiny path.', source:'Configured service requirements', rule:'ROUTE-SVC-01', evaluatedAt:'23 Sep 2026, 10:42',
+  { id:'sf1', name:'Service type', result:'verified', condition:'Service type is Land / Plot - configured as a factor for this scrutiny path.', source:'Configured service requirements', rule:'ROUTE-SVC-01', evaluatedAt:'23 Sep 2026, 10:42',
     detail:{ values:[{ label:'Service', value:'Land / Plot' }, { label:'Factor effect', value:'Standard routing consideration' }] } },
   { id:'sf2', name:'New construction', result:'warning', condition:'Proposed new construction indicated in the submitted application and Business DNA.', source:'Application form + Business DNA', rule:'ROUTE-CONST-01', evaluatedAt:'23 Sep 2026, 10:42',
-    detail:{ values:[{ label:'Project stage', value:'New Construction' }, { label:'Factor effect', value:'Triggers enhanced review depth', match:false }], impact:'Construction stage is a configured scrutiny-depth condition', nextReview:'M11 — Scrutiny Workbench' } },
+    detail:{ values:[{ label:'Project stage', value:'New Construction' }, { label:'Factor effect', value:'Triggers enhanced review depth', match:false }], impact:'Construction stage is a configured scrutiny-depth condition', nextReview:'Scrutiny Workbench' } },
   { id:'sf3', name:'Land / plot inconsistency', result:'warning', condition:'Plot area in the submitted application differs from the Master Project Dossier record.', source:'Master Project Dossier + Current MIDC Application', rule:'Configured consistency rule: Plot Area', evaluatedAt:'23 Sep 2026, 10:42',
-    detail:{ values:[{ label:'Master Project Dossier', value:'4,800 m²', match:true }, { label:'MIDC Application form', value:'4,200 m²', match:false }], impact:'Cross-form mismatch — configured scrutiny factor', nextReview:'M16 — Cross-form Consistency' } },
+    detail:{ values:[{ label:'Master Project Dossier', value:'4,800 m²', match:true }, { label:'MIDC Application form', value:'4,200 m²', match:false }], impact:'Cross-form mismatch - configured scrutiny factor', nextReview:'Cross-form Consistency' } },
   { id:'sf4', name:'Unresolved prerequisite', result:'warning', condition:'MPCB Consent to Establish is pending. External dependency included as a configured scrutiny factor.', source:'Connected regulatory record (MPCB)', rule:'ROUTE-DEP-01', evaluatedAt:'23 Sep 2026, 10:42',
-    detail:{ values:[{ label:'Dependency', value:'MPCB — Consent to Establish' }, { label:'Status', value:'Pending', match:false }, { label:'Authority', value:'MPCB' }], impact:'Prerequisite pending — included as routing factor', nextReview:'M17 — Dependencies' } },
+    detail:{ values:[{ label:'Dependency', value:'MPCB - Consent to Establish' }, { label:'Status', value:'Pending', match:false }, { label:'Authority', value:'MPCB' }], impact:'Prerequisite pending - included as routing factor', nextReview:'Dependencies' } },
   { id:'sf5', name:'Inspection requirement', result:'judgment', condition:'Inspection condition configured for this service and project context. Whether inspection proceeds depends on officer assessment.', source:'Configured service workflow', rule:'ROUTE-INSP-01', evaluatedAt:'23 Sep 2026, 10:42',
-    detail:{ values:[{ label:'Requirement', value:'Conditional' }, { label:'Configured for', value:'Land / Plot service' }], impact:'Inspection may be required — officer review required', nextReview:'M21 / M22 — Inspection Planning' } },
+    detail:{ values:[{ label:'Requirement', value:'Conditional' }, { label:'Configured for', value:'Land / Plot service' }], impact:'Inspection may be required - officer review required', nextReview:'Inspection Planning' } },
 ]
 
 
@@ -4511,7 +4597,7 @@ function ScrutinyFactorRow({ factor }: { factor: ScrutinyFactor }) {
   const [open, setOpen] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const resultMeta = {
-    verified: { label:'Configured — matched', icon:'✓', textCls:'text-emerald-700', bgCls:'bg-emerald-50', borderCls:'border-emerald-200' },
+    verified: { label:'Configured - matched', icon:'✓', textCls:'text-emerald-700', bgCls:'bg-emerald-50', borderCls:'border-emerald-200' },
     warning:  { label:'Factor triggered', icon:'⚠', textCls:'text-amber-700', bgCls:'bg-amber-50', borderCls:'border-amber-200' },
     judgment: { label:'Needs officer judgment', icon:'○', textCls:'text-[#4a5568]', bgCls:'bg-[#f8f9fb]', borderCls:'border-[#d1d9e0]' },
   }[factor.result]
@@ -4557,7 +4643,7 @@ function ScrutinyFactorRow({ factor }: { factor: ScrutinyFactor }) {
               </div>
               {factor.detail?.impact && <div><p className="text-[10px] text-[#374151] uppercase tracking-wider font-semibold mb-1">Impact on routing</p><p className="text-[#1a2533]">{factor.detail.impact}</p></div>}
               {factor.detail?.nextReview && <div><p className="text-[10px] text-[#374151] uppercase tracking-wider font-semibold mb-1">Next review</p><p className="text-[#1a56db] font-medium">{factor.detail.nextReview}</p></div>}
-              <div className="pt-2 border-t border-[#d1d9e0]"><p className="text-[10px] text-[#374151] italic">Configuration-driven condition — not a statutory legal finding. Officer scrutiny determines the regulatory outcome.</p></div>
+              <div className="pt-2 border-t border-[#d1d9e0]"><p className="text-[10px] text-[#374151] italic">Configuration-driven condition - not a statutory legal finding. Officer scrutiny determines the regulatory outcome.</p></div>
             </div>
           </div>
         </div>
@@ -4698,7 +4784,7 @@ export function M10ScrutinyRoutePage({ onBackToOverview, onBackToPrecheck, onOpe
         {/* Info panel */}
         <div className="bg-[#ebf3ff] border border-[#bdd4f5] rounded px-4 py-3 flex gap-3">
           <span className="text-[#1a56db] text-sm shrink-0 mt-0.5" aria-hidden="true">ℹ</span>
-          <p className="text-xs text-[#1a3a5c]">Scrutiny route determines how deeply the application is reviewed. It does not automatically approve or reject the application. The assigned route reflects configured workflow conditions — not a legal or statutory decision.</p>
+          <p className="text-xs text-[#1a3a5c]">Scrutiny route determines how deeply the application is reviewed. It does not automatically approve or reject the application. The assigned route reflects configured workflow conditions - not a legal or statutory decision.</p>
         </div>
 
         {/* Configured Scrutiny Factors */}
@@ -4763,7 +4849,7 @@ export function M10ScrutinyRoutePage({ onBackToOverview, onBackToPrecheck, onOpe
           {/* M09 upstream */}
           <div className="bg-white border border-[#d1d9e0] rounded p-4">
             <p className="text-[10px] text-[#374151] uppercase tracking-wider font-semibold mb-2">Previous System Check</p>
-            <p className="text-xs font-semibold text-[#1a2533] mb-2">Automated Pre-check · M09</p>
+            <p className="text-xs font-semibold text-[#1a2533] mb-2">Automated Pre-check</p>
             <div className="space-y-1 text-[11px]">
               <div className="flex justify-between"><span className="text-[#374151]">✓ Machine-verified</span><strong className="text-emerald-700">18</strong></div>
               <div className="flex justify-between"><span className="text-[#374151]">⚠ Warnings</span><strong className="text-amber-700">5</strong></div>
@@ -4783,7 +4869,6 @@ export function M10ScrutinyRoutePage({ onBackToOverview, onBackToPrecheck, onOpe
                 </div>
               ))}
             </div>
-            <button onClick={onOpenDna} className="mt-3 text-[10px] text-[#1a56db] hover:underline font-semibold">View Business DNA → M07</button>
           </div>
 
           {/* Cross-form consistency */}
@@ -4797,15 +4882,14 @@ export function M10ScrutinyRoutePage({ onBackToOverview, onBackToPrecheck, onOpe
               <div className="flex justify-between"><span className="text-[#374151]">Master Project Dossier</span><span className="font-medium text-emerald-700">4,800 m²</span></div>
               <div className="flex justify-between"><span className="text-[#374151]">MIDC Application</span><span className="font-medium text-amber-700">4,200 m²</span></div>
             </div>
-            <p className="text-[10px] text-[#374151] mt-2 italic">Officer investigates in M16. M10 identifies the routing condition only.</p>
-            <button className="mt-2 text-[10px] text-[#374151] cursor-default">Investigate → M16 (coming)</button>
+            <p className="text-[10px] text-[#374151] mt-2 italic">Officer investigates in Cross-form Consistency. The pre-check identifies the routing condition only.</p>
           </div>
 
           {/* Dependencies */}
           <div className="bg-white border border-[#d1d9e0] rounded p-4">
             <p className="text-[10px] text-[#374151] uppercase tracking-wider font-semibold mb-2">Dependency Context</p>
             <div className="space-y-2">
-              {[{ dep:'MPCB — Consent to Establish', status:'Pending', authority:'MPCB' }, { dep:'Fire Authority — NOC', status:'Pending', authority:'Fire Authority' }].map(d => (
+              {[{ dep:'MPCB - Consent to Establish', status:'Pending', authority:'MPCB' }, { dep:'Fire Authority - NOC', status:'Pending', authority:'Fire Authority' }].map(d => (
                 <div key={d.dep} className="flex items-start justify-between gap-2 text-[11px]">
                   <div>
                     <p className="font-medium text-[#1a2533]">{d.dep}</p>
@@ -4816,7 +4900,7 @@ export function M10ScrutinyRoutePage({ onBackToOverview, onBackToPrecheck, onOpe
               ))}
             </div>
             <p className="text-[10px] text-[#374151] mt-2 italic">MIDC cannot approve or modify another department's decision.</p>
-            <button onClick={onOpenDepView} className="mt-2 text-[10px] text-[#1a56db] hover:underline font-semibold">View Dependency Graph → M17</button>
+            <button onClick={onOpenDepView} className="mt-2 text-[10px] text-[#1a56db] hover:underline font-semibold">View Dependency Graph</button>
           </div>
         </div>
 
@@ -4836,14 +4920,13 @@ export function M10ScrutinyRoutePage({ onBackToOverview, onBackToPrecheck, onOpe
           </div>
           <div className="flex items-center justify-between mt-2 pt-2">
             <p className="text-[10px] text-[#374151]">Changed: 18 Sep 2026 · Routing effect: Configured scrutiny factor triggered</p>
-            <button className="text-[10px] text-[#374151] cursor-default">View Delta Re-scrutiny → M20 (coming)</button>
           </div>
         </div>
 
         {/* Officer review note */}
         <div className="bg-white border border-[#d1d9e0] rounded p-4">
           <p className="text-[10px] text-[#374151] uppercase tracking-wider font-semibold mb-1">Officer Review Note</p>
-          <p className="text-[10px] text-[#6b7280] mb-2 italic">Officer-entered observation — not a system finding</p>
+          <p className="text-[10px] text-[#6b7280] mb-2 italic">Officer-entered observation - not a system finding</p>
           <textarea
             value={officerNote}
             onChange={e => setOfficerNote(e.target.value)}
@@ -4859,28 +4942,15 @@ export function M10ScrutinyRoutePage({ onBackToOverview, onBackToPrecheck, onOpe
           Route evaluation recorded in audit history. Route version: MIDC Scrutiny Config v1.2 · Evaluated: 23 Sep 2026, 10:42 · Previous route: Standard Review (updated after resubmission).
         </div>
 
-        {/* Secondary actions + primary CTA */}
-        <div className="bg-white border border-[#d1d9e0] rounded p-4 space-y-4">
+        {/* Primary CTA */}
+        <div className="bg-white border border-[#d1d9e0] rounded p-4 flex items-center justify-between gap-4">
           <div>
-            <p className="text-[10px] text-[#374151] uppercase tracking-wider font-semibold mb-2">Related Workspaces</p>
-            <div className="flex flex-wrap gap-2">
-              <button onClick={onBackToPrecheck} className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb] transition-colors">View Automated Pre-check → M09</button>
-              <button onClick={onOpenDna} className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb] transition-colors">View Business DNA → M07</button>
-              <button onClick={onOpenTimeline} className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb] transition-colors">View Timeline → M08</button>
-              <button className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#374151] cursor-default">View Consistency → M16</button>
-              <button className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#374151] cursor-default">View Dependencies → M17</button>
-              <button className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#374151] cursor-default">View Delta Changes → M20</button>
-            </div>
+            <p className="text-xs font-semibold text-[#1a2533]">Ready to proceed to scrutiny.</p>
+            <p className="text-[11px] text-[#374151] mt-0.5">Route: Enhanced Review · No approval or rejection at this stage.</p>
           </div>
-          <div className="pt-3 border-t border-[#f0f4f8] flex items-center justify-between gap-4">
-            <div>
-              <p className="text-xs font-semibold text-[#1a2533]">Ready to proceed to scrutiny.</p>
-              <p className="text-[11px] text-[#374151] mt-0.5">Route: Enhanced Review · No approval or rejection at this stage.</p>
-            </div>
-            <button onClick={onOpenScrutinyWorkbench} className="px-4 py-2 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540] transition-colors shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a56db]">
-              Proceed to Scrutiny → M11
-            </button>
-          </div>
+          <button onClick={onOpenScrutinyWorkbench} className="px-4 py-2 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540] transition-colors shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a56db]">
+            Proceed to Scrutiny
+          </button>
         </div>
 
         <p className="text-[10px] text-[#374151] italic">All values are fictional prototype data and do not represent actual MIDC records, legal thresholds, or official processing requirements.</p>
@@ -5006,8 +5076,8 @@ const M11_SECTIONS: ScrutinySection[] = [
   { id: 'findings', label: 'Officer Findings', status: 'not-reviewed', params: [] },
 ]
 
-export function M11ScrutinyWorkbenchPage({ onBack, onBackToOverview, onOpenDna, onOpenTimeline, onOpenParamDetail, onOpenDocReview, onOpenBldgScrutiny, onOpenWaterScrutiny, onOpenDepView, onOpenQueryBuilder }: {
-  onBack: () => void; onBackToOverview: () => void; onOpenDna?: () => void; onOpenTimeline?: () => void; onOpenParamDetail?: (id: string) => void; onOpenDocReview?: (id: string) => void; onOpenBldgScrutiny?: () => void; onOpenWaterScrutiny?: () => void; onOpenDepView?: () => void; onOpenQueryBuilder?: () => void
+export function M11ScrutinyWorkbenchPage({ onBack, onBackToOverview, onOpenDna, onOpenTimeline, onOpenParamDetail, onOpenDocReview, onOpenBldgScrutiny, onOpenWaterScrutiny, onOpenDepView }: {
+  onBack: () => void; onBackToOverview: () => void; onOpenDna?: () => void; onOpenTimeline?: () => void; onOpenParamDetail?: (id: string) => void; onOpenDocReview?: (id: string) => void; onOpenBldgScrutiny?: () => void; onOpenWaterScrutiny?: () => void; onOpenDepView?: () => void
 }) {
   const [activeSectionId, setActiveSectionId] = useState('land')
   const [activeParamId, setActiveParamId] = useState('plotarea')
@@ -5036,42 +5106,6 @@ export function M11ScrutinyWorkbenchPage({ onBack, onBackToOverview, onOpenDna, 
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-[#f8f9fb]">
-      {/* Query modal */}
-      {queryModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-modal="true" aria-label="Raise Query">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setQueryModal(false)} />
-          <div className="relative bg-white rounded shadow-xl w-full max-w-lg p-6 space-y-4 z-10">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-[#1a2533]">Raise Query</h3>
-              <button onClick={() => setQueryModal(false)} className="text-[#374151] hover:text-[#1a2533] text-lg leading-none" aria-label="Close">✕</button>
-            </div>
-            <div className="grid grid-cols-2 gap-3 text-xs">
-              <div><p className="text-[9px] text-[#374151] uppercase tracking-wider font-semibold mb-1">Parameter</p><p className="font-semibold text-[#1a2533]">{activeParam.name}</p></div>
-              <div><p className="text-[9px] text-[#374151] uppercase tracking-wider font-semibold mb-1">Current value</p><p className="font-semibold text-[#1a2533]">{activeParam.value}</p></div>
-              <div><p className="text-[9px] text-[#374151] uppercase tracking-wider font-semibold mb-1">Evidence</p><p className="text-[#1a2533]">{activeParam.document?.name ?? 'Current MIDC application'}</p></div>
-              <div><p className="text-[9px] text-[#374151] uppercase tracking-wider font-semibold mb-1">Application</p><p className="text-[#1a2533]">MIDC-APP-2026-00418</p></div>
-            </div>
-            <div>
-              <label className="text-[10px] text-[#374151] uppercase tracking-wider font-semibold block mb-1">Issue</label>
-              <input defaultValue={`${activeParam.name} requires clarification`} className="w-full text-xs border border-[#d1d9e0] rounded px-3 py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a56db]" />
-            </div>
-            <div>
-              <label className="text-[10px] text-[#374151] uppercase tracking-wider font-semibold block mb-1">Required response</label>
-              <input defaultValue={`Clarify ${activeParam.name.toLowerCase()} and provide supporting evidence`} className="w-full text-xs border border-[#d1d9e0] rounded px-3 py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a56db]" />
-            </div>
-            <div>
-              <label className="text-[10px] text-[#374151] uppercase tracking-wider font-semibold block mb-1">Officer comment</label>
-              <textarea rows={3} placeholder="Add observation..." className="w-full text-xs border border-[#d1d9e0] rounded px-3 py-2 resize-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a56db]" />
-            </div>
-            <div className="flex gap-2 pt-1">
-              <button onClick={() => { setReview(activeParam.id, 'query'); setQueryModal(false); setQuerySaved(true); setTimeout(() => setQuerySaved(false), 3000) }}
-                className="px-4 py-2 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540] transition-colors">Add to Consolidated Query → M18</button>
-              <button onClick={() => setQueryModal(false)} className="px-3 py-2 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb]">Cancel</button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Page header strip */}
       <div className="bg-white border-b border-[#d1d9e0] px-5 py-3 shrink-0">
         <Breadcrumb items={[
@@ -5083,7 +5117,7 @@ export function M11ScrutinyWorkbenchPage({ onBack, onBackToOverview, onOpenDna, 
         ]} />
         <div className="flex items-start justify-between gap-4 mt-2">
           <div>
-            <h1 className="text-base font-bold text-[#1a2533]">Land / Plot — Scrutiny Workbench</h1>
+            <h1 className="text-base font-bold text-[#1a2533]">Land / Plot - Scrutiny Workbench</h1>
             <p className="text-[11px] text-[#374151] mt-0.5">Service-specific scrutiny for MIDC-APP-2026-00418 · Enhanced Review</p>
           </div>
           <button onClick={onBack} className="text-xs text-[#1a56db] hover:underline shrink-0">← Scrutiny Route</button>
@@ -5102,18 +5136,16 @@ export function M11ScrutinyWorkbenchPage({ onBack, onBackToOverview, onOpenDna, 
         {[['Params reviewed', totalParams], ['✓ Valid', reviewed], ['⚠ Query', queryCount], ['○ Needs Verification', needsVerif], ['✗ Invalid', invalidCount]].map(([k, v]) => (
           <span key={String(k)} className="text-white"><span className="text-[#8fafd0]">{k}: </span><strong>{v}</strong></span>
         ))}
-        {querySaved && <span className="ml-auto text-emerald-400 font-semibold">Query saved to M18 ✓</span>}
         <div className="ml-auto flex gap-4 shrink-0">
-          <button onClick={onOpenBldgScrutiny} className="text-[10px] text-[#8fafd0] hover:text-white underline">Also reviewing: Building / Planning → M14</button>
-          <button onClick={onOpenWaterScrutiny} className="text-[10px] text-[#8fafd0] hover:text-white underline">Also reviewing: Water / Utility → M15</button>
-          <button onClick={onOpenQueryBuilder} className="text-[10px] text-[#8fafd0] hover:text-white underline">Query Builder → M18</button>
+          <button onClick={onOpenBldgScrutiny} className="text-[10px] text-[#8fafd0] hover:text-white underline">Also reviewing: Building / Planning</button>
+          <button onClick={onOpenWaterScrutiny} className="text-[10px] text-[#8fafd0] hover:text-white underline">Also reviewing: Water / Utility</button>
         </div>
       </div>
 
       {/* Three-column layout */}
       <div className="flex flex-1 overflow-hidden">
 
-        {/* LEFT — section navigation */}
+        {/* LEFT - section navigation */}
         <nav className="w-52 shrink-0 bg-white border-r border-[#d1d9e0] overflow-y-auto flex flex-col" aria-label="Application scrutiny sections">
           <div className="px-3 py-2.5 border-b border-[#d1d9e0]">
             <p className="text-[9px] text-[#374151] uppercase tracking-wider font-bold">Application Scrutiny</p>
@@ -5146,7 +5178,7 @@ export function M11ScrutinyWorkbenchPage({ onBack, onBackToOverview, onOpenDna, 
           </div>
         </nav>
 
-        {/* CENTER — parameter review panel */}
+        {/* CENTER - parameter review panel */}
         <main id="main-content" className="flex-1 overflow-y-auto bg-[#f8f9fb]" tabIndex={-1}>
           {activeSection.params.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full py-20 text-center">
@@ -5208,7 +5240,7 @@ export function M11ScrutinyWorkbenchPage({ onBack, onBackToOverview, onOpenDna, 
                       <div className="grid grid-cols-2 divide-x divide-[#94a3b8]">
                         <div className="px-4 py-3">
                           <p className="text-[9px] text-[#374151] uppercase tracking-wider font-semibold mb-0.5">Current application</p>
-                          <p className="text-xs text-[#1a2533] font-medium">{param.appValue ?? '—'}</p>
+                          <p className="text-xs text-[#1a2533] font-medium">{param.appValue ?? '-'}</p>
                         </div>
                         <div className="px-4 py-3">
                           <p className="text-[9px] text-[#374151] uppercase tracking-wider font-semibold mb-0.5">Previous submission</p>
@@ -5234,7 +5266,7 @@ export function M11ScrutinyWorkbenchPage({ onBack, onBackToOverview, onOpenDna, 
                           ))}
                         </div>
                         {param.crossForm.some(c => !c.match) ? (
-                          <button className="mt-2 text-[10px] text-[#1a56db] hover:underline font-semibold">Investigate in Cross-form Consistency → M16</button>
+                          <button className="mt-2 text-[10px] text-[#1a56db] hover:underline font-semibold">Investigate in Cross-form Consistency</button>
                         ) : (
                           <p className="mt-2 text-[10px] text-emerald-700 font-semibold">✓ Consistent across all sources</p>
                         )}
@@ -5255,7 +5287,7 @@ export function M11ScrutinyWorkbenchPage({ onBack, onBackToOverview, onOpenDna, 
                             <button disabled={!param.document.id} title={!param.document.id ? 'No document ID available' : undefined} onClick={() => { if (param.document?.id) onOpenDocReview?.(param.document.id) }} className="text-[10px] text-[#1a56db] hover:underline font-semibold">Open Document Review → M13</button>
                           </div>
                         </div>
-                        <p className="text-[10px] text-[#374151] mt-2 italic">Previously verified — reused from Business Document Repository. Do not overwrite master document.</p>
+                        <p className="text-[10px] text-[#374151] mt-2 italic">Previously verified - reused from Business Document Repository. Do not overwrite master document.</p>
                       </div>
                     )}
 
@@ -5268,7 +5300,7 @@ export function M11ScrutinyWorkbenchPage({ onBack, onBackToOverview, onOpenDna, 
                     {/* Officer review state selector */}
                     <div className="bg-white border border-[#d1d9e0] rounded p-4 space-y-3">
                       <p className="text-[10px] text-[#374151] uppercase tracking-wider font-semibold">Officer Review State</p>
-                      <p className="text-[10px] text-[#6b7280] italic">Officer scrutiny state — separate from source verification state.</p>
+                      <p className="text-[10px] text-[#6b7280] italic">Officer scrutiny state - separate from source verification state.</p>
                       <div className="flex flex-wrap gap-2">
                         {(['valid', 'needs-verification', 'query', 'invalid'] as OfficerReviewState[]).map(state => {
                           const m = OFFICER_REVIEW_META[state]
@@ -5289,7 +5321,7 @@ export function M11ScrutinyWorkbenchPage({ onBack, onBackToOverview, onOpenDna, 
                           <input value={invReason} onChange={e => setInvalidReason(prev => ({ ...prev, [param.id]: e.target.value }))}
                             placeholder="State why this parameter is invalid..."
                             className="w-full text-xs border border-red-200 rounded px-3 py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400" />
-                          <p className="text-[9px] text-[#374151] mt-1 italic">Invalid state does not automatically determine application outcome. Final decision belongs to M25/M26.</p>
+                          <p className="text-[9px] text-[#374151] mt-1 italic">Invalid state does not automatically determine application outcome. Final decision belongs to the Decision Workspace.</p>
                         </div>
                       )}
 
@@ -5322,7 +5354,7 @@ export function M11ScrutinyWorkbenchPage({ onBack, onBackToOverview, onOpenDna, 
           )}
         </main>
 
-        {/* RIGHT — regulatory / source / notes */}
+        {/* RIGHT - regulatory / source / notes */}
         <aside className="w-64 shrink-0 bg-white border-l border-[#d1d9e0] overflow-y-auto flex flex-col" aria-label="Regulatory and source context">
           <div className="px-4 py-2.5 border-b border-[#d1d9e0] bg-[#f8f9fb]">
             <p className="text-[9px] text-[#374151] uppercase tracking-wider font-bold">Regulatory / Source Context</p>
@@ -5337,7 +5369,6 @@ export function M11ScrutinyWorkbenchPage({ onBack, onBackToOverview, onOpenDna, 
                 <span className="font-medium text-[#1a2533]">{v}</span>
               </div>
             ))}
-            <button onClick={onOpenDna} className="mt-1 text-[10px] text-[#1a56db] hover:underline font-semibold">View Business DNA → M07</button>
           </div>
 
           {/* Source */}
@@ -5351,20 +5382,20 @@ export function M11ScrutinyWorkbenchPage({ onBack, onBackToOverview, onOpenDna, 
           {/* Rule / requirement */}
           <div className="px-4 py-3 border-b border-[#f0f4f8]">
             <p className="text-[9px] text-[#374151] uppercase tracking-wider font-semibold mb-1">Rule / Requirement</p>
-            <p className="text-[11px] text-[#1a2533]">Configured Land / Plot service requirement — Plot area must be consistent with MIDC allotment record and submitted application.</p>
+            <p className="text-[11px] text-[#1a2533]">Configured Land / Plot service requirement - Plot area must be consistent with MIDC allotment record and submitted application.</p>
             <p className="text-[10px] text-[#374151] mt-1 italic">Source reference: Configured workflow rule. No official GR cited in current configuration.</p>
           </div>
 
           {/* Dependency context */}
           <div className="px-4 py-3 border-b border-[#f0f4f8]">
             <p className="text-[9px] text-[#374151] uppercase tracking-wider font-semibold mb-2">Dependency Impact</p>
-            {[{ dep: 'MPCB — CTE', status: 'Pending', dept: 'MPCB' }, { dep: 'Fire Authority — NOC', status: 'Pending', dept: 'Fire Authority' }].map(d => (
+            {[{ dep: 'MPCB - CTE', status: 'Pending', dept: 'MPCB' }, { dep: 'Fire Authority - NOC', status: 'Pending', dept: 'Fire Authority' }].map(d => (
               <div key={d.dep} className="mb-2">
                 <p className="text-[11px] font-medium text-[#1a2533]">{d.dep}</p>
                 <p className="text-[10px] text-[#374151]">{d.dept} · <span className="text-amber-700 font-semibold">{d.status}</span></p>
               </div>
             ))}
-            <button onClick={onOpenDepView} className="text-[10px] text-[#1a56db] hover:underline font-semibold">View Dependency Graph → M17</button>
+            <button onClick={onOpenDepView} className="text-[10px] text-[#1a56db] hover:underline font-semibold">View Dependency Graph</button>
           </div>
 
           {/* Officer notes log */}
@@ -5379,7 +5410,7 @@ export function M11ScrutinyWorkbenchPage({ onBack, onBackToOverview, onOpenDna, 
             <p className="text-[9px] text-[#374151] uppercase tracking-wider font-semibold mb-1">Regulatory Assistant</p>
             <p className="text-[10px] text-[#1a2533]">2 relevant references available for Plot Area.</p>
             <button className="mt-1 text-[10px] text-[#1a56db] hover:underline font-semibold">View references</button>
-            <p className="text-[9px] text-[#6b7280] mt-2 italic">Retrieved regulatory context — not a legal finding or AI decision.</p>
+            <p className="text-[9px] text-[#6b7280] mt-2 italic">Retrieved regulatory context - not a legal finding or AI decision.</p>
           </div>
         </aside>
       </div>
@@ -5406,7 +5437,7 @@ export function M12ParameterDetailPage({ onBack, onBackToOverview, onOpenDna, on
           <div className="absolute inset-0 bg-black/40" onClick={() => setQueryModal(false)} />
           <div className="relative bg-white rounded shadow-xl w-full max-w-lg p-6 space-y-4 z-10">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-[#1a2533]">Raise Query — Plot Area</h3>
+              <h3 className="text-sm font-bold text-[#1a2533]">Raise Query - Plot Area</h3>
               <button onClick={() => setQueryModal(false)} className="text-[#374151] hover:text-[#1a2533] text-lg" aria-label="Close">✕</button>
             </div>
             <div className="grid grid-cols-2 gap-3 text-xs">
@@ -5417,7 +5448,7 @@ export function M12ParameterDetailPage({ onBack, onBackToOverview, onOpenDna, on
             <div><label className="text-[10px] text-[#374151] uppercase tracking-wider font-semibold block mb-1">Required response</label><input defaultValue="Confirm plot area with supporting allotment evidence" className="w-full text-xs border border-[#d1d9e0] rounded px-3 py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a56db]" /></div>
             <div><label className="text-[10px] text-[#374151] uppercase tracking-wider font-semibold block mb-1">Officer comment</label><textarea rows={2} className="w-full text-xs border border-[#d1d9e0] rounded px-3 py-2 resize-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a56db]" /></div>
             <div className="flex gap-2">
-              <button onClick={() => { setOfficerFinding('query'); setQueryModal(false); setSaved(true); setTimeout(() => setSaved(false), 3000) }} className="px-4 py-2 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540]">Add to Consolidated Query → M18</button>
+              <button onClick={() => { setOfficerFinding('query'); setQueryModal(false); setSaved(true); setTimeout(() => setSaved(false), 3000) }} className="px-4 py-2 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540]">Add to Consolidated Query</button>
               <button onClick={() => setQueryModal(false)} className="px-3 py-2 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb]">Cancel</button>
             </div>
           </div>
@@ -5486,9 +5517,8 @@ export function M12ParameterDetailPage({ onBack, onBackToOverview, onOpenDna, on
 
             {/* MPD value detail */}
             <div className="bg-white border border-[#d1d9e0] rounded overflow-hidden">
-              <div className="px-4 py-2.5 bg-[#f8f9fb] border-b border-[#d1d9e0] flex justify-between">
+              <div className="px-4 py-2.5 bg-[#f8f9fb] border-b border-[#d1d9e0]">
                 <p className="text-xs font-bold text-[#1a2533] uppercase tracking-wider">Master Project Dossier</p>
-                <button onClick={onOpenDna} className="text-[10px] text-[#1a56db] hover:underline font-semibold">View in Business DNA → M07</button>
               </div>
               <div className="px-4 py-4 space-y-3">
                 <p className="text-2xl font-bold text-[#1a3a5c]">4,800 m²</p>
@@ -5523,7 +5553,7 @@ export function M12ParameterDetailPage({ onBack, onBackToOverview, onOpenDna, on
                   <p className="text-[9px] text-[#374151] uppercase tracking-wider font-semibold mb-1">Previous Submission</p>
                   <p className="text-xl font-bold text-[#1a2533]">4,800 m²</p>
                   <p className="text-[10px] text-[#374151] mt-1">No change detected</p>
-                  <p className="text-[10px] text-[#374151] mt-2 italic">If changed: View Delta Re-scrutiny → M20</p>
+                  <p className="text-[10px] text-[#374151] mt-2 italic">If changed: View Delta Re-scrutiny</p>
                 </div>
               </div>
             </div>
@@ -5546,7 +5576,7 @@ export function M12ParameterDetailPage({ onBack, onBackToOverview, onOpenDna, on
               </div>
               <div className="px-4 py-2 border-t border-[#f0f4f8] bg-[#f8f9fb]">
                 <p className="text-[10px] text-emerald-700 font-semibold">✓ Consistent across all configured sources</p>
-                <p className="text-[10px] text-[#374151] mt-0.5 italic">If mismatch: Investigate Cross-form Consistency → M16 (MIDC cannot edit another department's record)</p>
+                <p className="text-[10px] text-[#374151] mt-0.5 italic">If mismatch: Investigate Cross-form Consistency (MIDC cannot edit another department's record)</p>
               </div>
             </div>
 
@@ -5572,9 +5602,8 @@ export function M12ParameterDetailPage({ onBack, onBackToOverview, onOpenDna, on
 
             {/* Audit history */}
             <div className="bg-white border border-[#d1d9e0] rounded overflow-hidden">
-              <div className="px-4 py-2.5 bg-[#f8f9fb] border-b border-[#d1d9e0] flex justify-between">
+              <div className="px-4 py-2.5 bg-[#f8f9fb] border-b border-[#d1d9e0]">
                 <p className="text-xs font-bold text-[#1a2533] uppercase tracking-wider">Audit History</p>
-                <button className="text-[10px] text-[#374151] cursor-default">View Full Audit → M38 (coming)</button>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-[11px]">
@@ -5609,7 +5638,7 @@ export function M12ParameterDetailPage({ onBack, onBackToOverview, onOpenDna, on
                     <span className="font-medium text-[#1a2533] text-right">{v}</span>
                   </div>
                 ))}
-                <p className="text-[10px] text-[#374151] italic mt-1">Verification indicates how the value was established — separate from officer scrutiny finding.</p>
+                <p className="text-[10px] text-[#374151] italic mt-1">Verification indicates how the value was established - separate from officer scrutiny finding.</p>
               </div>
             </div>
 
@@ -5633,7 +5662,7 @@ export function M12ParameterDetailPage({ onBack, onBackToOverview, onOpenDna, on
               <div className="p-4 text-[11px] space-y-2">
                 <p className="text-[#1a2533]">Plot Area is potentially related to: Building / Planning, Inspection, Configured downstream services.</p>
                 <p className="text-[#374151]">No direct dependency change detected for the current value.</p>
-                <p className="text-[10px] italic text-[#374151]">Change may affect configured downstream requirements. View Dependency Graph → M17 (coming)</p>
+                <p className="text-[10px] italic text-[#374151]">Change may affect configured downstream requirements.</p>
               </div>
             </div>
 
@@ -5641,10 +5670,10 @@ export function M12ParameterDetailPage({ onBack, onBackToOverview, onOpenDna, on
             <div className="bg-white border border-[#d1d9e0] rounded overflow-hidden">
               <div className="px-4 py-2.5 bg-[#f8f9fb] border-b border-[#d1d9e0]"><p className="text-xs font-bold text-[#1a2533] uppercase tracking-wider">Regulatory Reference</p></div>
               <div className="p-4 text-[11px] space-y-2">
-                <p className="text-[#1a2533]">Configured Land / Plot service requirement — Plot area must correspond to the MIDC allotment record.</p>
+                <p className="text-[#1a2533]">Configured Land / Plot service requirement - Plot area must correspond to the MIDC allotment record.</p>
                 <p className="text-[#374151] italic">Regulatory reference: Configured workflow rule. No official GR cited in current configuration.</p>
                 <button className="text-[10px] text-[#1a56db] hover:underline font-semibold">Open Regulatory Reference</button>
-                <p className="text-[9px] text-[#6b7280] italic">Retrieved regulatory context — not a legal finding or AI decision.</p>
+                <p className="text-[9px] text-[#6b7280] italic">Retrieved regulatory context - not a legal finding or AI decision.</p>
               </div>
             </div>
 
@@ -5652,7 +5681,7 @@ export function M12ParameterDetailPage({ onBack, onBackToOverview, onOpenDna, on
             <div className="bg-white border border-[#d1d9e0] rounded overflow-hidden">
               <div className="px-4 py-2.5 bg-[#f8f9fb] border-b border-[#d1d9e0]"><p className="text-xs font-bold text-[#1a2533] uppercase tracking-wider">Officer Scrutiny</p></div>
               <div className="p-4 space-y-3">
-                <p className="text-[10px] text-[#374151] italic">Officer scrutiny state — separate from source verification state.</p>
+                <p className="text-[10px] text-[#374151] italic">Officer scrutiny state - separate from source verification state.</p>
                 <div className="flex flex-wrap gap-2">
                   {(['valid','needs-verification','query','invalid'] as OfficerReviewState[]).map(s => {
                     const m = OFFICER_REVIEW_META[s]
@@ -5682,7 +5711,7 @@ export function M12ParameterDetailPage({ onBack, onBackToOverview, onOpenDna, on
           <button onClick={() => setQueryModal(true)} className="px-3 py-2 text-xs border border-amber-200 rounded text-amber-700 bg-amber-50 hover:bg-amber-100 font-semibold">Raise Query</button>
           <button className="px-3 py-2 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb]">Request Additional Evidence</button>
           <button className="px-3 py-2 text-xs border border-[#d1d9e0] rounded text-[#1a56db] hover:bg-[#ebf3ff]">Open Regulatory Reference</button>
-          <p className="ml-auto text-[10px] text-[#374151] italic">Approval / rejection belong to M25/M26.</p>
+          <p className="ml-auto text-[10px] text-[#374151] italic">Approval / rejection belong to the Decision Workspace.</p>
         </div>
       </div>
     </div>
@@ -5720,13 +5749,13 @@ export function M13DocumentReviewPage({ onBack, onOpenParamDetail }: {
             <h1 className="text-lg font-bold text-[#1a2533]">Land / Plot Allotment Record</h1>
             <div className="flex flex-wrap gap-x-4 mt-1 text-[11px] text-[#374151]">
               <span>DOC-LAND-00418</span><span>·</span><span>MIDC-APP-2026-00418</span><span>·</span>
-              <span className="text-emerald-700 font-semibold">Previously Verified — Reused</span>
+              <span className="text-emerald-700 font-semibold">Previously Verified - Reused</span>
             </div>
           </div>
           <button onClick={onBack} className="text-xs text-[#1a56db] hover:underline shrink-0">← Scrutiny Workbench</button>
         </div>
 
-        <p className="text-[10px] text-[#374151] italic">Fictional prototype data — not an actual MIDC record.</p>
+        <p className="text-[10px] text-[#374151] italic">Fictional prototype data - not an actual MIDC record.</p>
 
         {/* Action confirmation panel */}
         {confirmed && (
@@ -5736,7 +5765,7 @@ export function M13DocumentReviewPage({ onBack, onOpenParamDetail }: {
         )}
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-          {/* CENTER — document preview */}
+          {/* CENTER - document preview */}
           <div className="lg:col-span-2 space-y-3">
             {/* Preview area */}
             <div className="bg-white border border-[#d1d9e0] rounded overflow-hidden">
@@ -5766,7 +5795,7 @@ export function M13DocumentReviewPage({ onBack, onOpenParamDetail }: {
                     <div className="flex justify-between"><span className="text-[#374151]">Allottee</span><span className="font-semibold">Aster Precision Components Pvt. Ltd.</span></div>
                     <div className="flex justify-between"><span className="text-[#374151]">Date</span><span className="font-semibold">2 Mar 2024</span></div>
                   </div>
-                  <p className="text-[9px] text-[#6b7280] italic">— Prototype sample document — Page {page} of {totalPages} —</p>
+                  <p className="text-[9px] text-[#6b7280] italic">- Prototype sample document - Page {page} of {totalPages} -</p>
                 </div>
               </div>
               {/* Page nav */}
@@ -5779,9 +5808,9 @@ export function M13DocumentReviewPage({ onBack, onOpenParamDetail }: {
 
             {/* Reuse history */}
             <div className="bg-white border border-[#d1d9e0] rounded overflow-hidden">
-              <div className="px-4 py-2.5 bg-[#f8f9fb] border-b border-[#d1d9e0]"><p className="text-xs font-bold text-[#1a2533] uppercase tracking-wider">Reuse History — Upload Once, Reuse Where Applicable</p></div>
+              <div className="px-4 py-2.5 bg-[#f8f9fb] border-b border-[#d1d9e0]"><p className="text-xs font-bold text-[#1a2533] uppercase tracking-wider">Reuse History - Upload Once, Reuse Where Applicable</p></div>
               <div className="px-4 py-3 space-y-1 text-[11px]">
-                <p className="text-emerald-700 font-semibold">Previously verified — reused from Business Document Repository.</p>
+                <p className="text-emerald-700 font-semibold">Previously verified - reused from Business Document Repository.</p>
                 <p className="text-[#374151]">Original verification: Department Verified · Source: Verified Document Repository</p>
               </div>
               <div className="overflow-x-auto">
@@ -5835,7 +5864,7 @@ export function M13DocumentReviewPage({ onBack, onOpenParamDetail }: {
                   {docAction === 'invalid' && (
                     <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded">
                       <span className="text-amber-600">⚠</span>
-                      <p className="text-xs text-amber-700">Marking this document invalid records a document-level finding. It does not automatically reject the application. Application outcome belongs to M25/M26.</p>
+                      <p className="text-xs text-amber-700">Marking this document invalid records a document-level finding. It does not automatically reject the application. Application outcome belongs to the Decision Workspace.</p>
                     </div>
                   )}
                   <div className="grid grid-cols-2 gap-3 text-[11px]">
@@ -5853,7 +5882,7 @@ export function M13DocumentReviewPage({ onBack, onOpenParamDetail }: {
                   <div className="flex gap-2">
                     <button onClick={() => { setConfirmed(true); setDocAction('none'); setActionNote(''); setTimeout(() => setConfirmed(false), 4000) }}
                       className="px-4 py-2 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540] transition-colors">
-                      {docAction === 'correction' || docAction === 'evidence' ? 'Add to Consolidated Query → M18' : 'Confirm & Save'}
+                      {docAction === 'correction' || docAction === 'evidence' ? 'Add to Consolidated Query' : 'Confirm & Save'}
                     </button>
                     <button onClick={() => { setDocAction('none'); setActionNote('') }} className="px-3 py-2 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb]">Cancel</button>
                   </div>
@@ -5872,7 +5901,7 @@ export function M13DocumentReviewPage({ onBack, onOpenParamDetail }: {
             </div>
           </div>
 
-          {/* RIGHT — context panel */}
+          {/* RIGHT - context panel */}
           <div className="space-y-4">
             {/* Document details */}
             <div className="bg-white border border-[#d1d9e0] rounded overflow-hidden">
@@ -5912,7 +5941,7 @@ export function M13DocumentReviewPage({ onBack, onOpenParamDetail }: {
                 {['Plot Area','Allotment Status','Possession Status'].map(p => (
                   <button key={p} onClick={() => p === 'Plot Area' ? onOpenParamDetail?.('plotarea') : undefined}
                     className={`block w-full text-left text-[11px] font-semibold py-1 px-2 rounded hover:bg-[#f0f4f8] transition-colors ${p === 'Plot Area' ? 'text-[#1a56db]' : 'text-[#1a2533]'}`}>
-                    {p} {p === 'Plot Area' && '→ M12'}
+                    {p}
                   </button>
                 ))}
               </div>
@@ -5932,7 +5961,7 @@ export function M13DocumentReviewPage({ onBack, onOpenParamDetail }: {
             <div className="bg-white border border-[#d1d9e0] rounded p-4 space-y-1.5 text-[11px]">
               <p className="text-[10px] text-[#374151] uppercase tracking-wider font-semibold">Regulatory Reference</p>
               <p className="text-[#1a2533]">Configured Land / Plot service: allotment record is a required supporting document.</p>
-              <p className="text-[#374151] italic text-[10px]">Regulatory reference unavailable in current configuration — no official GR cited.</p>
+              <p className="text-[#374151] italic text-[10px]">Regulatory reference unavailable in current configuration - no official GR cited.</p>
               <button className="text-[10px] text-[#1a56db] hover:underline font-semibold">Open Regulatory Reference</button>
             </div>
 
@@ -5992,7 +6021,7 @@ export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamD
           <div className="absolute inset-0 bg-black/40" onClick={() => setQueryModal(null)} />
           <div className="relative bg-white rounded shadow-xl w-full max-w-lg p-6 space-y-4 z-10">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-[#1a2533]">Raise Query — {queryModal}</h3>
+              <h3 className="text-sm font-bold text-[#1a2533]">Raise Query - {queryModal}</h3>
               <button onClick={() => setQueryModal(null)} className="text-[#374151] hover:text-[#1a2533] text-lg" aria-label="Close">✕</button>
             </div>
             <div className="grid grid-cols-2 gap-3 text-xs">
@@ -6003,7 +6032,7 @@ export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamD
             <div><label className="text-[10px] text-[#374151] uppercase tracking-wider font-semibold block mb-1">Required response</label><input defaultValue="Provide supporting evidence and clarification" className="w-full text-xs border border-[#d1d9e0] rounded px-3 py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a56db]" /></div>
             <div><label className="text-[10px] text-[#374151] uppercase tracking-wider font-semibold block mb-1">Officer comment</label><textarea rows={2} className="w-full text-xs border border-[#d1d9e0] rounded px-3 py-2 resize-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a56db]" /></div>
             <div className="flex gap-2">
-              <button onClick={() => setQueryModal(null)} className="px-4 py-2 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540]">Add to Consolidated Query → M18</button>
+              <button onClick={() => setQueryModal(null)} className="px-4 py-2 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540]">Add to Consolidated Query</button>
               <button onClick={() => setQueryModal(null)} className="px-3 py-2 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb]">Cancel</button>
             </div>
           </div>
@@ -6021,10 +6050,10 @@ export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamD
         ]} />
         <div className="flex items-start justify-between gap-4 mt-2">
           <div>
-            <h1 className="text-base font-bold text-[#1a2533]">Building / Planning — Scrutiny Workbench <span className="text-[11px] text-[#374151] font-normal ml-2">M14</span></h1>
+            <h1 className="text-base font-bold text-[#1a2533]">Building / Planning - Scrutiny Workbench </h1>
             <p className="text-[11px] text-[#374151] mt-0.5">Service-specific scrutiny · MIDC-APP-2026-00418 · Enhanced Review</p>
           </div>
-          <button onClick={onBack} className="text-xs text-[#1a56db] hover:underline shrink-0">← Land / Plot (M11)</button>
+          <button onClick={onBack} className="text-xs text-[#1a56db] hover:underline shrink-0">← Land / Plot</button>
         </div>
         <div className="flex flex-wrap gap-x-6 gap-y-1 mt-2 text-[10px]">
           {[['Application','MIDC-APP-2026-00418'],['Business','Aster Precision Components Pvt. Ltd.'],['Service','Building / Planning'],['State','TECHNICAL_SCRUTINY'],['Route','ENHANCED REVIEW'],['Desk','Planning / Building Scrutiny'],['SLA','Approaching']].map(([k,v]) => (
@@ -6040,7 +6069,7 @@ export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamD
           {[['Plot','P-104 · Sample Industrial Estate'],['Plot Area','4,800 m²'],['Built-up Area','2,300 m²'],['Floors','G+2'],['Construction','New Construction'],['Occupancy','Industrial / Manufacturing'],['Stage','Pre-construction'],['Industrial Machinery','Yes'],['Warehouse','Yes'],['MPCB CTE','Completed']].map(([k,v]) => (
             <span key={k} className="text-[#1a3a5c]">{k}: <strong>{v}</strong></span>
           ))}
-          <span className="text-[10px] text-[#374151] italic">Read-only — inherited from Master Project Dossier</span>
+          <span className="text-[10px] text-[#374151] italic">Read-only - inherited from Master Project Dossier</span>
         </div>
       </div>
 
@@ -6115,8 +6144,7 @@ export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamD
               <div className="flex flex-wrap gap-2 pt-1">
                 <button onClick={() => {}} className="px-3 py-1.5 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540]">Save Review</button>
                 <button className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb]">Flag for Attention</button>
-                <button disabled title="No parameter selected" className="px-3 py-1.5 text-xs border border-[#1a56db] text-[#1a56db] rounded hover:bg-[#ebf3ff] font-semibold">Open Parameter Detail → M12</button>
-                <button onClick={onOpenConsistency} className="px-3 py-1.5 text-xs border border-[#1a56db] text-[#1a56db] rounded hover:bg-[#ebf3ff] font-semibold">Open Cross-form Consistency → M16</button>
+                <button onClick={onOpenConsistency} className="px-3 py-1.5 text-xs border border-[#1a56db] text-[#1a56db] rounded hover:bg-[#ebf3ff] font-semibold">Open Cross-form Consistency</button>
               </div>
             </>
           )}
@@ -6127,7 +6155,6 @@ export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamD
               <h2 className="text-xs font-bold text-[#1a2533] uppercase tracking-wider">Building Parameters</h2>
               <div className="bg-amber-50 border border-amber-200 rounded px-4 py-2 flex items-center gap-2 text-xs text-amber-700">
                 <span>⚠</span> Changes detected since previous submission: Built-up Area 2,000 m² → 2,300 m²
-                <button className="ml-auto text-[10px] text-[#1a56db] hover:underline font-semibold shrink-0">Open Delta Re-scrutiny → M20 (coming)</button>
               </div>
               <div className="bg-white border border-[#d1d9e0] rounded overflow-hidden">
                 <div className="px-4 py-2 bg-[#f8f9fb] border-b border-[#d1d9e0] grid grid-cols-5 gap-2">
@@ -6154,7 +6181,6 @@ export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamD
               </div>
               <div className="flex flex-wrap gap-2 pt-1">
                 <button className="px-3 py-1.5 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540]">Save Review</button>
-                <button disabled title="No parameter selected" className="px-3 py-1.5 text-xs border border-[#1a56db] text-[#1a56db] rounded hover:bg-[#ebf3ff] font-semibold">Open Parameter Detail → M12</button>
                 <button onClick={() => setQueryModal('Building Parameters')} className="px-3 py-1.5 text-xs border border-amber-200 rounded text-amber-700 bg-amber-50 hover:bg-amber-100 font-semibold">Raise Query</button>
               </div>
             </>
@@ -6180,7 +6206,7 @@ export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamD
                   <div className="px-4 py-3 grid grid-cols-3 gap-4 text-[11px]">
                     <div><p className="text-[#374151]">Verification</p><p className="font-semibold text-[#1a2533]">{d.verify.replace(/_/g,' ')}</p></div>
                     <div><p className="text-[#374151]">Dependency type</p><p className="font-semibold text-[#1a2533]">External / Upstream</p></div>
-                    <div><p className="text-[#374151]">MIDC action</p><button disabled title="No document ID available" className="text-[10px] text-[#1a56db] hover:underline font-semibold">View evidence → M13</button></div>
+                    <div><p className="text-[#374151]">MIDC action</p><span className="text-[10px] text-[#6b7280]">No evidence document attached</span></div>
                   </div>
                   <div className="px-4 py-2 border-t border-[#f0f4f8] bg-[#f8f9fb]">
                     <p className="text-[10px] text-[#374151] italic">{d.note}</p>
@@ -6220,7 +6246,6 @@ export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamD
               </div>
               <div className="flex flex-wrap gap-2 pt-1">
                 <button className="px-3 py-1.5 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540]">Save Review</button>
-                <button disabled title="No document selected" className="px-3 py-1.5 text-xs border border-[#1a56db] text-[#1a56db] rounded hover:bg-[#ebf3ff] font-semibold">Open Document Review → M13</button>
                 <button className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb]">Request Additional Evidence</button>
               </div>
             </>
@@ -6247,7 +6272,6 @@ export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamD
                       </span>
                     </div>
                     <div className="flex gap-2 mt-3">
-                      <button disabled title="No document ID available" className="text-[10px] text-[#1a56db] hover:underline font-semibold">Open Document Review → M13</button>
                       <button onClick={() => setQueryModal(d.name)} className="text-[10px] text-amber-600 hover:underline font-semibold">Request Evidence</button>
                     </div>
                   </div>
@@ -6278,10 +6302,10 @@ export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamD
                 </div>
               </div>
               <div className="flex flex-wrap gap-2 pt-1">
-                <button onClick={onOpenConsistency} className="px-3 py-1.5 text-xs border border-[#1a56db] text-[#1a56db] rounded hover:bg-[#ebf3ff] font-semibold">Investigate Cross-form Consistency → M16</button>
-                <button onClick={() => setQueryModal('Plot Area — cross-form mismatch')} className="px-3 py-1.5 text-xs border border-amber-200 rounded text-amber-700 bg-amber-50 hover:bg-amber-100 font-semibold">Raise Query</button>
+                <button onClick={onOpenConsistency} className="px-3 py-1.5 text-xs border border-[#1a56db] text-[#1a56db] rounded hover:bg-[#ebf3ff] font-semibold">Investigate Cross-form Consistency</button>
+                <button onClick={() => setQueryModal('Plot Area - cross-form mismatch')} className="px-3 py-1.5 text-xs border border-amber-200 rounded text-amber-700 bg-amber-50 hover:bg-amber-100 font-semibold">Raise Query</button>
               </div>
-              <p className="text-[10px] text-[#374151] italic">M14 identifies mismatches for officer review. MIDC may not edit another department's application. Resolution through M16.</p>
+              <p className="text-[10px] text-[#374151] italic">Building / Planning scrutiny identifies mismatches for officer review. MIDC may not edit another department's application. Resolution through Cross-form Consistency.</p>
             </>
           )}
 
@@ -6301,7 +6325,7 @@ export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamD
                         <div>
                           <p className="text-xs font-bold text-[#1a2533]">{d.name}</p>
                           <p className="text-[10px] text-[#374151] mt-0.5">{d.type} · Dept: {d.dept}</p>
-                          {d.ref && d.ref !== '—' && <p className="text-[10px] text-[#374151]">Ref: {d.ref}</p>}
+                          {d.ref && d.ref !== '-' && <p className="text-[10px] text-[#374151]">Ref: {d.ref}</p>}
                         </div>
                         <div className="flex flex-col items-end gap-1">
                           <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-bold border ${d.status === 'Completed' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : d.current ? 'bg-[#1a3a5c] text-white border-[#1a3a5c]' : 'bg-amber-50 text-amber-700 border-amber-200'}`}>
@@ -6311,13 +6335,13 @@ export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamD
                         </div>
                       </div>
                       {!d.current && d.dept !== 'MIDC' && (
-                        <p className="text-[9px] text-[#374151] mt-2 italic">External department — MIDC may view status only. No MIDC controls to approve/modify {d.dept} decisions.</p>
+                        <p className="text-[9px] text-[#374151] mt-2 italic">External department - MIDC may view status only. No MIDC controls to approve/modify {d.dept} decisions.</p>
                       )}
                     </div>
                   </div>
                 ))}
               </div>
-              <button onClick={onOpenDepView} className="text-[10px] text-[#1a56db] hover:underline font-semibold">View full Dependency Graph → M17</button>
+              <button onClick={onOpenDepView} className="text-[10px] text-[#1a56db] hover:underline font-semibold">View full Dependency Graph</button>
             </>
           )}
 
@@ -6330,7 +6354,7 @@ export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamD
           )}
         </main>
 
-        {/* RIGHT — regulatory / dependency / notes */}
+        {/* RIGHT - regulatory / dependency / notes */}
         <aside className="w-64 shrink-0 bg-white border-l border-[#d1d9e0] overflow-y-auto" aria-label="Regulatory and source context">
           <div className="px-4 py-2.5 border-b border-[#d1d9e0] bg-[#f8f9fb]">
             <p className="text-[9px] text-[#374151] uppercase tracking-wider font-bold">Regulatory / Source Context</p>
@@ -6348,9 +6372,9 @@ export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamD
           <div className="px-4 py-3 border-b border-[#f0f4f8]">
             <p className="text-[9px] text-[#374151] uppercase tracking-wider font-semibold mb-2">Rule / Requirement</p>
             <p className="text-[11px] text-[#1a2533]">Configured Building / Planning service requirement. Review items must be consistent with Master Project Dossier and submitted application.</p>
-            <p className="text-[10px] text-[#374151] mt-1 italic">Source: Configured workflow rule — no official GR cited.</p>
+            <p className="text-[10px] text-[#374151] mt-1 italic">Source: Configured workflow rule - no official GR cited.</p>
             <button className="mt-2 text-[10px] text-[#1a56db] hover:underline font-semibold">Open Regulatory Reference</button>
-            <p className="text-[9px] text-[#6b7280] mt-1 italic">Retrieved regulatory context — not a legal finding.</p>
+            <p className="text-[9px] text-[#6b7280] mt-1 italic">Retrieved regulatory context - not a legal finding.</p>
           </div>
 
           {/* Dependency summary */}
@@ -6363,7 +6387,7 @@ export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamD
                 <p className="text-[9px] text-[#374151]">{d.dept} · <span className={d.status === 'Completed' ? 'text-emerald-700' : d.current ? 'text-[#1a3a5c]' : 'text-amber-700'}>{d.status}</span></p>
               </div>
             ))}
-            <button onClick={onOpenDepView} className="text-[10px] text-[#1a56db] hover:underline font-semibold">View Dependency Graph → M17</button>
+            <button onClick={onOpenDepView} className="text-[10px] text-[#1a56db] hover:underline font-semibold">View Dependency Graph</button>
           </div>
 
           {/* Officer notes */}
@@ -6413,7 +6437,7 @@ export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDeta
           <div className="absolute inset-0 bg-black/40" onClick={() => setQueryModal(null)} />
           <div className="relative bg-white rounded shadow-xl w-full max-w-lg p-6 space-y-4 z-10">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-[#1a2533]">Raise Query — {queryModal}</h3>
+              <h3 className="text-sm font-bold text-[#1a2533]">Raise Query - {queryModal}</h3>
               <button onClick={() => setQueryModal(null)} className="text-[#374151] hover:text-[#1a2533] text-lg" aria-label="Close">✕</button>
             </div>
             <div className="grid grid-cols-2 gap-3 text-xs">
@@ -6424,7 +6448,7 @@ export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDeta
             <div><label className="text-[10px] text-[#374151] uppercase tracking-wider font-semibold block mb-1">Required response</label><input defaultValue="Provide supporting evidence and clarification" className="w-full text-xs border border-[#d1d9e0] rounded px-3 py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a56db]" /></div>
             <div><label className="text-[10px] text-[#374151] uppercase tracking-wider font-semibold block mb-1">Officer comment</label><textarea rows={2} className="w-full text-xs border border-[#d1d9e0] rounded px-3 py-2 resize-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a56db]" /></div>
             <div className="flex gap-2">
-              <button onClick={() => setQueryModal(null)} className="px-4 py-2 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540]">Add to Consolidated Query → M18</button>
+              <button onClick={() => setQueryModal(null)} className="px-4 py-2 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540]">Add to Consolidated Query</button>
               <button onClick={() => setQueryModal(null)} className="px-3 py-2 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb]">Cancel</button>
             </div>
           </div>
@@ -6442,10 +6466,10 @@ export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDeta
         ]} />
         <div className="flex items-start justify-between gap-4 mt-2">
           <div>
-            <h1 className="text-base font-bold text-[#1a2533]">Water / Utility / Drainage — Scrutiny Workbench <span className="text-[11px] text-[#374151] font-normal ml-2">M15</span></h1>
+            <h1 className="text-base font-bold text-[#1a2533]">Water / Utility / Drainage - Scrutiny Workbench </h1>
             <p className="text-[11px] text-[#374151] mt-0.5">Service-specific scrutiny · MIDC-APP-2026-00418 · Enhanced Review</p>
           </div>
-          <button onClick={onBack} className="text-xs text-[#1a56db] hover:underline shrink-0">← Scrutiny (M11)</button>
+          <button onClick={onBack} className="text-xs text-[#1a56db] hover:underline shrink-0">← Scrutiny</button>
         </div>
         <div className="flex flex-wrap gap-x-6 gap-y-1 mt-2 text-[10px]">
           {[['Application','MIDC-APP-2026-00418'],['Business','Aster Precision Components Pvt. Ltd.'],['Service','Water / Utility / Drainage'],['State','TECHNICAL_SCRUTINY'],['Route','ENHANCED REVIEW'],['Desk','Utility / Water Scrutiny'],['SLA','Approaching']].map(([k,v]) => (
@@ -6457,11 +6481,11 @@ export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDeta
       {/* Business DNA utility context strip */}
       <div className="bg-[#ebf3ff] border-b border-[#bdd4f5] px-5 py-2 shrink-0">
         <div className="flex flex-wrap gap-x-6 gap-y-1 text-[10px]">
-          <span className="text-[#1a3a5c] font-bold uppercase tracking-wider">Business DNA — Utility Context</span>
+          <span className="text-[#1a3a5c] font-bold uppercase tracking-wider">Business DNA - Utility Context</span>
           {[['Water Required','Yes'],['Water Quantity','Prototype value'],['Water Source','MIDC'],['MIDC Water Route','Active'],['Plot','A-18 · Sample Industrial Estate'],['Plot Area','4,800 m²'],['Stage','Construction'],['Wastewater','Generated'],['Drainage','Required'],['Context','Construction + proposed operation']].map(([k,v]) => (
             <span key={k} className="text-[#1a3a5c]">{k}: <strong>{v}</strong></span>
           ))}
-          <span className="text-[10px] text-[#374151] italic">Read-only — inherited from Master Project Dossier</span>
+          <span className="text-[10px] text-[#374151] italic">Read-only - inherited from Master Project Dossier</span>
         </div>
       </div>
 
@@ -6512,7 +6536,7 @@ export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDeta
                     <p className="text-[11px] font-bold text-[#1a2533]">Service Activation Status</p>
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-bold border bg-emerald-50 text-emerald-700 border-emerald-200">✓ Service Activated</span>
                   </div>
-                  <p className="text-[10px] text-[#1a2533] mt-1.5">This service was activated because the current Business DNA and configured regulatory journey indicate a relevant MIDC utility requirement. This is a system finding — officer judgment is required to confirm applicability.</p>
+                  <p className="text-[10px] text-[#1a2533] mt-1.5">This service was activated because the current Business DNA and configured regulatory journey indicate a relevant MIDC utility requirement. This is a system finding - officer judgment is required to confirm applicability.</p>
                 </div>
                 <div className="grid grid-cols-2 gap-0 divide-y divide-[#94a3b8]">
                   {[
@@ -6553,7 +6577,7 @@ export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDeta
                   {M15_WATER_PARAMS.map(p => {
                     const key = 'wp_' + p.name
                     const rs = reviewStates[key] ?? p.finding
-                    const mismatch = p.appVal !== p.dnaVal && p.dnaVal !== '—'
+                    const mismatch = p.appVal !== p.dnaVal && p.dnaVal !== '-'
                     return (
                       <div key={p.name} className={`grid grid-cols-6 gap-2 px-4 py-2.5 items-center hover:bg-[#f8f9fb] ${mismatch ? 'bg-amber-50' : ''}`}>
                         <button disabled title="No parameter ID available" className="text-[11px] font-semibold text-[#1a56db] hover:underline text-left">{p.name}</button>
@@ -6575,8 +6599,7 @@ export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDeta
               </div>
               <div className="flex gap-2">
                 <button className="px-3 py-1.5 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540]">Save Review</button>
-                <button disabled title="No parameter selected" className="px-3 py-1.5 text-xs border border-[#1a56db] text-[#1a56db] rounded hover:bg-[#ebf3ff] font-semibold">Open Parameter Detail → M12</button>
-                <button onClick={onOpenConsistency} className="px-3 py-1.5 text-xs border border-[#1a56db] text-[#1a56db] rounded hover:bg-[#ebf3ff] font-semibold">Open Cross-form Consistency → M16</button>
+                <button onClick={onOpenConsistency} className="px-3 py-1.5 text-xs border border-[#1a56db] text-[#1a56db] rounded hover:bg-[#ebf3ff] font-semibold">Open Cross-form Consistency</button>
               </div>
             </>
           )}
@@ -6613,7 +6636,6 @@ export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDeta
               </div>
               <div className="flex gap-2">
                 <button className="px-3 py-1.5 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540]">Save Review</button>
-                <button disabled title="No parameter selected" className="px-3 py-1.5 text-xs border border-[#1a56db] text-[#1a56db] rounded hover:bg-[#ebf3ff] font-semibold">Open Parameter Detail → M12</button>
                 <button onClick={() => setQueryModal('Water Parameters')} className="px-3 py-1.5 text-xs border border-amber-200 rounded text-amber-700 bg-amber-50 hover:bg-amber-100 font-semibold">Raise Query</button>
               </div>
             </>
@@ -6629,8 +6651,8 @@ export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDeta
                 </div>
                 <div className="divide-y divide-[#94a3b8]">
                   {[
-                    { name:'Wastewater Generated',   val:'Yes — Generated',   src:'Business DNA',   verify:'USER_CONFIRMED',   finding:'not-reviewed' as OfficerReviewState },
-                    { name:'Wastewater Context',     val:'Industrial — prototype context', src:'Business DNA', verify:'USER_CONFIRMED', finding:'not-reviewed' as OfficerReviewState },
+                    { name:'Wastewater Generated',   val:'Yes - Generated',   src:'Business DNA',   verify:'USER_CONFIRMED',   finding:'not-reviewed' as OfficerReviewState },
+                    { name:'Wastewater Context',     val:'Industrial - prototype context', src:'Business DNA', verify:'USER_CONFIRMED', finding:'not-reviewed' as OfficerReviewState },
                     { name:'Drainage Required',      val:'Required',          src:'Business DNA',   verify:'USER_CONFIRMED',   finding:'not-reviewed' as OfficerReviewState },
                     { name:'Drainage Status',        val:'Configured review required', src:'Regulatory Journey', verify:'SYSTEM_VERIFIED', finding:'not-reviewed' as OfficerReviewState },
                     { name:'Construction Context',   val:'Construction + proposed operation', src:'Business DNA', verify:'USER_CONFIRMED', finding:'not-reviewed' as OfficerReviewState },
@@ -6690,7 +6712,6 @@ export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDeta
               </div>
               <div className="flex gap-2">
                 <button className="px-3 py-1.5 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540]">Save Review</button>
-                <button disabled title="No document selected" className="px-3 py-1.5 text-xs border border-[#1a56db] text-[#1a56db] rounded hover:bg-[#ebf3ff] font-semibold">Open Document Review → M13</button>
                 <button className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb]">Request Additional Evidence</button>
               </div>
             </>
@@ -6700,7 +6721,7 @@ export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDeta
           {activeSection === 'deps' && (
             <>
               <h2 className="text-xs font-bold text-[#1a2533] uppercase tracking-wider">Dependency</h2>
-              <p className="text-[10px] text-[#374151] italic">Configured dependencies for this Water / Utility service. The sequence is configurable — utilities may proceed in parallel with conditional NOCs when the configured dependency graph allows it.</p>
+              <p className="text-[10px] text-[#374151] italic">Configured dependencies for this Water / Utility service. The sequence is configurable - utilities may proceed in parallel with conditional NOCs when the configured dependency graph allows it.</p>
               <div className="space-y-3">
                 {M15_DEPS.map((d, i) => (
                   <div key={d.name} className="flex gap-3">
@@ -6713,7 +6734,7 @@ export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDeta
                         <div>
                           <p className="text-xs font-bold text-[#1a2533]">{d.name}</p>
                           <p className="text-[10px] text-[#374151] mt-0.5">{d.type} · Dept: {d.dept}</p>
-                          {d.ref && d.ref !== '—' && <p className="text-[10px] text-[#374151]">Ref: {d.ref}</p>}
+                          {d.ref && d.ref !== '-' && <p className="text-[10px] text-[#374151]">Ref: {d.ref}</p>}
                         </div>
                         <div className="flex flex-col items-end gap-1">
                           <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-bold border ${d.status === 'Completed' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : d.current ? 'bg-[#1a3a5c] text-white border-[#1a3a5c]' : d.status.includes('Parallel') ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-[#f8f9fb] text-[#374151] border-[#d1d9e0]'}`}>{d.status}</span>
@@ -6724,7 +6745,7 @@ export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDeta
                   </div>
                 ))}
               </div>
-              <button onClick={onOpenDepView} className="text-[10px] text-[#1a56db] hover:underline font-semibold">View full Dependency Graph → M17</button>
+              <button onClick={onOpenDepView} className="text-[10px] text-[#1a56db] hover:underline font-semibold">View full Dependency Graph</button>
             </>
           )}
 
@@ -6748,7 +6769,7 @@ export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDeta
                 </div>
               </div>
               <div className="flex gap-2">
-                <button onClick={onOpenConsistency} className="px-3 py-1.5 text-xs border border-[#1a56db] text-[#1a56db] rounded hover:bg-[#ebf3ff] font-semibold">Open Cross-form Consistency → M16</button>
+                <button onClick={onOpenConsistency} className="px-3 py-1.5 text-xs border border-[#1a56db] text-[#1a56db] rounded hover:bg-[#ebf3ff] font-semibold">Open Cross-form Consistency</button>
                 <button onClick={() => setQueryModal('Consistency check discrepancy')} className="px-3 py-1.5 text-xs border border-amber-200 rounded text-amber-700 bg-amber-50 hover:bg-amber-100 font-semibold">Raise Query</button>
               </div>
             </>
@@ -6780,16 +6801,16 @@ export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDeta
                   ))}
                 </div>
               </div>
-              <p className="text-[10px] text-[#374151] italic">Context fields — read-only for this service. These are not MIDC Water/Utility decision fields.</p>
+              <p className="text-[10px] text-[#374151] italic">Context fields - read-only for this service. These are not MIDC Water/Utility decision fields.</p>
             </>
           )}
 
           {/* PREVIOUS APPROVED DATA */}
           {activeSection === 'previous' && (
             <div className="flex flex-col items-center justify-center py-20 text-center">
-              <p className="text-sm font-semibold text-[#1a2533]">08 — Previous Approved Data</p>
+              <p className="text-sm font-semibold text-[#1a2533]">08 - Previous Approved Data</p>
               <p className="text-xs text-[#374151] mt-1">This is the applicant's first submission for this service. No previous approved data to compare.</p>
-              <p className="text-[10px] text-[#6b7280] mt-2 italic">For resubmissions, delta values appear here — open M20 for Delta Re-scrutiny.</p>
+              <p className="text-[10px] text-[#6b7280] mt-2 italic">For resubmissions, delta values appear here — open Delta Re-scrutiny.</p>
             </div>
           )}
 
@@ -6816,9 +6837,9 @@ export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDeta
           <div className="px-4 py-3 border-b border-[#f0f4f8]">
             <p className="text-[9px] text-[#374151] uppercase tracking-wider font-semibold mb-2">Rule / Requirement</p>
             <p className="text-[11px] text-[#1a2533]">Configured Water / Utility service requirement. Review items must be consistent with Business DNA and submitted application.</p>
-            <p className="text-[10px] text-[#374151] mt-1 italic">Source: Configured workflow rule — no official GR cited.</p>
+            <p className="text-[10px] text-[#374151] mt-1 italic">Source: Configured workflow rule - no official GR cited.</p>
             <button className="mt-2 text-[10px] text-[#1a56db] hover:underline font-semibold">Open Regulatory Reference</button>
-            <p className="text-[9px] text-[#6b7280] mt-1 italic">Retrieved regulatory context — not a legal finding.</p>
+            <p className="text-[9px] text-[#6b7280] mt-1 italic">Retrieved regulatory context - not a legal finding.</p>
           </div>
           <div className="px-4 py-3 border-b border-[#f0f4f8]">
             <p className="text-[9px] text-[#374151] uppercase tracking-wider font-semibold mb-2">Regulatory Dependencies</p>
@@ -6829,7 +6850,7 @@ export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDeta
                 <p className="text-[9px] text-[#374151]">{d.dept} · <span className={d.status === 'Completed' ? 'text-emerald-700' : d.current ? 'text-[#1a3a5c]' : 'text-amber-700'}>{d.status}</span></p>
               </div>
             ))}
-            <button onClick={onOpenDepView} className="text-[10px] text-[#1a56db] hover:underline font-semibold">View Dependency Graph → M17</button>
+            <button onClick={onOpenDepView} className="text-[10px] text-[#1a56db] hover:underline font-semibold">View Dependency Graph</button>
           </div>
           <div className="px-4 py-3">
             <p className="text-[9px] text-[#374151] uppercase tracking-wider font-semibold mb-2">Officer Notes</p>
@@ -6853,7 +6874,7 @@ const M16_CONSISTENCY_STATUS: Record<ConsistencyStatus, { icon: string; label: s
   'match':              { icon:'✓', label:'Match',            textCls:'text-emerald-700', bgCls:'bg-emerald-50',  borderCls:'border-emerald-200' },
   'mismatch':           { icon:'⚠', label:'Mismatch',        textCls:'text-amber-700',   bgCls:'bg-amber-50',    borderCls:'border-amber-200' },
   'needs-verification': { icon:'○', label:'Needs Verification', textCls:'text-purple-700', bgCls:'bg-purple-50', borderCls:'border-purple-200' },
-  'not-applicable':     { icon:'—', label:'Not Applicable',  textCls:'text-[#374151]',  bgCls:'bg-[#f8f9fb]',   borderCls:'border-[#d1d9e0]' },
+  'not-applicable':     { icon:'-', label:'Not Applicable',  textCls:'text-[#374151]',  bgCls:'bg-[#f8f9fb]',   borderCls:'border-[#d1d9e0]' },
   'no-data':            { icon:'∅', label:'No Data',         textCls:'text-[#374151]',  bgCls:'bg-[#f8f9fb]',   borderCls:'border-[#d1d9e0]' },
 }
 
@@ -6887,10 +6908,10 @@ const M16_FIELDS: ConsistencyField[] = [
     { source:'Master Project Dossier', dept:'Platform / Master', recordId:'MPD-2026-00418', value:'Prototype value', sourceType:'Master Project Dossier', verify:'USER_CONFIRMED', version:'MPD v3', updatedAt:'12 Jan 2026', status:'reference' },
     { source:'MIDC Application',       dept:'MIDC',              recordId:'MIDC-APP-2026-00418', value:'Prototype value', sourceType:'MIDC Application',  verify:'USER_CONFIRMED', version:'App v2', updatedAt:'14 Jan 2026', status:'match' },
   ]},
-  { id:'water-req',     category:'Utilities', label:'Water Requirement',  masterValue:'Yes — MIDC Source', status:'match', records:[
-    { source:'Master Project Dossier', dept:'Platform / Master', recordId:'MPD-2026-00418', value:'Yes — MIDC Source', sourceType:'Master Project Dossier', verify:'USER_CONFIRMED',    version:'MPD v3', updatedAt:'12 Jan 2026', status:'reference' },
-    { source:'MIDC Water/Utility',     dept:'MIDC',              recordId:'MIDC-APP-2026-00418', value:'Yes — MIDC Source', sourceType:'MIDC Application', verify:'SYSTEM_VERIFIED', version:'App v1', updatedAt:'21 Jan 2026', status:'match' },
-    { source:'MPCB',                   dept:'MPCB',              recordId:'MPCB-APP-XXXX',  value:'—', sourceType:'External Dept Application', verify:'DEPARTMENT_VERIFIED', version:'v1', updatedAt:'18 Jan 2026', status:'not-applicable' },
+  { id:'water-req',     category:'Utilities', label:'Water Requirement',  masterValue:'Yes - MIDC Source', status:'match', records:[
+    { source:'Master Project Dossier', dept:'Platform / Master', recordId:'MPD-2026-00418', value:'Yes - MIDC Source', sourceType:'Master Project Dossier', verify:'USER_CONFIRMED',    version:'MPD v3', updatedAt:'12 Jan 2026', status:'reference' },
+    { source:'MIDC Water/Utility',     dept:'MIDC',              recordId:'MIDC-APP-2026-00418', value:'Yes - MIDC Source', sourceType:'MIDC Application', verify:'SYSTEM_VERIFIED', version:'App v1', updatedAt:'21 Jan 2026', status:'match' },
+    { source:'MPCB',                   dept:'MPCB',              recordId:'MPCB-APP-XXXX',  value:'-', sourceType:'External Dept Application', verify:'DEPARTMENT_VERIFIED', version:'v1', updatedAt:'18 Jan 2026', status:'not-applicable' },
   ]},
   { id:'company',       category:'Business / Identity', label:'Company Identity', masterValue:'Aster Precision Components Pvt. Ltd.', status:'match', records:[
     { source:'Master Business Profile', dept:'Platform / Master', recordId:'MBP-2026-00418', value:'Aster Precision Components Pvt. Ltd.', sourceType:'Master Business Profile', verify:'DEPARTMENT_VERIFIED', version:'MBP v1', updatedAt:'10 Jan 2026', status:'reference' },
@@ -6956,7 +6977,7 @@ export function M16ConsistencyPage({ onBack, onBackToOverview, onOpenParamDetail
         ]} />
         <div className="flex items-start justify-between gap-4 mt-2">
           <div>
-            <h1 className="text-base font-bold text-[#1a2533]">Cross-form Consistency <span className="text-[11px] text-[#374151] font-normal ml-2">M16</span></h1>
+            <h1 className="text-base font-bold text-[#1a2533]">Cross-form Consistency </h1>
             <p className="text-[11px] text-[#374151] mt-0.5">Shared-field comparison across applications and records · MIDC-APP-2026-00418</p>
           </div>
           <button onClick={onBack} className="text-xs text-[#1a56db] hover:underline shrink-0">← Scrutiny</button>
@@ -6982,17 +7003,17 @@ export function M16ConsistencyPage({ onBack, onBackToOverview, onOpenParamDetail
           </button>
         ))}
         <button onClick={() => setFilter('all')} className={`ml-2 text-[#8fafd0] hover:text-white text-[9px] ${filter==='all'?'font-bold':''}`}>Show all</button>
-        <span className="ml-auto text-[#8fafd0] italic">Sample prototype data — not actual records</span>
+        <span className="ml-auto text-[#8fafd0] italic">Sample prototype data - not actual records</span>
       </div>
 
       {/* Three-column */}
       <div className="flex flex-1 overflow-hidden">
 
-        {/* LEFT — field navigation */}
+        {/* LEFT - field navigation */}
         <nav className="w-56 shrink-0 bg-white border-r border-[#d1d9e0] overflow-y-auto" aria-label="Shared fields">
           <div className="px-3 py-2.5 border-b border-[#d1d9e0]">
             <p className="text-[9px] text-[#374151] uppercase tracking-wider font-bold">Shared Fields</p>
-            <p className="text-[9px] text-[#6b7280] mt-0.5 italic">Configurable — showing fields relevant to this application</p>
+            <p className="text-[9px] text-[#6b7280] mt-0.5 italic">Configurable - showing fields relevant to this application</p>
           </div>
           {M16_CATEGORIES.map(cat => {
             const catFields = filteredFields.filter(f => f.category === cat)
@@ -7023,7 +7044,7 @@ export function M16ConsistencyPage({ onBack, onBackToOverview, onOpenParamDetail
           </div>
         </nav>
 
-        {/* CENTER — comparison table */}
+        {/* CENTER - comparison table */}
         <main className="flex-1 overflow-y-auto bg-[#f8f9fb] p-5 space-y-4" tabIndex={-1}>
           {selectedField && (
             <>
@@ -7031,7 +7052,7 @@ export function M16ConsistencyPage({ onBack, onBackToOverview, onOpenParamDetail
               <div className="bg-white border border-[#d1d9e0] rounded overflow-hidden">
                 <div className={`px-4 py-3 flex items-start justify-between gap-4 ${selectedField.status === 'mismatch' ? 'bg-amber-50 border-b border-amber-100' : 'bg-[#f8f9fb] border-b border-[#f0f4f8]'}`}>
                   <div>
-                    <p className="text-[9px] text-[#374151] uppercase tracking-wider font-bold mb-0.5">Selected Field — {selectedField.category}</p>
+                    <p className="text-[9px] text-[#374151] uppercase tracking-wider font-bold mb-0.5">Selected Field - {selectedField.category}</p>
                     <p className="text-base font-bold text-[#1a2533] uppercase tracking-widest">{selectedField.label}</p>
                     <div className="flex items-center gap-3 mt-1.5 text-[11px]">
                       <span className="text-[#374151]">Master value: <strong className="text-[#1a2533]">{selectedField.masterValue}</strong></span>
@@ -7049,8 +7070,8 @@ export function M16ConsistencyPage({ onBack, onBackToOverview, onOpenParamDetail
                 </div>
                 {selectedField.status === 'mismatch' && (
                   <div className="px-4 py-2 bg-amber-50 border-b border-amber-100 flex items-center justify-between gap-3">
-                    <p className="text-[11px] text-amber-700 font-semibold">⚠ {countMismatch} mismatch requires officer review — {selectedField.affectedRecords?.join(', ')}</p>
-                    <p className="text-[10px] text-[#374151] italic">Mismatch detected — officer review required. System does not determine which value is legally correct.</p>
+                    <p className="text-[11px] text-amber-700 font-semibold">⚠ {countMismatch} mismatch requires officer review - {selectedField.affectedRecords?.join(', ')}</p>
+                    <p className="text-[10px] text-[#374151] italic">Mismatch detected - officer review required. System does not determine which value is legally correct.</p>
                   </div>
                 )}
               </div>
@@ -7086,26 +7107,20 @@ export function M16ConsistencyPage({ onBack, onBackToOverview, onOpenParamDetail
 
               {/* Action bar */}
               <div className="bg-white border border-[#d1d9e0] rounded p-4">
-                <p className="text-[9px] text-[#374151] uppercase tracking-wider font-bold mb-3">Officer Actions — {selectedField.label}</p>
+                <p className="text-[9px] text-[#374151] uppercase tracking-wider font-bold mb-3">Officer Actions - {selectedField.label}</p>
                 <div className="flex flex-wrap gap-2 mb-4">
                   <button onClick={() => handleAction('accept')} className={`px-3 py-1.5 text-xs font-bold rounded border transition-colors ${activeAction==='accept' ? 'bg-[#1a3a5c] text-white border-[#1a3a5c]' : 'bg-white text-[#1a3a5c] border-[#1a3a5c] hover:bg-[#ebf3ff]'}`}>
                     1. Accept Verified Source
                   </button>
-                  <button onClick={() => handleAction('query')} className={`px-3 py-1.5 text-xs font-bold rounded border transition-colors ${activeAction==='query' ? 'bg-amber-600 text-white border-amber-600' : 'bg-amber-50 text-amber-700 border-amber-300 hover:bg-amber-100'}`}>
-                    2. Raise Query → M18
-                  </button>
                   <button onClick={() => handleAction('exception')} className={`px-3 py-1.5 text-xs font-bold rounded border transition-colors ${activeAction==='exception' ? 'bg-purple-700 text-white border-purple-700' : 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100'}`}>
-                    3. Record Justified Exception
-                  </button>
-                  <button onClick={() => handleAction('clarify')} className={`px-3 py-1.5 text-xs font-bold rounded border transition-colors ${activeAction==='clarify' ? 'bg-[#1a56db] text-white border-[#1a56db]' : 'border-[#d1d9e0] text-[#1a2533] hover:bg-[#f8f9fb]'}`}>
-                    4. Request Entrepreneur Clarification
+                    2. Record Justified Exception
                   </button>
                 </div>
 
                 {/* Action forms */}
                 {activeAction === 'accept' && (
                   <div className="border border-[#1a3a5c] rounded p-3 bg-[#ebf3ff] space-y-2">
-                    <p className="text-[11px] font-bold text-[#1a3a5c]">Accept Verified Source — {selectedField.label}</p>
+                    <p className="text-[11px] font-bold text-[#1a3a5c]">Accept Verified Source - {selectedField.label}</p>
                     <p className="text-[10px] text-[#1a2533]">Accept this source as the relevant verified reference for the current MIDC scrutiny context. This does NOT overwrite another department's record or change Business DNA.</p>
                     <div className="grid grid-cols-2 gap-2">
                       <div><label className="text-[9px] text-[#374151] uppercase font-semibold block mb-1">Selected reference source</label><input defaultValue={selectedField.records.find(r=>r.status==='reference')?.source ?? ''} className="w-full text-xs border border-[#d1d9e0] rounded px-2 py-1 bg-white" /></div>
@@ -7119,25 +7134,9 @@ export function M16ConsistencyPage({ onBack, onBackToOverview, onOpenParamDetail
                   </div>
                 )}
 
-                {activeAction === 'query' && (
-                  <div className="border border-amber-300 rounded p-3 bg-amber-50 space-y-2">
-                    <p className="text-[11px] font-bold text-amber-700">Raise Query → M18 Consolidated Query Builder</p>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div><label className="text-[9px] text-[#374151] uppercase font-semibold block mb-1">Issue</label><input defaultValue={`${selectedField.label} differs between records`} className="w-full text-xs border border-amber-200 rounded px-2 py-1 bg-white" onChange={e => setQueryText(e.target.value)} /></div>
-                      <div><label className="text-[9px] text-[#374151] uppercase font-semibold block mb-1">Required clarification</label><input defaultValue="Confirm applicable value and provide supporting evidence" className="w-full text-xs border border-amber-200 rounded px-2 py-1 bg-white" /></div>
-                    </div>
-                    <div><label className="text-[9px] text-[#374151] uppercase font-semibold block mb-1">Officer comment</label><textarea rows={2} className="w-full text-xs border border-amber-200 rounded px-2 py-1 bg-white resize-none" /></div>
-                    <p className="text-[9px] text-[#374151] italic">Deficiency ID DEF-2026-3842 will be created in M18. Type: Data inconsistency · Does not automatically accuse the entrepreneur of an error.</p>
-                    <div className="flex gap-2">
-                      <button onClick={() => commitAction('query')} className="px-3 py-1.5 bg-amber-600 text-white text-xs font-bold rounded hover:bg-amber-700">Add to M18 Consolidated Query</button>
-                      <button onClick={() => setActiveAction(null)} className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#1a2533]">Cancel</button>
-                    </div>
-                  </div>
-                )}
-
                 {activeAction === 'exception' && (
                   <div className="border border-purple-200 rounded p-3 bg-purple-50 space-y-2">
-                    <p className="text-[11px] font-bold text-purple-700">Record Justified Exception — {selectedField.label}</p>
+                    <p className="text-[11px] font-bold text-purple-700">Record Justified Exception - {selectedField.label}</p>
                     <p className="text-[10px] text-purple-700">Record a documented exception when the discrepancy has a legitimate explanation. The exception remains visible in audit history.</p>
                     <div className="grid grid-cols-2 gap-2">
                       <div><label className="text-[9px] text-[#374151] uppercase font-semibold block mb-1">Exception reason</label><select className="w-full text-xs border border-purple-200 rounded px-2 py-1 bg-white"><option>Different measurement context</option><option>Different application version</option><option>Updated Business DNA</option><option>Pending correction by external dept</option><option>Other configured reason</option></select></div>
@@ -7147,23 +7146,6 @@ export function M16ConsistencyPage({ onBack, onBackToOverview, onOpenParamDetail
                     <p className="text-[9px] text-[#374151] italic">Exception ID EXC-2026-3843 · Audit record will be created · Previous values preserved.</p>
                     <div className="flex gap-2">
                       <button onClick={() => commitAction('exception')} className="px-3 py-1.5 bg-purple-700 text-white text-xs font-bold rounded hover:bg-purple-800">Record Exception &amp; Create Audit Entry</button>
-                      <button onClick={() => setActiveAction(null)} className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#1a2533]">Cancel</button>
-                    </div>
-                  </div>
-                )}
-
-                {activeAction === 'clarify' && (
-                  <div className="border border-[#d1d9e0] rounded p-3 bg-white space-y-2">
-                    <p className="text-[11px] font-bold text-[#1a2533]">Request Entrepreneur Clarification — {selectedField.label}</p>
-                    <div className="grid grid-cols-2 gap-2 text-[11px]">
-                      <div><p className="text-[#374151]">Field</p><p className="font-semibold">{selectedField.label}</p></div>
-                      <div><p className="text-[#374151]">Conflicting values</p>{selectedField.records.filter(r=>r.status==='mismatch').map(r=><p key={r.source} className="font-semibold text-amber-700">{r.source}: {r.value}</p>)}</div>
-                    </div>
-                    <div><label className="text-[9px] text-[#374151] uppercase font-semibold block mb-1">Question to entrepreneur</label><input defaultValue={`Please clarify the applicable ${selectedField.label} and provide supporting evidence for each record.`} className="w-full text-xs border border-[#d1d9e0] rounded px-2 py-1" /></div>
-                    <div><label className="text-[9px] text-[#374151] uppercase font-semibold block mb-1">Supporting evidence requested</label><input defaultValue="Updated allotment record or certified measurement" className="w-full text-xs border border-[#d1d9e0] rounded px-2 py-1" /></div>
-                    <p className="text-[9px] text-[#374151] italic">Flows into existing query/response lifecycle → M18 → M19.</p>
-                    <div className="flex gap-2">
-                      <button onClick={() => commitAction('clarify')} className="px-3 py-1.5 bg-[#1a56db] text-white text-xs font-bold rounded hover:bg-[#1a3a5c]">Send to M18 Query Builder</button>
                       <button onClick={() => setActiveAction(null)} className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#1a2533]">Cancel</button>
                     </div>
                   </div>
@@ -7188,12 +7170,12 @@ export function M16ConsistencyPage({ onBack, onBackToOverview, onOpenParamDetail
                 </div>
               </div>
 
-              <p className="text-[10px] text-[#6b7280] italic">Delta resubmission changes → Open M20 Delta Re-scrutiny · Dependency impact → M17</p>
+              <p className="text-[10px] text-[#6b7280] italic">Delta resubmission changes → Open Delta Re-scrutiny · Dependency impact</p>
             </>
           )}
         </main>
 
-        {/* RIGHT — mismatch detail / provenance / officer context */}
+        {/* RIGHT - mismatch detail / provenance / officer context */}
         <aside className="w-64 shrink-0 bg-white border-l border-[#d1d9e0] overflow-y-auto" aria-label="Mismatch detail and provenance">
           <div className="px-4 py-2.5 border-b border-[#d1d9e0] bg-[#f8f9fb]">
             <p className="text-[9px] text-[#374151] uppercase tracking-wider font-bold">Mismatch Detail &amp; Provenance</p>
@@ -7221,13 +7203,13 @@ export function M16ConsistencyPage({ onBack, onBackToOverview, onOpenParamDetail
                       <p className="text-[10px] text-[#374151]">{r.dept} · {r.verify.replace(/_/g,' ')}</p>
                     </div>
                   ))}
-                  <p className="text-[9px] text-[#6b7280] italic">Mismatch detected — officer review required. System does not automatically determine which value is legally correct.</p>
-                  <p className="text-[10px] text-[#1a2533] mt-2">Why: <span className="text-[#374151]">Reason not established — officer review required.</span></p>
+                  <p className="text-[9px] text-[#6b7280] italic">Mismatch detected - officer review required. System does not automatically determine which value is legally correct.</p>
+                  <p className="text-[10px] text-[#1a2533] mt-2">Why: <span className="text-[#374151]">Reason not established - officer review required.</span></p>
                   {selectedField.affectedRecords && (
                     <div className="mt-2">
                       <p className="text-[9px] text-[#374151] uppercase tracking-wider font-semibold mb-1">Potentially affected</p>
                       {selectedField.affectedRecords.map(r => <p key={r} className="text-[10px] text-[#1a2533]">· {r}</p>)}
-                      <p className="text-[10px] text-[#374151] mt-1 italic">Dependency impact not automatically determined — officer review required.</p>
+                      <p className="text-[10px] text-[#374151] mt-1 italic">Dependency impact not automatically determined - officer review required.</p>
                     </div>
                   )}
                 </div>
@@ -7287,11 +7269,11 @@ const M17_NODES: DepNode[] = [
   { id:'land',    label:'MIDC Land / Plot Context',      dept:'MIDC',              type:'midc',     status:'completed',   ref:'MIDC-APP-2026-00418-LAND', relationship:'Upstream / MIDC Controlled', blocking:false   },
   { id:'mpcb',    label:'MPCB Consent to Establish',     dept:'MPCB',              type:'external', status:'completed',   ref:'MPCB-CTE-2026-XXXX',       relationship:'External / Upstream',         blocking:false   },
   { id:'bldg',    label:'MIDC Building / Planning',      dept:'MIDC',              type:'midc',     status:'current',     ref:'MIDC-APP-2026-00418',       relationship:'MIDC Controlled / Current',   blocking:false, children:['fire','water','construction'] },
-  { id:'fire',    label:'Provisional Fire NOC',          dept:'Fire Authority',    type:'external', status:'conditional', ref:'—',                         relationship:'Conditional / Downstream',    blocking:false, unlockCondition:'Building / Planning reaches configured required state' },
-  { id:'water',   label:'MIDC Water / Utility',         dept:'MIDC',              type:'midc',     status:'ready',       ref:'—',                         relationship:'Parallel / Downstream',       blocking:false, unlockCondition:'Building / Planning approved; may proceed in parallel per config' },
-  { id:'cond-noc',label:'Conditional NOC(s)',            dept:'Configured Authority',type:'external',status:'blocked',   ref:'—',                         relationship:'Conditional',                 blocking:true,  unlockCondition:'Upstream configured dependencies satisfied' },
-  { id:'construction',label:'Construction',             dept:'Entrepreneur',       type:'milestone',status:'blocked',    ref:'—',                         relationship:'Downstream Milestone',        blocking:true,  unlockCondition:'Building / Planning, Fire NOC and configured utilities complete' },
-  { id:'preop',   label:'Pre-operation Approvals',      dept:'Multiple',           type:'milestone',status:'blocked',    ref:'—',                         relationship:'Downstream Milestone',        blocking:true,  unlockCondition:'Construction milestone reached + configured upstream requirements' },
+  { id:'fire',    label:'Provisional Fire NOC',          dept:'Fire Authority',    type:'external', status:'conditional', ref:'-',                         relationship:'Conditional / Downstream',    blocking:false, unlockCondition:'Building / Planning reaches configured required state' },
+  { id:'water',   label:'MIDC Water / Utility',         dept:'MIDC',              type:'midc',     status:'ready',       ref:'-',                         relationship:'Parallel / Downstream',       blocking:false, unlockCondition:'Building / Planning approved; may proceed in parallel per config' },
+  { id:'cond-noc',label:'Conditional NOC(s)',            dept:'Configured Authority',type:'external',status:'blocked',   ref:'-',                         relationship:'Conditional',                 blocking:true,  unlockCondition:'Upstream configured dependencies satisfied' },
+  { id:'construction',label:'Construction',             dept:'Entrepreneur',       type:'milestone',status:'blocked',    ref:'-',                         relationship:'Downstream Milestone',        blocking:true,  unlockCondition:'Building / Planning, Fire NOC and configured utilities complete' },
+  { id:'preop',   label:'Pre-operation Approvals',      dept:'Multiple',           type:'milestone',status:'blocked',    ref:'-',                         relationship:'Downstream Milestone',        blocking:true,  unlockCondition:'Construction milestone reached + configured upstream requirements' },
 ]
 
 const M17_CURRENT        = M17_NODES.find(n => n.id === 'bldg')!
@@ -7303,30 +7285,11 @@ const M17_UNLOCKS        = M17_NODES.filter(n => n.id === 'water' || n.id === 'c
 
 export function M17DependencyViewPage({ onBack, onBackToOverview }: { onBack: () => void; onBackToOverview: () => void }) {
   const [selectedNode, setSelectedNode] = useState<DepNode | null>(null)
-  const [activeTab, setActiveTab]       = useState<'prerequisites'|'parallel'|'downstream'|'blocked'|'unlocks'>('prerequisites')
+  const [selectedEdge, setSelectedEdge] = useState<DepEdge | null>(null)
+  const [relationshipFilter, setRelationshipFilter] = useState<'all'|'prerequisites'|'parallel'|'conditional'|'downstream'|'blocked'>('all')
+  const [ruleModalOpen, setRuleModalOpen] = useState(false)
 
-  const NodeCard = ({ node, compact = false }: { node: DepNode; compact?: boolean }) => {
-    const sm  = M17_NODE_STATUS[node.status as DepNodeStatus]
-    const sel = selectedNode?.id === node.id
-    return (
-      <button onClick={() => setSelectedNode(sel ? null : node)}
-        className={`w-full text-left border rounded p-3 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a56db] ${sel ? 'ring-2 ring-[#1a56db]' : ''} ${node.status === 'current' ? 'bg-[#0f2540] border-[#1a3a5c]' : `${sm.bgCls} ${sm.borderCls}`}`}
-      >
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex items-start gap-2">
-            <div className={`w-2.5 h-2.5 rounded-full shrink-0 mt-0.5 ${sm.dot}`} />
-            <div>
-              <p className={`text-[11px] font-bold leading-tight ${node.status === 'current' ? 'text-white' : 'text-[#1a2533]'}`}>{node.label}</p>
-              {!compact && <p className={`text-[10px] mt-0.5 ${node.status === 'current' ? 'text-[#8fafd0]' : 'text-[#374151]'}`}>{node.dept} · {node.relationship}</p>}
-            </div>
-          </div>
-          <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] font-bold border shrink-0 ${node.status === 'current' ? 'bg-white text-[#1a3a5c] border-white' : `${sm.bgCls} ${sm.textCls} ${sm.borderCls}`}`}>{sm.label}</span>
-        </div>
-        {!compact && node.ref && node.ref !== '—' && <p className={`text-[9px] mt-1.5 font-mono ${node.status === 'current' ? 'text-[#8fafd0]' : 'text-[#374151]'}`}>Ref: {node.ref}</p>}
-        {!compact && node.blocking && <p className="text-[9px] text-red-600 mt-1">● Configured dependency blocking downstream</p>}
-      </button>
-    )
-  }
+  const activeNode = selectedNode ?? M17_CURRENT
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-[#f8f9fb]">
@@ -7341,7 +7304,7 @@ export function M17DependencyViewPage({ onBack, onBackToOverview }: { onBack: ()
         ]} />
         <div className="flex items-start justify-between gap-4 mt-2">
           <div>
-            <h1 className="text-base font-bold text-[#1a2533]">Regulatory Dependency View <span className="text-[11px] text-[#374151] font-normal ml-2">M17</span></h1>
+            <h1 className="text-base font-bold text-[#1a2533]">Regulatory Dependency View </h1>
             <p className="text-[11px] text-[#374151] mt-0.5">Configured regulatory journey · MIDC-APP-2026-00418 · Building / Planning (current node)</p>
           </div>
           <button onClick={onBack} className="text-xs text-[#1a56db] hover:underline shrink-0">← Scrutiny</button>
@@ -7353,334 +7316,340 @@ export function M17DependencyViewPage({ onBack, onBackToOverview }: { onBack: ()
         </div>
       </div>
 
-      {/* Purpose panel */}
-      <div className="bg-[#ebf3ff] border-b border-[#bdd4f5] px-5 py-2 shrink-0">
-        <p className="text-[11px] text-[#1a3a5c]">
-          <span className="font-bold">Regulatory Dependency View</span> — Shows how the current MIDC service relates to other configured regulatory requirements in the project journey. Dependencies are configuration-driven. External department records are visible as context; MIDC cannot approve, reject or modify another department's decision.
-          <span className="ml-2 italic text-[#1a2533]">Payment / challan timing is controlled separately by service workflow configuration and is not a regulatory dependency node.</span>
-        </p>
-      </div>
-
-      {/* Summary bar */}
-      <div className="bg-[#0f2540] px-5 py-2 flex items-center gap-6 shrink-0 text-[10px]">
+      {/* Dependency Summary Bar */}
+      <div className="bg-[#0f2540] px-5 py-2 flex items-center gap-6 shrink-0 text-[10px] flex-wrap">
         <span className="text-[#8fafd0] font-semibold uppercase tracking-wider">Dependency Summary</span>
-        {[['Prerequisites','2'],['Current Node','1'],['Parallel','1'],['Conditional','2'],['Blocked','2']].map(([k,v]) => (
+        {[
+          ['Prerequisites', '2'],
+          ['Current Node', '1'],
+          ['Parallel', '1'],
+          ['Conditional', '2'],
+          ['Downstream', '3'],
+          ['Blocked', '2']
+        ].map(([k,v]) => (
           <span key={k} className="text-white"><span className="text-[#8fafd0]">{k}: </span><strong>{v}</strong></span>
         ))}
-        <span className="ml-auto text-[#8fafd0] italic">Configurable dependency graph — baseline prototype journey</span>
+        <span className="ml-auto text-[#8fafd0] italic hidden lg:inline">Dagre Top-to-Bottom directional layout (Done → Current → Blocked)</span>
       </div>
 
-      {/* Main layout: graph + detail */}
+      {/* Dependency Boundary Notice (Preserved per wireframe) */}
+      <div className="bg-[#fffbeb] border-b border-[#fcd34d] px-5 py-2 shrink-0 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-[#92400e] bg-[#fef3c7] px-1.5 py-0.5 rounded border border-[#fde68a]">Dependency Boundary</span>
+          <p className="text-[11px] text-[#78350f]">
+            MIDC can track configured dependencies but cannot control another department's approval. External department records are visible for context only.
+          </p>
+        </div>
+        <span className="text-[11px] font-bold text-[#b45309] shrink-0" title="Boundary Information">[ⓘ]</span>
+      </div>
+
+      {/* Main Body: Graph Canvas + Right Inspector */}
       <div className="flex flex-1 overflow-hidden">
+        {/* LEFT / CENTER: Graph Canvas with Relationship Filter */}
+        <div className="flex-1 flex flex-col overflow-hidden bg-white border-r border-[#d1d9e0]">
+          {/* Filter & Quick Inspect Bar */}
+          <div className="px-4 py-2.5 bg-[#f8f9fb] border-b border-[#d1d9e0] flex flex-col gap-2 shrink-0">
+            {/* Row 1: Relationship Filter */}
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#374151]">Filter:</span>
+                <div className="flex gap-1 flex-wrap">
+                  {(['all', 'prerequisites', 'parallel', 'conditional', 'downstream', 'blocked'] as const).map(f => (
+                    <button
+                      key={f}
+                      onClick={() => {
+                        setRelationshipFilter(f);
+                        if (f !== 'all') {
+                          setSelectedNode(null);
+                          setSelectedEdge(null);
+                        }
+                      }}
+                      className={`px-2 py-0.5 text-[10px] font-semibold rounded border transition-colors ${
+                        relationshipFilter === f
+                          ? 'bg-[#1a3a5c] text-white border-[#1a3a5c]'
+                          : 'bg-white text-[#374151] border-[#d1d9e0] hover:bg-[#eff6ff] hover:text-[#1a56db]'
+                      }`}
+                    >
+                      {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <span className="text-[10px] text-[#6b7280] italic">
+                Click any node or edge to inspect details in the right sidebar
+              </span>
+            </div>
 
-        {/* LEFT — vertical dependency graph */}
-        <div className="w-72 shrink-0 bg-white border-r border-[#d1d9e0] overflow-y-auto" aria-label="Dependency graph">
-          <div className="px-3 py-2.5 border-b border-[#d1d9e0]">
-            <p className="text-[9px] text-[#374151] uppercase tracking-wider font-bold">A – Z Regulatory Journey</p>
-            <p className="text-[9px] text-[#6b7280] italic mt-0.5">Baseline prototype. Actual graph from configured dependencies.</p>
+            {/* Row 2: Direct Node Selector Pills */}
+            <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#374151]">Quick Node:</span>
+              {M17_NODES.map(n => {
+                const isSelected = selectedNode?.id === n.id;
+                return (
+                  <button
+                    key={n.id}
+                    onClick={() => {
+                      setSelectedNode(n);
+                      setSelectedEdge(null);
+                    }}
+                    className={`px-2 py-0.5 text-[10px] rounded border font-semibold transition-all ${
+                      isSelected
+                        ? 'bg-[#1a56db] text-white border-[#1a56db] shadow-sm'
+                        : 'bg-white text-[#374151] border-[#d1d9e0] hover:border-[#1a56db] hover:bg-[#eff6ff]'
+                    }`}
+                  >
+                    {n.label.split(' ')[0]} ({n.dept})
+                  </button>
+                );
+              })}
+            </div>
           </div>
-          <div className="p-3 space-y-1">
-            {/* LAND */}
-            <NodeCard node={M17_NODES[0]} />
-            <div className="flex justify-center"><div className="w-0.5 h-4 bg-[#d1d9e0]" /></div>
-            {/* MPCB */}
-            <NodeCard node={M17_NODES[1]} />
-            <div className="flex justify-center"><div className="w-0.5 h-4 bg-[#d1d9e0]" /></div>
-            {/* CURRENT — Building/Planning */}
-            <NodeCard node={M17_NODES[2]} />
-            {/* Fork visual */}
-            <div className="relative flex justify-center pt-1">
-              <div className="w-0.5 h-3 bg-[#d1d9e0]" />
-            </div>
-            <div className="flex items-start gap-2 pl-2">
-              <div className="flex flex-col items-end pt-1 w-1/2">
-                <div className="w-full h-0.5 bg-[#d1d9e0]" />
-                <div className="w-0.5 h-3 bg-[#d1d9e0] ml-auto" />
-                <NodeCard node={M17_NODES[3]} compact />
-              </div>
-              <div className="w-0.5 h-16 bg-[#d1d9e0] shrink-0 mt-1" />
-              <div className="flex flex-col pt-1 w-1/2">
-                <div className="w-full h-0.5 bg-[#d1d9e0]" />
-                <div className="w-0.5 h-3 bg-[#d1d9e0]" />
-                <NodeCard node={M17_NODES[4]} compact />
-              </div>
-            </div>
-            <div className="flex justify-center mt-1"><div className="w-0.5 h-4 bg-[#d1d9e0]" /></div>
-            <NodeCard node={M17_NODES[5]} compact />
-            <div className="flex justify-center"><div className="w-0.5 h-4 bg-[#d1d9e0]" /></div>
-            <NodeCard node={M17_NODES[6]} compact />
-            <div className="flex justify-center"><div className="w-0.5 h-4 bg-[#d1d9e0]" /></div>
-            <NodeCard node={M17_NODES[7]} compact />
 
-            <div className="pt-3 border-t border-[#f0f4f8] mt-3">
-              <p className="text-[9px] text-[#6b7280] italic">Legend</p>
-              <div className="mt-1 space-y-1">
-                {Object.entries(M17_NODE_STATUS).map(([k, v]) => (
-                  <div key={k} className="flex items-center gap-1.5">
-                    <div className={`w-2 h-2 rounded-full shrink-0 ${v.dot}`} />
-                    <p className="text-[9px] text-[#374151]">{v.label}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          {/* Cytoscape Graph Canvas */}
+          <CytoscapeDependencyGraph
+            nodes={M17_NODES}
+            selectedNodeId={selectedNode ? selectedNode.id : null}
+            selectedEdgeId={selectedEdge ? selectedEdge.id : null}
+            activeFilter={relationshipFilter}
+            onSelectNode={(node) => {
+              setSelectedNode(node);
+              setSelectedEdge(null);
+            }}
+            onSelectEdge={(edge) => {
+              setSelectedEdge(edge);
+              setSelectedNode(null);
+            }}
+          />
         </div>
 
-        {/* CENTER — tabbed dependency sections */}
-        <main className="flex-1 overflow-y-auto bg-[#f8f9fb] p-5 space-y-4" tabIndex={-1}>
-          {/* Tab bar */}
-          <div className="flex gap-0 border border-[#d1d9e0] rounded overflow-hidden bg-white shrink-0">
-            {([['prerequisites','Prerequisites'],['parallel','Parallel / Conditional'],['downstream','Downstream'],['blocked','Blocked'],['unlocks','Unlocks']] as [typeof activeTab, string][]).map(([tab, label]) => (
-              <button key={tab} onClick={() => setActiveTab(tab)}
-                className={`flex-1 text-[10px] font-semibold py-2 px-2 transition-colors border-r last:border-r-0 border-[#d1d9e0] focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#1a56db] ${activeTab === tab ? 'bg-[#1a3a5c] text-white' : 'text-[#1a2533] hover:bg-[#f8f9fb]'}`}
-              >{label}</button>
-            ))}
+        {/* RIGHT: Current Node / Selected Node / Edge Detail & Regulatory Context */}
+        <aside className="w-80 lg:w-96 shrink-0 bg-white overflow-y-auto flex flex-col divide-y divide-[#e5eaf0]" aria-label="Node detail and regulatory context">
+          {/* Header */}
+          <div className="px-4 py-2.5 bg-[#f8f9fb] flex items-center justify-between">
+            <span className="text-[9px] font-bold uppercase tracking-wider text-[#374151]">
+              {selectedEdge ? 'Selected Relationship' : selectedNode ? 'Selected Node Details' : 'Current Node Details'}
+            </span>
+            {((selectedNode && selectedNode.id !== 'bldg') || selectedEdge) && (
+              <button
+                onClick={() => {
+                  setSelectedNode(M17_CURRENT);
+                  setSelectedEdge(null);
+                }}
+                className="text-[10px] text-[#1a56db] font-semibold hover:underline"
+              >
+                Reset to Current
+              </button>
+            )}
           </div>
 
-          {/* PREREQUISITES */}
-          {activeTab === 'prerequisites' && (
-            <>
-              <h2 className="text-xs font-bold text-[#1a2533] uppercase tracking-wider">Prerequisites</h2>
-              <div className="bg-[#ebf3ff] border border-[#bdd4f5] rounded px-4 py-2 text-xs text-[#1a3a5c]">ℹ MIDC may view prerequisite references and use their status as context. MIDC may NOT approve, reject, or modify another department's decision.</div>
-              <div className="space-y-3">
-                {M17_PREREQUISITES.map(node => {
-                  const sm = M17_NODE_STATUS[node.status as DepNodeStatus]
-                  return (
-                    <div key={node.id} className="bg-white border border-[#d1d9e0] rounded overflow-hidden">
-                      <div className="px-4 py-3 border-b border-[#f0f4f8] flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-2">
-                          <div className={`w-2.5 h-2.5 rounded-full ${sm.dot}`} />
-                          <p className="text-xs font-bold text-[#1a2533]">{node.label}</p>
-                        </div>
-                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-bold border ${sm.bgCls} ${sm.textCls} ${sm.borderCls}`}>{sm.label}</span>
-                      </div>
-                      <div className="grid grid-cols-3 gap-4 px-4 py-3 text-[11px]">
-                        <div><p className="text-[#374151]">Department</p><p className="font-semibold text-[#1a2533]">{node.dept}</p></div>
-                        <div><p className="text-[#374151]">Relationship</p><p className="font-semibold text-[#1a2533]">{node.relationship}</p></div>
-                        <div><p className="text-[#374151]">Blocking State</p><p className="font-semibold text-emerald-700">Satisfied</p></div>
-                        {node.ref && node.ref !== '—' && <div><p className="text-[#374151]">Reference</p><p className="font-mono text-[10px] text-[#1a2533]">{node.ref}</p></div>}
-                      </div>
-                      {node.type === 'external' && (
-                        <div className="px-4 py-2 border-t border-[#f0f4f8] bg-[#f8f9fb]">
-                          <p className="text-[10px] text-[#374151] italic">External department — MIDC may view reference only. No MIDC controls to approve / modify {node.dept} decisions.</p>
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            </>
-          )}
-
-          {/* PARALLEL / CONDITIONAL */}
-          {activeTab === 'parallel' && (
-            <>
-              <h2 className="text-xs font-bold text-[#1a2533] uppercase tracking-wider">Parallel / Conditional Services</h2>
-              <p className="text-[10px] text-[#374151] italic">Not every regulatory process is strictly serial. Parallel and conditional relationships come from configured dependency rules.</p>
-              <div className="space-y-3">
-                {[...M17_PARALLEL, ...M17_CONDITIONAL].map(node => {
-                  const sm = M17_NODE_STATUS[node.status]
-                  return (
-                    <div key={node.id} className={`bg-white border rounded overflow-hidden ${sm.borderCls}`}>
-                      <div className="px-4 py-3 border-b border-[#f0f4f8] flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-2">
-                          <div className={`w-2.5 h-2.5 rounded-full ${sm.dot}`} />
-                          <p className="text-xs font-bold text-[#1a2533]">{node.label}</p>
-                        </div>
-                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-bold border ${sm.bgCls} ${sm.textCls} ${sm.borderCls}`}>{sm.label}</span>
-                      </div>
-                      <div className="grid grid-cols-3 gap-4 px-4 py-3 text-[11px]">
-                        <div><p className="text-[#374151]">Department</p><p className="font-semibold text-[#1a2533]">{node.dept}</p></div>
-                        <div><p className="text-[#374151]">Relationship</p><p className="font-semibold text-[#1a2533]">{node.relationship}</p></div>
-                        <div><p className="text-[#374151]">Blocking</p><p className={`font-semibold ${node.blocking ? 'text-red-700' : 'text-emerald-700'}`}>{node.blocking ? 'Yes — see Blocked tab' : 'No'}</p></div>
-                      </div>
-                      {node.unlockCondition && (
-                        <div className="px-4 py-2 border-t border-[#f0f4f8] bg-[#f8f9fb]">
-                          <p className="text-[10px] text-[#1a2533]"><span className="font-semibold">Unlock / activation condition:</span> {node.unlockCondition}</p>
-                          <p className="text-[9px] text-[#6b7280] italic mt-0.5">Configured dependency rule — not a universal legal requirement.</p>
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            </>
-          )}
-
-          {/* DOWNSTREAM */}
-          {activeTab === 'downstream' && (
-            <>
-              <h2 className="text-xs font-bold text-[#1a2533] uppercase tracking-wider">Downstream Requirements</h2>
-              <p className="text-[10px] text-[#374151] italic">Services and milestones that depend on the current MIDC node. Configured dependency rules determine blocking relationships.</p>
-              <div className="space-y-3">
-                {M17_DOWNSTREAM.map(node => {
-                  const sm = M17_NODE_STATUS[node.status]
-                  return (
-                    <div key={node.id} className={`bg-white border rounded overflow-hidden ${sm.borderCls}`}>
-                      <div className="px-4 py-3 flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-2">
-                          <div className={`w-2.5 h-2.5 rounded-full ${sm.dot}`} />
-                          <p className="text-xs font-bold text-[#1a2533]">{node.label}</p>
-                        </div>
-                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-bold border ${sm.bgCls} ${sm.textCls} ${sm.borderCls}`}>{sm.label}</span>
-                      </div>
-                      {node.unlockCondition && (
-                        <div className="px-4 py-2 border-t border-[#f0f4f8] bg-[#f8f9fb]">
-                          <p className="text-[10px] text-[#1a2533]"><span className="font-semibold text-[#1a2533]">Reason / Configured dependency:</span> {node.unlockCondition}</p>
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            </>
-          )}
-
-          {/* BLOCKED */}
-          {activeTab === 'blocked' && (
-            <>
-              <h2 className="text-xs font-bold text-[#1a2533] uppercase tracking-wider">Currently Blocked</h2>
-              <div className="space-y-3">
-                {M17_BLOCKED.map(node => {
-                  const sm = M17_NODE_STATUS[node.status]
-                  return (
-                    <div key={node.id} className="bg-white border border-red-100 rounded overflow-hidden">
-                      <div className="px-4 py-3 border-b border-[#f0f4f8] flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-2">
-                          <div className={`w-2.5 h-2.5 rounded-full ${sm.dot}`} />
-                          <p className="text-xs font-bold text-[#1a2533]">{node.label}</p>
-                        </div>
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-bold border bg-red-50 text-red-700 border-red-200">Blocked</span>
-                      </div>
-                      <div className="px-4 py-3 grid grid-cols-2 gap-4 text-[11px]">
-                        <div><p className="text-[#374151]">Department</p><p className="font-semibold text-[#1a2533]">{node.dept}</p></div>
-                        <div><p className="text-[#374151]">Upstream dependency</p><p className="font-semibold text-[#1a2533]">MIDC Building / Planning (Current)</p></div>
-                      </div>
-                      {node.unlockCondition && (
-                        <div className="px-4 py-2 border-t border-[#f0f4f8] bg-red-50">
-                          <p className="text-[10px] text-red-700"><span className="font-semibold">Configured unlock condition:</span> {node.unlockCondition}</p>
-                          <p className="text-[9px] text-[#6b7280] italic mt-0.5">Configured dependency rule. Does not automatically invalidate any existing approvals.</p>
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-              <div className="bg-[#f8f9fb] border border-[#d1d9e0] rounded px-4 py-3 text-[11px]">
-                <p className="font-semibold text-[#1a2533] mb-1">Entrepreneur Actions Required</p>
-                <ul className="space-y-1 text-[#1a2533]">
-                  <li>· Complete Building / Planning scrutiny response (if query raised)</li>
-                  <li>· Await MIDC Building / Planning decision before downstream services activate</li>
-                  <li>· Ensure MPCB CTE reference remains valid (external — entrepreneur to monitor)</li>
-                </ul>
-                <p className="text-[9px] text-[#6b7280] italic mt-2">Only actions blocking the current journey are shown here.</p>
-              </div>
-            </>
-          )}
-
-          {/* UNLOCKS */}
-          {activeTab === 'unlocks' && (
-            <>
-              <h2 className="text-xs font-bold text-[#1a2533] uppercase tracking-wider">Unlocks — Potential Downstream Availability</h2>
-              <div className="bg-amber-50 border border-amber-200 rounded px-4 py-2 text-xs text-amber-700">
-                <span className="font-semibold">Important:</span> Approval of the current MIDC application does NOT automatically guarantee another department's approval. Services shown below may become available or eligible according to configured dependency rules.
-              </div>
-              <div className="space-y-3">
-                {M17_UNLOCKS.map(node => {
-                  const sm = M17_NODE_STATUS[node.status]
-                  return (
-                    <div key={node.id} className="bg-white border border-[#d1d9e0] rounded overflow-hidden">
-                      <div className="px-4 py-3 flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-2">
-                          <div className={`w-2.5 h-2.5 rounded-full ${sm.dot}`} />
-                          <p className="text-xs font-bold text-[#1a2533]">{node.label}</p>
-                        </div>
-                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-bold border ${sm.bgCls} ${sm.textCls} ${sm.borderCls}`}>Currently: {sm.label}</span>
-                      </div>
-                      {node.unlockCondition && (
-                        <div className="px-4 py-2 border-t border-[#f0f4f8] bg-[#f8f9fb]">
-                          <p className="text-[10px] text-[#1a2533]"><span className="font-semibold">Unlock condition:</span> {node.unlockCondition}</p>
-                          <p className="text-[9px] text-[#6b7280] italic mt-0.5">May become available / eligible according to configured dependency rules.</p>
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            </>
-          )}
-        </main>
-
-        {/* RIGHT — selected node detail + context */}
-        <aside className="w-64 shrink-0 bg-white border-l border-[#d1d9e0] overflow-y-auto" aria-label="Node detail and regulatory context">
-          <div className="px-4 py-2.5 border-b border-[#d1d9e0] bg-[#f8f9fb]">
-            <p className="text-[9px] text-[#374151] uppercase tracking-wider font-bold">{selectedNode ? 'Selected Node' : 'Current Node'}</p>
-          </div>
-
-          {/* Current node always shown */}
-          {!selectedNode && (
+          {/* If Nothing Selected: Current Node Default */}
+          {!selectedNode && !selectedEdge && (
             <div className="px-4 py-3 bg-[#0f2540] border-b border-[#1a3a5c]">
               <div className="flex items-center gap-2 mb-1">
                 <div className="w-2.5 h-2.5 rounded-full bg-white" />
                 <p className="text-[11px] font-bold text-white">{M17_CURRENT.label}</p>
               </div>
               <p className="text-[10px] text-[#8fafd0]">MIDC Controlled · Current</p>
-              {[['State','TECHNICAL_SCRUTINY'],['Route','ENHANCED REVIEW'],['Desk','Planning / Building Scrutiny'],['Payment','PAID'],['Ref',M17_CURRENT.ref ?? '']].map(([k,v]) => (
-                <div key={k} className="flex justify-between mt-1"><span className="text-[10px] text-[#8fafd0]">{k}</span><span className={`text-[10px] font-bold ${k==='Payment'?'text-emerald-400':'text-white'}`}>{v}</span></div>
+              {[
+                ['State', 'TECHNICAL_SCRUTINY'],
+                ['Route', 'ENHANCED REVIEW'],
+                ['Desk', 'Planning / Building Scrutiny'],
+                ['Payment', 'PAID'],
+                ['Ref', M17_CURRENT.ref ?? ''],
+              ].map(([k, v]) => (
+                <div key={k} className="flex justify-between mt-1">
+                  <span className="text-[10px] text-[#8fafd0]">{k}</span>
+                  <span className={`text-[10px] font-bold ${k === 'Payment' ? 'text-emerald-400' : 'text-white'}`}>{v}</span>
+                </div>
               ))}
-              <p className="text-[9px] text-[#8fafd0] italic mt-2">Click any node in the graph to see its detail.</p>
+              <p className="text-[9px] text-[#8fafd0] italic mt-2">Click any node or relationship in the graph to see its detail.</p>
             </div>
           )}
 
-          {selectedNode && (() => {
-            const sm = M17_NODE_STATUS[selectedNode.status]
-            return (
-              <div className={`border-b border-[#f0f4f8] ${selectedNode.status === 'current' ? 'bg-[#0f2540]' : ''}`}>
-                <div className="px-4 py-3 space-y-2">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className={`text-[11px] font-bold ${selectedNode.status === 'current' ? 'text-white' : 'text-[#1a2533]'}`}>{selectedNode.label}</p>
-                    <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] font-bold border ${selectedNode.status === 'current' ? 'bg-white text-[#1a3a5c] border-white' : `${sm.bgCls} ${sm.textCls} ${sm.borderCls}`}`}>{sm.label}</span>
-                  </div>
-                  {[['Department', selectedNode.dept], ['Relationship', selectedNode.relationship], ['Reference', selectedNode.ref ?? '—']].map(([k,v]) => (
-                    <div key={k} className="flex justify-between gap-2">
-                      <span className={`text-[10px] ${selectedNode.status === 'current' ? 'text-[#8fafd0]' : 'text-[#374151]'}`}>{k}</span>
-                      <span className={`text-[10px] font-semibold text-right ${selectedNode.status === 'current' ? 'text-white' : 'text-[#1a2533]'}`}>{v}</span>
-                    </div>
-                  ))}
-                  {selectedNode.unlockCondition && (
-                    <div className="pt-1 border-t border-[#1a3a5c]/20">
-                      <p className={`text-[9px] ${selectedNode.status === 'current' ? 'text-[#8fafd0]' : 'text-[#374151]'} uppercase tracking-wider font-semibold mb-1`}>Unlock Condition</p>
-                      <p className={`text-[10px] ${selectedNode.status === 'current' ? 'text-[#8fafd0]' : 'text-[#1a2533]'}`}>{selectedNode.unlockCondition}</p>
-                    </div>
-                  )}
-                  {selectedNode.type === 'external' && (
-                    <div className="pt-1 border-t border-[#d1d9e0]">
-                      <p className="text-[9px] text-[#374151] italic">External dept · MIDC view only · No MIDC decision controls</p>
-                    </div>
-                  )}
-                  <button onClick={() => setSelectedNode(null)} className="text-[9px] text-[#1a56db] hover:underline mt-1">Clear selection</button>
+          {/* If Edge Selected */}
+          {selectedEdge && (
+            <div className="p-4 space-y-3">
+              <div className="rounded border border-[#bdd4f5] bg-[#ebf3ff] p-3">
+                <span className="inline-block text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-white text-[#1a56db] border border-[#bdd4f5] mb-1">
+                  {selectedEdge.relationship.toUpperCase()}
+                </span>
+                <p className="text-xs font-bold text-[#1a2533]">{selectedEdge.label}</p>
+                <div className="mt-2 flex items-center gap-1.5 font-mono text-[11px] text-[#1a3a5c]">
+                  <span className="font-semibold">{selectedEdge.source.toUpperCase()}</span>
+                  <span>→</span>
+                  <span className="font-semibold">{selectedEdge.target.toUpperCase()}</span>
                 </div>
               </div>
-            )
+
+              <div className="space-y-2 text-xs">
+                <div>
+                  <span className="text-[10px] text-[#6b7280]">Configured Condition</span>
+                  <p className="font-medium text-[#1a2533] mt-0.5">{selectedEdge.condition || 'Direct prerequisite requirement'}</p>
+                </div>
+                <div>
+                  <span className="text-[10px] text-[#6b7280]">Blocking Impact</span>
+                  <p className={`font-semibold ${selectedEdge.blocking ? 'text-red-700' : 'text-emerald-700'}`}>
+                    {selectedEdge.blocking ? 'Blocking downstream milestone' : 'Non-blocking / Parallel eligible'}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setSelectedEdge(null)}
+                className="text-[10px] text-[#1a56db] hover:underline block pt-1"
+              >
+                Clear selection
+              </button>
+            </div>
+          )}
+
+          {/* If Node Selected */}
+          {selectedNode && (() => {
+            const sm = M17_NODE_STATUS[selectedNode.status];
+            return (
+              <div className={`p-4 border-b border-[#e5eaf0] ${selectedNode.status === 'current' ? 'bg-[#0f2540] text-white' : 'bg-[#f8f9fb] text-[#1a2533]'}`}>
+                <div className="space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <span className={`text-[9px] font-bold uppercase tracking-wider ${selectedNode.status === 'current' ? 'text-[#8fafd0]' : 'text-[#6b7280]'}`}>
+                        {selectedNode.id === 'bldg' ? 'Current Application Node' : 'Selected Node Details'}
+                      </span>
+                      <h2 className={`text-sm font-bold leading-snug mt-0.5 ${selectedNode.status === 'current' ? 'text-white' : 'text-[#1a2533]'}`}>
+                        {selectedNode.label}
+                      </h2>
+                      <span className={`inline-block mt-1 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${
+                        selectedNode.status === 'current'
+                          ? 'bg-[#1a3a5c] text-white border-[#2b4c74]'
+                          : 'bg-white text-[#1a3a5c] border-[#d1d9e0]'
+                      }`}>
+                        {selectedNode.type === 'midc' ? 'MIDC Controlled' : selectedNode.type === 'external' ? 'External Department' : 'Milestone'}
+                      </span>
+                    </div>
+                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-bold border shrink-0 ${
+                      selectedNode.status === 'current'
+                        ? 'bg-white text-[#1a3a5c] border-white'
+                        : `${sm.bgCls} ${sm.textCls} ${sm.borderCls}`
+                    }`}>
+                      {sm.label}
+                    </span>
+                  </div>
+
+                  <div className={`space-y-1.5 text-xs rounded p-2.5 border ${
+                    selectedNode.status === 'current'
+                      ? 'bg-[#142c47] border-[#22446d]'
+                      : 'bg-white border-[#e5eaf0]'
+                  }`}>
+                    {[
+                      ['Department', selectedNode.dept],
+                      ['Relationship', selectedNode.relationship],
+                      ['Reference', selectedNode.ref && selectedNode.ref !== '-' && selectedNode.ref !== '—' ? selectedNode.ref : 'Pending / Not Assigned'],
+                      ['Blocking State', selectedNode.blocking ? 'Yes — Configured dependency blocking downstream' : 'Satisfied / Non-blocking'],
+                      ...(selectedNode.id === 'bldg' ? [
+                        ['Workflow Stage', 'TECHNICAL_SCRUTINY'],
+                        ['Route Factor', 'Enhanced Review'],
+                        ['Current Desk', 'Planning / Building Scrutiny'],
+                        ['Payment Status', 'PAID'],
+                      ] : []),
+                    ].map(([k, v]) => (
+                      <div key={k} className="flex justify-between gap-2 py-0.5 border-b border-[#e5eaf0]/30 last:border-0">
+                        <span className={`text-[10px] ${selectedNode.status === 'current' ? 'text-[#8fafd0]' : 'text-[#6b7280]'}`}>{k}</span>
+                        <span className={`text-[10px] font-semibold text-right ${selectedNode.status === 'current' ? 'text-white' : 'text-[#1a2533]'} ${k === 'Blocking State' ? (selectedNode.blocking ? 'text-red-500 font-bold' : 'text-emerald-600 font-bold') : ''}`}>
+                          {v}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {selectedNode.unlockCondition && (
+                    <div className={`rounded p-2.5 text-xs border ${
+                      selectedNode.status === 'current'
+                        ? 'bg-[#163254] border-[#2b4c74]'
+                        : 'bg-amber-50 border-amber-200'
+                    }`}>
+                      <p className={`text-[9px] font-bold uppercase tracking-wider ${selectedNode.status === 'current' ? 'text-[#8fafd0]' : 'text-amber-800'}`}>
+                        Unlock / Activation Condition
+                      </p>
+                      <p className={`text-[10px] mt-0.5 ${selectedNode.status === 'current' ? 'text-white' : 'text-amber-950'}`}>
+                        {selectedNode.unlockCondition}
+                      </p>
+                    </div>
+                  )}
+
+                  {selectedNode.type === 'external' && (
+                    <div className="rounded bg-amber-50 border border-amber-200 p-2 text-[10px] text-amber-800">
+                      External department boundary: MIDC may view reference only. No MIDC controls to approve or modify {selectedNode.dept} decisions.
+                    </div>
+                  )}
+
+                  <div className="pt-1">
+                    <button
+                      onClick={() => {
+                        setSelectedNode(null);
+                        setSelectedEdge(null);
+                      }}
+                      className="text-[10px] text-[#1a56db] font-semibold hover:underline block"
+                    >
+                      ← Back to Current Node Overview
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
           })()}
 
-          {/* Payment context — separate from regulatory deps */}
-          <div className="px-4 py-3 border-b border-[#f0f4f8]">
+          {/* Payment / Challan State (verbatim like earlier) */}
+          <div className="px-4 py-3">
             <p className="text-[9px] text-[#374151] uppercase tracking-wider font-semibold mb-2">Payment / Challan State</p>
             <div className="flex items-center justify-between">
               <span className="text-[11px] text-[#1a2533]">Payment</span>
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-bold border bg-emerald-50 text-emerald-700 border-emerald-200">PAID</span>
             </div>
-            <p className="text-[9px] text-[#6b7280] italic mt-1.5">Payment state is managed separately from regulatory dependencies. It is not a fixed node in the regulatory dependency graph unless configured as an operational gate.</p>
+            <p className="text-[9px] text-[#6b7280] italic mt-1.5">
+              Payment state is managed separately from regulatory dependencies. It is not a fixed node in the regulatory dependency graph unless configured as an operational gate.
+            </p>
           </div>
 
-          {/* Node type legend */}
+          {/* Node Types Legend (verbatim like earlier) */}
           <div className="px-4 py-3">
             <p className="text-[9px] text-[#374151] uppercase tracking-wider font-semibold mb-2">Node Types</p>
-            {[['MIDC Controlled','Managed within MIDC workflow'],['External Dept','View only — no MIDC controls'],['Milestone','Journey stage marker']].map(([t,d]) => (
-              <div key={t} className="mb-2"><p className="text-[10px] font-semibold text-[#1a2533]">{t}</p><p className="text-[9px] text-[#374151]">{d}</p></div>
-            ))}
-            <p className="text-[9px] text-[#6b7280] italic mt-2">This is a configurable dependency model. The baseline prototype shows a representative journey — not a universal legal sequence.</p>
+            <div className="space-y-1.5">
+              {[
+                ['MIDC Controlled', 'Managed within MIDC workflow'],
+                ['External Dept', 'View only — no MIDC controls'],
+                ['Milestone', 'Journey stage marker'],
+              ].map(([t, d]) => (
+                <div key={t}>
+                  <span className="text-[10px] font-semibold text-[#1a2533]">{t}</span>
+                  <p className="text-[9px] text-[#6b7280]">{d}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Section: SELECTED NODE ACTIONS */}
+          <div className="p-4 space-y-2 mt-auto">
+            <h3 className="text-[10px] font-bold uppercase tracking-wider text-[#374151]">Selected Node Actions</h3>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setRuleModalOpen(!ruleModalOpen)}
+                className="flex-1 rounded border border-[#1a3a5c] bg-white py-1.5 text-xs font-semibold text-[#1a3a5c] hover:bg-[#ebf3ff]"
+              >
+                {ruleModalOpen ? 'Hide Rule' : 'View Rule'}
+              </button>
+              <button
+                onClick={onBackToOverview}
+                className="flex-1 rounded bg-[#1a3a5c] py-1.5 text-xs font-semibold text-white hover:bg-[#0f2540]"
+              >
+                View Application
+              </button>
+            </div>
+
+            {ruleModalOpen && (
+              <div className="mt-2 rounded border border-[#bfdbfe] bg-[#eff6ff] p-2.5 text-[11px] text-[#1e40af] space-y-1">
+                <p className="font-bold">Configured Dependency Rule:</p>
+                <p>Rule MIDC-REG-2026-DP4: Requires valid Land Allocation and MPCB CTE prior to Building Scrutiny approval. Downstream Construction gated until Fire NOC and Utility clearance.</p>
+              </div>
+            )}
           </div>
         </aside>
       </div>
@@ -7700,28 +7669,29 @@ const M18_DEF_STATUS: Record<DefStatus, { label: string; textCls: string; bgCls:
 }
 
 const M18_CANDIDATES: Deficiency[] = [
-  { id:'DEF-2026-0091', category:'Data Inconsistency', source:'M16 — Cross-form Consistency', issue:'Plot area differs between Fire record and current MIDC project data.', evidence:'Master Project Dossier: 4,800 m² · Fire record: 4,600 m²', relatedField:'Plot Area', requiredCorrection:'Confirm the applicable plot area and provide supporting evidence from the relevant authority.', docRequested:'Updated allotment record or certified measurement', entrepreneurComment:'Please confirm the applicable plot area and provide supporting evidence for each record where the value differs.', internalNote:'Potential mismatch originated from external Fire application — MIDC cannot edit Fire record directly.', status:'unresolved', createdAt:'23 Sep 2026' },
-  { id:'DEF-2026-0092', category:'Document', source:'M13 — Document Review', issue:'Building plan version requires correction — uploaded file does not match current project parameters.', evidence:'Building Plan v1 · Built-up Area: 2,000 m² (submitted) vs 2,300 m² (current project data)', relatedField:'Building Plan', requiredCorrection:'Replace the building plan with the corrected version reflecting current project parameters. New document must be uploaded as a new version.', docRequested:'Corrected Building Plan (new version)', entrepreneurComment:'Please upload a corrected Building Plan that reflects the current project parameters, including the updated built-up area.', internalNote:'Delta detected during Building Parameters review — see M14.', status:'unresolved', createdAt:'23 Sep 2026' },
-  { id:'DEF-2026-0093', category:'Building / Plan', source:'M14 — Building / Planning Scrutiny', issue:'Submitted built-up area (2,300 m²) differs from previously declared value in earlier submission (2,000 m²). Change not accompanied by a delta explanation.', evidence:'Previous submission: 2,000 m² · Current submission: 2,300 m²', relatedField:'Built-up Area', requiredCorrection:'Provide a written explanation for the change in built-up area and confirm the applicable value with supporting evidence.', docRequested:'No additional document required — written explanation sufficient', entrepreneurComment:'The built-up area has changed between submissions. Please confirm the correct value and explain the reason for this change.', internalNote:'Delta re-scrutiny triggered — open M20 if required.', status:'unresolved', createdAt:'23 Sep 2026' },
-  { id:'DEF-2026-0094', category:'Utility / Water', source:'M15 — Water / Utility / Drainage', issue:'Water quantity value requires verification — submitted as a prototype value without supporting evidence.', evidence:'Water Quantity: Prototype value · Verification: USER_CONFIRMED · Supporting evidence: Not provided', relatedField:'Water Quantity', requiredCorrection:'Confirm the applicable water quantity requirement and provide supporting technical evidence or project document.', docRequested:'Water requirement evidence / project document', entrepreneurComment:'Please confirm the water quantity requirement for your project and provide supporting technical documentation.', internalNote:'Marked Needs Verification during M15 review.', status:'unresolved', createdAt:'23 Sep 2026' },
+  { id:'DEF-2026-0091', category:'Data Inconsistency', source:'Cross-form Consistency', issue:'Plot area differs between Fire record and current MIDC project data.', evidence:'Master Project Dossier: 4,800 m² · Fire record: 4,600 m²', relatedField:'Plot Area', requiredCorrection:'Confirm the applicable plot area and provide supporting evidence from the relevant authority.', docRequested:'Updated allotment record or certified measurement', entrepreneurComment:'Please confirm the applicable plot area and provide supporting evidence for each record where the value differs.', internalNote:'Potential mismatch originated from external Fire application - MIDC cannot edit Fire record directly.', status:'unresolved', createdAt:'23 Sep 2026' },
+  { id:'DEF-2026-0092', category:'Document', source:'Document Review', issue:'Building plan version requires correction - uploaded file does not match current project parameters.', evidence:'Building Plan v1 · Built-up Area: 2,000 m² (submitted) vs 2,300 m² (current project data)', relatedField:'Building Plan', requiredCorrection:'Replace the building plan with the corrected version reflecting current project parameters. New document must be uploaded as a new version.', docRequested:'Corrected Building Plan (new version)', entrepreneurComment:'Please upload a corrected Building Plan that reflects the current project parameters, including the updated built-up area.', internalNote:'Delta detected during Building Parameters review.', status:'unresolved', createdAt:'23 Sep 2026' },
+  { id:'DEF-2026-0093', category:'Building / Plan', source:'Building / Planning Scrutiny', issue:'Submitted built-up area (2,300 m²) differs from previously declared value in earlier submission (2,000 m²). Change not accompanied by a delta explanation.', evidence:'Previous submission: 2,000 m² · Current submission: 2,300 m²', relatedField:'Built-up Area', requiredCorrection:'Provide a written explanation for the change in built-up area and confirm the applicable value with supporting evidence.', docRequested:'No additional document required - written explanation sufficient', entrepreneurComment:'The built-up area has changed between submissions. Please confirm the correct value and explain the reason for this change.', internalNote:'Delta re-scrutiny triggered.', status:'unresolved', createdAt:'23 Sep 2026' },
+  { id:'DEF-2026-0094', category:'Utility / Water', source:'Water / Utility / Drainage', issue:'Water quantity value requires verification - submitted as a prototype value without supporting evidence.', evidence:'Water Quantity: Prototype value · Verification: USER_CONFIRMED · Supporting evidence: Not provided', relatedField:'Water Quantity', requiredCorrection:'Confirm the applicable water quantity requirement and provide supporting technical evidence or project document.', docRequested:'Water requirement evidence / project document', entrepreneurComment:'Please confirm the water quantity requirement for your project and provide supporting technical documentation.', internalNote:'Marked Needs Verification during Water scrutiny review.', status:'unresolved', createdAt:'23 Sep 2026' },
 ]
 
 const M18_PREVIOUS: Deficiency[] = [
-  { id:'DEF-2026-0081', category:'Land / Plot', source:'M11 — Land / Plot Scrutiny', issue:'Plot allotment record required re-verification.', evidence:'Previous allotment record expired — entrepreneur confirmed renewal pending.', relatedField:'Plot / Allotment', requiredCorrection:'Upload renewed allotment record.', docRequested:'Renewed allotment record', entrepreneurComment:'Please upload the renewed allotment record.', internalNote:'', status:'resolved', queryId:'QRY-2026-0036', createdAt:'12 Sep 2026', updatedAt:'15 Sep 2026', response:'Entrepreneur uploaded renewed allotment record v2.' },
-  { id:'DEF-2026-0082', category:'Document',   source:'M13 — Document Review', issue:'Site layout plan required updated version.', evidence:'Site Layout Plan v1 — outdated.', relatedField:'Site Layout Plan', requiredCorrection:'Upload updated site layout plan.', docRequested:'Updated site layout plan', entrepreneurComment:'Please upload an updated site layout plan.', internalNote:'', status:'resolved', queryId:'QRY-2026-0036', createdAt:'12 Sep 2026', updatedAt:'15 Sep 2026', response:'Entrepreneur uploaded Site Layout Plan v2 — verified.' },
-  { id:'DEF-2026-0083', category:'Data Inconsistency', source:'M16 — Cross-form Consistency', issue:'Company name inconsistency between business profile and MIDC application.', evidence:'Business Profile: Aster Precision Components Pvt. Ltd. · Application: Aster Precision Pvt. Ltd.', relatedField:'Company Identity', requiredCorrection:'Confirm and correct the registered company name.', docRequested:'No document required', entrepreneurComment:'Please confirm the correct registered company name.', internalNote:'', status:'partially-resolved', queryId:'QRY-2026-0039', createdAt:'18 Sep 2026', response:'Entrepreneur confirmed Aster Precision Components Pvt. Ltd. — MIDC application update pending.' },
+  { id:'DEF-2026-0081', category:'Land / Plot', source:'Land / Plot Scrutiny', issue:'Plot allotment record required re-verification.', evidence:'Previous allotment record expired - entrepreneur confirmed renewal pending.', relatedField:'Plot / Allotment', requiredCorrection:'Upload renewed allotment record.', docRequested:'Renewed allotment record', entrepreneurComment:'Please upload the renewed allotment record.', internalNote:'', status:'resolved', queryId:'QRY-2026-0036', createdAt:'12 Sep 2026', updatedAt:'15 Sep 2026', response:'Entrepreneur uploaded renewed allotment record v2.' },
+  { id:'DEF-2026-0082', category:'Document',   source:'Document Review', issue:'Site layout plan required updated version.', evidence:'Site Layout Plan v1 - outdated.', relatedField:'Site Layout Plan', requiredCorrection:'Upload updated site layout plan.', docRequested:'Updated site layout plan', entrepreneurComment:'Please upload an updated site layout plan.', internalNote:'', status:'resolved', queryId:'QRY-2026-0036', createdAt:'12 Sep 2026', updatedAt:'15 Sep 2026', response:'Entrepreneur uploaded Site Layout Plan v2 - verified.' },
+  { id:'DEF-2026-0083', category:'Data Inconsistency', source:'Cross-form Consistency', issue:'Company name inconsistency between business profile and MIDC application.', evidence:'Business Profile: Aster Precision Components Pvt. Ltd. · Application: Aster Precision Pvt. Ltd.', relatedField:'Company Identity', requiredCorrection:'Confirm and correct the registered company name.', docRequested:'No document required', entrepreneurComment:'Please confirm the correct registered company name.', internalNote:'', status:'partially-resolved', queryId:'QRY-2026-0039', createdAt:'18 Sep 2026', response:'Entrepreneur confirmed Aster Precision Components Pvt. Ltd. - MIDC application update pending.' },
 ]
 
 
 export function M18QueryBuilderPage({ onBack, onBackToOverview, onOpenQueryHistory }: {
   onBack: () => void; onBackToOverview: () => void; onOpenQueryHistory?: () => void
 }) {
+  const app = useMonolithData().APP_SAMPLE
   const [selectedDef, setSelectedDef] = useState<Deficiency | null>(M18_CANDIDATES[0])
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [filterCat, setFilterCat]     = useState('All')
   const [showPreview, setShowPreview] = useState(false)
   const [sent, setSent]               = useState(false)
-  const [queryId]                     = useState('QRY-2026-0042')
+  const [queryId]                     = useState(app.queryVersion ?? `DRAFT-${app.id}`)
 
   const toggleSelect = (id: string) => setSelectedIds(prev => {
     const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n
@@ -7729,7 +7699,7 @@ export function M18QueryBuilderPage({ onBack, onBackToOverview, onOpenQueryHisto
 
   const filteredCandidates = filterCat === 'All' ? M18_CANDIDATES : M18_CANDIDATES.filter(d => d.category === filterCat)
   const selectedDefs = M18_CANDIDATES.filter(d => selectedIds.has(d.id))
-  const docsRequested = selectedDefs.filter(d => d.docRequested && d.docRequested !== 'No additional document required — written explanation sufficient' && d.docRequested !== 'No document required').length
+  const docsRequested = selectedDefs.filter(d => d.docRequested && d.docRequested !== 'No additional document required - written explanation sufficient' && d.docRequested !== 'No document required').length
 
   const StatusBadge = ({ status }: { status: DefStatus }) => {
     const m = M18_DEF_STATUS[status]
@@ -7745,7 +7715,7 @@ export function M18QueryBuilderPage({ onBack, onBackToOverview, onOpenQueryHisto
       <p className="text-[10px] text-[#374151] italic mb-6">Entrepreneur notified. Awaiting response. Application state updated to QUERY_RAISED (operational overlay: Awaiting Entrepreneur Response).</p>
       <div className="flex gap-3">
         <button onClick={() => { setSent(false); setSelectedIds(new Set()); setShowPreview(false) }} className="px-4 py-2 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540]">Back to Query Builder</button>
-        <button onClick={onOpenQueryHistory} className="px-4 py-2 border border-[#1a56db] text-[#1a56db] text-xs font-bold rounded hover:bg-[#ebf3ff]">View Query History → M19</button>
+        <button onClick={onOpenQueryHistory} className="px-4 py-2 border border-[#1a56db] text-[#1a56db] text-xs font-bold rounded hover:bg-[#ebf3ff]">View Query History</button>
       </div>
     </div>
   )
@@ -7754,11 +7724,11 @@ export function M18QueryBuilderPage({ onBack, onBackToOverview, onOpenQueryHisto
     <div className="flex-1 flex flex-col overflow-hidden bg-[#f8f9fb]">
       <div className="bg-white border-b border-[#d1d9e0] px-5 py-3 shrink-0">
         <Breadcrumb items={[{ label:'Department Home', onClick: onBackToOverview },{ label:'Applications', onClick: onBackToOverview },{ label:'Application Overview', onClick: onBackToOverview },{ label:'Query Builder', onClick: () => setShowPreview(false) },{ label:'Review Before Sending' }]} />
-        <h1 className="text-base font-bold text-[#1a2533] mt-2">Review Before Sending — {queryId} <span className="text-[11px] text-[#374151] font-normal">M18</span></h1>
+        <h1 className="text-base font-bold text-[#1a2533] mt-2">Review Before Sending {queryId} </h1>
       </div>
       <div className="flex-1 overflow-y-auto p-5 space-y-4">
         <div className="bg-[#ebf3ff] border border-[#bdd4f5] rounded px-4 py-3 text-[11px] text-[#1a3a5c]">
-          <p className="font-bold mb-1">Summary — what the entrepreneur will receive</p>
+          <p className="font-bold mb-1">Summary - what the entrepreneur will receive</p>
           <div className="flex gap-6">
             <span>{selectedIds.size} deficiencies</span>
             <span>{docsRequested} documents requested</span>
@@ -7795,7 +7765,7 @@ export function M18QueryBuilderPage({ onBack, onBackToOverview, onOpenQueryHisto
           <button className="px-4 py-2 border border-[#d1d9e0] text-xs rounded text-[#1a2533] hover:bg-[#f8f9fb]">Save Draft</button>
           <button onClick={() => setShowPreview(false)} className="px-4 py-2 text-xs text-[#374151] hover:underline">Cancel</button>
         </div>
-        <p className="text-[10px] text-[#6b7280] italic">Sending will update application state to QUERY_RAISED. Operational overlay: Awaiting Entrepreneur Response. Sample prototype data — not actual records.</p>
+        <p className="text-[10px] text-[#6b7280] italic">Sending will update application state to QUERY_RAISED. Operational overlay: Awaiting Entrepreneur Response. Sample prototype data - not actual records.</p>
       </div>
     </div>
   )
@@ -7804,16 +7774,16 @@ export function M18QueryBuilderPage({ onBack, onBackToOverview, onOpenQueryHisto
     <div className="flex-1 flex flex-col overflow-hidden bg-[#f8f9fb]">
       {/* Header */}
       <div className="bg-white border-b border-[#d1d9e0] px-5 py-3 shrink-0">
-        <Breadcrumb items={[{ label:'Department Home', onClick: onBackToOverview },{ label:'Applications', onClick: onBackToOverview },{ label:'Application Overview', onClick: onBackToOverview },{ label:'Scrutiny', onClick: onBack },{ label:'Query Builder' }]} />
+        <Breadcrumb items={[{ label:'Department Home', onClick: onBackToOverview },{ label:'Applications', onClick: onBackToOverview },{ label:'Application Overview', onClick: onBackToOverview },{ label:'Queries / Deficiencies' },{ label:'Query Builder' }]} />
         <div className="flex items-start justify-between gap-4 mt-2">
           <div>
-            <h1 className="text-base font-bold text-[#1a2533]">M18 — Consolidated Query Builder <span className="text-[11px] text-[#374151] font-normal ml-2">Consolidate all unresolved issues into one outgoing query</span></h1>
-            <p className="text-[11px] text-[#374151] mt-0.5">MIDC-APP-2026-00418 · Aster Precision Components Pvt. Ltd. · Building / Planning</p>
+            <h1 className="text-base font-bold text-[#1a2533]">Consolidated Query Builder <span className="text-[11px] text-[#374151] font-normal ml-2">Consolidate all unresolved issues into one outgoing query</span></h1>
+            <p className="text-[11px] text-[#374151] mt-0.5">{app.id} · {app.business} · {app.service}</p>
           </div>
-          <button onClick={onOpenQueryHistory} className="text-xs text-[#1a56db] hover:underline shrink-0">Query History → M19</button>
+          <button onClick={onOpenQueryHistory} className="text-xs text-[#1a56db] hover:underline shrink-0">Query History</button>
         </div>
         <div className="flex flex-wrap gap-x-6 gap-y-1 mt-2 text-[10px]">
-          {[['Application','MIDC-APP-2026-00418'],['State','QUERY_RAISED'],['Payment','PAID'],['Desk','Planning / Building Scrutiny'],['SLA','Approaching']].map(([k,v]) => (
+          {[['Application',app.id],['State',app.state],['Payment','PAID'],['Desk',app.desk],['SLA',app.slaRemaining]].map(([k,v]) => (
             <span key={k} className="text-[#374151]">{k}: <strong className={k==='SLA'?'text-amber-700':k==='Payment'?'text-emerald-700':k==='State'?'text-[#1a3a5c]':'text-[#1a2533]'}>{v}</strong></span>
           ))}
         </div>
@@ -7821,7 +7791,7 @@ export function M18QueryBuilderPage({ onBack, onBackToOverview, onOpenQueryHisto
 
       {/* Purpose */}
       <div className="bg-[#ebf3ff] border-b border-[#bdd4f5] px-5 py-2 shrink-0">
-        <p className="text-[11px] text-[#1a3a5c]"><span className="font-bold">Consolidated Query Builder</span> — Select unresolved issues from scrutiny screens and consolidate them into one outgoing query. Individual scrutiny screens do not independently contact the entrepreneur — all issues flow through M18. This prevents repeated one-by-one query loops.</p>
+        <p className="text-[11px] text-[#1a3a5c]"><span className="font-bold">Consolidated Query Builder</span> - Select unresolved issues from scrutiny screens and consolidate them into one outgoing query. Individual scrutiny screens do not independently contact the entrepreneur. All issues flow through this builder. This prevents repeated one-by-one query loops.</p>
       </div>
 
       {/* Dark summary bar */}
@@ -7837,10 +7807,10 @@ export function M18QueryBuilderPage({ onBack, onBackToOverview, onOpenQueryHisto
       {/* Three-column */}
       <div className="flex flex-1 overflow-hidden">
 
-        {/* LEFT — category nav + candidate list */}
+        {/* LEFT - category nav + candidate list */}
         <div className="w-64 shrink-0 bg-white border-r border-[#d1d9e0] overflow-y-auto">
           <div className="px-3 py-2.5 border-b border-[#d1d9e0]">
-            <p className="text-[9px] text-[#374151] uppercase tracking-wider font-bold">Unresolved Issues — Available</p>
+            <p className="text-[9px] text-[#374151] uppercase tracking-wider font-bold">Unresolved Issues - Available</p>
           </div>
           {/* Category filter */}
           <div className="px-3 py-2 border-b border-[#f0f4f8]">
@@ -7896,14 +7866,14 @@ export function M18QueryBuilderPage({ onBack, onBackToOverview, onOpenQueryHisto
           </div>
         </div>
 
-        {/* CENTER — deficiency detail */}
+        {/* CENTER - deficiency detail */}
         <main className="flex-1 overflow-y-auto bg-[#f8f9fb] p-5 space-y-4" tabIndex={-1}>
           {selectedDef ? (
             <>
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-[9px] text-[#374151] uppercase tracking-wider font-bold">Deficiency Detail</p>
-                  <h2 className="text-sm font-bold text-[#1a2533] mt-0.5">{selectedDef.id} — {selectedDef.category}</h2>
+                  <h2 className="text-sm font-bold text-[#1a2533] mt-0.5">{selectedDef.id} - {selectedDef.category}</h2>
                   <p className="text-[10px] text-[#374151]">Source: {selectedDef.source} · Created: {selectedDef.createdAt}</p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
@@ -7939,7 +7909,7 @@ export function M18QueryBuilderPage({ onBack, onBackToOverview, onOpenQueryHisto
                   ['Related Field', selectedDef.relatedField],
                   ['Required Correction', selectedDef.requiredCorrection],
                   ['Document Requested', selectedDef.docRequested],
-                  ['Regulatory Source', 'Configured MIDC Building / Planning requirement — no official GR cited in prototype.'],
+                  ['Regulatory Source', 'Configured MIDC Building / Planning requirement - no official GR cited in prototype.'],
                 ].map(([k,v]) => (
                   <div key={k} className="grid grid-cols-3 gap-2 px-4 py-3 text-[11px]">
                     <p className="text-[#374151] font-semibold">{k}</p>
@@ -7969,13 +7939,6 @@ export function M18QueryBuilderPage({ onBack, onBackToOverview, onOpenQueryHisto
                   {selectedDef.queryId && <p className="text-[9px] text-emerald-600 mt-1">Query: {selectedDef.queryId} · {selectedDef.updatedAt}</p>}
                 </div>
               )}
-
-              {/* Evidence links */}
-              <div className="flex gap-2 flex-wrap">
-                <button className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#1a56db] hover:bg-[#ebf3ff]">View Comparison → M16</button>
-                <button className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#1a56db] hover:bg-[#ebf3ff]">View Parameter → M12</button>
-                <button className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#1a56db] hover:bg-[#ebf3ff]">View Document → M13</button>
-              </div>
             </>
           ) : (
             <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -7984,7 +7947,7 @@ export function M18QueryBuilderPage({ onBack, onBackToOverview, onOpenQueryHisto
           )}
         </main>
 
-        {/* RIGHT — consolidated query panel */}
+        {/* RIGHT - consolidated query panel */}
         <aside className="w-64 shrink-0 bg-white border-l border-[#d1d9e0] overflow-y-auto" aria-label="Current consolidated query">
           <div className="px-4 py-2.5 border-b border-[#d1d9e0] bg-[#f8f9fb]">
             <p className="text-[9px] text-[#374151] uppercase tracking-wider font-bold">Current Consolidated Query</p>
@@ -8028,11 +7991,11 @@ export function M18QueryBuilderPage({ onBack, onBackToOverview, onOpenQueryHisto
 
           <div className="px-4 py-3 border-t border-[#f0f4f8]">
             <p className="text-[9px] text-[#374151] uppercase tracking-wider font-semibold mb-1">After sending</p>
-            <p className="text-[10px] text-[#1a2533]">Application state → QUERY_RAISED. Entrepreneur receives one consolidated query. Responses tracked in M19.</p>
+            <p className="text-[10px] text-[#1a2533]">Application state → QUERY_RAISED. Entrepreneur receives one consolidated query. Responses tracked in Query History.</p>
             <button onClick={onOpenQueryHistory} className="mt-2 text-[10px] text-[#1a56db] hover:underline font-semibold">View Query / Response History → M19</button>
           </div>
           <div className="px-4 py-3 border-t border-[#f0f4f8]">
-            <p className="text-[9px] text-[#6b7280] italic">Sample prototype data — not actual records</p>
+            <p className="text-[9px] text-[#6b7280] italic">Sample prototype data - not actual records</p>
           </div>
         </aside>
       </div>
@@ -8159,19 +8122,19 @@ export function ScrutinyCommandCentre({ onOpenScrutinyApp }: { onOpenScrutinyApp
 
   const ATTENTION_ITEMS = [
     { text:'2 unresolved Building / Planning issues', sub:'MIDC-APP-2026-00418', dest:'bldg-scrutiny', appId:'MIDC-APP-2026-00418' },
-    { text:'1 cross-form inconsistency — Plot Area mismatch', sub:'MIDC-APP-2026-00418', dest:'consistency', appId:'MIDC-APP-2026-00418' },
+    { text:'1 cross-form inconsistency - Plot Area mismatch', sub:'MIDC-APP-2026-00418', dest:'consistency', appId:'MIDC-APP-2026-00418' },
     { text:'1 upstream dependency pending', sub:'MIDC-APP-2026-00418', dest:'dependency-view', appId:'MIDC-APP-2026-00418' },
-    { text:'Entrepreneur resubmitted — Delta Re-scrutiny required', sub:'MIDC-APP-2026-00418', dest:'delta-rescrutiny', appId:'MIDC-APP-2026-00418' },
-    { text:'Entrepreneur response received — Building Plan v3', sub:'MIDC-APP-2026-00405', dest:'query-history', appId:'MIDC-APP-2026-00405' },
+    { text:'Entrepreneur resubmitted - Delta Re-scrutiny required', sub:'MIDC-APP-2026-00418', dest:'delta-rescrutiny', appId:'MIDC-APP-2026-00418' },
+    { text:'Entrepreneur response received - Building Plan v3', sub:'MIDC-APP-2026-00405', dest:'query-history', appId:'MIDC-APP-2026-00405' },
     { text:'Delta Re-scrutiny required', sub:'MIDC-APP-2026-00391', dest:'delta-rescrutiny', appId:'MIDC-APP-2026-00391' },
   ]
 
   const RECENT_ACTIVITY = [
     { date:'18 Sep', appId:'MIDC-APP-2026-00418', event:'Entrepreneur resubmitted application v2', action:'Delta Re-scrutiny required', dest:'delta-rescrutiny' },
-    { date:'18 Sep', appId:'MIDC-APP-2026-00418', event:'Business DNA changed after submission — v3 → v4', action:'View Business DNA change', dest:'dna' },
+    { date:'18 Sep', appId:'MIDC-APP-2026-00418', event:'Business DNA changed after submission - v3 → v4', action:'View Business DNA change', dest:'dna' },
     { date:'17 Sep', appId:'MIDC-APP-2026-00405', event:'Building Plan v3 uploaded', action:'Document review required', dest:'doc-review' },
-    { date:'16 Sep', appId:'MIDC-APP-2026-00372', event:'Inspection requirement identified during M14 scrutiny', action:'Plan inspection', dest:'inspection-queue' },
-    { date:'15 Sep', appId:'MIDC-APP-2026-00391', event:'Cross-form inconsistency detected — Water / Utility vs Master Project', action:'Review consistency', dest:'consistency' },
+    { date:'16 Sep', appId:'MIDC-APP-2026-00372', event:'Inspection requirement identified during Building / Planning scrutiny', action:'Plan inspection', dest:'inspection-queue' },
+    { date:'15 Sep', appId:'MIDC-APP-2026-00391', event:'Cross-form inconsistency detected - Water / Utility vs Master Project', action:'Review consistency', dest:'consistency' },
   ]
 
   const filtered = SCRUTINY_APPS.filter(a => {
@@ -8186,7 +8149,7 @@ export function ScrutinyCommandCentre({ onOpenScrutinyApp }: { onOpenScrutinyApp
     if (status === 'Completed') return '✓'
     if (status === 'Issues Found' || status === 'Query Required') return '!'
     if (status === 'In Review' || status === 'Pending' || status === 'Resubmission Received') return '●'
-    if (status === 'Not Applicable') return '—'
+    if (status === 'Not Applicable') return '-'
     return '○'
   }
 
@@ -8233,10 +8196,10 @@ export function ScrutinyCommandCentre({ onOpenScrutinyApp }: { onOpenScrutinyApp
             <Icon.AlertCircle />
             <div className="flex-1 min-w-0">
               <div className="text-xs font-bold text-[#6b21a8]">Resubmission Received</div>
-              <div className="text-[11px] text-[#6b21a8] mt-0.5">MIDC-APP-2026-00418 — v1 → v2 · 4 changed fields · 3 affected areas</div>
+              <div className="text-[11px] text-[#6b21a8] mt-0.5">MIDC-APP-2026-00418 - v1 → v2 · 4 changed fields · 3 affected areas</div>
             </div>
             <button onClick={() => { setSelectedApp(SCRUTINY_APPS[0]); setShowAppDetail(true); onOpenScrutinyApp('MIDC-APP-2026-00418', 'delta-rescrutiny') }}
-              className="shrink-0 text-[11px] font-bold text-[#6b21a8] underline hover:text-[#7e22ce]">Open Delta → M20</button>
+              className="shrink-0 text-[11px] font-bold text-[#6b21a8] underline hover:text-[#7e22ce]">Open Delta</button>
           </div>
           <div className="bg-[#eff6ff] border border-[#93c5fd] rounded-lg px-4 py-3 flex items-start gap-3">
             <Icon.Info />
@@ -8245,7 +8208,7 @@ export function ScrutinyCommandCentre({ onOpenScrutinyApp }: { onOpenScrutinyApp
               <div className="text-[11px] text-[#1e40af] mt-0.5">QRY-2026-0042 · DEF-2026-0092 · Building Plan v3 uploaded</div>
             </div>
             <button onClick={() => onOpenScrutinyApp('MIDC-APP-2026-00405', 'query-history')}
-              className="shrink-0 text-[11px] font-bold text-[#1e40af] underline hover:text-[#1d4ed8]">Review Response → M19</button>
+              className="shrink-0 text-[11px] font-bold text-[#1e40af] underline hover:text-[#1d4ed8]">Review Response</button>
           </div>
         </div>
 
@@ -8267,7 +8230,6 @@ export function ScrutinyCommandCentre({ onOpenScrutinyApp }: { onOpenScrutinyApp
             <select value={slaFilter} onChange={e => setSlaFilter(e.target.value)} className="text-xs border border-[#d1d9e0] rounded px-2 py-1.5 bg-white focus:outline-none">
               {['All','Within SLA','Due Soon','SLA Risk','SLA Breached'].map(s => <option key={s}>{s}</option>)}
             </select>
-            <button className="text-[10px] text-[#1a56db] hover:underline ml-1">Advanced Search → M04</button>
           </div>
           <table className="w-full text-xs border-collapse">
             <thead>
@@ -8328,9 +8290,7 @@ export function ScrutinyCommandCentre({ onOpenScrutinyApp }: { onOpenScrutinyApp
                 </div>
               </div>
               <div className="ml-auto flex gap-2">
-                <button onClick={() => onOpenScrutinyApp(selectedApp.appId, 'overview')} className="text-[10px] text-[#1a56db] hover:underline">View Application → M06</button>
-                <button onClick={() => onOpenScrutinyApp(selectedApp.appId, 'dna')} className="text-[10px] text-[#1a56db] hover:underline">Business DNA → M07</button>
-                <button onClick={() => onOpenScrutinyApp(selectedApp.appId, 'timeline')} className="text-[10px] text-[#1a56db] hover:underline">Timeline → M08</button>
+                <button onClick={() => onOpenScrutinyApp(selectedApp.appId, 'overview')} className="text-[10px] text-[#1a56db] hover:underline font-semibold">View Application → M06</button>
               </div>
             </div>
 
@@ -8359,7 +8319,7 @@ export function ScrutinyCommandCentre({ onOpenScrutinyApp }: { onOpenScrutinyApp
 
             {/* Module cards */}
             <div className="p-4">
-              <div className="text-[10px] font-bold text-[#374151] uppercase tracking-wider mb-3">Scrutiny Modules — {selectedApp.appId}</div>
+              <div className="text-[10px] font-bold text-[#374151] uppercase tracking-wider mb-3">Scrutiny Modules - {selectedApp.appId}</div>
               <div className="grid grid-cols-4 gap-3">
                 {selectedApp.modules.map(mod => {
                   const s = MODULE_STATUS_STYLE[mod.status]
@@ -8367,7 +8327,7 @@ export function ScrutinyCommandCentre({ onOpenScrutinyApp }: { onOpenScrutinyApp
                     <div key={mod.id} className={`border rounded-lg p-3 flex flex-col gap-2 ${mod.status === 'Not Applicable' ? 'opacity-50' : ''}`}>
                       <div className="flex items-start justify-between gap-1">
                         <div>
-                          <div className="text-[9px] font-bold text-[#374151] uppercase">{mod.mNum}</div>
+                          
                           <div className="text-xs font-bold text-[#1a2533] leading-tight">{mod.name}</div>
                         </div>
                         {(mod.issues ?? 0) > 0 && (
@@ -8380,7 +8340,7 @@ export function ScrutinyCommandCentre({ onOpenScrutinyApp }: { onOpenScrutinyApp
                         <button
                           onClick={() => onOpenScrutinyApp(selectedApp.appId, moduleDestination(mod.id))}
                           className="mt-auto text-[10px] font-bold text-[#1a56db] hover:underline text-left"
-                        >Open {mod.mNum} →</button>
+                        >Open →</button>
                       )}
                     </div>
                   )
@@ -8389,19 +8349,19 @@ export function ScrutinyCommandCentre({ onOpenScrutinyApp }: { onOpenScrutinyApp
 
               {/* Next actions panel */}
               <div className="mt-4 bg-[#f8f9fb] border border-[#e5eaf0] rounded-lg p-3">
-                <div className="text-[10px] font-bold text-[#374151] uppercase tracking-wider mb-2">Next Actions — {selectedApp.appId}</div>
+                <div className="text-[10px] font-bold text-[#374151] uppercase tracking-wider mb-2">Next Actions - {selectedApp.appId}</div>
                 <div className="space-y-1.5">
                   {selectedApp.modules.filter(m => ['In Review','Issues Found','Query Required','Resubmission Received','Review Required','Pending','Needs Verification'].includes(m.status)).map((m, i) => (
                     <div key={m.id} className="flex items-center gap-2">
                       <span className="text-[10px] font-bold text-[#374151] w-4">{i + 1}.</span>
                       <span className="text-xs text-[#1a2533] flex-1">
-                        {m.status === 'Issues Found' ? `Resolve ${m.issues ?? ''} issue${(m.issues ?? 0) > 1 ? 's' : ''} — ${m.name}` :
-                         m.status === 'Resubmission Received' ? `Perform Delta Re-scrutiny — ${m.issues ?? 0} changes` :
-                         m.status === 'Review Required' ? `Review responses — ${m.name}` :
-                         m.status === 'Pending' ? `${m.name} — action required` :
-                         `Continue — ${m.name}`}
+                        {m.status === 'Issues Found' ? `Resolve ${m.issues ?? ''} issue${(m.issues ?? 0) > 1 ? 's' : ''} - ${m.name}` :
+                         m.status === 'Resubmission Received' ? `Perform Delta Re-scrutiny - ${m.issues ?? 0} changes` :
+                         m.status === 'Review Required' ? `Review responses - ${m.name}` :
+                         m.status === 'Pending' ? `${m.name} - action required` :
+                         `Continue - ${m.name}`}
                       </span>
-                      <button onClick={() => onOpenScrutinyApp(selectedApp.appId, moduleDestination(m.id))} className="shrink-0 text-[10px] font-bold text-white bg-[#1a3a5c] px-2 py-0.5 rounded hover:bg-[#0f2540]">Open {m.mNum}</button>
+                      <button onClick={() => onOpenScrutinyApp(selectedApp.appId, moduleDestination(m.id))} className="shrink-0 text-[10px] font-bold text-white bg-[#1a3a5c] px-2 py-0.5 rounded hover:bg-[#0f2540]">Open</button>
                     </div>
                   ))}
                 </div>
@@ -8469,19 +8429,19 @@ const M20_AFFECTED: AffectedItem[] = [
   { id:'a3', service:'Provisional Fire', parameter:'Configured dependency impact', reason:'Building and plot context changed; fire dependency may be affected by updated project scope.', causedBy:'Plot Area / Building Area', reviewStatus:'not-reviewed' },
   { id:'a4', service:'Construction', parameter:'Configured downstream impact', reason:'Building scope change may affect construction staging or configured downstream approvals.', causedBy:'Building Area', reviewStatus:'not-reviewed' },
   { id:'a5', service:'Inspection', parameter:'Potential inspection impact', reason:'Building area increased from 2,000 to 2,300 m². Configured inspection requirement may be affected.', causedBy:'Building Area', reviewStatus:'needs-verification' },
-  { id:'a6', service:'M16 Cross-form Consistency', parameter:'Potential new mismatch', reason:'Plot area in MIDC Building form (4,800) may now mismatch updated project value (5,200). Cross-form check required.', causedBy:'Plot Area', reviewStatus:'not-reviewed' },
+  { id:'a6', service:'Cross-form Consistency', parameter:'Potential new mismatch', reason:'Plot area in MIDC Building form (4,800) may now mismatch updated project value (5,200). Cross-form check required.', causedBy:'Plot Area', reviewStatus:'not-reviewed' },
 ]
 const M20_UNCHANGED: UnchangedItem[] = [
   { id:'u1', field:'Company Identity', value:'Aster Precision Components Pvt. Ltd.', verification:'Department Verified', reviewStatus:'no-review-required' },
   { id:'u2', field:'Project Location', value:'MIDC Chakan Phase II, Pune', verification:'System Verified', reviewStatus:'no-review-required' },
   { id:'u3', field:'Plot Number', value:'C-124, MIDC Chakan', verification:'System Verified', reviewStatus:'no-review-required' },
   { id:'u4', field:'Water Source', value:'MIDC', verification:'System Verified', reviewStatus:'no-review-required' },
-  { id:'u5', field:'Existing Land Document', value:'7/12 Extract — v2', verification:'Department Verified', reviewStatus:'no-review-required' },
+  { id:'u5', field:'Existing Land Document', value:'7/12 Extract - v2', verification:'Department Verified', reviewStatus:'no-review-required' },
   { id:'u6', field:'Company PAN', value:'AAACA1234Z', verification:'System Verified', reviewStatus:'no-review-required' },
-  { id:'u7', field:'Director — Primary', value:'Vikram Nair', verification:'Department Verified', reviewStatus:'no-review-required' },
+  { id:'u7', field:'Director - Primary', value:'Vikram Nair', verification:'Department Verified', reviewStatus:'no-review-required' },
   { id:'u8', field:'Industry Type', value:'Precision Engineering', verification:'System Verified', reviewStatus:'no-review-required' },
   { id:'u9', field:'MIDC Zone', value:'Chakan Phase II', verification:'System Verified', reviewStatus:'no-review-required' },
-  { id:'u10', field:'Connectivity — Road', value:'State Highway SH-50', verification:'System Verified', reviewStatus:'no-review-required' },
+  { id:'u10', field:'Connectivity - Road', value:'State Highway SH-50', verification:'System Verified', reviewStatus:'no-review-required' },
   { id:'u11', field:'Power Source', value:'MSEDCL', verification:'System Verified', reviewStatus:'no-review-required' },
   { id:'u12', field:'Environmental Category', value:'Orange', verification:'Department Verified', reviewStatus:'no-review-required' },
 ]
@@ -8493,17 +8453,16 @@ const REVIEW_STATUS_MAP: Record<ReviewStatus, { label: string; bg: string; text:
   'query':              { label:'Query',               bg:'bg-[#fff7ed]', text:'text-[#9a3412]', border:'border-[#fdba74]' },
   'invalid':            { label:'Invalid',             bg:'bg-[#fef2f2]', text:'text-[#991b1b]', border:'border-[#fca5a5]' },
   'needs-verification': { label:'Needs Verification',  bg:'bg-[#eff6ff]', text:'text-[#1e40af]', border:'border-[#93c5fd]' },
-  'reviewed-no-change': { label:'Reviewed — No Change',bg:'bg-[#ecfdf5]', text:'text-[#065f46]', border:'border-[#a7f3d0]' },
+  'reviewed-no-change': { label:'Reviewed - No Change',bg:'bg-[#ecfdf5]', text:'text-[#065f46]', border:'border-[#a7f3d0]' },
 }
 const CHANGE_TYPE_LABEL: Record<ChangedItem['changeType'], string> = {
   value:'Value Changed', document:'Document Version Changed', status:'Status Changed',
   dna:'Business DNA Changed', dependency:'Dependency State Changed', applicability:'Applicability Changed',
 }
 
-export function M20DeltaRescrutinyPage({ onBackToOverview, onOpenDna, onOpenDocReview, onOpenConsistency, onOpenDepView, onOpenQueryBuilder, onOpenQueryHistory, onOpenTimeline }: {
+export function M20DeltaRescrutinyPage({ onBackToOverview, onOpenDna, onOpenDocReview, onOpenConsistency, onOpenDepView, onOpenTimeline }: {
   onBackToOverview: () => void; onOpenDna: () => void; onOpenDocReview: (id: string) => void
-  onOpenConsistency: () => void; onOpenDepView: () => void; onOpenQueryBuilder: () => void
-  onOpenQueryHistory: () => void; onOpenTimeline: () => void
+  onOpenConsistency: () => void; onOpenDepView: () => void; onOpenTimeline: () => void
 }) {
   const [tab, setTab] = useState<DeltaTab>('changed')
   const [changedItems, setChangedItems] = useState<ChangedItem[]>(M20_CHANGED)
@@ -8539,10 +8498,12 @@ export function M20DeltaRescrutinyPage({ onBackToOverview, onOpenDna, onOpenDocR
   return (
     <div className="flex-1 flex flex-col bg-[#f8f9fb] min-h-0">
       {/* Breadcrumb */}
-      <div className="bg-white border-b border-[#e5eaf0] px-6 py-2 flex items-center gap-1.5 text-xs text-[#1a2533]">
-        <button onClick={onBackToOverview} className="hover:text-[#1a3a5c] hover:underline">Application</button>
-        <Icon.ChevronRight />
-        <span className="text-[#1a2533] font-semibold">M20 — Delta Re-scrutiny</span>
+      <div className="bg-white border-b border-[#e5eaf0] px-6 py-2">
+        <Breadcrumb items={[
+          { label: 'Department Home' },
+          { label: 'Scrutiny' },
+          { label: 'Delta Re-scrutiny' }
+        ]} />
       </div>
 
       {/* App context header */}
@@ -8567,16 +8528,16 @@ export function M20DeltaRescrutinyPage({ onBackToOverview, onOpenDna, onOpenDocR
           <div className="border-l border-[#e5eaf0] pl-6 flex gap-6">
             <div>
               <div className="text-[10px] text-[#374151] uppercase tracking-wider font-bold">Previous Submission</div>
-              <div className="text-xs font-semibold text-[#1a2533]">Version 1 — 12 Sep 2026</div>
+              <div className="text-xs font-semibold text-[#1a2533]">Version 1 - 12 Sep 2026</div>
             </div>
             <div>
               <div className="text-[10px] text-[#374151] uppercase tracking-wider font-bold">Current Submission</div>
-              <div className="text-xs font-semibold text-[#1a3a5c]">Version 2 — 18 Sep 2026</div>
+              <div className="text-xs font-semibold text-[#1a3a5c]">Version 2 - 18 Sep 2026</div>
             </div>
           </div>
           <div className="ml-auto flex gap-2 items-center">
             <button onClick={onOpenTimeline} className="text-xs text-[#1a56db] hover:underline">Application Timeline →</button>
-            <button onClick={onOpenQueryHistory} className="text-xs text-[#1a56db] hover:underline">Query History →</button>
+            <button onClick={onBackToOverview} className="px-3 py-1 bg-[#1a3a5c] text-white text-xs font-semibold rounded hover:bg-[#234c78]">✓ Complete Delta Review</button>
           </div>
         </div>
       </div>
@@ -8586,14 +8547,14 @@ export function M20DeltaRescrutinyPage({ onBackToOverview, onOpenDna, onOpenDocR
         <Icon.Warning />
         <div className="flex-1 min-w-0">
           <div className="text-xs font-bold text-[#92400e]">Business DNA changed after original submission.</div>
-          <div className="text-[11px] text-[#78350f] mt-0.5">Business DNA v3 → v4 — 3 fields updated by Adaptive Business Profile on 18 Sep 2026. Changes confirmed by entrepreneur.</div>
+          <div className="text-[11px] text-[#78350f] mt-0.5">Business DNA v3 → v4 - 3 fields updated by Adaptive Business Profile on 18 Sep 2026. Changes confirmed by entrepreneur.</div>
           <div className="flex gap-3 mt-1.5 flex-wrap">
             <span className="text-[10px] text-[#92400e] font-semibold">Plot Area: 4,800 → 5,200 m²</span>
             <span className="text-[10px] text-[#92400e] font-semibold">Water Requirement: No → Yes</span>
             <span className="text-[10px] text-[#92400e] font-semibold">Project Stage: Pre-construction → Construction</span>
           </div>
         </div>
-        <button onClick={onOpenDna} className="shrink-0 text-[11px] font-bold text-[#92400e] underline hover:text-[#78350f]">View Business DNA Change → M07</button>
+        <button onClick={onOpenDna} className="shrink-0 text-[11px] font-bold text-[#92400e] underline hover:text-[#78350f]">View Business DNA Change</button>
       </div>
 
       {/* Delta summary header */}
@@ -8622,14 +8583,14 @@ export function M20DeltaRescrutinyPage({ onBackToOverview, onOpenDna, onOpenDocR
         {/* Version comparison */}
         <div className="mt-4 grid grid-cols-2 gap-4 max-w-lg">
           <div className="bg-[#f8f9fb] border border-[#d1d9e0] rounded p-3">
-            <div className="text-[9px] text-[#374151] uppercase tracking-wider font-bold mb-1">Version 1 — Previous</div>
+            <div className="text-[9px] text-[#374151] uppercase tracking-wider font-bold mb-1">Version 1 - Previous</div>
             <div className="text-[11px] text-[#1a2533]">Submitted: <span className="font-semibold">12 Sep 2026</span></div>
             <div className="text-[11px] text-[#1a2533]">Business DNA: <span className="font-semibold">v3</span></div>
             <div className="text-[11px] text-[#1a2533]">Application: <span className="font-semibold">v1</span></div>
             <div className="text-[11px] text-[#1a2533]">Officer review: <span className="font-semibold">Query Raised</span></div>
           </div>
           <div className="bg-[#ebf3ff] border border-[#bdd4f5] rounded p-3">
-            <div className="text-[9px] text-[#1a3a5c] uppercase tracking-wider font-bold mb-1">Version 2 — Current</div>
+            <div className="text-[9px] text-[#1a3a5c] uppercase tracking-wider font-bold mb-1">Version 2 - Current</div>
             <div className="text-[11px] text-[#1a3a5c]">Resubmitted: <span className="font-semibold">18 Sep 2026</span></div>
             <div className="text-[11px] text-[#1a3a5c]">Business DNA: <span className="font-semibold">v4</span></div>
             <div className="text-[11px] text-[#1a3a5c]">Application: <span className="font-semibold">v2</span></div>
@@ -8762,12 +8723,8 @@ export function M20DeltaRescrutinyPage({ onBackToOverview, onOpenDna, onOpenDocR
 
                   <div className="flex flex-col gap-2 pt-2 border-t border-[#e5eaf0]">
                     <div className="text-[9px] font-bold text-[#374151] uppercase tracking-wider">Actions</div>
-                    <button onClick={onOpenConsistency} className="text-left text-xs text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">Open Cross-form Consistency → M16</button>
-                    <button onClick={onOpenDepView}    className="text-left text-xs text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">Open Regulatory Dependency → M17</button>
-                    {selectedChanged.changeType === 'document' && (
-                      <button disabled title="No document ID available" className="text-left text-xs text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">Open Document Review → M13</button>
-                    )}
-                    <button onClick={onOpenQueryBuilder} className="text-left text-xs text-[#9a3412] hover:underline px-2 py-1 bg-[#fff7ed] rounded">Raise Query → M18</button>
+                    <button onClick={onOpenConsistency} className="text-left text-xs text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">Open Cross-form Consistency</button>
+                    <button onClick={onOpenDepView}    className="text-left text-xs text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">Open Regulatory Dependency</button>
                     <button onClick={() => markChangedReviewed(selectedChanged.id)} className="text-left text-xs text-[#065f46] hover:underline px-2 py-1 bg-[#ecfdf5] rounded font-semibold">✓ Mark Reviewed</button>
                   </div>
                 </div>
@@ -8839,10 +8796,9 @@ export function M20DeltaRescrutinyPage({ onBackToOverview, onOpenDna, onOpenDocR
                   </div>
                   <div className="flex flex-col gap-2 pt-2 border-t border-[#e5eaf0]">
                     <div className="text-[9px] font-bold text-[#374151] uppercase tracking-wider">Actions</div>
-                    <button onClick={onOpenConsistency} className="text-left text-xs text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">Open Cross-form Consistency → M16</button>
-                    <button onClick={onOpenDepView}    className="text-left text-xs text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">Open Regulatory Dependency → M17</button>
-                    <button onClick={onOpenDna}        className="text-left text-xs text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">Open Business DNA → M07</button>
-                    <button onClick={onOpenQueryBuilder} className="text-left text-xs text-[#9a3412] hover:underline px-2 py-1 bg-[#fff7ed] rounded">Raise Query → M18</button>
+                    <button onClick={onOpenConsistency} className="text-left text-xs text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">Open Cross-form Consistency</button>
+                    <button onClick={onOpenDepView}    className="text-left text-xs text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">Open Regulatory Dependency</button>
+                    <button onClick={onOpenDna}        className="text-left text-xs text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">Open Business DNA</button>
                   </div>
                 </div>
               )}
@@ -8862,7 +8818,7 @@ export function M20DeltaRescrutinyPage({ onBackToOverview, onOpenDna, onOpenDocR
                     disabled={selectedUnchangedRows.size === 0}
                     className="text-xs px-3 py-1.5 bg-[#1a3a5c] text-white rounded font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#243c5c] transition-colors"
                   >
-                    Mark Selected — Reviewed, No Change ({selectedUnchangedRows.size})
+                    Mark Selected - Reviewed, No Change ({selectedUnchangedRows.size})
                   </button>
                   <span className="text-[10px] text-[#374151]">Select rows to mark in bulk. Cannot bulk-confirm items requiring individual scrutiny.</span>
                 </div>
@@ -8895,7 +8851,7 @@ export function M20DeltaRescrutinyPage({ onBackToOverview, onOpenDna, onOpenDocR
                         <td className="px-3 py-2.5 text-[#1a2533]">{item.verification}</td>
                         <td className="px-3 py-2.5">
                           {item.reviewStatus === 'reviewed'
-                            ? <span className="text-[10px] font-semibold text-[#065f46] bg-[#ecfdf5] px-1.5 py-0.5 rounded border border-[#a7f3d0]">Reviewed — No Change</span>
+                            ? <span className="text-[10px] font-semibold text-[#065f46] bg-[#ecfdf5] px-1.5 py-0.5 rounded border border-[#a7f3d0]">Reviewed - No Change</span>
                             : <span className="text-[10px] text-[#374151]">No review required</span>
                           }
                         </td>
@@ -8943,13 +8899,12 @@ export function M20DeltaRescrutinyPage({ onBackToOverview, onOpenDna, onOpenDocR
               <div>
                 <div className="text-xs font-semibold text-[#1a2533]">Building Plan v1 → v2</div>
                 <div className="text-[10px] text-[#374151]">Needs Verification · Affects Building Review</div>
-                <button disabled title="No document ID available" className="text-[10px] text-[#1a56db] hover:underline">Open M13</button>
               </div>
             </div>
             <div className="flex items-start gap-2">
               <span className="text-[10px] bg-[#ecfdf5] text-[#065f46] px-1.5 py-0.5 rounded font-bold border border-[#a7f3d0] shrink-0">No change</span>
               <div>
-                <div className="text-xs font-semibold text-[#1a2533]">Land Record — v2</div>
+                <div className="text-xs font-semibold text-[#1a2533]">Land Record - v2</div>
                 <div className="text-[10px] text-[#374151]">Department Verified · No impact</div>
               </div>
             </div>
@@ -8965,7 +8920,6 @@ export function M20DeltaRescrutinyPage({ onBackToOverview, onOpenDna, onOpenDocR
               <div className="text-[10px] text-[#78350f]">Status: <span className="font-semibold">Needs Verification</span></div>
             </div>
             <div className="text-[10px] text-[#374151]">Configured inspection impact detected. Do not automatically schedule.</div>
-            <button className="text-[10px] text-[#1a56db] hover:underline text-left">Open Inspection Queue → M21</button>
           </div>
         </div>
 
@@ -8987,7 +8941,7 @@ export function M20DeltaRescrutinyPage({ onBackToOverview, onOpenDna, onOpenDocR
               </div>
               <span className="text-[9px] bg-[#f3f4f6] text-[#374151] px-1.5 py-0.5 rounded border border-[#d1d5db] font-bold shrink-0">Not Reviewed</span>
             </div>
-            <button onClick={onOpenDepView} className="text-[10px] text-[#1a56db] hover:underline text-left">View Regulatory Dependency → M17</button>
+            <button onClick={onOpenDepView} className="text-[10px] text-[#1a56db] hover:underline text-left">View Regulatory Dependency</button>
           </div>
         </div>
       </div>
@@ -9021,9 +8975,9 @@ const INSP_STATUS_MAP: Record<InspStatus, { label: string; bg: string; text: str
 const M21_ROWS: InspRow[] = [
   { inspId:'INSP-2026-00418', appId:'MIDC-APP-2026-00418', business:'Aster Precision Components Pvt. Ltd.', service:'Building / Planning', site:'Example MIDC Estate / Plot A-18', inspType:'Building / Planning Site Inspection', requiredBy:'25 Sep 2026', status:'PENDING', assigned:'Unassigned', targetDate:'Not Scheduled', slaImpact:'Inspection Pending', reInspection:false, source:'Configured service workflow' },
   { inspId:'INSP-2026-00391', appId:'MIDC-APP-2026-00391', business:'Kalyan Agro Industries Ltd.', service:'Water / Utility', site:'Chakan Phase II / Plot B-07', inspType:'Utility Site Inspection', requiredBy:'26 Sep 2026', status:'SCHEDULED', assigned:'MIDC Utility Inspection Team', targetDate:'26 Sep 2026', slaImpact:'Within SLA', reInspection:false, source:'Configured service workflow' },
-  { inspId:'INSP-2026-00372', appId:'MIDC-APP-2026-00372', business:'Sunrise Pharmaceuticals Pvt. Ltd.', service:'Building / Planning', site:'Taloja MIDC / Plot C-12', inspType:'Building / Planning — Re-inspection', requiredBy:'28 Sep 2026', status:'RE_INSPECTION_REQUIRED', assigned:'Building Inspection Team B', targetDate:'28 Sep 2026', slaImpact:'SLA Risk', reInspection:true, source:'M24 — Observation outcome' },
-  { inspId:'INSP-2026-00411', appId:'MIDC-APP-2026-00411', business:'Puretech Engineering Pvt. Ltd.', service:'Building / Planning', site:'Butibori MIDC / Plot D-03', inspType:'Building / Planning Site Inspection', requiredBy:'30 Sep 2026', status:'AWAITING_COORDINATION', assigned:'Building Inspection Team A', targetDate:'30 Sep 2026', slaImpact:'Due Soon', reInspection:false, source:'M14 — Building scrutiny finding' },
-  { inspId:'INSP-2026-00398', appId:'MIDC-APP-2026-00398', business:'Vidarbha Food Processing Ltd.', service:'Water / Utility', site:'Nagpur MIDC / Plot E-22', inspType:'Utility Site Inspection', requiredBy:'01 Oct 2026', status:'NEEDS_VERIFICATION', assigned:'Unassigned', targetDate:'Not Scheduled', slaImpact:'Within SLA', reInspection:false, source:'M15 — Water scrutiny finding' },
+  { inspId:'INSP-2026-00372', appId:'MIDC-APP-2026-00372', business:'Sunrise Pharmaceuticals Pvt. Ltd.', service:'Building / Planning', site:'Taloja MIDC / Plot C-12', inspType:'Building / Planning - Re-inspection', requiredBy:'28 Sep 2026', status:'RE_INSPECTION_REQUIRED', assigned:'Building Inspection Team B', targetDate:'28 Sep 2026', slaImpact:'SLA Risk', reInspection:true, source:'Observation outcome' },
+  { inspId:'INSP-2026-00411', appId:'MIDC-APP-2026-00411', business:'Puretech Engineering Pvt. Ltd.', service:'Building / Planning', site:'Butibori MIDC / Plot D-03', inspType:'Building / Planning Site Inspection', requiredBy:'30 Sep 2026', status:'AWAITING_COORDINATION', assigned:'Building Inspection Team A', targetDate:'30 Sep 2026', slaImpact:'Due Soon', reInspection:false, source:'Building scrutiny finding' },
+  { inspId:'INSP-2026-00398', appId:'MIDC-APP-2026-00398', business:'Vidarbha Food Processing Ltd.', service:'Water / Utility', site:'Nagpur MIDC / Plot E-22', inspType:'Utility Site Inspection', requiredBy:'01 Oct 2026', status:'NEEDS_VERIFICATION', assigned:'Unassigned', targetDate:'Not Scheduled', slaImpact:'Within SLA', reInspection:false, source:'Water scrutiny finding' },
 ]
 
 const INSP_FILTERS: Record<string, string[]> = {
@@ -9076,16 +9030,17 @@ export function M21InspectionQueuePage({ applicationId, onBack, onPlanInspection
   return (
     <div className="flex-1 flex flex-col bg-[#f8f9fb] min-h-0">
       {/* Breadcrumb */}
-      <div className="bg-white border-b border-[#e5eaf0] px-6 py-2 flex items-center gap-1.5 text-xs text-[#1a2533]">
-        <button onClick={onBack} className="hover:text-[#1a3a5c] hover:underline">Department</button>
-        <Icon.ChevronRight />
-        <span className="text-[#1a2533] font-semibold">M21 — Inspection Queue</span>
+      <div className="bg-white border-b border-[#e5eaf0] px-6 py-2">
+        <Breadcrumb items={[
+          { label: 'Department Home' },
+          { label: 'Inspection Queue' }
+        ]} />
       </div>
 
       {/* Header */}
       <div className="bg-white border-b border-[#e5eaf0] px-6 py-4 flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-base font-bold text-[#1a2533]">Inspection Queue <span className="text-[11px] font-normal text-[#374151] ml-2">M21</span></h1>
+          <h1 className="text-base font-bold text-[#1a2533]">Inspection Queue </h1>
           <p className="text-xs text-[#1a2533] mt-0.5">View and manage MIDC inspections requiring scheduling, completion, follow-up or re-inspection.</p>
         </div>
         <div className="flex gap-4 shrink-0 flex-wrap">
@@ -9239,7 +9194,7 @@ export function M21InspectionQueuePage({ applicationId, onBack, onPlanInspection
                 <div className="flex justify-between"><span className="text-[#1a2533]">{selected.service}</span><span className="font-semibold text-[#9a3412]">Inspection Required</span></div>
                 <div className="flex justify-between"><span className="text-[#1a2533]">Fire</span><span className="font-semibold text-[#1a2533]">Conditional</span></div>
               </div>
-              <button onClick={() => onOpenDepView(selected.appId)} className="mt-1.5 text-[10px] text-[#1a56db] hover:underline">View Regulatory Dependencies → M17</button>
+              <button onClick={() => onOpenDepView(selected.appId)} className="mt-1.5 text-[10px] text-[#1a56db] hover:underline">View Regulatory Dependencies</button>
             </div>
 
             {selected.reInspection && (
@@ -9253,9 +9208,7 @@ export function M21InspectionQueuePage({ applicationId, onBack, onPlanInspection
             <div className="flex flex-col gap-2 pt-2 border-t border-[#e5eaf0]">
               <div className="text-[9px] font-bold text-[#374151] uppercase tracking-wider">Actions</div>
               <button onClick={() => onPlanInspection(selected.appId, selected.inspId)} className="text-left text-xs text-white font-bold px-3 py-1.5 bg-[#1a3a5c] rounded hover:bg-[#0f2540]">Plan Inspection → M22</button>
-              <button onClick={() => onOpenDepView(selected.appId)}      className="text-left text-xs text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">View Dependency → M17</button>
-              <button onClick={() => onOpenQueryHistory(selected.appId)} className="text-left text-xs text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">View Query History → M19</button>
-              <button onClick={() => onOpenDelta(selected.appId)}        className="text-left text-xs text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">View Delta → M20</button>
+              <button onClick={() => onOpenDepView(selected.appId)}      className="text-left text-xs text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">View Dependency</button>
             </div>
           </div>
         )}
@@ -9302,10 +9255,12 @@ export function M22InspectionPlanningPage({ onBack, onBackToQueue, onOpenDna, on
   return (
     <div className="flex-1 flex flex-col bg-[#f8f9fb] min-h-0">
       {/* Breadcrumb */}
-      <div className="bg-white border-b border-[#e5eaf0] px-6 py-2 flex items-center gap-1.5 text-xs text-[#1a2533]">
-        <button onClick={onBackToQueue} className="hover:text-[#1a3a5c] hover:underline">Inspection Queue</button>
-        <Icon.ChevronRight />
-        <span className="text-[#1a2533] font-semibold">M22 — Inspection Planning</span>
+      <div className="bg-white border-b border-[#e5eaf0] px-6 py-2">
+        <Breadcrumb items={[
+          { label: 'Department Home' },
+          { label: 'Inspection Queue', onClick: onBackToQueue },
+          { label: 'Inspection Planning' }
+        ]} />
       </div>
 
       {/* Inspection context header */}
@@ -9340,7 +9295,7 @@ export function M22InspectionPlanningPage({ onBack, onBackToQueue, onOpenDna, on
         {/* Planning summary strip */}
         <div className="mt-3 grid grid-cols-5 gap-3 text-xs">
           {[
-            { label:'Site', value:'Example MIDC Estate — Plot A-18' },
+            { label:'Site', value:'Example MIDC Estate - Plot A-18' },
             { label:'MIDC Team', value:'Building / Planning Inspection Team' },
             { label:'Fire', value:'Coordination Requested' },
             { label:'DISH', value:'Not Required' },
@@ -9360,13 +9315,13 @@ export function M22InspectionPlanningPage({ onBack, onBackToQueue, onOpenDna, on
         <div className="flex-1 text-[11px] text-[#92400e]">
           <span className="font-bold">Inspection impact from Delta Re-scrutiny:</span> Building Area changed from 2,000 → 2,300 m². Configured inspection requirement may be affected.
         </div>
-        <button onClick={onOpenDelta} className="text-[11px] font-bold text-[#92400e] underline hover:text-[#78350f] shrink-0">View Delta → M20</button>
+        <button onClick={onOpenDelta} className="text-[11px] font-bold text-[#92400e] underline hover:text-[#78350f] shrink-0">View Delta</button>
       </div>
 
       {/* Three-column main layout */}
       <div className="flex flex-1 overflow-hidden min-h-0 mx-6 mt-4 mb-6 gap-4">
 
-        {/* LEFT — Requirements + Site + Participants */}
+        {/* LEFT - Requirements + Site + Participants */}
         <div className="w-64 shrink-0 flex flex-col gap-4 overflow-y-auto">
 
           {/* Inspection requirements */}
@@ -9391,7 +9346,6 @@ export function M22InspectionPlanningPage({ onBack, onBackToQueue, onOpenDna, on
               <Row label="Site Contact" value="Needs Verification" />
               <Row label="Access" value="Configured requirement" />
             </div>
-            <button onClick={onOpenDna} className="mt-2 text-[10px] text-[#1a56db] hover:underline">View Business DNA → M07</button>
           </div>
 
           {/* Participating departments */}
@@ -9423,7 +9377,7 @@ export function M22InspectionPlanningPage({ onBack, onBackToQueue, onOpenDna, on
           </div>
         </div>
 
-        {/* CENTER — Calendar */}
+        {/* CENTER - Calendar */}
         <div className="flex-1 flex flex-col gap-3 min-w-0">
           <div className="bg-white border border-[#e5eaf0] rounded-lg p-4 flex-1 flex flex-col">
             <div className="flex items-center justify-between mb-3">
@@ -9503,10 +9457,10 @@ export function M22InspectionPlanningPage({ onBack, onBackToQueue, onOpenDna, on
           </div>
         </div>
 
-        {/* RIGHT — Plan actions (always visible at top) + selected slot */}
+        {/* RIGHT - Plan actions (always visible at top) + selected slot */}
         <div className="w-64 shrink-0 flex flex-col gap-4 overflow-y-auto">
 
-          {/* Plan actions / confirmed state — FIRST so it's always visible */}
+          {/* Plan actions / confirmed state - FIRST so it's always visible */}
           {confirmed ? (
             <div className="bg-[#ecfdf5] border-2 border-[#059669] rounded-lg p-4">
               <div className="text-xs font-bold text-[#065f46] mb-2">✓ Inspection Plan Scheduled</div>
@@ -9519,7 +9473,7 @@ export function M22InspectionPlanningPage({ onBack, onBackToQueue, onOpenDna, on
               <button
                 onClick={() => onOpenWorkspace?.()}
                 className="mt-3 w-full px-3 py-2.5 text-xs font-bold bg-[#1a3a5c] text-white rounded hover:bg-[#0f2540] cursor-pointer"
-              >Open Inspection Workspace → M23</button>
+              >Open Inspection Workspace</button>
             </div>
           ) : (
             <div className="bg-white border border-[#e5eaf0] rounded-lg p-4 flex flex-col gap-2">
@@ -9600,17 +9554,6 @@ export function M22InspectionPlanningPage({ onBack, onBackToQueue, onOpenDna, on
             ))}
             <div className="mt-1.5 text-[9px] text-[#374151] italic">Source: Configured inspection requirement. Entrepreneur receives inspection details upon confirmation.</div>
           </div>
-
-          {/* Quick links */}
-          <div className="bg-white border border-[#e5eaf0] rounded-lg p-4">
-            <div className="text-[10px] font-bold text-[#374151] uppercase tracking-wider mb-2">Quick Links</div>
-            <div className="flex flex-col gap-1.5">
-              <button onClick={onOpenDepView}      className="text-left text-[10px] text-[#1a56db] hover:underline">View Regulatory Dependencies → M17</button>
-              <button onClick={onOpenQueryHistory} className="text-left text-[10px] text-[#1a56db] hover:underline">View Query History → M19</button>
-              <button onClick={onOpenDelta}        className="text-left text-[10px] text-[#1a56db] hover:underline">View Delta → M20</button>
-              <button onClick={onOpenDna}          className="text-left text-[10px] text-[#1a56db] hover:underline">View Business DNA → M07</button>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -9621,14 +9564,14 @@ export function M22InspectionPlanningPage({ onBack, onBackToQueue, onOpenDna, on
 
 
 const M23_CHECKLIST: CheckItem[] = [
-  { id:'c1', category:'Site Identity',       item:'Site identity matches application record',    dnaValue:'MIDC Estate — Plot A-18', appValue:'Example MIDC Estate / A-18', status:'Checked',      comment:'' },
+  { id:'c1', category:'Site Identity',       item:'Site identity matches application record',    dnaValue:'MIDC Estate - Plot A-18', appValue:'Example MIDC Estate / A-18', status:'Checked',      comment:'' },
   { id:'c2', category:'Plot / Land Context', item:'Plot area matches current project parameters', dnaValue:'5,200 m²',               appValue:'5,200 m²',                status:'Checked',      comment:'' },
   { id:'c3', category:'Building / Planning', item:'Building plan reflects current project scope', dnaValue:'2,300 m²',               appValue:'2,300 m²',                status:'Observation',  comment:'Submitted plan v2 does not reflect updated parameters.' },
   { id:'c4', category:'Building / Planning', item:'Building height and floors conform to MIDC norms', dnaValue:'G+2', appValue:'G+2',                     status:'Checked',      comment:'' },
-  { id:'c5', category:'Application Data',    item:'Application data matches on-site conditions', dnaValue:'—',                     appValue:'—',                       status:'Checked',      comment:'' },
-  { id:'c6', category:'Documents',           item:'Building Plan v2 available on-site',          dnaValue:'—',                     appValue:'v2',                      status:'Observation',  comment:'v2 plan available but does not match updated scope.' },
-  { id:'c7', category:'Documents',           item:'Land / Plot Record available on-site',        dnaValue:'—',                     appValue:'v3',                      status:'Checked',      comment:'' },
-  { id:'c8', category:'Site Conditions',     item:'Site accessible and ready for inspection',    dnaValue:'—',                     appValue:'—',                       status:'Checked',      comment:'' },
+  { id:'c5', category:'Application Data',    item:'Application data matches on-site conditions', dnaValue:'-',                     appValue:'-',                       status:'Checked',      comment:'' },
+  { id:'c6', category:'Documents',           item:'Building Plan v2 available on-site',          dnaValue:'-',                     appValue:'v2',                      status:'Observation',  comment:'v2 plan available but does not match updated scope.' },
+  { id:'c7', category:'Documents',           item:'Land / Plot Record available on-site',        dnaValue:'-',                     appValue:'v3',                      status:'Checked',      comment:'' },
+  { id:'c8', category:'Site Conditions',     item:'Site accessible and ready for inspection',    dnaValue:'-',                     appValue:'-',                       status:'Checked',      comment:'' },
 ]
 
 const M23_OBSERVATIONS: ObsRecord[] = [
@@ -9676,12 +9619,13 @@ export function M23InspectionWorkspacePage({ onBack, onBackToQueue, onOpenM24, o
   return (
     <div className="flex-1 flex flex-col bg-[#f8f9fb] min-h-0">
       {/* Breadcrumb */}
-      <div className="bg-white border-b border-[#e5eaf0] px-6 py-2 flex items-center gap-1.5 text-xs text-[#1a2533]">
-        <button onClick={onBackToQueue} className="hover:text-[#1a3a5c] hover:underline">Inspection Queue</button>
-        <Icon.ChevronRight />
-        <button onClick={onBack} className="hover:text-[#1a3a5c] hover:underline">Inspection Planning</button>
-        <Icon.ChevronRight />
-        <span className="text-[#1a2533] font-semibold">M23 — Inspection Workspace</span>
+      <div className="bg-white border-b border-[#e5eaf0] px-6 py-2">
+        <Breadcrumb items={[
+          { label: 'Department Home' },
+          { label: 'Inspection Queue', onClick: onBackToQueue },
+          { label: 'Inspection Planning', onClick: onBack },
+          { label: 'Inspection Workspace' }
+        ]} />
       </div>
 
       {/* App + Inspection context */}
@@ -9698,19 +9642,13 @@ export function M23InspectionWorkspacePage({ onBack, onBackToQueue, onOpenM24, o
             <div><div className="text-[10px] text-[#374151] uppercase font-bold">Time</div><div className="text-xs font-semibold text-[#1a2533]">10:30 AM</div></div>
             <div><div className="text-[10px] text-[#374151] uppercase font-bold">Inspector</div><div className="text-xs text-[#1a2533]">Building / Planning Inspection Team</div></div>
           </div>
-          <div className="ml-auto flex gap-2 flex-wrap text-[10px]">
-            <button onClick={onOpenDna}          className="text-[#1a56db] hover:underline">Business DNA → M07</button>
-            <button onClick={onOpenQueryHistory} className="text-[#1a56db] hover:underline">Query History → M19</button>
-            <button onClick={onOpenDelta}        className="text-[#1a56db] hover:underline">Delta → M20</button>
-            <button onClick={onOpenDepView}      className="text-[#1a56db] hover:underline">Dependencies → M17</button>
-          </div>
         </div>
       </div>
 
       {/* Main three-column layout */}
       <div className="flex flex-1 gap-4 p-4 overflow-hidden min-h-0" style={{ minHeight: 600 }}>
 
-        {/* LEFT — Site context + documents + dependency */}
+        {/* LEFT - Site context + documents + dependency */}
         <div className="w-56 shrink-0 flex flex-col gap-3 overflow-y-auto">
           {/* Site card */}
           <div className="bg-white border border-[#e5eaf0] rounded-lg p-3">
@@ -9728,7 +9666,6 @@ export function M23InspectionWorkspacePage({ onBack, onBackToQueue, onOpenM24, o
                 </div>
               ))}
             </div>
-            <button onClick={onOpenDna} className="mt-2 text-[10px] text-[#1a56db] hover:underline">View Business DNA → M07</button>
           </div>
 
           {/* Inspection documents */}
@@ -9762,13 +9699,13 @@ export function M23InspectionWorkspacePage({ onBack, onBackToQueue, onOpenM24, o
               <div className="flex justify-between"><span className="text-[#1a2533]">Fire</span><span className="font-semibold text-[#1a2533]">Conditional</span></div>
               <div className="flex justify-between"><span className="text-[#1a2533]">Construction</span><span className="font-semibold text-[#374151]">Downstream</span></div>
             </div>
-            <button onClick={onOpenDepView} className="mt-2 text-[10px] text-[#1a56db] hover:underline">View Dependencies → M17</button>
+            <button onClick={onOpenDepView} className="mt-2 text-[10px] text-[#1a56db] hover:underline">View Dependencies</button>
           </div>
 
           {/* Evidence capture placeholder */}
           <div className="bg-[#f8f9fb] border border-dashed border-[#d1d9e0] rounded-lg p-3">
             <div className="text-[10px] font-bold text-[#374151] uppercase tracking-wider mb-1">Inspection Evidence Capture</div>
-            <div className="text-[10px] text-[#374151] italic mb-2">Capture / upload capability — configured prototype placeholder</div>
+            <div className="text-[10px] text-[#374151] italic mb-2">Capture / upload capability - configured prototype placeholder</div>
             <div className="flex flex-col gap-1.5">
               {['Photo','Document','Site Evidence'].map(t => (
                 <div key={t} className="flex items-center gap-2 text-[10px] text-[#1a2533] border border-[#e5eaf0] rounded px-2 py-1 bg-white">
@@ -9780,13 +9717,13 @@ export function M23InspectionWorkspacePage({ onBack, onBackToQueue, onOpenM24, o
           </div>
         </div>
 
-        {/* CENTER — MIDC Inspection Checklist */}
+        {/* CENTER - MIDC Inspection Checklist */}
         <div className="flex-1 overflow-y-auto flex flex-col gap-3 min-w-0">
           <div className="bg-white border border-[#e5eaf0] rounded-lg overflow-hidden">
             <div className="px-4 py-3 border-b border-[#e5eaf0] flex items-center justify-between">
               <div>
                 <div className="text-xs font-bold text-[#1a2533]">MIDC Inspection Checklist</div>
-                <div className="text-[10px] text-[#374151]">Building / Planning Inspection Checklist — Version 2026.09</div>
+                <div className="text-[10px] text-[#374151]">Building / Planning Inspection Checklist - Version 2026.09</div>
               </div>
               <div className="text-[10px] text-[#374151]">
                 {checklist.filter(c=>c.status==='Checked').length}/{checklist.length} checked
@@ -9802,8 +9739,8 @@ export function M23InspectionWorkspacePage({ onBack, onBackToQueue, onOpenM24, o
                         <div className="text-xs text-[#1a2533] font-medium">{item.item}</div>
                         {(item.dnaValue || item.appValue) && (
                           <div className="flex gap-3 mt-1 text-[10px]">
-                            {item.dnaValue && item.dnaValue !== '—' && <span className="text-[#374151]">DNA: <span className="text-[#1a2533] font-medium">{item.dnaValue}</span></span>}
-                            {item.appValue && item.appValue !== '—' && <span className="text-[#374151]">App: <span className="text-[#1a2533] font-medium">{item.appValue}</span></span>}
+                            {item.dnaValue && item.dnaValue !== '-' && <span className="text-[#374151]">DNA: <span className="text-[#1a2533] font-medium">{item.dnaValue}</span></span>}
+                            {item.appValue && item.appValue !== '-' && <span className="text-[#374151]">App: <span className="text-[#1a2533] font-medium">{item.appValue}</span></span>}
                           </div>
                         )}
                         {item.status === 'Observation' && (
@@ -9856,7 +9793,7 @@ export function M23InspectionWorkspacePage({ onBack, onBackToQueue, onOpenM24, o
           </div>
         </div>
 
-        {/* RIGHT — Outcome + Recommendation + Actions */}
+        {/* RIGHT - Outcome + Recommendation + Actions */}
         <div className="w-56 shrink-0 flex flex-col gap-3 overflow-y-auto">
           {/* Inspection outcome */}
           <div className="bg-white border border-[#e5eaf0] rounded-lg p-4">
@@ -9880,7 +9817,7 @@ export function M23InspectionWorkspacePage({ onBack, onBackToQueue, onOpenM24, o
                 {outcomeMeta.desc}
               </div>
             )}
-            <div className="mt-2 text-[9px] text-[#374151] italic">This outcome is an inspector finding. It is NOT a final statutory application decision. Final decision: M25.</div>
+            <div className="mt-2 text-[9px] text-[#374151] italic">This outcome is an inspector finding. It is NOT a final statutory application decision. Final decision: Decision Workspace.</div>
           </div>
 
           {/* Inspector recommendation */}
@@ -9893,7 +9830,7 @@ export function M23InspectionWorkspacePage({ onBack, onBackToQueue, onOpenM24, o
               className="w-full text-[11px] border border-[#d1d9e0] rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#1a56db] resize-none"
               placeholder="Recommended next action…"
             />
-            <div className="text-[9px] text-[#374151] mt-1 italic">Label: "Inspector Recommendation" — not a final decision.</div>
+            <div className="text-[9px] text-[#374151] mt-1 italic">Label: "Inspector Recommendation" - not a final decision.</div>
           </div>
 
           {/* Audit */}
@@ -9918,10 +9855,8 @@ export function M23InspectionWorkspacePage({ onBack, onBackToQueue, onOpenM24, o
               </>
             ) : (
               <>
-                <div className="text-[10px] text-[#065f46] font-bold bg-[#ecfdf5] border border-[#6ee7b7] rounded px-2 py-1.5">Inspection Completed — 25 Sep 2026</div>
-                <button onClick={onOpenM24} className="w-full px-3 py-2 text-xs font-bold bg-[#9a3412] text-white rounded hover:bg-[#7c2d12]">Open Observation / Re-inspection → M24</button>
-                <button onClick={onOpenConsistency} className="text-left text-[10px] text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">View Cross-form Consistency → M16</button>
-                <button onClick={onOpenDelta}        className="text-left text-[10px] text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">View Delta → M20</button>
+                <div className="text-[10px] text-[#065f46] font-bold bg-[#ecfdf5] border border-[#6ee7b7] rounded px-2 py-1.5">Inspection Completed - 25 Sep 2026</div>
+                <button onClick={onOpenM24} className="w-full px-3 py-2 text-xs font-bold bg-[#9a3412] text-white rounded hover:bg-[#7c2d12]">Open Observation / Re-inspection</button>
               </>
             )}
           </div>
@@ -9952,7 +9887,7 @@ const M24_TIMELINE: M24Event[] = [
   { date:'28 Sep 2026', type:'ENTREPRENEUR_RESPONSE',id:'QRY-2026-0042',      title:'Entrepreneur Response Received',detail:'Corrected plan uploaded.', actor:'Entrepreneur', evidence:'Building Plan v3' },
   { date:'28 Sep 2026', type:'NEW_EVIDENCE',         id:'BUILD-PLAN-00418-v3',title:'New Evidence Submitted',        detail:'Corrected Building Plan v3 submitted by entrepreneur.', actor:'Entrepreneur', evidence:'Building Plan v3' },
   { date:'29 Sep 2026', type:'OFFICER_REVIEW',       id:'REVIEW-001',         title:'Officer Review',               detail:'Evidence reviewed. Plan v3 submitted but re-inspection required to verify on-site compliance.', actor:'MIDC Officer', status:'Re-inspection Required' },
-  { date:'01 Oct 2026', type:'RE_INSPECTION',        id:'INSP-2026-00418-R1', title:'Re-inspection Scheduled',      detail:'Re-inspection planned — Building / Planning Inspection Team.', actor:'MIDC Officer', status:'Scheduled' },
+  { date:'01 Oct 2026', type:'RE_INSPECTION',        id:'INSP-2026-00418-R1', title:'Re-inspection Scheduled',      detail:'Re-inspection planned - Building / Planning Inspection Team.', actor:'MIDC Officer', status:'Scheduled' },
   { date:'01 Oct 2026', type:'RESOLVED',             id:'OBS-2026-00418-01',  title:'Observation Resolved',         detail:'Re-inspection outcome: site confirms corrected plan. Observation resolved.', actor:'Inspection Officer', status:'Resolved' },
 ]
 
@@ -9981,12 +9916,13 @@ export function M24ObservationReinspectionPage({ onBack, onBackToM23, onOpenM22,
   return (
     <div className="flex-1 flex flex-col bg-[#f8f9fb] min-h-0">
       {/* Breadcrumb */}
-      <div className="bg-white border-b border-[#e5eaf0] px-6 py-2 flex items-center gap-1.5 text-xs text-[#1a2533]">
-        <button onClick={onBack} className="hover:text-[#1a3a5c] hover:underline">Inspection Queue</button>
-        <Icon.ChevronRight />
-        <button onClick={onBackToM23} className="hover:text-[#1a3a5c] hover:underline">Inspection Workspace</button>
-        <Icon.ChevronRight />
-        <span className="text-[#1a2533] font-semibold">M24 — Observation / Re-inspection</span>
+      <div className="bg-white border-b border-[#e5eaf0] px-6 py-2">
+        <Breadcrumb items={[
+          { label: 'Department Home' },
+          { label: 'Inspection Queue', onClick: onBack },
+          { label: 'Inspection Workspace', onClick: onBackToM23 },
+          { label: 'Observation / Re-inspection' }
+        ]} />
       </div>
 
       {/* Context header */}
@@ -10082,7 +10018,7 @@ export function M24ObservationReinspectionPage({ onBack, onBackToM23, onOpenM22,
           </div>
         </div>
 
-        {/* Right — Event detail drawer */}
+        {/* Right - Event detail drawer */}
         {selectedEvent ? (
           <div className="w-72 shrink-0 bg-white border border-[#e5eaf0] rounded-lg overflow-y-auto p-4 flex flex-col gap-4">
             <div className="flex items-center justify-between">
@@ -10116,7 +10052,7 @@ export function M24ObservationReinspectionPage({ onBack, onBackToM23, onOpenM22,
             {/* Original observation card (immutable) */}
             {selectedEvent.type === 'OBSERVATION' && (
               <div className="bg-[#fffbeb] border border-[#fcd34d] rounded p-3">
-                <div className="text-[9px] font-bold text-[#92400e] uppercase mb-1">Original Observation — Immutable</div>
+                <div className="text-[9px] font-bold text-[#92400e] uppercase mb-1">Original Observation - Immutable</div>
                 <div className="text-[10px] text-[#78350f]">This record cannot be overwritten. Subsequent responses and re-inspections are appended as new events.</div>
               </div>
             )}
@@ -10134,18 +10070,14 @@ export function M24ObservationReinspectionPage({ onBack, onBackToM23, onOpenM22,
 
             {/* Cross-system links */}
             <div className="flex flex-col gap-1.5 pt-2 border-t border-[#e5eaf0]">
-              <div className="text-[9px] font-bold text-[#374151] uppercase tracking-wider mb-1">Navigate</div>
-              <button disabled title="No document ID available" className="text-left text-[10px] text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">View Document → M13</button>
-              <button onClick={onOpenQueryHistory} className="text-left text-[10px] text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">View Query History → M19</button>
-              <button onClick={onOpenDelta}        className="text-left text-[10px] text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">View Delta → M20</button>
-              <button onClick={onOpenDepView}      className="text-left text-[10px] text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">View Dependencies → M17</button>
-              <button onClick={onOpenM22}          className="text-left text-[10px] text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">Plan Re-inspection → M22</button>
+              <div className="text-[9px] font-bold text-[#374151] uppercase tracking-wider mb-1">Actions</div>
+              <button onClick={onOpenM22}          className="text-left text-[10px] text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">Plan Re-inspection</button>
             </div>
 
             {/* Resolution state + M24 boundary notice */}
             <div className="bg-[#ecfdf5] border border-[#a7f3d0] rounded p-3 text-[10px] text-[#065f46]">
               <div className="font-bold mb-1">Observation: Resolved</div>
-              <div>Resolution of this observation does NOT automatically set Application = Approved. The configured workflow continues to M25.</div>
+              <div>Resolution of this observation does NOT automatically set Application = Approved. The configured workflow continues to the Decision Workspace.</div>
             </div>
           </div>
         ) : (
@@ -10179,19 +10111,19 @@ export function DecisionsDashboard({ onOpenApp, onOpenCompliance, onOpenDependen
         {/* Quick access */}
         <div className="grid grid-cols-3 gap-3">
           <button onClick={() => onOpenApp(applicationId)} className="bg-[#1a3a5c] text-white rounded-lg p-4 text-left hover:bg-[#0f2540] transition-colors">
-            <div className="text-[10px] font-bold text-[#93c5fd] uppercase tracking-wider mb-1">M25 / M26</div>
+            <div className="text-[10px] font-bold text-[#93c5fd] uppercase tracking-wider mb-1">Decision Workspace</div>
             <div className="text-sm font-bold">Decision Workspace</div>
             <div className="text-[10px] text-[#bfdbfe] mt-0.5">Final statutory decision for MIDC-APP-2026-00418</div>
           </button>
           <button onClick={() => onOpenDependencyUpdate(applicationId, 'midc-bldg')} className="bg-white border border-[#e5eaf0] rounded-lg p-4 text-left hover:border-[#1a3a5c] transition-colors">
-            <div className="text-[10px] font-bold text-[#374151] uppercase tracking-wider mb-1">M27</div>
+            <div className="text-[10px] font-bold text-[#374151] uppercase tracking-wider mb-1">Dependency Update</div>
             <div className="text-sm font-bold text-[#1a2533]">Dependency Update</div>
-            <div className="text-[10px] text-[#1a2533] mt-0.5">Post-decision propagation — MIDC-APP-2026-00418</div>
+            <div className="text-[10px] text-[#1a2533] mt-0.5">Post-decision propagation - MIDC-APP-2026-00418</div>
           </button>
           <button onClick={() => onOpenCompliance(applicationId, M28_OBLIGATIONS[0].id)} className="bg-white border border-[#c4b5fd] rounded-lg p-4 text-left hover:border-[#5b21b6] transition-colors">
             <div className="text-[10px] font-bold text-[#5b21b6] uppercase tracking-wider mb-1">M28</div>
             <div className="text-sm font-bold text-[#1a2533]">Conditions / Compliance</div>
-            <div className="text-[10px] text-[#1a2533] mt-0.5">Post-decision obligations — MIDC-APP-2026-00418</div>
+            <div className="text-[10px] text-[#1a2533] mt-0.5">Post-decision obligations - MIDC-APP-2026-00418</div>
           </button>
         </div>
 
@@ -10202,7 +10134,7 @@ export function DecisionsDashboard({ onOpenApp, onOpenCompliance, onOpenDependen
             <div className="px-4 py-3 flex items-center gap-3">
               <div className="flex-1">
                 <p className="text-xs font-semibold text-[#1a3a5c]">MIDC-APP-2026-00418</p>
-                <p className="text-[11px] text-[#1a2533]">Aster Precision Components Pvt. Ltd. — MIDC Building / Planning</p>
+                <p className="text-[11px] text-[#1a2533]">Aster Precision Components Pvt. Ltd. - MIDC Building / Planning</p>
               </div>
               <span className="text-[10px] font-semibold bg-[#fffbeb] text-[#92400e] border border-[#fcd34d] px-2 py-0.5 rounded">FINAL_DECISION</span>
               <span className="text-[10px] text-red-700 font-semibold">Due in 2 days</span>
@@ -10218,12 +10150,12 @@ export function DecisionsDashboard({ onOpenApp, onOpenCompliance, onOpenDependen
             <div className="px-4 py-3 flex items-center gap-3">
               <div className="flex-1">
                 <p className="text-xs font-semibold text-[#1a3a5c]">MIDC-APP-2026-00418</p>
-                <p className="text-[11px] text-[#1a2533]">Aster Precision Components Pvt. Ltd. — Decision: APPROVED — 01 Oct 2026</p>
+                <p className="text-[11px] text-[#1a2533]">Aster Precision Components Pvt. Ltd. - Decision: APPROVED - 01 Oct 2026</p>
               </div>
               <span className="text-[10px] font-semibold bg-[#ecfdf5] text-[#065f46] border border-[#6ee7b7] px-2 py-0.5 rounded">APPROVED</span>
               <div className="flex gap-2">
-                <button onClick={() => onOpenDependencyUpdate(applicationId, 'midc-bldg')} className="text-[11px] border border-[#d1d9e0] text-[#1a2533] px-2 py-1 rounded hover:bg-[#f8f9fb]">M27 Dep. Update</button>
-                <button onClick={() => onOpenCompliance(applicationId, M28_OBLIGATIONS[0].id)}       className="text-[11px] bg-[#f5f3ff] text-[#5b21b6] border border-[#c4b5fd] px-2 py-1 rounded hover:bg-[#ede9fe]">M28 Compliance →</button>
+                <button onClick={() => onOpenDependencyUpdate(applicationId, 'midc-bldg')} className="text-[11px] border border-[#d1d9e0] text-[#1a2533] px-2 py-1 rounded hover:bg-[#f8f9fb]">Dep. Update</button>
+                <button onClick={() => onOpenCompliance(applicationId, M28_OBLIGATIONS[0].id)}       className="text-[11px] bg-[#f5f3ff] text-[#5b21b6] border border-[#c4b5fd] px-2 py-1 rounded hover:bg-[#ede9fe]">Compliance →</button>
               </div>
             </div>
           </div>
@@ -10261,7 +10193,7 @@ export function M25DecisionWorkspacePage({ onBack, onOpenDocReview, onOpenConsis
     { label: 'Cross-form consistency reviewed', status: 'ok', action: onOpenConsistency },
     { label: 'Queries resolved (QRY-2026-0042)', status: 'ok', action: onOpenQueryHistory },
     { label: 'Latest resubmission reviewed (v2)', status: 'ok', action: onOpenDelta },
-    { label: 'Inspection completed (INSP-2026-00418 — Re-inspection Resolved)', status: 'ok', action: onOpenInspection ? () => onOpenInspection('INSP-2026-00418') : undefined },
+    { label: 'Inspection completed (INSP-2026-00418 - Re-inspection Resolved)', status: 'ok', action: onOpenInspection ? () => onOpenInspection('INSP-2026-00418') : undefined },
     { label: 'Required dependencies checked', status: 'ok', action: onOpenDepView },
     { label: 'One item marked Needs Verification (Building Plan v2)', status: 'warn', action: undefined },
   ]
@@ -10276,22 +10208,22 @@ export function M25DecisionWorkspacePage({ onBack, onOpenDocReview, onOpenConsis
     )},
     { id: 'documents', title: 'DOCUMENTS', action: undefined, content: (
       <div className="text-xs space-y-1">
-        <div className="flex items-center gap-2"><span className="text-amber-600 font-semibold">⚠</span><span>Building Plan v2 — Needs Verification</span></div>
-        <div className="flex items-center gap-2"><span className="text-green-700">✓</span><span>Land Record v3 — Verified</span></div>
-        <div className="flex items-center gap-2"><span className="text-green-700">✓</span><span>MIDC Application v2 — Verified</span></div>
+        <div className="flex items-center gap-2"><span className="text-amber-600 font-semibold">⚠</span><span>Building Plan v2 - Needs Verification</span></div>
+        <div className="flex items-center gap-2"><span className="text-green-700">✓</span><span>Land Record v3 - Verified</span></div>
+        <div className="flex items-center gap-2"><span className="text-green-700">✓</span><span>MIDC Application v2 - Verified</span></div>
       </div>
     )},
     { id: 'consistency', title: 'CROSS-FORM CONSISTENCY', action: onOpenConsistency, content: (
       <div className="text-xs space-y-1">
-        <div className="flex items-center gap-2"><span className="text-green-700">✓</span><span>Plot Area — Consistent across forms</span></div>
-        <div className="flex items-center gap-2"><span className="text-green-700">✓</span><span>Building Area — Query Resolved (QRY-2026-0042)</span></div>
+        <div className="flex items-center gap-2"><span className="text-green-700">✓</span><span>Plot Area - Consistent across forms</span></div>
+        <div className="flex items-center gap-2"><span className="text-green-700">✓</span><span>Building Area - Query Resolved (QRY-2026-0042)</span></div>
       </div>
     )},
     { id: 'queries', title: 'QUERIES / RESPONSES', action: onOpenQueryHistory, content: (
       <div className="text-xs space-y-1">
         <p><span className="font-semibold">Query:</span> QRY-2026-0042</p>
         <p><span className="font-semibold">Deficiencies:</span> 3 raised, all resolved</p>
-        <p><span className="font-semibold">Status:</span> Resolved — Resubmission v2 accepted</p>
+        <p><span className="font-semibold">Status:</span> Resolved - Resubmission v2 accepted</p>
       </div>
     )},
     { id: 'delta', title: 'DELTA RE-SCRUTINY', action: onOpenDelta, content: (
@@ -10303,7 +10235,7 @@ export function M25DecisionWorkspacePage({ onBack, onOpenDocReview, onOpenConsis
     )},
     { id: 'inspection', title: 'INSPECTION', action: onOpenM24 ? () => onOpenM24('INSP-2026-00418') : undefined, content: (
       <div className="text-xs space-y-1">
-        <p><span className="font-semibold">ID:</span> INSP-2026-00418 — 25 Sep 2026</p>
+        <p><span className="font-semibold">ID:</span> INSP-2026-00418 - 25 Sep 2026</p>
         <p><span className="font-semibold">Module:</span> Building / Planning</p>
         <p><span className="font-semibold">Initial outcome:</span> Correction Required</p>
         <p>Re-inspection: 01 Oct 2026 → Resolved</p>
@@ -10311,10 +10243,10 @@ export function M25DecisionWorkspacePage({ onBack, onOpenDocReview, onOpenConsis
     )},
     { id: 'dependencies', title: 'DEPENDENCIES', action: onOpenDepView, content: (
       <div className="text-xs space-y-1">
-        <div className="flex items-center gap-2"><span className="text-green-700">✓</span><span>MPCB CTE — Complete</span></div>
-        <div className="flex items-center gap-2"><span className="text-amber-600">↻</span><span>Building / Planning — In Progress (this service)</span></div>
-        <div className="flex items-center gap-2"><span className="text-amber-600">⚠</span><span>Fire NOC — Conditional</span></div>
-        <div className="flex items-center gap-2"><span className="text-[#374151]">⬇</span><span>Construction — Downstream (locked)</span></div>
+        <div className="flex items-center gap-2"><span className="text-green-700">✓</span><span>MPCB CTE - Complete</span></div>
+        <div className="flex items-center gap-2"><span className="text-amber-600">↻</span><span>Building / Planning - In Progress (this service)</span></div>
+        <div className="flex items-center gap-2"><span className="text-amber-600">⚠</span><span>Fire NOC - Conditional</span></div>
+        <div className="flex items-center gap-2"><span className="text-[#374151]">⬇</span><span>Construction - Downstream (locked)</span></div>
       </div>
     )},
   ]
@@ -10336,7 +10268,7 @@ export function M25DecisionWorkspacePage({ onBack, onOpenDocReview, onOpenConsis
         ]} />
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-xl font-bold text-[#1a3a5c]">Decision Workspace — M25</h1>
+            <h1 className="text-xl font-bold text-[#1a3a5c]">Decision Workspace</h1>
             <p className="text-sm text-[#1a2533] mt-0.5">Final statutory decision for MIDC-APP-2026-00418</p>
           </div>
           <button onClick={onBack} className="text-xs border border-[#d1d9e0] bg-white text-[#1a2533] px-3 py-1.5 rounded hover:bg-[#f0f4f8]">← Back</button>
@@ -10350,7 +10282,7 @@ export function M25DecisionWorkspacePage({ onBack, onOpenDocReview, onOpenConsis
           <div><span className="text-[#374151]">Scrutiny Route</span><p className="font-semibold">Enhanced Review</p></div>
           <div><span className="text-[#374151]">SLA</span><p className="font-semibold text-red-700">Due in 2 days</p></div>
           <div><span className="text-[#374151]">Desk</span><p className="font-semibold">Decision Desk</p></div>
-          <div><span className="text-[#374151]">Officer</span><p className="font-semibold">Authorised Officer — MIDC Building</p></div>
+          <div><span className="text-[#374151]">Officer</span><p className="font-semibold">Authorised Officer - MIDC Building</p></div>
         </div>
 
         {/* Quick nav strip */}
@@ -10459,7 +10391,7 @@ export function M25DecisionWorkspacePage({ onBack, onOpenDocReview, onOpenConsis
             {[
               { outcome: 'APPROVED', color: 'text-green-700 bg-[#ecfdf5]', bullets: ['Building/Planning node APPROVED', 'Construction permit unlocked', 'Entrepreneur notified', 'Approval order generated (APPR-2026-00418)'] },
               { outcome: 'CORRECTION REQUIRED', color: 'text-amber-700 bg-[#fffbeb]', bullets: ['Application returned to entrepreneur', 'Deficiencies communicated', 'SLA clock paused (entrepreneur time)', 'Resubmission required'] },
-              { outcome: 'REJECTED', color: 'text-red-700 bg-[#fef2f2]', bullets: ['Application closed — Rejected', 'Statutory rejection order issued', 'No downstream services unlocked', 'Appeal period begins'] },
+              { outcome: 'REJECTED', color: 'text-red-700 bg-[#fef2f2]', bullets: ['Application closed - Rejected', 'Statutory rejection order issued', 'No downstream services unlocked', 'Appeal period begins'] },
             ].map((s, i) => (
               <div key={i} className="p-3">
                 <p className={`text-[10px] font-bold px-2 py-0.5 rounded mb-2 inline-block ${s.color}`}>{s.outcome}</p>
@@ -10497,7 +10429,7 @@ export function M25DecisionWorkspacePage({ onBack, onOpenDocReview, onOpenConsis
         {decisionStep === 'form' && selectedOutcome && (
           <div className="bg-white border border-[#e5eaf0] rounded-lg overflow-hidden">
             <div className={`px-4 py-2.5 border-b border-[#e5eaf0] flex items-center gap-3 ${selectedOutcome === 'APPROVE' ? 'bg-[#ecfdf5]' : selectedOutcome === 'REJECT' ? 'bg-[#fef2f2]' : 'bg-[#fffbeb]'}`}>
-              <h2 className="text-sm font-bold text-[#1a2533]">Decision Form — {selectedOutcome.replace('_', ' ')}</h2>
+              <h2 className="text-sm font-bold text-[#1a2533]">Decision Form - {selectedOutcome.replace('_', ' ')}</h2>
               <button onClick={() => { setSelectedOutcome(null); setDecisionStep('evidence') }} className="ml-auto text-xs text-[#1a2533] hover:text-[#1a2533]">← Change outcome</button>
             </div>
             <div className="p-4 space-y-4">
@@ -10506,7 +10438,7 @@ export function M25DecisionWorkspacePage({ onBack, onOpenDocReview, onOpenConsis
                 <Row label="Decision ID" value="DEC-2026-00418" />
                 <Row label="Application ID" value="MIDC-APP-2026-00418" />
                 <Row label="Decision Date" value="01 Oct 2026" />
-                <Row label="Officer" value="Authorised Officer — MIDC Building" />
+                <Row label="Officer" value="Authorised Officer - MIDC Building" />
               </div>
 
               {selectedOutcome === 'APPROVE' && (
@@ -10587,7 +10519,7 @@ export function M25DecisionWorkspacePage({ onBack, onOpenDocReview, onOpenConsis
                 <Row label="Outcome" value={selectedOutcome.replace('_', ' ')} />
                 <Row label="Decision ID" value="DEC-2026-00418" />
                 <Row label="Application" value="MIDC-APP-2026-00418" />
-                <Row label="Officer" value="Authorised Officer — MIDC Building" />
+                <Row label="Officer" value="Authorised Officer - MIDC Building" />
                 <Row label="Decision Date" value="01 Oct 2026" />
                 <Row label="Supporting Basis" value={approvalBasis || rejectBasis || 'MRTP Act 1966 / MIDC Estate Guidelines 2019'} />
               </div>
@@ -10595,10 +10527,10 @@ export function M25DecisionWorkspacePage({ onBack, onOpenDocReview, onOpenConsis
                 <p className="font-semibold text-[#1a2533] mb-1">Downstream Effect</p>
                 {selectedOutcome === 'APPROVE' && <p className="text-green-700">Building/Planning node will be set to APPROVED. Construction service will be unlocked. Approval order APPR-2026-00418 will be generated.</p>}
                 {selectedOutcome === 'CORRECTION_REQUIRED' && <p className="text-amber-700">Application will be returned to entrepreneur with {deficiencies.length} deficiencies. SLA entrepreneur clock resumes.</p>}
-                {selectedOutcome === 'REJECT' && <p className="text-red-700">Application will be closed — Rejected. Statutory rejection order will be issued. No downstream services will be unlocked.</p>}
+                {selectedOutcome === 'REJECT' && <p className="text-red-700">Application will be closed - Rejected. Statutory rejection order will be issued. No downstream services will be unlocked.</p>}
               </div>
               <div className="flex gap-3">
-                <button onClick={() => setDecisionStep('evidence')} className="flex-1 border border-[#d1d9e0] bg-white text-[#1a2533] text-xs font-semibold py-2.5 rounded hover:bg-[#f0f4f8]">Cancel — Return to Review</button>
+                <button onClick={() => setDecisionStep('evidence')} className="flex-1 border border-[#d1d9e0] bg-white text-[#1a2533] text-xs font-semibold py-2.5 rounded hover:bg-[#f0f4f8]">Cancel - Return to Review</button>
                 <button onClick={() => onRecordDecision?.('DEC-2026-00418')} className="flex-1 bg-[#1a56db] text-white text-xs font-semibold py-2.5 rounded hover:bg-[#1246b5]">Confirm & Record Decision (Mock Persistence)</button>
               </div>
             </div>
@@ -10634,7 +10566,7 @@ export function M26DecisionRecordPage({ onBack, onBackToOverview, onOpenDepView,
             { label: 'Business', value: 'Aster Precision Components Pvt. Ltd.' },
             { label: 'Decision', value: 'APPROVED' },
             { label: 'Decision Date', value: '01 Oct 2026' },
-            { label: 'Officer', value: 'Authorised Officer — MIDC Building / Planning' },
+            { label: 'Officer', value: 'Authorised Officer - MIDC Building / Planning' },
             { label: 'Region', value: 'Pune Region' },
             { label: 'Service', value: 'MIDC Building / Planning Service' },
           ].map(r => (
@@ -10664,7 +10596,7 @@ export function M26DecisionRecordPage({ onBack, onBackToOverview, onOpenDepView,
                 <Row label="Approval / Order ID" value="APPR-2026-00418" />
                 <Row label="Issue Date" value="01 Oct 2026" />
                 <Row label="Expiry" value="Not applicable (configured service)" />
-                <Row label="Decision Officer" value="Authorised Officer — MIDC Building / Planning" />
+                <Row label="Decision Officer" value="Authorised Officer - MIDC Building / Planning" />
                 <Row label="Supporting Basis" value="MRTP Act 1966 / MIDC Estate Guidelines 2019" />
               </div>
               <div className="px-4 pb-4">
@@ -10712,20 +10644,20 @@ export function M26DecisionRecordPage({ onBack, onBackToOverview, onOpenDepView,
                 <span className="text-green-700 font-bold text-base">✓</span>
                 <div>
                   <p className="font-semibold text-green-800">Building / Planning node → APPROVED</p>
-                  <p className="text-green-700">Decision recorded — node status updated in dependency graph</p>
+                  <p className="text-green-700">Decision recorded - node status updated in dependency graph</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 p-3 bg-[#eff6ff] border border-blue-200 rounded">
                 <span className="text-blue-700 font-bold text-base">↓</span>
                 <div>
-                  <p className="font-semibold text-blue-800">Construction permit — Unlocked</p>
+                  <p className="font-semibold text-blue-800">Construction permit - Unlocked</p>
                   <p className="text-blue-700">Blocking dependency resolved; entrepreneur may now apply</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 p-3 bg-[#fffbeb] border border-amber-200 rounded">
                 <span className="text-amber-600 font-bold">⚠</span>
                 <div>
-                  <p className="font-semibold text-amber-800">Fire NOC — Conditional (unchanged)</p>
+                  <p className="font-semibold text-amber-800">Fire NOC - Conditional (unchanged)</p>
                   <p className="text-amber-700">Fire NOC remains conditional; entrepreneur must satisfy conditions separately</p>
                 </div>
               </div>
@@ -10740,7 +10672,7 @@ export function M26DecisionRecordPage({ onBack, onBackToOverview, onOpenDepView,
             </div>
             <div className="divide-y divide-[#94a3b8]">
               {[
-                { ts: '01 Oct 2026 10:42', event: 'Decision recorded', detail: 'Outcome: APPROVED — DEC-2026-00418', actor: 'Authorised Officer — MIDC Building' },
+                { ts: '01 Oct 2026 10:42', event: 'Decision recorded', detail: 'Outcome: APPROVED - DEC-2026-00418', actor: 'Authorised Officer - MIDC Building' },
                 { ts: '01 Oct 2026 10:42', event: 'Version created', detail: 'Decision record v1 created in system', actor: 'System' },
                 { ts: '01 Oct 2026 10:43', event: 'Entrepreneur notification sent', detail: 'Approval notification dispatched via portal', actor: 'System' },
               ].map((a, i) => (
@@ -10765,8 +10697,8 @@ export function M26DecisionRecordPage({ onBack, onBackToOverview, onOpenDepView,
             <div className="px-4 py-3 flex gap-3 text-xs">
               <div className="w-8 h-8 rounded-full bg-[#1a3a5c] text-white flex items-center justify-center shrink-0 font-bold">v1</div>
               <div>
-                <p className="font-semibold text-[#1a2533]">Decision recorded — APPROVE</p>
-                <p className="text-[#374151]">01 Oct 2026 · Authorised Officer — MIDC Building / Planning</p>
+                <p className="font-semibold text-[#1a2533]">Decision recorded - APPROVE</p>
+                <p className="text-[#374151]">01 Oct 2026 · Authorised Officer - MIDC Building / Planning</p>
                 <p className="text-[#1a2533] mt-0.5">Initial recording of final decision. DEC-2026-00418 created. Approval order APPR-2026-00418 generated.</p>
               </div>
             </div>
@@ -10789,13 +10721,13 @@ export function M26DecisionRecordPage({ onBack, onBackToOverview, onOpenDepView,
 
 
 const M27_SYNC_EVENTS: SyncEvent[] = [
-  { id:'SYNC-00418-01', time:'14:32', from:'M25 Decision Workspace', to:'Decision Engine',   action:'Decision DEC-2026-00418 recorded — APPROVED',              result:'Completed' },
+  { id:'SYNC-00418-01', time:'14:32', from:'Decision Workspace', to:'Decision Engine',   action:'Decision DEC-2026-00418 recorded - APPROVED',              result:'Completed' },
   { id:'SYNC-00418-02', time:'14:32', from:'Decision Engine',         to:'Dependency Engine', action:'MIDC Building/Planning node set to COMPLETE',              result:'Completed' },
   { id:'SYNC-00418-03', time:'14:33', from:'Dependency Engine',       to:'Journey Engine',   action:'Downstream nodes Provisional Fire + Construction updated', result:'Completed' },
   { id:'SYNC-00418-04', time:'14:33', from:'Journey Engine',          to:'Entrepreneur View', action:'Application status updated to APPROVED',                   result:'Completed' },
   { id:'SYNC-00418-05', time:'14:33', from:'Document Engine',         to:'Document Centre',  action:'Approval Order DOC-MIDC-2026-00418 stored',               result:'Completed' },
   { id:'SYNC-00418-06', time:'14:33', from:'Notification Engine',     to:'Entrepreneur',     action:'Portal notification NTF-00418-07 generated',              result:'Completed' },
-  { id:'SYNC-00418-07', time:'14:34', from:'Compliance Engine',       to:'M28',              action:'2 configured conditions forwarded to compliance engine',   result:'Pending' },
+  { id:'SYNC-00418-07', time:'14:34', from:'Compliance Engine',       to:'Conditions / Compliance',              action:'2 configured conditions forwarded to compliance engine',   result:'Pending' },
 ]
 
 
@@ -10830,14 +10762,13 @@ export function M27DependencyUpdatePage({ onBack, onOpenM25, onOpenM26, onOpenM2
   return (
     <div className="flex-1 flex flex-col bg-[#f8f9fb] min-h-0 overflow-y-auto">
       {/* Breadcrumb */}
-      <div className="bg-white border-b border-[#e5eaf0] px-6 py-2 flex items-center gap-1.5 text-xs text-[#1a2533]">
-        <button onClick={onBack} className="hover:text-[#1a3a5c] hover:underline">Department Home</button>
-        <span>/</span>
-        <button onClick={onBack} className="hover:text-[#1a3a5c] hover:underline">Decisions</button>
-        <span>/</span>
-        <button onClick={() => onOpenM26?.('DEC-2026-00418')} className="hover:text-[#1a3a5c] hover:underline">Decision Record</button>
-        <span>/</span>
-        <span className="text-[#1a2533] font-semibold">M27 — Dependency Update</span>
+      <div className="bg-white border-b border-[#e5eaf0] px-6 py-2">
+        <Breadcrumb items={[
+          { label: 'Department Home' },
+          { label: 'Decisions' },
+          { label: 'Decision Record', onClick: () => onOpenM26?.('DEC-2026-00418') },
+          { label: 'Dependency Update' }
+        ]} />
       </div>
 
       {/* Decision context header */}
@@ -10845,16 +10776,17 @@ export function M27DependencyUpdatePage({ onBack, onOpenM25, onOpenM26, onOpenM2
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <div className="text-[10px] text-[#93c5fd] uppercase font-bold tracking-wider mb-0.5">Post-Decision Propagation Workspace</div>
-            <h1 className="text-lg font-bold">M27 — Dependency Update + Entrepreneur Synchronization</h1>
+            <h1 className="text-lg font-bold">Dependency Update + Entrepreneur Synchronization</h1>
             <p className="text-[11px] text-[#bfdbfe] mt-0.5">MIDC-APP-2026-00418 · Aster Precision Components Pvt. Ltd. · MIDC Building / Planning Service</p>
           </div>
           <div className="flex gap-2 flex-wrap text-xs">
             <button onClick={onOpenM25} className="border border-[#4b7ab5] text-[#bfdbfe] px-3 py-1.5 rounded hover:bg-[#0f2540]">← Decision Workspace</button>
             <button onClick={() => onOpenM26?.('DEC-2026-00418')} className="border border-[#4b7ab5] text-[#bfdbfe] px-3 py-1.5 rounded hover:bg-[#0f2540]">View Decision Record</button>
+            <button onClick={() => onOpenM28?.('COND-001')} className="bg-[#2563eb] text-white px-3 py-1.5 rounded hover:bg-[#1d4ed8]">Conditions & Compliance →</button>
           </div>
         </div>
         <div className="mt-3 grid grid-cols-2 gap-x-8 gap-y-1 text-xs md:grid-cols-4">
-          {[['Decision ID','DEC-2026-00418'],['Outcome','APPROVED'],['Date','01 Oct 2026, 14:32'],['Officer','Authorised Officer — MIDC Building'],
+          {[['Decision ID','DEC-2026-00418'],['Outcome','APPROVED'],['Date','01 Oct 2026, 14:32'],['Officer','Authorised Officer - MIDC Building'],
             ['Application','MIDC-APP-2026-00418'],['App State','APPROVED'],['App Version','v3'],['DNA Version','v4']
           ].map(([l,v]) => (
             <div key={l}><span className="text-[#93c5fd] text-[10px]">{l}</span><p className={`font-semibold text-[11px] ${l==='Outcome' ? 'text-[#6ee7b7]' : 'text-white'}`}>{v}</p></div>
@@ -10887,20 +10819,20 @@ export function M27DependencyUpdatePage({ onBack, onOpenM25, onOpenM26, onOpenM2
               <div className="space-y-0.5 text-xs">
                 <Row label="Decision ID" value="DEC-2026-00418" />
                 <Row label="Recorded" value="01 Oct 2026, 14:32" />
-                <Row label="Officer" value="Authorised Officer — MIDC Building" />
-                <Row label="Source" value="M26 Decision Record" />
+                <Row label="Officer" value="Authorised Officer - MIDC Building" />
+                <Row label="Source" value="Decision Record" />
               </div>
             </div>
             <div className="flex flex-col gap-2 shrink-0">
-              <button onClick={() => onOpenM26?.('DEC-2026-00418')} className="text-xs font-semibold bg-[#1a3a5c] text-white px-3 py-1.5 rounded hover:bg-[#0f2540]">View Decision Record → M26</button>
-              <div className="text-[9px] text-[#374151] italic">Decision cannot be edited from M27.</div>
+              <button onClick={() => onOpenM26?.('DEC-2026-00418')} className="text-xs font-semibold bg-[#1a3a5c] text-white px-3 py-1.5 rounded hover:bg-[#0f2540]">View Decision Record</button>
+              <div className="text-[9px] text-[#374151] italic">Decision cannot be edited from this view.</div>
             </div>
           </div>
 
           {/* Before / After MIDC node transition */}
           <div className="bg-white border-2 border-[#1a3a5c] rounded-lg overflow-hidden">
             <div className="px-4 py-2.5 bg-[#1a3a5c]">
-              <span className="text-sm font-bold text-white">Decision Effect — MIDC Building / Planning Node</span>
+              <span className="text-sm font-bold text-white">Decision Effect - MIDC Building / Planning Node</span>
             </div>
             <div className="p-4 flex items-center gap-4 flex-wrap justify-center text-center">
               <div className="bg-[#fffbeb] border border-[#fcd34d] rounded-lg px-6 py-4 min-w-[140px]">
@@ -10928,7 +10860,7 @@ export function M27DependencyUpdatePage({ onBack, onOpenM25, onOpenM26, onOpenM2
             {/* Before */}
             <div className="bg-white border border-[#e5eaf0] rounded-lg overflow-hidden">
               <div className="px-4 py-2 bg-[#f8f9fb] border-b border-[#e5eaf0]">
-                <div className="text-[10px] font-bold text-[#374151] uppercase tracking-wider">Dependency State — Before Decision</div>
+                <div className="text-[10px] font-bold text-[#374151] uppercase tracking-wider">Dependency State - Before Decision</div>
               </div>
               <div className="p-3 space-y-1.5">
                 {BEFORE_NODES.map((n, i) => {
@@ -10954,7 +10886,7 @@ export function M27DependencyUpdatePage({ onBack, onOpenM25, onOpenM26, onOpenM2
             {/* After */}
             <div className="bg-white border border-[#e5eaf0] rounded-lg overflow-hidden">
               <div className="px-4 py-2 bg-[#f8f9fb] border-b border-[#e5eaf0]">
-                <div className="text-[10px] font-bold text-[#374151] uppercase tracking-wider">Dependency State — After Decision</div>
+                <div className="text-[10px] font-bold text-[#374151] uppercase tracking-wider">Dependency State - After Decision</div>
               </div>
               <div className="p-3 space-y-1.5">
                 {AFTER_NODES.map((n, i) => {
@@ -10979,7 +10911,7 @@ export function M27DependencyUpdatePage({ onBack, onOpenM25, onOpenM26, onOpenM2
                 })}
               </div>
               <div className="px-3 pb-3">
-                <button onClick={onOpenDepView} className="mt-2 text-[10px] text-[#1a56db] hover:underline font-semibold">View Full Dependency Journey → M17</button>
+                <button onClick={onOpenDepView} className="mt-2 text-[10px] text-[#1a56db] hover:underline font-semibold">View Full Dependency Journey</button>
               </div>
             </div>
           </div>
@@ -10988,7 +10920,7 @@ export function M27DependencyUpdatePage({ onBack, onOpenM25, onOpenM26, onOpenM2
           <div className="bg-white border border-[#e5eaf0] rounded-lg overflow-hidden">
             <div className="px-4 py-2.5 border-b border-[#e5eaf0] flex items-center justify-between">
               <div className="text-xs font-bold text-[#1a2533]">What Changed?</div>
-              <button onClick={onOpenDepView} className="text-[10px] text-[#1a56db] hover:underline">View Full Dependency Journey → M17</button>
+              <button onClick={onOpenDepView} className="text-[10px] text-[#1a56db] hover:underline">View Full Dependency Journey</button>
             </div>
             <div className="grid grid-cols-2 divide-x divide-[#e5eaf0]">
               <div className="p-4">
@@ -11035,7 +10967,7 @@ export function M27DependencyUpdatePage({ onBack, onOpenM25, onOpenM26, onOpenM2
                 '✓ Reusable verified data (Plot Verification, Land Record v3) made available',
                 '✓ 2 configured conditions forwarded to compliance engine',
                 '✓ Provisional Fire node: dependency availability updated',
-                '⏳ M28 Conditions / Compliance handoff: Pending',
+                '⏳ Conditions / Compliance handoff: Pending',
               ].map(item => (
                 <div key={item} className={`text-xs flex items-start gap-1.5 ${item.startsWith('⏳') ? 'text-[#92400e]' : 'text-[#1a2533]'}`}>
                   <span>{item}</span>
@@ -11048,7 +10980,7 @@ export function M27DependencyUpdatePage({ onBack, onOpenM25, onOpenM26, onOpenM2
           <div className="bg-white border border-[#e5eaf0] rounded-lg overflow-hidden">
             <div className="px-4 py-2.5 border-b border-[#e5eaf0]">
               <div className="text-xs font-bold text-[#1a2533]">External Department Impact</div>
-              <div className="text-[10px] text-[#374151]">MIDC updates dependency availability only — does not edit or impersonate another department's decision.</div>
+              <div className="text-[10px] text-[#374151]">MIDC updates dependency availability only - does not edit or impersonate another department's decision.</div>
             </div>
             <table className="w-full text-xs">
               <thead className="bg-[#f8f9fb] border-b border-[#e5eaf0]">
@@ -11059,7 +10991,7 @@ export function M27DependencyUpdatePage({ onBack, onOpenM25, onOpenM26, onOpenM2
               <tbody className="divide-y divide-[#94a3b8]">
                 {[
                   { dept:'MPCB',  node:'CTE',               before:'Complete', after:'Complete',        effect:'No change', ctrl:'MPCB' },
-                  { dept:'Fire',  node:'Provisional Fire',   before:'Blocked',  after:'Ready / Unlocked', effect:'Dependency availability updated — MIDC prerequisite satisfied', ctrl:'Fire' },
+                  { dept:'Fire',  node:'Provisional Fire',   before:'Blocked',  after:'Ready / Unlocked', effect:'Dependency availability updated - MIDC prerequisite satisfied', ctrl:'Fire' },
                   { dept:'DISH',  node:'DISH NOC',           before:'Pending',  after:'Newly Available',  effect:'Dependency availability updated', ctrl:'DISH' },
                   { dept:'MIDC',  node:'Construction',       before:'Blocked',  after:'Available',        effect:'Unlocked by MIDC approval', ctrl:'MIDC-controlled' },
                 ].map(r => (
@@ -11083,7 +11015,7 @@ export function M27DependencyUpdatePage({ onBack, onOpenM25, onOpenM26, onOpenM2
               <div className="space-y-1.5 text-xs">
                 <Row label="Application" value="MIDC-APP-2026-00418" />
                 <Row label="New Status" value="Approved" />
-                <Row label="Decision" value="MIDC Building / Planning — Approved" />
+                <Row label="Decision" value="MIDC Building / Planning - Approved" />
                 <Row label="Newly Available" value="Provisional Fire application" />
                 <Row label="Newly Available" value="Configured utility workflow" />
                 <Row label="Documents" value="Approval Order added to Document Centre" />
@@ -11096,7 +11028,7 @@ export function M27DependencyUpdatePage({ onBack, onOpenM25, onOpenM26, onOpenM2
               <div className="text-[10px] font-bold text-[#374151] uppercase tracking-wider mb-2">Document Update</div>
               <div className="space-y-2 text-xs">
                 {[
-                  { id:'DOC-MIDC-2026-00418', type:'MIDC Approval Order', ver:'v1', date:'01 Oct 2026', expiry:'Not Applicable', status:'Stored — Document Centre' },
+                  { id:'DOC-MIDC-2026-00418', type:'MIDC Approval Order', ver:'v1', date:'01 Oct 2026', expiry:'Not Applicable', status:'Stored - Document Centre' },
                 ].map(d => (
                   <div key={d.id} className="bg-[#f8f9fb] rounded border border-[#e5eaf0] p-2.5">
                     <div className="font-mono text-[10px] font-bold text-[#1a3a5c]">{d.id}</div>
@@ -11111,14 +11043,14 @@ export function M27DependencyUpdatePage({ onBack, onOpenM25, onOpenM26, onOpenM2
                 ))}
                 <div className="bg-[#f8f9fb] rounded border border-[#e5eaf0] p-2.5">
                   <div className="text-[10px] text-[#374151] font-bold">Certificate</div>
-                  <div className="text-[11px] text-[#1a2533] italic mt-0.5">Not Applicable — configured service does not require a separate certificate.</div>
+                  <div className="text-[11px] text-[#1a2533] italic mt-0.5">Not Applicable - configured service does not require a separate certificate.</div>
                 </div>
               </div>
 
               <div className="mt-3">
                 <div className="text-[10px] font-bold text-[#374151] uppercase tracking-wider mb-1.5">Reusable Records</div>
                 {[
-                  ['MIDC Plot Verification', 'Department Verified — Reusable'],
+                  ['MIDC Plot Verification', 'Department Verified - Reusable'],
                   ['Land Record v3',         'Verified / Reusable'],
                 ].map(([name, status]) => (
                   <div key={name} className="flex justify-between text-[10px] py-1 border-b border-[#f0f4f8] last:border-0">
@@ -11134,7 +11066,7 @@ export function M27DependencyUpdatePage({ onBack, onOpenM25, onOpenM26, onOpenM2
           <div className="bg-white border border-[#e5eaf0] rounded-lg overflow-hidden">
             <div className="px-4 py-2.5 border-b border-[#e5eaf0] flex items-center justify-between">
               <div className="text-xs font-bold text-[#1a2533]">Approval Conditions → Compliance Engine</div>
-              <button onClick={() => onOpenM28?.('COND-001')} className="text-[10px] text-[#1a56db] hover:underline">View Compliance Context → M28</button>
+              <button onClick={() => onOpenM28?.('COND-001')} className="text-[10px] text-[#1a56db] hover:underline">View Compliance Context</button>
             </div>
             <div className="p-4 space-y-3">
               {[
@@ -11151,7 +11083,7 @@ export function M27DependencyUpdatePage({ onBack, onOpenM25, onOpenM26, onOpenM2
                 </div>
               ))}
               <div className="flex items-center gap-2 text-[10px] text-[#374151] italic bg-[#f8f9fb] rounded border border-[#e5eaf0] px-3 py-2">
-                <span>Condition recorded → Configured compliance rule detected → Compliance obligation generated in M28</span>
+                <span>Condition recorded → Configured compliance rule detected → Compliance obligation generated</span>
               </div>
             </div>
           </div>
@@ -11168,7 +11100,7 @@ export function M27DependencyUpdatePage({ onBack, onOpenM25, onOpenM26, onOpenM2
                   { label:'Journey Engine',               result:'Completed' },
                   { label:'Entrepreneur View',            result:'Completed' },
                   { label:'Eligible Downstream Queues',   result:'Completed' },
-                  { label:'M28 Conditions / Compliance',  result:'Pending' },
+                  { label:'Conditions / Compliance',  result:'Pending' },
                 ].map((s, i) => (
                   <div key={s.label}>
                     {i > 0 && <div className="flex justify-center text-[#d1d9e0] text-xs py-0.5">↓</div>}
@@ -11207,9 +11139,9 @@ export function M27DependencyUpdatePage({ onBack, onOpenM25, onOpenM26, onOpenM2
 
           {/* Actions footer */}
           <div className="flex gap-3 flex-wrap pb-6">
-            <button onClick={() => onOpenM26?.('DEC-2026-00418')}      className="px-4 py-2 text-xs font-bold bg-[#1a3a5c] text-white rounded hover:bg-[#0f2540]">View Decision Record → M26</button>
-            <button onClick={onOpenDepView}  className="px-4 py-2 text-xs font-semibold border border-[#d1d9e0] text-[#1a2533] rounded hover:bg-[#f8f9fb]">View Dependency Journey → M17</button>
-            <button onClick={() => onOpenM28?.('COND-001')}      className="px-4 py-2 text-xs font-semibold border border-[#d1d9e0] text-[#1a2533] rounded hover:bg-[#f8f9fb]">View Compliance Context → M28</button>
+            <button onClick={() => onOpenM26?.('DEC-2026-00418')}      className="px-4 py-2 text-xs font-bold bg-[#1a3a5c] text-white rounded hover:bg-[#0f2540]">View Decision Record</button>
+            <button onClick={onOpenDepView}  className="px-4 py-2 text-xs font-semibold border border-[#d1d9e0] text-[#1a2533] rounded hover:bg-[#f8f9fb]">View Dependency Journey</button>
+            <button onClick={() => onOpenM28?.('COND-001')}      className="px-4 py-2 text-xs font-semibold border border-[#d1d9e0] text-[#1a2533] rounded hover:bg-[#f8f9fb]">View Compliance Context</button>
           </div>
         </>}
 
@@ -11234,9 +11166,6 @@ export function M27DependencyUpdatePage({ onBack, onOpenM25, onOpenM26, onOpenM2
                 </div>
               </div>
             ))}
-            <div className="pt-2 pb-6">
-              <button className="text-[10px] text-[#1a56db] hover:underline">View Full Audit History → M38</button>
-            </div>
           </div>
         )}
 
@@ -11248,8 +11177,8 @@ export function M27DependencyUpdatePage({ onBack, onOpenM25, onOpenM26, onOpenM2
               </div>
               <div className="p-4 space-y-2 text-xs">
                 <Row label="Notification ID" value="NTF-00418-07" />
-                <Row label="Recipient" value="Applicant — Aster Precision Components Pvt. Ltd." />
-                <Row label="Type" value="MIDC Decision — APPROVED" />
+                <Row label="Recipient" value="Applicant - Aster Precision Components Pvt. Ltd." />
+                <Row label="Type" value="MIDC Decision - APPROVED" />
                 <Row label="Generated" value="01 Oct 2026, 14:33" />
                 <Row label="Channel" value="Portal" />
                 <Row label="Status" value="Generated" />
@@ -11257,10 +11186,10 @@ export function M27DependencyUpdatePage({ onBack, onOpenM25, onOpenM26, onOpenM2
               <div className="px-4 pb-4">
                 <div className="bg-[#f8f9fb] border border-[#e5eaf0] rounded p-3 text-xs space-y-1.5">
                   <div className="font-bold text-[#1a2533] mb-1">Notification Content Summary</div>
-                  <Row label="Decision" value="MIDC Building / Planning — APPROVED" />
+                  <Row label="Decision" value="MIDC Building / Planning - APPROVED" />
                   <Row label="Application ID" value="MIDC-APP-2026-00418" />
                   <Row label="Decision Reference" value="DEC-2026-00418" />
-                  <Row label="Document Available" value="Approval Order — Document Centre" />
+                  <Row label="Document Available" value="Approval Order - Document Centre" />
                   <Row label="Next Action" value="Provisional Fire application now available" />
                   <div className="text-[9px] text-[#374151] italic mt-1">Internal officer notes are not exposed to the entrepreneur.</div>
                 </div>
@@ -11302,10 +11231,10 @@ export function M27DependencyUpdatePage({ onBack, onOpenM25, onOpenM26, onOpenM2
 
 
 const M28_OBLIGATIONS: ComplianceObligation[] = [
-  { id:'COND-001', title:'Comply with approval-specific site conditions', source:'MIDC Approval Order — MIDC-ORD-2026-00872', type:'Condition', due:'Configured by approval', entStatus:'Pending', evidence:'0 documents', verification:'Needs Verification', state:'Open' },
+  { id:'COND-001', title:'Comply with approval-specific site conditions', source:'MIDC Approval Order - MIDC-ORD-2026-00872', type:'Condition', due:'Configured by approval', entStatus:'Pending', evidence:'0 documents', verification:'Needs Verification', state:'Open' },
   { id:'COND-002', title:'Construction to commence within configured period of approval order', source:'Configured MIDC Service Rule', type:'Condition', due:'Configured date', entStatus:'Not Started', evidence:'0 documents', verification:'Not Applicable', state:'Upcoming' },
-  { id:'RPT-001',  title:'Monthly site progress reports to MIDC Estate Office', source:'Configured MIDC Reporting Requirement', type:'Reporting', due:'Monthly — configured start', entStatus:'Not Started', evidence:'0 documents', verification:'Not Applicable', state:'Upcoming' },
-  { id:'INSP-001', title:'Post-approval site verification inspection if configured', source:'Configured Inspection Rule', type:'Inspection', due:'Configured window', entStatus:'Not Started', evidence:'—', verification:'Not Applicable', state:'Upcoming' },
+  { id:'RPT-001',  title:'Monthly site progress reports to MIDC Estate Office', source:'Configured MIDC Reporting Requirement', type:'Reporting', due:'Monthly - configured start', entStatus:'Not Started', evidence:'0 documents', verification:'Not Applicable', state:'Upcoming' },
+  { id:'INSP-001', title:'Post-approval site verification inspection if configured', source:'Configured Inspection Rule', type:'Inspection', due:'Configured window', entStatus:'Not Started', evidence:'-', verification:'Not Applicable', state:'Upcoming' },
 ]
 
 const OBL_STATE_STYLE: Record<string, string> = {
@@ -11322,7 +11251,7 @@ const ENT_STATUS_STYLE: Record<string, string> = {
   'Overdue':     'text-[#991b1b]',
 }
 
-export function M28CompliancePage({ onBack, onOpenM26, onOpenM29, onOpenInspection, onOpenDepView, onOpenDocReview }: {
+export function M28CompliancePage({ onBack, onOpenM26, onOpenM27, onOpenM29, onOpenInspection, onOpenDepView, onOpenDocReview }: {
   onBack: () => void; onOpenM26: (id: string) => void; onOpenM27: (id: string) => void; onOpenM29: () => void
   onOpenInspection?: (id: string) => void; onOpenDepView: () => void; onOpenDocReview: (id: string) => void
 }) {
@@ -11340,26 +11269,26 @@ export function M28CompliancePage({ onBack, onOpenM26, onOpenM29, onOpenInspecti
   return (
     <div className="flex-1 flex flex-col bg-[#f8f9fb] min-h-0 overflow-y-auto">
       {/* Breadcrumb */}
-      <div className="bg-white border-b border-[#e5eaf0] px-6 py-2 flex items-center gap-1.5 text-xs text-[#1a2533]">
-        <button onClick={onBack} className="hover:text-[#1a3a5c] hover:underline">Department Home</button>
-        <span>/</span>
-        <button onClick={onBack} className="hover:text-[#1a3a5c] hover:underline">Applications</button>
-        <span>/</span>
-        <button onClick={() => onOpenM26?.('DEC-2026-00418')} className="hover:text-[#1a3a5c] hover:underline">Decision</button>
-        <span>/</span>
-        <span className="text-[#1a2533] font-semibold">M28 — Conditions / Compliance</span>
+      <div className="bg-white border-b border-[#e5eaf0] px-6 py-2">
+        <Breadcrumb items={[
+          { label: 'Department Home' },
+          { label: 'Decisions' },
+          { label: 'Decision Record', onClick: () => onOpenM26?.('DEC-2026-00418') },
+          { label: 'Conditions / Compliance' }
+        ]} />
       </div>
 
       {/* Header */}
       <div className="bg-white border-b border-[#e5eaf0] px-6 py-4">
         <div className="flex items-start justify-between gap-4 flex-wrap mb-3">
           <div>
-            <h1 className="text-lg font-bold text-[#1a3a5c]">M28 — MIDC Conditions / Compliance / Renewal Context</h1>
+            <h1 className="text-lg font-bold text-[#1a3a5c]">MIDC Conditions / Compliance / Renewal Context</h1>
             <p className="text-xs text-[#1a2533] mt-0.5">Post-decision obligations and follow-up generated from the recorded MIDC decision.</p>
           </div>
-          <div className="flex gap-2">
-            <button disabled className="text-xs border border-[#d1d9e0] text-[#1a2533] px-3 py-1.5 rounded opacity-50 cursor-not-allowed">← M27 Dependency Update (Disabled: No ID)</button>
-            <button onClick={() => onOpenM26?.('DEC-2026-00418')} className="text-xs bg-[#1a3a5c] text-white px-3 py-1.5 rounded hover:bg-[#0f2540]">View Formal Decision → M26</button>
+          <div className="flex gap-2 flex-wrap">
+            <button onClick={() => onOpenM27?.('midc-bldg')} className="text-xs border border-[#1a3a5c] text-[#1a3a5c] px-3 py-1.5 rounded hover:bg-[#ebf3ff]">← M27 Dependency Update</button>
+            <button onClick={() => onOpenM26?.('DEC-2026-00418')} className="text-xs bg-[#1a3a5c] text-white px-3 py-1.5 rounded hover:bg-[#0f2540]">View Formal Decision</button>
+            <button onClick={() => onOpenM29?.()} className="text-xs bg-[#2563eb] text-white px-3 py-1.5 rounded hover:bg-[#1d4ed8]">Expansion / Amendment Intake →</button>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-xs md:grid-cols-4">
@@ -11381,13 +11310,13 @@ export function M28CompliancePage({ onBack, onOpenM26, onOpenM29, onOpenInspecti
             <Row label="Decision ID" value="DEC-2026-00418" />
             <Row label="Outcome" value="APPROVED" />
             <Row label="Date" value="01 Oct 2026" />
-            <Row label="Officer" value="Authorised Officer — MIDC Building" />
+            <Row label="Officer" value="Authorised Officer - MIDC Building" />
             <Row label="App Version" value="v3" />
             <Row label="DNA Version" value="v4" />
             <Row label="Approval Version" value="v1" />
           </div>
-          <button onClick={() => onOpenM26?.('DEC-2026-00418')} className="mt-3 text-[10px] text-[#1a56db] hover:underline font-semibold">View Formal Decision → M26</button>
-          <div className="mt-1 text-[9px] text-[#374151] italic">Decision cannot be edited from M28.</div>
+          <button onClick={() => onOpenM26?.('DEC-2026-00418')} className="mt-3 text-[10px] text-[#1a56db] hover:underline font-semibold">View Formal Decision</button>
+          <div className="mt-1 text-[9px] text-[#374151] italic">Decision cannot be edited from this view.</div>
         </div>
 
         {/* Obligation summary cards */}
@@ -11442,7 +11371,7 @@ export function M28CompliancePage({ onBack, onOpenM26, onOpenM29, onOpenInspecti
                         <td className="px-3 py-2.5">
                           <div className="font-mono text-[9px] text-[#374151]">{obl.id}</div>
                           <div className="font-semibold text-[#1a2533] text-[11px] max-w-[220px]">{obl.title}</div>
-                          <div className="text-[9px] text-[#374151] mt-0.5">Generated from: {obl.source.split('—')[0].trim()}</div>
+                          <div className="text-[9px] text-[#374151] mt-0.5">Generated from: {obl.source.split('-')[0].trim()}</div>
                         </td>
                         <td className="px-3 py-2.5 text-[10px] text-[#1a2533] max-w-[140px]">{obl.source}</td>
                         <td className="px-3 py-2.5"><span className="text-[9px] font-bold bg-[#f3f4f6] text-[#1a2533] px-1.5 py-0.5 rounded">{obl.type}</span></td>
@@ -11468,7 +11397,7 @@ export function M28CompliancePage({ onBack, onOpenM26, onOpenM29, onOpenInspecti
                 <Row label="Status" value="Not Applicable" />
               </div>
               <div className="mt-3 text-[11px] text-[#374151] italic bg-[#f8f9fb] border border-[#e5eaf0] rounded px-3 py-2">
-                Renewal is not configured for this MIDC service / approval. No renewal requirement is shown as this is a prototype-safe state — the configured service rule does not include a renewal lifecycle.
+                Renewal is not configured for this MIDC service / approval. No renewal requirement is shown as this is a prototype-safe state - the configured service rule does not include a renewal lifecycle.
               </div>
             </div>
           )}
@@ -11489,11 +11418,11 @@ export function M28CompliancePage({ onBack, onOpenM26, onOpenM29, onOpenInspecti
                   <Row label="Date" value="25 Sep 2026 (Re-inspection: 01 Oct 2026)" />
                   <Row label="Outcome" value="Correction Required → Re-inspection Resolved" />
                   <Row label="Related Condition" value="COND-001" />
-                  <Row label="Observation Status" value="OBS-2026-00418-01 — Resolved" />
+                  <Row label="Observation Status" value="OBS-2026-00418-01 - Resolved" />
                 </div>
                 <div className="flex gap-2 flex-wrap">
-                  <button onClick={() => onOpenInspection?.('INSP-2026-00418')} className="text-[10px] text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">Inspection Workspace → M23</button>
-                  <button onClick={() => onOpenInspection?.('INSP-2026-00418')} className="text-[10px] text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">Observation / Re-inspection → M24</button>
+                  <button onClick={() => onOpenInspection?.('INSP-2026-00418')} className="text-[10px] text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">Inspection Workspace</button>
+                  <button onClick={() => onOpenInspection?.('INSP-2026-00418')} className="text-[10px] text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">Observation / Re-inspection</button>
                 </div>
                 <div className="text-[9px] text-[#374151] italic">Inspection completion is an input to compliance context only. It does not automatically determine application outcome.</div>
               </div>
@@ -11505,7 +11434,7 @@ export function M28CompliancePage({ onBack, onOpenM26, onOpenM29, onOpenInspecti
               <div className="bg-white border border-[#e5eaf0] rounded-lg p-4">
                 <div className="text-xs font-bold text-[#1a2533] mb-2">Related Changes / Amendments</div>
                 <div className="bg-[#fffbeb] border border-[#fcd34d] rounded p-3 text-xs mb-3">
-                  No amendment or change has been initiated for this approval. M29 — Expansion / Amendment Intake is available if the entrepreneur submits a Business DNA change.
+                  No amendment or change has been initiated for this approval. Expansion / Amendment Intake is available if the entrepreneur submits a Business DNA change.
                 </div>
                 <div className="text-[10px] text-[#374151] mb-2">Original Approval History</div>
                 <div className="space-y-1.5 text-xs">
@@ -11519,7 +11448,7 @@ export function M28CompliancePage({ onBack, onOpenM26, onOpenM29, onOpenInspecti
                 </div>
               </div>
               <button onClick={onOpenM29} className="w-full text-left bg-white border border-[#e5eaf0] rounded-lg px-4 py-3 hover:border-[#1a56db] hover:bg-[#f8fbff] transition-colors">
-                <div className="text-xs font-bold text-[#1a3a5c]">Open Expansion / Amendment Intake → M29</div>
+                <div className="text-xs font-bold text-[#1a3a5c]">Open Expansion / Amendment Intake</div>
                 <div className="text-[10px] text-[#374151] mt-0.5">Review proposed Business DNA changes and their regulatory impact.</div>
               </button>
             </div>
@@ -11531,11 +11460,11 @@ export function M28CompliancePage({ onBack, onOpenM26, onOpenM29, onOpenInspecti
               <div className="relative pl-8">
                 <div className="absolute left-3 top-0 bottom-0 w-0.5 bg-[#e5eaf0]" />
                 {[
-                  { date:'01 Oct 2026', event:'MIDC Decision Recorded', detail:'DEC-2026-00418 — APPROVED', link:null },
+                  { date:'01 Oct 2026', event:'MIDC Decision Recorded', detail:'DEC-2026-00418 - APPROVED', link:null },
                   { date:'01 Oct 2026', event:'Approval / Order Generated', detail:'MIDC-ORD-2026-00418', link:null },
                   { date:'01 Oct 2026', event:'Configured Conditions Created', detail:'COND-001, COND-002 created from approval conditions', link:null },
-                  { date:'01 Oct 2026', event:'M27 Dependency Propagation', detail:'Dependency nodes updated', link:'→ M27' },
-                  { date:'Configured date', event:'Entrepreneur Action Due', detail:'Site conditions compliance — entrepreneur action pending', link:null },
+                  { date:'01 Oct 2026', event:'Dependency Propagation', detail:'Dependency nodes updated', link:null },
+                  { date:'Configured date', event:'Entrepreneur Action Due', detail:'Site conditions compliance - entrepreneur action pending', link:null },
                   { date:'Configured date', event:'Reporting / Follow-up', detail:'Monthly site progress reports (if configured)', link:null },
                 ].map((ev, i) => (
                   <div key={i} className="relative mb-4">
@@ -11586,9 +11515,8 @@ export function M28CompliancePage({ onBack, onOpenM26, onOpenM29, onOpenInspecti
               </div>
             </div>
             <div className="flex flex-col gap-1.5">
-              <button onClick={() => onOpenM26?.('DEC-2026-00418')}      className="text-left text-[10px] text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">View Approval → M26</button>
-              <button disabled title="No document ID available for this evidence" className="text-left text-[10px] text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">View Evidence → M13</button>
-              <button onClick={onOpenDepView}   className="text-left text-[10px] text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">View Dependency → M17</button>
+              <button onClick={() => onOpenM26?.('DEC-2026-00418')}      className="text-left text-[10px] text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">View Approval</button>
+              <button onClick={onOpenDepView}   className="text-left text-[10px] text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">View Dependency</button>
             </div>
           </div>
         )}
@@ -11626,19 +11554,20 @@ export function M29AmendmentIntakePage({ onBack, onOpenM26, onOpenM28, onOpenDoc
   return (
     <div className="flex-1 flex flex-col bg-[#f8f9fb] min-h-0 overflow-y-auto">
       {/* Breadcrumb */}
-      <div className="bg-white border-b border-[#e5eaf0] px-6 py-2 flex items-center gap-1.5 text-xs text-[#1a2533]">
-        <button onClick={onBack} className="hover:text-[#1a3a5c] hover:underline">Department Home</button>
-        <span>/</span>
-        <button onClick={() => onOpenM28?.('COND-001')} className="hover:text-[#1a3a5c] hover:underline">Conditions / Compliance</button>
-        <span>/</span>
-        <span className="text-[#1a2533] font-semibold">M29 — Expansion / Amendment Intake</span>
+      <div className="bg-white border-b border-[#e5eaf0] px-6 py-2">
+        <Breadcrumb items={[
+          { label: 'Department Home' },
+          { label: 'Decisions' },
+          { label: 'Conditions / Compliance', onClick: () => onOpenM28?.('COND-001') },
+          { label: 'Expansion / Amendment Intake' }
+        ]} />
       </div>
 
       {/* Header */}
       <div className="bg-white border-b border-[#e5eaf0] px-6 py-4">
         <div className="flex items-start justify-between gap-4 flex-wrap mb-3">
           <div>
-            <h1 className="text-lg font-bold text-[#1a3a5c]">M29 — Expansion / Amendment Intake</h1>
+            <h1 className="text-lg font-bold text-[#1a3a5c]">Expansion / Amendment Intake</h1>
             <p className="text-xs text-[#1a2533] mt-0.5">Review proposed Business DNA changes and their impact on the existing MIDC approval and regulatory journey.</p>
           </div>
           <div className="flex gap-2 flex-wrap">
@@ -11691,8 +11620,8 @@ export function M29AmendmentIntakePage({ onBack, onOpenM26, onOpenM28, onOpenDoc
           <>
             <div className="bg-white border border-[#e5eaf0] rounded-lg overflow-hidden">
               <div className="px-4 py-2.5 border-b border-[#e5eaf0]">
-                <div className="text-xs font-bold text-[#1a2533]">Business Change Comparison — Current vs Proposed</div>
-                <div className="text-[10px] text-[#374151]">Source: Entrepreneur Business DNA v3 → v4. Original Business DNA is preserved — changes create a new versioned record.</div>
+                <div className="text-xs font-bold text-[#1a2533]">Business Change Comparison - Current vs Proposed</div>
+                <div className="text-[10px] text-[#374151]">Source: Entrepreneur Business DNA v3 → v4. Original Business DNA is preserved - changes create a new versioned record.</div>
               </div>
               <table className="w-full text-xs">
                 <thead className="bg-[#f8f9fb] border-b border-[#e5eaf0]">
@@ -11722,7 +11651,7 @@ export function M29AmendmentIntakePage({ onBack, onOpenM26, onOpenM28, onOpenDoc
               <div className="grid grid-cols-2 gap-3 md:grid-cols-3 text-xs">
                 {[
                   { label:'Business DNA', result:'Changed (v3 → v4)', source:'Business DNA comparison', color:'text-[#9a3412]' },
-                  { label:'MIDC Services', result:'Needs Review — Building/Planning affected', source:'Configured MIDC rule', color:'text-[#92400e]' },
+                  { label:'MIDC Services', result:'Needs Review - Building/Planning affected', source:'Configured MIDC rule', color:'text-[#92400e]' },
                   { label:'Amendment', result:'Configured rule indicates amendment required', source:'Configured MIDC rule', color:'text-[#9a3412]' },
                   { label:'Inspection', result:'Inspection scope may change', source:'Configured inspection rule', color:'text-[#92400e]' },
                   { label:'Documents', result:'2 documents require update', source:'Business DNA comparison', color:'text-[#92400e]' },
@@ -11745,8 +11674,7 @@ export function M29AmendmentIntakePage({ onBack, onOpenM26, onOpenM28, onOpenDoc
                 <div className="text-xs font-bold text-[#1e40af]">Original Approval History is Preserved</div>
                 <div className="text-[10px] text-[#1a2533] mt-0.5">Proposed changes create a new change/amendment version (CHG-2026-00019) and do not overwrite the historical decision DEC-2026-00418 or approval MIDC-ORD-2026-00418.</div>
                 <div className="flex gap-3 mt-2">
-                  <button onClick={() => onOpenM26?.('DEC-2026-00418')}  className="text-[10px] text-[#1a56db] hover:underline">View Original Approval → M26</button>
-                  <button className="text-[10px] text-[#1a56db] hover:underline">View Audit History → M38</button>
+                  <button onClick={() => onOpenM26?.('DEC-2026-00418')}  className="text-[10px] text-[#1a56db] hover:underline">View Original Approval</button>
                 </div>
               </div>
             </div>
@@ -11766,7 +11694,7 @@ export function M29AmendmentIntakePage({ onBack, onOpenM26, onOpenM28, onOpenDoc
                   <span className="text-[9px] bg-[#fff7ed] text-[#9a3412] border border-[#fdba74] px-1.5 py-0.5 rounded font-bold">Configured rule indicates</span>
                 </div>
                 <Row label="Reason" value="Building area increase (+600 sq. m.) exceeds configured threshold for existing approval scope" />
-                <Row label="Configured Rule" value="MIDC Building / Planning — Expansion Amendment Rule" />
+                <Row label="Configured Rule" value="MIDC Building / Planning - Expansion Amendment Rule" />
                 <Row label="Source" value="Configured MIDC Service Rule" />
                 <Row label="Affected Fields" value="Building Area, Production Capacity" />
                 <div className="mt-2 text-[9px] text-[#374151] italic">This is not final statutory approval. The above result is machine-derived from configured rules. Officer determination may be required before proceeding.</div>
@@ -11777,17 +11705,17 @@ export function M29AmendmentIntakePage({ onBack, onOpenM26, onOpenM28, onOpenDoc
             {[
               { title:'Affected MIDC Services', content: [
                 { label:'Existing', value:'MIDC Building / Planning' },
-                { label:'Potentially Affected', value:'Building / Planning — Expansion Amendment Service' },
+                { label:'Potentially Affected', value:'Building / Planning - Expansion Amendment Service' },
                 { label:'Reason', value:'Built-up area changed +600 sq. m.' },
                 { label:'Source', value:'Business DNA Version 4' },
                 { label:'Status', value:'Needs Review' },
-              ], links:[{ label:'View Scrutiny → M14', fn: undefined }] },
+              ], links: [] },
               { title:'Inspection Impact', content: [
-                { label:'Existing Inspection', value:'INSP-2026-00418 — Resolved' },
+                { label:'Existing Inspection', value:'INSP-2026-00418 - Resolved' },
                 { label:'Proposed', value:'New inspection scope may be required for expanded building area' },
-                { label:'Status', value:'Inspection scope may change — officer determination required' },
+                { label:'Status', value:'Inspection scope may change - officer determination required' },
                 { label:'Affected Checklist', value:'MIDC Building / Planning Checklist v2026.09' },
-              ], links:[{ label:'Inspection Queue → M21', fn: () => onOpenInspection?.('INSP-2026-00418') }] },
+              ], links:[{ label:'Inspection Queue', fn: () => onOpenInspection?.('INSP-2026-00418') }] },
               { title:'External Dependency Impact', content: [
                 { label:'Business Change', value:'Water Requirement increased 40 → 65 KLD' },
                 { label:'Department', value:'Water Utility / MIDC Water Services' },
@@ -11795,7 +11723,7 @@ export function M29AmendmentIntakePage({ onBack, onOpenM26, onOpenM28, onOpenDoc
                 { label:'Previous State', value:'Pending' },
                 { label:'Potential New State', value:'Dependency availability may be affected' },
                 { label:'Status', value:'Officer determination required' },
-              ], links:[{ label:'Dependency View → M17', fn: onOpenDepView }] },
+              ], links:[{ label:'Dependency View', fn: onOpenDepView }] },
             ].map(section => (
               <div key={section.title} className="bg-white border border-[#e5eaf0] rounded-lg overflow-hidden">
                 <div className="px-4 py-2.5 border-b border-[#e5eaf0]">
@@ -11803,11 +11731,13 @@ export function M29AmendmentIntakePage({ onBack, onOpenM26, onOpenM28, onOpenDoc
                 </div>
                 <div className="p-4 space-y-1.5 text-xs">
                   {section.content.map(item => <Row key={item.label} label={item.label} value={item.value} />)}
-                  <div className="flex gap-2 pt-1.5">
-                    {section.links.map(link => (
-                      <button key={link.label} onClick={link.fn} disabled={!link.fn} title={!link.fn ? 'No document ID available' : undefined} className="text-[10px] text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">{link.label}</button>
-                    ))}
-                  </div>
+                  {section.links.length > 0 && (
+                    <div className="flex gap-2 pt-1.5">
+                      {section.links.map(link => (
+                        <button key={link.label} onClick={link.fn} disabled={!link.fn} title={!link.fn ? 'No document ID available' : undefined} className="text-[10px] text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded">{link.label}</button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -11821,7 +11751,7 @@ export function M29AmendmentIntakePage({ onBack, onOpenM26, onOpenM28, onOpenDoc
                 <Row label="Current Services" value="MIDC Building / Planning" />
                 <Row label="Potential New Service" value="Configured expansion-related MIDC service" />
                 <Row label="Reason" value="Building area exceeds previous approved project configuration by configured threshold" />
-                <Row label="Status" value="Needs Verification — officer determination required" />
+                <Row label="Status" value="Needs Verification - officer determination required" />
                 <div className="text-[9px] text-[#374151] italic mt-1">Configured rules indicate an additional MIDC service may be required. This requires officer determination before proceeding.</div>
               </div>
             </div>
@@ -11833,10 +11763,6 @@ export function M29AmendmentIntakePage({ onBack, onOpenM26, onOpenM28, onOpenDoc
                 {[
                   { label:'Mark Impact Reviewed', fn:() => {} },
                   { label:'Request Clarification', fn:() => {} },
-                  { label:'Open Consistency → M16', fn:onOpenConsistency },
-                  { label:'View Delta → M20', fn:onOpenDelta },
-                  { label:'Open Dependency → M17', fn:onOpenDepView },
-                  { label:'View Decision → M25/M26', fn: () => onOpenM26?.('DEC-2026-00418') },
                 ].map(action => (
                   <button key={action.label} onClick={action.fn} className="text-xs border border-[#d1d9e0] text-[#1a2533] px-3 py-1.5 rounded hover:bg-[#f8f9fb]">{action.label}</button>
                 ))}
@@ -11850,7 +11776,7 @@ export function M29AmendmentIntakePage({ onBack, onOpenM26, onOpenM28, onOpenDoc
           <div className="bg-white border border-[#e5eaf0] rounded-lg overflow-hidden">
             <div className="px-4 py-2.5 border-b border-[#e5eaf0]">
               <div className="text-xs font-bold text-[#1a2533]">Document Impact</div>
-              <div className="text-[10px] text-[#374151]">Uses existing Document Centre — no separate amendment document repository is created.</div>
+              <div className="text-[10px] text-[#374151]">Uses existing Document Centre - no separate amendment document repository is created.</div>
             </div>
             <table className="w-full text-xs">
               <thead className="bg-[#f8f9fb] border-b border-[#e5eaf0]">
@@ -11862,7 +11788,7 @@ export function M29AmendmentIntakePage({ onBack, onOpenM26, onOpenM28, onOpenDoc
                 {[
                   { doc:'Building Plan', cur:'v2', req:'v3 (expanded scope)', reason:'Building area change requires updated plan', ver:'Needs Re-verification', action:'Request Updated Document', changed:true },
                   { doc:'Water Utility NOC', cur:'v1', req:'v2 (updated capacity)', reason:'Water requirement increased', ver:'Needs Re-verification', action:'Request Updated Document', changed:true },
-                  { doc:'Land / Plot Record', cur:'v3', req:'v3 (unchanged)', reason:'No plot area change', ver:'Department Verified', action:'—', changed:false },
+                  { doc:'Land / Plot Record', cur:'v3', req:'v3 (unchanged)', reason:'No plot area change', ver:'Department Verified', action:'-', changed:false },
                 ].map(row => (
                   <tr key={row.doc} className={row.changed ? 'bg-[#fffbeb]' : 'hover:bg-[#f8f9fb]'}>
                     <td className="px-3 py-2.5 font-semibold text-[#1a2533]">{row.doc}</td>
@@ -11885,10 +11811,10 @@ export function M29AmendmentIntakePage({ onBack, onOpenM26, onOpenM28, onOpenDoc
               <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-[#e5eaf0]" />
               {[
                 { ver:'Business DNA v1', date:'01 Aug 2026', label:'Original project', type:'dna' },
-                { ver:'Application v1',  date:'05 Aug 2026', label:'MIDC submission — MIDC-APP-2026-00418', type:'app' },
-                { ver:'Decision v1',     date:'01 Oct 2026', label:'Approved — DEC-2026-00418', type:'decision' },
+                { ver:'Application v1',  date:'05 Aug 2026', label:'MIDC submission - MIDC-APP-2026-00418', type:'app' },
+                { ver:'Decision v1',     date:'01 Oct 2026', label:'Approved - DEC-2026-00418', type:'decision' },
                 { ver:'Business DNA v3', date:'10 Oct 2026', label:'Updated business information', type:'dna' },
-                { ver:'Change Request v1', date:'18 Oct 2026', label:'Capacity increase + building expansion proposed — CHG-2026-00019', type:'change', current:true },
+                { ver:'Change Request v1', date:'18 Oct 2026', label:'Capacity increase + building expansion proposed - CHG-2026-00019', type:'change', current:true },
               ].map((ev, i) => (
                 <div key={i} className="relative mb-3">
                   <div className={`absolute -left-6 top-2 w-3 h-3 rounded-full border-2 border-white ${ev.current ? 'bg-[#9a3412]' : ev.type === 'decision' ? 'bg-[#065f46]' : 'bg-[#1a3a5c]'}`} />
@@ -11910,7 +11836,7 @@ export function M29AmendmentIntakePage({ onBack, onOpenM26, onOpenM28, onOpenDoc
         <div className="bg-white border border-[#e5eaf0] rounded-lg p-4">
           <div className="text-[10px] font-bold text-[#374151] uppercase tracking-wider mb-3">Business Change Simulator → MIDC Amendment Flow</div>
           <div className="flex items-center gap-1 flex-wrap text-[10px] text-[#1a2533]">
-            {['Entrepreneur Business Change Simulator','Proposed DNA v4','Change Request CHG-2026-00019','MIDC M29 Intake','Impact Analysis','Affected MIDC Services','Document / Inspection Impact','Amendment Workflow','Focused Re-scrutiny','Decision if Required → M25/M26','M27 Dependency Update','Updated Entrepreneur Journey'].map((step, i, arr) => (
+            {['Entrepreneur Business Change Simulator','Proposed DNA v4','Change Request CHG-2026-00019','Amendment Intake','Impact Analysis','Affected MIDC Services','Document / Inspection Impact','Amendment Workflow','Focused Re-scrutiny','Decision if Required','Dependency Update','Updated Entrepreneur Journey'].map((step, i, arr) => (
               <span key={step} className="flex items-center gap-1">
                 <span className={`px-2 py-1 rounded text-[9px] font-semibold ${i === 3 ? 'bg-[#1a3a5c] text-white' : 'bg-[#f3f4f6] text-[#1a2533]'}`}>{step}</span>
                 {i < arr.length - 1 && <span className="text-[#d1d9e0]">→</span>}
@@ -11928,8 +11854,8 @@ export function M29AmendmentIntakePage({ onBack, onOpenM26, onOpenM28, onOpenDoc
 
 const M19_QUERY_LIST: QueryRecord[] = [
   { queryId:'QRY-2026-0036', sentAt:'12 Sep 2026', defCount:2, docsRequested:2, appState:'QUERY_RAISED', status:'closed', defs:['DEF-2026-0081','DEF-2026-0082'], response:'Entrepreneur uploaded all requested documents. Deficiencies DEF-2026-0081 and DEF-2026-0082 resolved.', respondedAt:'15 Sep 2026' },
-  { queryId:'QRY-2026-0039', sentAt:'18 Sep 2026', defCount:1, docsRequested:0, appState:'QUERY_RAISED', status:'response-received', defs:['DEF-2026-0083'], response:'Entrepreneur confirmed company name — Aster Precision Components Pvt. Ltd. Application update pending.', respondedAt:'20 Sep 2026' },
-  { queryId:'QRY-2026-0042', sentAt:'—',           defCount:4, docsRequested:0, appState:'QUERY_RAISED', status:'draft', defs:['DEF-2026-0091','DEF-2026-0092','DEF-2026-0093','DEF-2026-0094'] },
+  { queryId:'QRY-2026-0039', sentAt:'18 Sep 2026', defCount:1, docsRequested:0, appState:'QUERY_RAISED', status:'response-received', defs:['DEF-2026-0083'], response:'Entrepreneur confirmed company name - Aster Precision Components Pvt. Ltd. Application update pending.', respondedAt:'20 Sep 2026' },
+  { queryId:'QRY-2026-0042', sentAt:'-',           defCount:4, docsRequested:0, appState:'QUERY_RAISED', status:'draft', defs:['DEF-2026-0091','DEF-2026-0092','DEF-2026-0093','DEF-2026-0094'] },
 ]
 
 const M19_STATUS: Record<QueryRecord['status'], { label: string; textCls: string; bgCls: string; borderCls: string }> = {
@@ -11939,9 +11865,10 @@ const M19_STATUS: Record<QueryRecord['status'], { label: string; textCls: string
   'draft':             { label:'Draft',             textCls:'text-[#374151]',   bgCls:'bg-[#f8f9fb]',   borderCls:'border-[#d1d9e0]' },
 }
 
-export function M19QueryHistoryPage({ onBack, onBackToOverview, onOpenQueryBuilder }: {
-  onBack: () => void; onBackToOverview: () => void; onOpenQueryBuilder?: () => void
+export function M19QueryHistoryPage({ onBack, onBackToOverview, onOpenQueryBuilder, onOpenDeltaRescrutiny }: {
+  onBack: () => void; onBackToOverview: () => void; onOpenQueryBuilder?: () => void; onOpenDeltaRescrutiny?: () => void
 }) {
+  const app = useMonolithData().APP_SAMPLE
   const [selectedQuery, setSelectedQuery] = useState(M19_QUERY_LIST[0])
   const [selectedDef, setSelectedDef]     = useState<Deficiency | null>(null)
 
@@ -11964,20 +11891,31 @@ export function M19QueryHistoryPage({ onBack, onBackToOverview, onOpenQueryBuild
         <Breadcrumb items={[{ label:'Department Home', onClick: onBackToOverview },{ label:'Applications', onClick: onBackToOverview },{ label:'Application Overview', onClick: onBackToOverview },{ label:'Query Builder', onClick: onBack },{ label:'Query / Response History' }]} />
         <div className="flex items-start justify-between gap-4 mt-2">
           <div>
-            <h1 className="text-base font-bold text-[#1a2533]">M19 — Query / Response History <span className="text-[11px] text-[#374151] font-normal ml-2">Full audit trail of sent queries and entrepreneur responses</span></h1>
-            <p className="text-[11px] text-[#374151] mt-0.5">MIDC-APP-2026-00418 · Aster Precision Components Pvt. Ltd.</p>
+            <h1 className="text-base font-bold text-[#1a2533]">Query / Response History <span className="text-[11px] text-[#374151] font-normal ml-2">Full audit trail of sent queries and entrepreneur responses</span></h1>
+            <p className="text-[11px] text-[#374151] mt-0.5">{app.id} · {app.business}</p>
           </div>
-          <button onClick={onOpenQueryBuilder} className="text-xs text-[#1a56db] hover:underline shrink-0">← Query Builder (M18)</button>
+          <div className="flex items-center gap-3 shrink-0">
+            {onOpenQueryBuilder && (
+              <button onClick={onOpenQueryBuilder} className="text-xs text-[#1a56db] hover:underline">
+                ← Query Builder
+              </button>
+            )}
+            {onOpenDeltaRescrutiny && (
+              <button onClick={onOpenDeltaRescrutiny} className="px-3 py-1 bg-[#1a3a5c] text-white text-xs font-semibold rounded hover:bg-[#234c78]">
+                Proceed to Delta Re-Scrutiny →
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Purpose */}
       <div className="bg-[#ebf3ff] border-b border-[#bdd4f5] px-5 py-2 shrink-0">
-        <p className="text-[11px] text-[#1a3a5c]"><span className="font-bold">Query / Response History</span> — Complete audit trail of all queries sent to the entrepreneur, responses received, and current deficiency resolution state. Historical records are preserved; original deficiency IDs are never overwritten on resubmission.</p>
+        <p className="text-[11px] text-[#1a3a5c]"><span className="font-bold">Query / Response History</span> - Complete audit trail of all queries sent to the entrepreneur, responses received, and current deficiency resolution state. Historical records are preserved; original deficiency IDs are never overwritten on resubmission.</p>
       </div>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* LEFT — query list */}
+        {/* LEFT - query list */}
         <div className="w-60 shrink-0 bg-white border-r border-[#d1d9e0] overflow-y-auto">
           <div className="px-3 py-2.5 border-b border-[#d1d9e0]">
             <p className="text-[9px] text-[#374151] uppercase tracking-wider font-bold">All Queries ({M19_QUERY_LIST.length})</p>
@@ -11993,24 +11931,24 @@ export function M19QueryHistoryPage({ onBack, onBackToOverview, onOpenQueryBuild
                     <span className="text-[10px] font-bold text-[#1a2533]">{q.queryId}</span>
                     <StatusBadge status={q.status} />
                   </div>
-                  <p className="text-[9px] text-[#374151]">{q.sentAt === '—' ? 'Not yet sent' : `Sent: ${q.sentAt}`}</p>
+                  <p className="text-[9px] text-[#374151]">{q.sentAt === '-' ? 'Not yet sent' : `Sent: ${q.sentAt}`}</p>
                   <p className="text-[9px] text-[#374151]">{q.defCount} deficiencie{q.defCount !== 1 ? 's' : ''}</p>
                 </button>
               )
             })}
           </div>
           <div className="px-3 py-3 border-t border-[#d1d9e0]">
-            <button onClick={onOpenQueryBuilder} className="w-full px-3 py-1.5 text-xs font-bold border border-[#1a3a5c] text-[#1a3a5c] rounded hover:bg-[#ebf3ff]">New Query → M18</button>
+            <button onClick={onOpenQueryBuilder} className="w-full px-3 py-1.5 text-xs font-bold border border-[#1a3a5c] text-[#1a3a5c] rounded hover:bg-[#ebf3ff]">New Query</button>
           </div>
         </div>
 
-        {/* CENTER — query detail + deficiency list */}
+        {/* CENTER - query detail + deficiency list */}
         <main className="flex-1 overflow-y-auto bg-[#f8f9fb] p-5 space-y-4" tabIndex={-1}>
           <div className="bg-white border border-[#d1d9e0] rounded overflow-hidden">
             <div className="px-4 py-3 border-b border-[#f0f4f8] flex items-center justify-between gap-4">
               <div>
                 <p className="text-xs font-bold text-[#1a2533]">{selectedQuery.queryId}</p>
-                <p className="text-[10px] text-[#374151] mt-0.5">Application: MIDC-APP-2026-00418 · {selectedQuery.sentAt === '—' ? 'Draft — not yet sent' : `Sent: ${selectedQuery.sentAt}`}{selectedQuery.respondedAt ? ` · Response: ${selectedQuery.respondedAt}` : ''}</p>
+                <p className="text-[10px] text-[#374151] mt-0.5">Application: {app.id} · {selectedQuery.sentAt === '-' ? 'Draft - not yet sent' : `Sent: ${selectedQuery.sentAt}`}{selectedQuery.respondedAt ? ` · Response: ${selectedQuery.respondedAt}` : ''}</p>
               </div>
               <StatusBadge status={selectedQuery.status} />
             </div>
@@ -12033,7 +11971,7 @@ export function M19QueryHistoryPage({ onBack, onBackToOverview, onOpenQueryBuild
           <div className="space-y-2">
             {selectedQuery.defs.map(defId => {
               const def = allDefs.find(d => d.id === defId)
-              if (!def) return <div key={defId} className="bg-white border border-[#d1d9e0] rounded px-4 py-2 text-[10px] text-[#374151]">{defId} — details pending</div>
+              if (!def) return <div key={defId} className="bg-white border border-[#d1d9e0] rounded px-4 py-2 text-[10px] text-[#374151]">{defId} - details pending</div>
               const isActive = selectedDef?.id === def.id
               return (
                 <div key={defId} className={`bg-white border rounded overflow-hidden cursor-pointer transition-all ${isActive ? 'border-[#1a56db] ring-1 ring-[#1a56db]' : 'border-[#d1d9e0] hover:border-[#bdd4f5]'}`}
@@ -12062,8 +12000,8 @@ export function M19QueryHistoryPage({ onBack, onBackToOverview, onOpenQueryBuild
                         </div>
                       )}
                       <div className="px-4 py-2 flex gap-2">
-                        <button className="text-[10px] text-[#1a56db] hover:underline">View Parameter → M12</button>
-                        <button className="text-[10px] text-[#1a56db] hover:underline">View Document → M13</button>
+                        <button className="text-[10px] text-[#1a56db] hover:underline">View Parameter</button>
+                        <button className="text-[10px] text-[#1a56db] hover:underline">View Document</button>
                         {def.status === 'partially-resolved' && <button className="text-[10px] text-amber-600 hover:underline">Reopen</button>}
                       </div>
                     </div>
@@ -12073,10 +12011,10 @@ export function M19QueryHistoryPage({ onBack, onBackToOverview, onOpenQueryBuild
             })}
           </div>
 
-          <p className="text-[10px] text-[#6b7280] italic">Original deficiency IDs are preserved across submissions. Responses and corrections tracked here → Delta re-scrutiny via M20.</p>
+          <p className="text-[10px] text-[#6b7280] italic">Original deficiency IDs are preserved across submissions. Responses and corrections tracked here → Delta re-scrutiny.</p>
         </main>
 
-        {/* RIGHT — audit trail */}
+        {/* RIGHT - audit trail */}
         <aside className="w-60 shrink-0 bg-white border-l border-[#d1d9e0] overflow-y-auto" aria-label="Audit trail">
           <div className="px-4 py-2.5 border-b border-[#d1d9e0] bg-[#f8f9fb]">
             <p className="text-[9px] text-[#374151] uppercase tracking-wider font-bold">Audit Trail</p>
@@ -12084,12 +12022,12 @@ export function M19QueryHistoryPage({ onBack, onBackToOverview, onOpenQueryBuild
           <div className="px-4 py-3 space-y-3 text-[10px]">
             {[
               { date:'23 Sep 2026', action:'Draft query QRY-2026-0042 created', by:'Planning / Building Scrutiny Desk', color:'text-[#1a2533]' },
-              { date:'20 Sep 2026', action:'DEF-2026-0083 response reviewed — partially resolved', by:'Planning / Building Scrutiny Desk', color:'text-[#1a2533]' },
+              { date:'20 Sep 2026', action:'DEF-2026-0083 response reviewed - partially resolved', by:'Planning / Building Scrutiny Desk', color:'text-[#1a2533]' },
               { date:'20 Sep 2026', action:'QRY-2026-0039 response received from entrepreneur', by:'Entrepreneur', color:'text-[#1a56db]' },
-              { date:'18 Sep 2026', action:'QRY-2026-0039 sent — 1 deficiency', by:'Planning / Building Scrutiny Desk', color:'text-[#1a2533]' },
-              { date:'15 Sep 2026', action:'QRY-2026-0036 DEF-0081 & 0082 resolved — documents verified', by:'Planning / Building Scrutiny Desk', color:'text-emerald-700' },
+              { date:'18 Sep 2026', action:'QRY-2026-0039 sent - 1 deficiency', by:'Planning / Building Scrutiny Desk', color:'text-[#1a2533]' },
+              { date:'15 Sep 2026', action:'QRY-2026-0036 DEF-0081 & 0082 resolved - documents verified', by:'Planning / Building Scrutiny Desk', color:'text-emerald-700' },
               { date:'15 Sep 2026', action:'QRY-2026-0036 response received from entrepreneur', by:'Entrepreneur', color:'text-[#1a56db]' },
-              { date:'12 Sep 2026', action:'QRY-2026-0036 sent — 2 deficiencies', by:'Planning / Building Scrutiny Desk', color:'text-[#1a2533]' },
+              { date:'12 Sep 2026', action:'QRY-2026-0036 sent - 2 deficiencies', by:'Planning / Building Scrutiny Desk', color:'text-[#1a2533]' },
             ].map((e, i) => (
               <div key={i} className="flex gap-2">
                 <div className="flex flex-col items-center">
@@ -12104,16 +12042,16 @@ export function M19QueryHistoryPage({ onBack, onBackToOverview, onOpenQueryBuild
             ))}
           </div>
           <div className="px-4 py-3 border-t border-[#f0f4f8]">
-            <p className="text-[9px] text-[#374151] uppercase tracking-wider font-semibold mb-1">Query Lifecycle</p>
-            {(['Query Raised','Entrepreneur Notified','Response Received','Officer Review','Resolved / Reopened','Delta Re-scrutiny → M20'] as const).map((s, i) => (
+            <p className="text-[9px] text-[#374151] uppercase tracking-wider font-semibold mb-2">Query Lifecycle</p>
+            {(['Query Raised','Entrepreneur Notified','Response Received','Officer Review','Resolved / Reopened'] as const).map((s, i) => (
               <div key={s} className="flex items-center gap-1.5 mb-1">
                 <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${i < 3 ? 'bg-emerald-500' : i === 3 ? 'bg-[#1a3a5c]' : 'bg-[#d1d9e0]'}`} />
                 <p className={`text-[9px] ${i < 3 ? 'text-emerald-700' : i === 3 ? 'text-[#1a3a5c] font-semibold' : 'text-[#374151]'}`}>{s}</p>
               </div>
             ))}
-          </div>
-          <div className="px-4 py-3 border-t border-[#f0f4f8]">
-            <p className="text-[9px] text-[#6b7280] italic">Sample prototype data — not actual records</p>
+            <button disabled={!onOpenDeltaRescrutiny} onClick={onOpenDeltaRescrutiny} className="w-full mt-3 px-3 py-1.5 text-[10px] font-bold text-[#1a56db] bg-[#ebf3ff] border border-[#bdd4f5] rounded hover:bg-[#dbeafe] transition-colors">
+              Proceed to Delta Re-scrutiny
+            </button>
           </div>
         </aside>
       </div>
@@ -12186,24 +12124,25 @@ function M01Shell({ onLogout, lang, fontSize, highContrast }: {
           {activeDeptItem === 'dept-queue'   && !appView && <M03QueuePage onOpenApp={() => { setAppView(true); setAppSubPage('overview') }} />}
           {activeDeptItem === 'dept-apps'    && !appView && <M04SearchPage onOpenApp={() => { setAppView(true); setAppSubPage('overview') }} />}
           {activeDeptItem === 'dept-catalogue' && <M05ServicePage />}
+          {activeDeptItem === 'dept-queries' && !appView && <M04SearchPage onOpenApp={() => { setAppView(true); setAppSubPage('query-builder') }} initialQuery="Query Candidate Applications" />}
           {activeDeptItem === 'dept-scrutiny' && !appView && <ScrutinyCommandCentre onOpenScrutinyApp={(_appId, dest) => { setAppView(true); const d = dest as typeof appSubPage; setAppSubPage(d) }} />}
           {activeDeptItem === 'dept-insp-queue' && <M21InspectionQueuePage onBack={() => setActiveDeptItem('dept-home')} onPlanInspection={id => { setInspPlanId(id); setActiveDeptItem('dept-insp-planning' as string) }} onOpenDepView={() => {}} onOpenQueryHistory={() => {}} onOpenDelta={() => {}} />}
           {activeDeptItem === 'dept-insp-planning' && <M22InspectionPlanningPage onBack={() => setActiveDeptItem('dept-insp-queue')} onBackToQueue={() => setActiveDeptItem('dept-insp-queue')} onOpenDna={() => {}} onOpenDocReview={() => {}} onOpenDepView={() => {}} onOpenDelta={() => {}} onOpenQueryHistory={() => {}} onOpenWorkspace={() => { setAppView(true); setAppSubPage('inspection-workspace') }} />}
-          {appView && appSubPage === 'overview'  && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-decisions') && <M06AppOverviewPage onBack={() => setAppView(false)} onOpenDna={() => setAppSubPage('dna')} onOpenTimeline={() => setAppSubPage('timeline')} onOpenPrecheck={() => setAppSubPage('precheck')} onOpenDeltaRescrutiny={() => setAppSubPage('delta-rescrutiny')} onOpenInspectionQueue={() => setAppSubPage('inspection-queue')} onOpenDecision={() => setAppSubPage('decision-workspace')} onOpenCompliance={() => setAppSubPage('compliance-context')} />}
-          {appView && appSubPage === 'dna'       && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny') && <M07DnaPage onBackToOverview={() => setAppSubPage('overview')} />}
-          {appView && appSubPage === 'timeline'  && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny') && <M08TimelinePage onBackToOverview={() => setAppSubPage('overview')} />}
-          {appView && appSubPage === 'precheck'       && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny') && <M09PreCheckPage onBackToOverview={() => setAppSubPage('overview')} onOpenDna={() => setAppSubPage('dna')} onOpenTimeline={() => setAppSubPage('timeline')} onOpenScrutinyRoute={() => setAppSubPage('scrutiny-route')} />}
-          {appView && appSubPage === 'scrutiny-route'     && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny') && <M10ScrutinyRoutePage onBackToOverview={() => setAppSubPage('overview')} onBackToPrecheck={() => setAppSubPage('precheck')} onOpenDna={() => setAppSubPage('dna')} onOpenTimeline={() => setAppSubPage('timeline')} onOpenScrutinyWorkbench={() => setAppSubPage('scrutiny-workbench')} onOpenDepView={() => setAppSubPage('dependency-view')} />}
-          {appView && appSubPage === 'scrutiny-workbench' && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny') && <M11ScrutinyWorkbenchPage onBack={() => setAppSubPage('scrutiny-route')} onBackToOverview={() => setAppSubPage('overview')} onOpenDna={() => setAppSubPage('dna')} onOpenTimeline={() => setAppSubPage('timeline')} onOpenParamDetail={() => setAppSubPage('param-detail')} onOpenDocReview={() => setAppSubPage('doc-review')} onOpenBldgScrutiny={() => setAppSubPage('bldg-scrutiny')} onOpenWaterScrutiny={() => setAppSubPage('water-scrutiny')} onOpenDepView={() => setAppSubPage('dependency-view')} onOpenQueryBuilder={() => setAppSubPage('query-builder')} />}
-          {appView && appSubPage === 'param-detail'       && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny') && <M12ParameterDetailPage onBack={() => setAppSubPage('scrutiny-workbench')} onBackToOverview={() => setAppSubPage('overview')} onOpenDna={() => setAppSubPage('dna')} onOpenDocReview={() => setAppSubPage('doc-review')} onOpenDepView={() => setAppSubPage('dependency-view')} />}
-          {appView && appSubPage === 'doc-review'         && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny') && <M13DocumentReviewPage onBack={() => setAppSubPage('scrutiny-workbench')} onOpenParamDetail={() => setAppSubPage('param-detail')} />}
-          {appView && appSubPage === 'bldg-scrutiny'     && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny') && <M14BuildingScrutinyPage onBack={() => setAppSubPage('scrutiny-workbench')} onBackToOverview={() => setAppSubPage('overview')} onOpenParamDetail={() => setAppSubPage('param-detail')} onOpenDocReview={() => setAppSubPage('doc-review')} onOpenConsistency={() => setAppSubPage('consistency')} onOpenDepView={() => setAppSubPage('dependency-view')} />}
-          {appView && appSubPage === 'water-scrutiny'    && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny') && <M15WaterScrutinyPage onBack={() => setAppSubPage('scrutiny-workbench')} onBackToOverview={() => setAppSubPage('overview')} onOpenParamDetail={() => setAppSubPage('param-detail')} onOpenDocReview={() => setAppSubPage('doc-review')} onOpenConsistency={() => setAppSubPage('consistency')} onOpenDepView={() => setAppSubPage('dependency-view')} />}
-          {appView && appSubPage === 'consistency'       && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny') && <M16ConsistencyPage onBack={() => setAppSubPage('scrutiny-workbench')} onBackToOverview={() => setAppSubPage('overview')} onOpenParamDetail={() => setAppSubPage('param-detail')} onOpenDocReview={() => setAppSubPage('doc-review')} />}
-          {appView && appSubPage === 'dependency-view'   && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny') && <M17DependencyViewPage onBack={() => setAppSubPage('scrutiny-workbench')} onBackToOverview={() => setAppSubPage('overview')} />}
-          {appView && appSubPage === 'query-builder'    && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny') && <M18QueryBuilderPage onBack={() => setAppSubPage('scrutiny-workbench')} onBackToOverview={() => setAppSubPage('overview')} onOpenQueryHistory={() => setAppSubPage('query-history')} />}
-          {appView && appSubPage === 'query-history'    && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny') && <M19QueryHistoryPage onBack={() => setAppSubPage('query-builder')} onBackToOverview={() => setAppSubPage('overview')} onOpenQueryBuilder={() => setAppSubPage('query-builder')} />}
-          {appView && appSubPage === 'delta-rescrutiny' && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny') && <M20DeltaRescrutinyPage onBackToOverview={() => setAppSubPage('overview')} onOpenDna={() => setAppSubPage('dna')} onOpenDocReview={() => setAppSubPage('doc-review')} onOpenConsistency={() => setAppSubPage('consistency')} onOpenDepView={() => setAppSubPage('dependency-view')} onOpenQueryBuilder={() => setAppSubPage('query-builder')} onOpenQueryHistory={() => setAppSubPage('query-history')} onOpenTimeline={() => setAppSubPage('timeline')} />}
+          {appView && appSubPage === 'overview'  && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-decisions' || activeDeptItem === 'dept-queries') && <M06AppOverviewPage onBack={() => setAppView(false)} onOpenDna={() => setAppSubPage('dna')} onOpenTimeline={() => setAppSubPage('timeline')} onOpenPrecheck={() => setAppSubPage('precheck')} onOpenDeltaRescrutiny={() => setAppSubPage('delta-rescrutiny')} onOpenInspectionQueue={() => setAppSubPage('inspection-queue')} onOpenDecision={() => setAppSubPage('decision-workspace')} onOpenCompliance={() => setAppSubPage('compliance-context')} />}
+          {appView && appSubPage === 'dna'       && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && <M07DnaPage onBackToOverview={() => setAppSubPage('overview')} />}
+          {appView && appSubPage === 'timeline'  && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && <M08TimelinePage onBackToOverview={() => setAppSubPage('overview')} />}
+          {appView && appSubPage === 'precheck'       && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && <M09PreCheckPage onBackToOverview={() => setAppSubPage('overview')} onOpenDna={() => setAppSubPage('dna')} onOpenTimeline={() => setAppSubPage('timeline')} onOpenScrutinyRoute={() => setAppSubPage('scrutiny-route')} />}
+          {appView && appSubPage === 'scrutiny-route'     && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && <M10ScrutinyRoutePage onBackToOverview={() => setAppSubPage('overview')} onBackToPrecheck={() => setAppSubPage('precheck')} onOpenDna={() => setAppSubPage('dna')} onOpenTimeline={() => setAppSubPage('timeline')} onOpenScrutinyWorkbench={() => setAppSubPage('scrutiny-workbench')} onOpenDepView={() => setAppSubPage('dependency-view')} />}
+          {appView && appSubPage === 'scrutiny-workbench' && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && <M11ScrutinyWorkbenchPage onBack={() => setAppSubPage('scrutiny-route')} onBackToOverview={() => setAppSubPage('overview')} onOpenDna={() => setAppSubPage('dna')} onOpenTimeline={() => setAppSubPage('timeline')} onOpenParamDetail={() => setAppSubPage('param-detail')} onOpenDocReview={() => setAppSubPage('doc-review')} onOpenBldgScrutiny={() => setAppSubPage('bldg-scrutiny')} onOpenWaterScrutiny={() => setAppSubPage('water-scrutiny')} onOpenDepView={() => setAppSubPage('dependency-view')} />}
+          {appView && appSubPage === 'param-detail'       && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && <M12ParameterDetailPage onBack={() => setAppSubPage('scrutiny-workbench')} onBackToOverview={() => setAppSubPage('overview')} onOpenDna={() => setAppSubPage('dna')} onOpenDocReview={() => setAppSubPage('doc-review')} onOpenDepView={() => setAppSubPage('dependency-view')} />}
+          {appView && appSubPage === 'doc-review'         && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && <M13DocumentReviewPage onBack={() => setAppSubPage('scrutiny-workbench')} onOpenParamDetail={() => setAppSubPage('param-detail')} />}
+          {appView && appSubPage === 'bldg-scrutiny'     && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && <M14BuildingScrutinyPage onBack={() => setAppSubPage('scrutiny-workbench')} onBackToOverview={() => setAppSubPage('overview')} onOpenParamDetail={() => setAppSubPage('param-detail')} onOpenDocReview={() => setAppSubPage('doc-review')} onOpenConsistency={() => setAppSubPage('consistency')} onOpenDepView={() => setAppSubPage('dependency-view')} />}
+          {appView && appSubPage === 'water-scrutiny'    && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && <M15WaterScrutinyPage onBack={() => setAppSubPage('scrutiny-workbench')} onBackToOverview={() => setAppSubPage('overview')} onOpenParamDetail={() => setAppSubPage('param-detail')} onOpenDocReview={() => setAppSubPage('doc-review')} onOpenConsistency={() => setAppSubPage('consistency')} onOpenDepView={() => setAppSubPage('dependency-view')} />}
+          {appView && appSubPage === 'consistency'       && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && <M16ConsistencyPage onBack={() => setAppSubPage('scrutiny-workbench')} onBackToOverview={() => setAppSubPage('overview')} onOpenParamDetail={() => setAppSubPage('param-detail')} onOpenDocReview={() => setAppSubPage('doc-review')} />}
+          {appView && appSubPage === 'dependency-view'   && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && <M17DependencyViewPage onBack={() => setAppSubPage('scrutiny-workbench')} onBackToOverview={() => setAppSubPage('overview')} />}
+          {appView && appSubPage === 'query-builder'    && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && <M18QueryBuilderPage onBack={() => setAppSubPage('overview')} onBackToOverview={() => setAppSubPage('overview')} onOpenQueryHistory={() => setAppSubPage('query-history')} />}
+          {appView && appSubPage === 'query-history'    && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && <M19QueryHistoryPage onBack={() => setAppSubPage('query-builder')} onBackToOverview={() => setAppSubPage('overview')} onOpenQueryBuilder={() => setAppSubPage('query-builder')} onOpenDeltaRescrutiny={() => setAppSubPage('delta-rescrutiny')} />}
+          {appView && appSubPage === 'delta-rescrutiny' && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && <M20DeltaRescrutinyPage onBackToOverview={() => setAppSubPage('overview')} onOpenDna={() => setAppSubPage('dna')} onOpenDocReview={() => setAppSubPage('doc-review')} onOpenConsistency={() => setAppSubPage('consistency')} onOpenDepView={() => setAppSubPage('dependency-view')} onOpenTimeline={() => setAppSubPage('timeline')} />}
           {appView && appSubPage === 'inspection-queue' && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny') && <M21InspectionQueuePage onBack={() => setAppSubPage('overview')} onPlanInspection={id => { setInspPlanId(id); setAppSubPage('inspection-planning') }} onOpenDepView={() => setAppSubPage('dependency-view')} onOpenQueryHistory={() => setAppSubPage('query-history')} onOpenDelta={() => setAppSubPage('delta-rescrutiny')} />}
           {appView && appSubPage === 'inspection-planning' && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny') && <M22InspectionPlanningPage onBack={() => setAppSubPage('inspection-queue')} onBackToQueue={() => setAppSubPage('inspection-queue')} onOpenDna={() => setAppSubPage('dna')} onOpenDocReview={() => setAppSubPage('doc-review')} onOpenDepView={() => setAppSubPage('dependency-view')} onOpenDelta={() => setAppSubPage('delta-rescrutiny')} onOpenQueryHistory={() => setAppSubPage('query-history')} onOpenWorkspace={() => setAppSubPage('inspection-workspace')} />}
           {appView && appSubPage === 'inspection-workspace' && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-insp-queue' || activeDeptItem === 'dept-scrutiny') && <M23InspectionWorkspacePage onBack={() => setAppSubPage('inspection-planning')} onBackToQueue={() => setAppSubPage('inspection-queue')} onOpenM24={() => setAppSubPage('observation-reinspection')} onOpenDocReview={() => setAppSubPage('doc-review')} onOpenDna={() => setAppSubPage('dna')} onOpenDepView={() => setAppSubPage('dependency-view')} onOpenQueryHistory={() => setAppSubPage('query-history')} onOpenDelta={() => setAppSubPage('delta-rescrutiny')} onOpenConsistency={() => setAppSubPage('consistency')} />}
@@ -12285,7 +12224,7 @@ export function M30SLADashboard({ onOpenApp, onOpenGrievance }: { onOpenApp: (ap
         </nav>
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-xl font-bold text-[#1a3a5c]">SLA Dashboard — M30</h1>
+            <h1 className="text-xl font-bold text-[#1a3a5c]">SLA Dashboard</h1>
             <p className="text-sm text-[#1a2533] mt-0.5">Monitor configured service timelines, elapsed processing time, and applications approaching or exceeding SLA.</p>
           </div>
           <div className="flex gap-2">
@@ -12313,7 +12252,7 @@ export function M30SLADashboard({ onOpenApp, onOpenGrievance }: { onOpenApp: (ap
 
         {/* Time breakdown */}
         <div className="bg-white border border-[#e5eaf0] rounded-lg p-4">
-          <p className="text-xs font-bold text-[#1a3a5c] uppercase tracking-wider mb-3">Where Is the Time Being Spent? — MIDC-APP-2026-00418</p>
+          <p className="text-xs font-bold text-[#1a3a5c] uppercase tracking-wider mb-3">Where Is the Time Being Spent? - MIDC-APP-2026-00418</p>
           <div className="grid grid-cols-6 gap-3">
             {[
               { label: 'MIDC Processing', val: '9d 2h', note: 'Attributed' },
@@ -12447,7 +12386,7 @@ export function M30SLADashboard({ onOpenApp, onOpenGrievance }: { onOpenApp: (ap
         {selectedApp && (
           <div className="bg-white border border-[#e5eaf0] rounded-lg p-4 space-y-3">
             <div className="flex items-center justify-between">
-              <p className="text-xs font-bold text-[#1a3a5c] uppercase tracking-wider">SLA Detail — {selectedApp.id}</p>
+              <p className="text-xs font-bold text-[#1a3a5c] uppercase tracking-wider">SLA Detail - {selectedApp.id}</p>
               <button onClick={() => setSelectedApp(null)} className="text-[10px] text-[#374151] hover:text-[#1a2533]">Close ×</button>
             </div>
             <div className="grid grid-cols-4 gap-3 text-xs">
@@ -12457,8 +12396,8 @@ export function M30SLADashboard({ onOpenApp, onOpenGrievance }: { onOpenApp: (ap
               <div><span className="text-[#374151]">SLA Due</span><p className={`font-semibold ${selectedApp.slaStatus === 'breached' ? 'text-red-700' : 'text-amber-700'}`}>{selectedApp.due}</p></div>
             </div>
             <div className="flex gap-2 pt-1">
-              <button onClick={() => onOpenApp(selectedApp.id)} className="text-[11px] bg-[#1a3a5c] text-white px-3 py-1.5 rounded hover:bg-[#0f2540]">Open Application → M06</button>
-              {selectedApp.slaStatus === 'breached' && <button onClick={onOpenGrievance} className="text-[11px] bg-red-50 text-red-700 border border-red-200 px-3 py-1.5 rounded hover:bg-red-100">Raise Grievance → M31</button>}
+              <button onClick={() => onOpenApp(selectedApp.id)} className="text-[11px] bg-[#1a3a5c] text-white px-3 py-1.5 rounded hover:bg-[#0f2540]">Open Application</button>
+              {selectedApp.slaStatus === 'breached' && <button onClick={onOpenGrievance} className="text-[11px] bg-red-50 text-red-700 border border-red-200 px-3 py-1.5 rounded hover:bg-red-100">Raise Grievance</button>}
             </div>
           </div>
         )}
@@ -12495,7 +12434,7 @@ export function M31GrievancePage({ onBack, onOpenApp, onOpenSLA, onOpenQuery, on
 
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-xl font-bold text-[#1a3a5c]">Escalation / Grievance — M31</h1>
+            <h1 className="text-xl font-bold text-[#1a3a5c]">Escalation / Grievance</h1>
             <p className="text-sm text-[#1a2533] mt-0.5">Review escalated issues, evidence, routing, and resolution workflow.</p>
           </div>
           <button onClick={onBack} className="text-xs border border-[#d1d9e0] px-3 py-1.5 rounded text-[#1a2533] hover:bg-white">← Back</button>
@@ -12552,7 +12491,7 @@ export function M31GrievancePage({ onBack, onOpenApp, onOpenSLA, onOpenQuery, on
                   <div><span className="text-red-600">Actual Elapsed</span><p className="font-bold text-red-800">{selectedGrv.actualElapsed}</p></div>
                   <div><span className="text-red-600">SLA Exceeded By</span><p className="font-bold text-red-800">{selectedGrv.slaExceededBy}</p></div>
                 </div>
-                <button onClick={onOpenSLA} className="mt-2 text-[11px] text-red-700 underline">View SLA Breakdown → M30</button>
+                <button onClick={onOpenSLA} className="mt-2 text-[11px] text-red-700 underline">View SLA Breakdown</button>
               </div>
             )}
 
@@ -12563,9 +12502,9 @@ export function M31GrievancePage({ onBack, onOpenApp, onOpenSLA, onOpenQuery, on
                 <div className="grid grid-cols-3 gap-3 text-xs">
                   <div><span className="text-amber-700">Inspection ID</span><p className="font-bold">INSP-2026-00388</p></div>
                   <div><span className="text-amber-700">Required</span><p className="font-bold">15 Sep 2026</p></div>
-                  <div><span className="text-amber-700">Status</span><p className="font-bold text-amber-800">Pending — 8 days</p></div>
+                  <div><span className="text-amber-700">Status</span><p className="font-bold text-amber-800">Pending - 8 days</p></div>
                 </div>
-                <button onClick={() => onOpenInspection(selectedGrv.appId, 'INSP-2026-00388')} className="mt-2 text-[11px] text-amber-700 underline">View Inspection → M21/M22</button>
+                <button onClick={() => onOpenInspection(selectedGrv.appId, 'INSP-2026-00388')} className="mt-2 text-[11px] text-amber-700 underline">View Inspection</button>
               </div>
             )}
 
@@ -12634,7 +12573,7 @@ export function M31GrievancePage({ onBack, onOpenApp, onOpenSLA, onOpenQuery, on
                 <div className="flex gap-2 pt-1">
                   <button onClick={() => setResolved(true)} disabled={!resolutionText} className="text-xs bg-emerald-700 text-white px-4 py-2 rounded font-semibold hover:bg-emerald-800 disabled:opacity-40">Record Resolution</button>
                   <button className="text-xs bg-purple-50 text-purple-700 border border-purple-200 px-4 py-2 rounded font-semibold hover:bg-purple-100">Escalate Further</button>
-                  <button onClick={() => onOpenApp(selectedGrv.appId)} className="text-xs border border-[#d1d9e0] px-3 py-2 rounded text-[#1a2533] hover:bg-[#f8f9fb]">Open Application → M06</button>
+                  <button onClick={() => onOpenApp(selectedGrv.appId)} className="text-xs border border-[#d1d9e0] px-3 py-2 rounded text-[#1a2533] hover:bg-[#f8f9fb]">Open Application</button>
                 </div>
                 {resolved && <div className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded px-3 py-2 font-semibold">Resolution recorded. Grievance marked as Resolved. Application journey is unchanged unless a configured action was selected.</div>}
               </div>
@@ -12645,8 +12584,8 @@ export function M31GrievancePage({ onBack, onOpenApp, onOpenSLA, onOpenQuery, on
                 <p className="text-xs font-bold text-emerald-700 uppercase tracking-wider mb-1">Resolved</p>
                 <p className="text-xs text-emerald-800">This grievance has been resolved. The complete resolution timeline is preserved in the audit record.</p>
                 <div className="flex gap-2 mt-3">
-                  <button onClick={() => onOpenApp(selectedGrv.appId)} className="text-[11px] text-[#1a56db] underline">Open Application → M06</button>
-                  <button onClick={() => onOpenQuery(selectedGrv.appId)} className="text-[11px] text-[#1a56db] underline">View Query History → M19</button>
+                  <button onClick={() => onOpenApp(selectedGrv.appId)} className="text-[11px] text-[#1a56db] underline">Open Application</button>
+                  <button onClick={() => onOpenQuery(selectedGrv.appId)} className="text-[11px] text-[#1a56db] underline">View Query History</button>
                 </div>
               </div>
             )}
@@ -12755,7 +12694,7 @@ export function M39NotificationDrawer({ open, onClose, onNavigate }: {
 
 
 
-export function M32RegRAGPage({ onBack, onOpenRegChange }: { onBack: () => void; onOpenRegChange?: () => void }) {
+export function M32RegRAGPage({ onBack, onOpenRegChange, applicationContext }: { onBack: () => void; onOpenRegChange?: () => void; applicationContext?: { id: string; business: string; service: string; dnaVersion: string } }) {
   const [conversation, setConversation] = useState(M32_CONVERSATION)
   const [input, setInput] = useState('')
   const [lang, setLang] = useState<'en'|'mr'>('en')
@@ -12763,7 +12702,7 @@ export function M32RegRAGPage({ onBack, onOpenRegChange }: { onBack: () => void;
 
   const addMessage = (text: string) => {
     setInput('')
-    const ragReply = { role: 'rag' as const, text: `Source-backed response for: "${text}". The configured MIDC regulatory repository has been searched. Where a specific clause is not configured in the prototype, the relevant source type and version reference is shown below.`, source: 'SRC-001', clause: 'Clause 4.3 — MIDC Building Regulations 2019', version: 'MIDC-RULE-2026-V3', retrieval: 'Source Found' as const }
+    const ragReply = { role: 'rag' as const, text: `Source-backed response for: "${text}". The configured MIDC regulatory repository has been searched. Where a specific clause is not configured in the prototype, the relevant source type and version reference is shown below.`, source: 'SRC-001', clause: 'Clause 4.3 - MIDC Building Regulations 2019', version: 'MIDC-RULE-2026-V3', retrieval: 'Source Found' as const }
     setConversation(c => [...c, { role: 'officer', text, chip: false }, ragReply])
   }
 
@@ -12779,7 +12718,7 @@ export function M32RegRAGPage({ onBack, onOpenRegChange }: { onBack: () => void;
       <div className="px-6 py-4 border-b border-[#e5eaf0] bg-white">
         <nav className="text-[11px] text-[#374151] flex items-center gap-1 mb-2">
           <span className="hover:text-[#1a3a5c] cursor-pointer" onClick={onBack}>Department Home</span>
-          <span>›</span><span className="text-[#1a3a5c] font-semibold">Regulatory Assistant — M32</span>
+          <span>›</span><span className="text-[#1a3a5c] font-semibold">Regulatory Assistant</span>
         </nav>
         <div className="flex items-center justify-between">
           <div>
@@ -12795,16 +12734,7 @@ export function M32RegRAGPage({ onBack, onOpenRegChange }: { onBack: () => void;
         </div>
         {/* Application context */}
         <div className="mt-3 flex items-center gap-3 text-[11px] bg-[#eff6ff] border border-[#bfdbfe] rounded px-3 py-2">
-          <span className="text-[#1a56db] font-semibold">Using application context</span>
-          <span className="text-[#1a2533]">MIDC-APP-2026-00418</span>
-          <span className="text-[#374151]">·</span>
-          <span className="text-[#1a2533]">Aster Precision Components</span>
-          <span className="text-[#374151]">·</span>
-          <span className="text-[#1a2533]">Building / Planning</span>
-          <span className="text-[#374151]">·</span>
-          <span className="text-[#1a2533]">Built-up Area</span>
-          <span className="text-[#374151]">·</span>
-          <span className="text-[#1a2533]">Business DNA v7</span>
+          {applicationContext ? <><span className="text-[#1a56db] font-semibold">Using application context</span><span className="text-[#1a2533]">{applicationContext.id}</span><span className="text-[#374151]">·</span><span className="text-[#1a2533]">{applicationContext.business}</span><span className="text-[#374151]">·</span><span className="text-[#1a2533]">{applicationContext.service}</span><span className="text-[#374151]">·</span><span className="text-[#1a2533]">{applicationContext.dnaVersion}</span></> : <><span className="text-[#1a56db] font-semibold">General department context</span><span className="text-[#1a2533]">Select an application to receive application-specific regulatory references.</span></>}
         </div>
       </div>
 
@@ -12867,7 +12797,7 @@ export function M32RegRAGPage({ onBack, onOpenRegChange }: { onBack: () => void;
                 ['Clause', selectedSrc.clause], ['Version', selectedSrc.version], ['Status', selectedSrc.status],
               ].map(([k, v]) => <div key={k} className="flex justify-between"><span className="text-[#374151]">{k}</span><span className="font-semibold text-right max-w-[160px]">{v}</span></div>)}
               <div className="pt-2 space-y-1">
-                <button onClick={onOpenRegChange} className="w-full text-[10px] text-[#1a56db] underline text-left">View in Regulatory Change Centre → M33</button>
+                <button onClick={onOpenRegChange} className="w-full text-[10px] text-[#1a56db] underline text-left">View in Regulatory Change Centre</button>
               </div>
             </div>
           )}
@@ -12897,7 +12827,7 @@ export function M33RegChangePage({ onBack, onOpenRAG, onOpenImpact }: { onBack: 
       <div className="px-6 py-5 space-y-5 max-w-6xl">
         <nav className="text-[11px] text-[#374151] flex items-center gap-1">
           <span className="cursor-pointer hover:text-[#1a3a5c]" onClick={onBack}>Department Home</span>
-          <span>›</span><span className="text-[#1a3a5c] font-semibold">Regulatory Change Centre — M33</span>
+          <span>›</span><span className="text-[#1a3a5c] font-semibold">Regulatory Change Centre</span>
         </nav>
         <div className="flex items-start justify-between">
           <div>
@@ -12937,7 +12867,7 @@ export function M33RegChangePage({ onBack, onOpenRAG, onOpenImpact }: { onBack: 
                       <div className="flex gap-1">
                         <button onClick={() => { setSelected(c); setView('detail') }} className="text-[10px] text-[#1a56db] hover:underline">Detail</button>
                         <button onClick={() => { setSelected(c); setView('compare') }} className="text-[10px] text-[#1a2533] hover:underline">Compare</button>
-                        {c.validation === 'Impact Analysis' && <button onClick={onOpenImpact} className="text-[10px] text-blue-700 hover:underline">Impact → M34</button>}
+                        {c.validation === 'Impact Analysis' && <button onClick={onOpenImpact} className="text-[10px] text-blue-700 hover:underline">Impact</button>}
                       </div>
                     </td>
                   </tr>
@@ -12971,13 +12901,13 @@ export function M33RegChangePage({ onBack, onOpenRAG, onOpenImpact }: { onBack: 
                 {['MIDC-RULE-2024-V1', 'MIDC-RULE-2025-V2', selected.currentVer].map((v, i) => (
                   <div key={v} className="flex gap-3 items-start mb-3">
                     <div className="flex flex-col items-center"><div className={`w-2.5 h-2.5 rounded-full ${i === 2 ? 'bg-[#1a3a5c]' : 'bg-[#d1d9e0]'}`} />{i < 2 && <div className="w-px h-6 bg-[#e5eaf0]" />}</div>
-                    <div><p className={`font-semibold ${i === 2 ? 'text-[#1a3a5c]' : 'text-[#1a2533]'}`}>{v}</p><p className="text-[10px] text-[#374151]">{i === 0 ? 'Original — 01 Apr 2024' : i === 1 ? 'Updated — 01 Apr 2025' : 'Current — 01 Apr 2026'}</p></div>
+                    <div><p className={`font-semibold ${i === 2 ? 'text-[#1a3a5c]' : 'text-[#1a2533]'}`}>{v}</p><p className="text-[10px] text-[#374151]">{i === 0 ? 'Original - 01 Apr 2024' : i === 1 ? 'Updated - 01 Apr 2025' : 'Current - 01 Apr 2026'}</p></div>
                   </div>
                 ))}
               </div>
               <div className="flex gap-2">
-                <button onClick={onOpenRAG} className="text-xs border border-[#d1d9e0] bg-white px-3 py-1.5 rounded text-[#1a2533] hover:bg-[#f8f9fb]">Ask RAG → M32</button>
-                <button onClick={onOpenImpact} className="text-xs bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1.5 rounded hover:bg-blue-100">Impact Analysis → M34</button>
+                <button onClick={onOpenRAG} className="text-xs border border-[#d1d9e0] bg-white px-3 py-1.5 rounded text-[#1a2533] hover:bg-[#f8f9fb]">Ask RAG</button>
+                <button onClick={onOpenImpact} className="text-xs bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1.5 rounded hover:bg-blue-100">Impact Analysis</button>
               </div>
             </div>
           </div>
@@ -12987,10 +12917,10 @@ export function M33RegChangePage({ onBack, onOpenRAG, onOpenImpact }: { onBack: 
           <div className="grid grid-cols-2 gap-4">
             {[{ label: 'Previous Version', ver: selected.currentVer, bg: 'bg-red-50' }, { label: 'Proposed Version', ver: selected.proposedVer, bg: 'bg-emerald-50' }].map(({ label, ver, bg }) => (
               <div key={ver} className={`${bg} border border-[#e5eaf0] rounded-lg p-4 text-xs space-y-2`}>
-                <p className="font-bold text-[#1a3a5c]">{label} — {ver}</p>
+                <p className="font-bold text-[#1a3a5c]">{label} - {ver}</p>
                 <div className="bg-white rounded p-3 space-y-2 border border-[#e5eaf0]">
                   <div><span className="text-[#374151]">Requirement:</span> <span className="font-semibold">{selected.requirement}</span></div>
-                  <div><span className="text-[#374151]">Calculation method:</span> <span>{label === 'Previous Version' ? 'Gross area as per submitted plan' : 'Net usable area — updated methodology'}</span>{label === 'Proposed Version' && <span className="ml-1 text-[9px] font-bold text-emerald-700 bg-emerald-100 px-1 rounded">CHANGED</span>}</div>
+                  <div><span className="text-[#374151]">Calculation method:</span> <span>{label === 'Previous Version' ? 'Gross area as per submitted plan' : 'Net usable area - updated methodology'}</span>{label === 'Proposed Version' && <span className="ml-1 text-[9px] font-bold text-emerald-700 bg-emerald-100 px-1 rounded">CHANGED</span>}</div>
                   <div><span className="text-[#374151]">Evidence required:</span> <span>{label === 'Previous Version' ? 'Building Plan (v1)' : 'Building Plan (v1) + Architect Certificate'}</span>{label === 'Proposed Version' && <span className="ml-1 text-[9px] font-bold text-emerald-700 bg-emerald-100 px-1 rounded">ADDED</span>}</div>
                   <div><span className="text-[#374151]">Effective:</span> <span>{label === 'Previous Version' ? '01 Apr 2026' : '01 Oct 2026 (Proposed)'}</span></div>
                 </div>
@@ -13021,7 +12951,7 @@ export function M34ImpactPage({ onBack, onOpenApp, onOpenRegChange }: { onBack: 
         <nav className="text-[11px] text-[#374151] flex items-center gap-1">
           <span className="cursor-pointer hover:text-[#1a3a5c]" onClick={onBack}>Department Home</span>
           <span>›</span><span className="cursor-pointer hover:text-[#1a3a5c]" onClick={onOpenRegChange}>Regulatory Changes</span>
-          <span>›</span><span className="text-[#1a3a5c] font-semibold">Impact Analysis — M34</span>
+          <span>›</span><span className="text-[#1a3a5c] font-semibold">Impact Analysis</span>
         </nav>
         <div className="flex items-start justify-between">
           <div>
@@ -13074,7 +13004,7 @@ export function M34ImpactPage({ onBack, onOpenApp, onOpenRegChange }: { onBack: 
         {activeTab !== 'Applications' && (
           <div className="bg-white border border-[#e5eaf0] rounded-lg p-8 text-center">
             <p className="text-sm font-semibold text-[#1a2533]">{activeTab} Impact</p>
-            <p className="text-xs text-[#374151] mt-1">{activeTab === 'Documents' ? '2 document requirements updated — Architect Certificate added as new evidence' : activeTab === 'Compliance' ? '1 compliance obligation under review — COND-001 may require condition update' : '3 entrepreneur journeys may be notified pending Regulatory Admin confirmation'}</p>
+            <p className="text-xs text-[#374151] mt-1">{activeTab === 'Documents' ? '2 document requirements updated - Architect Certificate added as new evidence' : activeTab === 'Compliance' ? '1 compliance obligation under review - COND-001 may require condition update' : '3 entrepreneur journeys may be notified pending Regulatory Admin confirmation'}</p>
             <p className="text-[10px] text-[#6b7280] mt-4 italic">Impact data sourced from configured regulatory records. Do not assume retrospective application without transition-rule confirmation.</p>
           </div>
         )}
@@ -13096,7 +13026,7 @@ export function M35AnalyticsPage({ onBack, onOpenSLA, onOpenInspection, onOpenBo
       <div className="px-6 py-5 space-y-5 max-w-6xl">
         <nav className="text-[11px] text-[#374151] flex items-center gap-1">
           <span className="cursor-pointer hover:text-[#1a3a5c]" onClick={onBack}>Department Home</span>
-          <span>›</span><span className="text-[#1a3a5c] font-semibold">Department Analytics — M35</span>
+          <span>›</span><span className="text-[#1a3a5c] font-semibold">Department Analytics</span>
         </nav>
         <div className="flex items-start justify-between">
           <div>
@@ -13121,12 +13051,12 @@ export function M35AnalyticsPage({ onBack, onOpenSLA, onOpenInspection, onOpenBo
           {(['Trend','Funnel','Queue Ageing','Drill-down'] as const).map(t => (
             <button key={t} onClick={() => setTab(t)} className={`text-xs px-3 py-1.5 rounded font-semibold border transition-colors ${tab === t ? 'bg-[#1a3a5c] text-white border-[#1a3a5c]' : 'bg-white border-[#d1d9e0] text-[#1a2533] hover:border-[#1a3a5c]'}`}>{t}</button>
           ))}
-          <div className="ml-auto"><button onClick={onOpenBottleneck} className="text-xs bg-amber-50 text-amber-700 border border-amber-200 px-3 py-1.5 rounded font-semibold hover:bg-amber-100">Bottleneck Analytics → M36</button></div>
+          <div className="ml-auto"><button onClick={onOpenBottleneck} className="text-xs bg-amber-50 text-amber-700 border border-amber-200 px-3 py-1.5 rounded font-semibold hover:bg-amber-100">Bottleneck Analytics</button></div>
         </div>
 
         {tab === 'Funnel' && (
           <div className="bg-white border border-[#e5eaf0] rounded-lg p-5">
-            <p className="text-xs font-bold text-[#1a3a5c] uppercase tracking-wider mb-4">Application Stage Funnel — Sep 2026</p>
+            <p className="text-xs font-bold text-[#1a3a5c] uppercase tracking-wider mb-4">Application Stage Funnel - Sep 2026</p>
             <div className="space-y-2">
               {M35_FUNNEL.map(f => (
                 <div key={f.stage} className="flex items-center gap-3 text-xs">
@@ -13146,7 +13076,7 @@ export function M35AnalyticsPage({ onBack, onOpenSLA, onOpenInspection, onOpenBo
 
         {tab === 'Trend' && (
           <div className="bg-white border border-[#e5eaf0] rounded-lg p-5">
-            <p className="text-xs font-bold text-[#1a3a5c] uppercase tracking-wider mb-4">Monthly Trend — Applications & SLA</p>
+            <p className="text-xs font-bold text-[#1a3a5c] uppercase tracking-wider mb-4">Monthly Trend - Applications & SLA</p>
             <div className="flex items-end gap-6 h-40">
               {M35_TREND_DATA.map(d => (
                 <div key={d.month} className="flex-1 flex flex-col items-center gap-1">
@@ -13186,7 +13116,7 @@ export function M35AnalyticsPage({ onBack, onOpenSLA, onOpenInspection, onOpenBo
                     <td className="px-3 py-2.5 text-[#1a2533]">{r.desk}</td>
                     <td className="px-3 py-2.5 font-semibold">{r.age}</td>
                     <td className="px-3 py-2.5"><span className={`text-[10px] font-semibold px-2 py-0.5 rounded border ${r.sla === 'SLA Exceeded' ? 'bg-red-50 text-red-700 border-red-200' : r.sla === 'Approaching Deadline' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'}`}>{r.sla}</span></td>
-                    <td className="px-3 py-2.5"><button onClick={onOpenSLA} className="text-[10px] text-[#1a56db] hover:underline">View SLA → M30</button></td>
+                    <td className="px-3 py-2.5"><button onClick={onOpenSLA} className="text-[10px] text-[#1a56db] hover:underline">View SLA</button></td>
                   </tr>
                 ))}
               </tbody>
@@ -13196,7 +13126,7 @@ export function M35AnalyticsPage({ onBack, onOpenSLA, onOpenInspection, onOpenBo
 
         {tab === 'Drill-down' && (
           <div className="bg-white border border-[#e5eaf0] rounded-lg p-5 space-y-4">
-            <p className="text-xs font-bold text-[#1a3a5c] uppercase tracking-wider">Service Breakdown — {scope}</p>
+            <p className="text-xs font-bold text-[#1a3a5c] uppercase tracking-wider">Service Breakdown - {scope}</p>
             <div className="space-y-3">
               {[['Building / Planning', 18, 3, '10.2d'], ['Land / Plot', 12, 2, '8.4d'], ['Water / Utilities', 8, 1, '7.1d'], ['Environmental', 5, 0, '6.2d']].map(([svc, pending, breaches, avg]) => (
                 <div key={String(svc)} className="flex items-center gap-4 text-xs py-2 border-b border-[#f0f4f8]">
@@ -13229,7 +13159,7 @@ export function M36BottleneckPage({ onBack, onOpenSLA, onOpenInspection, onOpenA
         <nav className="text-[11px] text-[#374151] flex items-center gap-1">
           <span className="cursor-pointer hover:text-[#1a3a5c]" onClick={onBack}>Department Home</span>
           <span>›</span><span className="cursor-pointer hover:text-[#1a3a5c]" onClick={onOpenAnalytics}>Analytics</span>
-          <span>›</span><span className="text-[#1a3a5c] font-semibold">Bottleneck Analytics — M36</span>
+          <span>›</span><span className="text-[#1a3a5c] font-semibold">Bottleneck Analytics</span>
         </nav>
         <div className="flex items-start justify-between">
           <div>
@@ -13252,7 +13182,7 @@ export function M36BottleneckPage({ onBack, onOpenSLA, onOpenInspection, onOpenA
         {/* Bottleneck table */}
         <div className="bg-white border border-[#e5eaf0] rounded-lg overflow-hidden">
           <div className="px-4 py-3 border-b border-[#e5eaf0]">
-            <p className="text-xs font-bold text-[#1a3a5c] uppercase tracking-wider">Process Stage Breakdown — Building / Planning, Sep 2026</p>
+            <p className="text-xs font-bold text-[#1a3a5c] uppercase tracking-wider">Process Stage Breakdown - Building / Planning, Sep 2026</p>
           </div>
           <table className="w-full text-xs">
             <thead className="bg-[#f8f9fb] border-b border-[#e5eaf0]">
@@ -13285,7 +13215,7 @@ export function M36BottleneckPage({ onBack, onOpenSLA, onOpenInspection, onOpenA
 
         {/* Selected stage detail */}
         <div className="bg-white border border-[#e5eaf0] rounded-lg p-4">
-          <p className="text-xs font-bold text-[#1a3a5c] uppercase tracking-wider mb-3">Observed Contributor Detail — {selected.stage}</p>
+          <p className="text-xs font-bold text-[#1a3a5c] uppercase tracking-wider mb-3">Observed Contributor Detail - {selected.stage}</p>
           <div className="grid grid-cols-3 gap-4 text-xs">
             <div className="space-y-2">
               <div><span className="text-[#374151]">Observed contribution to elapsed time</span><p className="text-xl font-bold text-amber-700">{selected.contribution}%</p><p className="text-[10px] text-[#374151]">Largest observed contributor</p></div>
@@ -13317,7 +13247,7 @@ export function M37WorkloadPage({ onBack, onOpenSLA, onOpenInspection, onOpenAna
       <div className="px-6 py-5 space-y-5 max-w-6xl">
         <nav className="text-[11px] text-[#374151] flex items-center gap-1">
           <span className="cursor-pointer hover:text-[#1a3a5c]" onClick={onBack}>Department Home</span>
-          <span>›</span><span className="text-[#1a3a5c] font-semibold">Workload / Capacity — M37</span>
+          <span>›</span><span className="text-[#1a3a5c] font-semibold">Workload / Capacity</span>
         </nav>
         <div className="flex items-start justify-between">
           <div>
@@ -13414,7 +13344,7 @@ export function M37WorkloadPage({ onBack, onOpenSLA, onOpenInspection, onOpenAna
               <thead className="bg-[#f8f9fb] border-b border-[#e5eaf0]"><tr>{['Application', 'Age', 'State', 'Desk', 'SLA', 'Waiting Reason'].map(h => <th key={h} className="px-3 py-2.5 text-left font-semibold text-[#1a2533]">{h}</th>)}</tr></thead>
               <tbody>
                 {[
-                  { id: 'MIDC-APP-2026-00388', age: '26d', state: 'DOCUMENT_SCRUTINY', desk: 'Land Desk', sla: 'Exceeded', reason: 'External dependency — MPCB' },
+                  { id: 'MIDC-APP-2026-00388', age: '26d', state: 'DOCUMENT_SCRUTINY', desk: 'Land Desk', sla: 'Exceeded', reason: 'External dependency - MPCB' },
                   { id: 'MIDC-APP-2026-00418', age: '13d', state: 'FINAL_DECISION', desk: 'Decision Desk', sla: 'Approaching', reason: 'Decision pending' },
                   { id: 'MIDC-APP-2026-00421', age: '11d', state: 'TECHNICAL_SCRUTINY', desk: 'Planning Desk', sla: 'Approaching', reason: 'Scrutiny in progress' },
                   { id: 'MIDC-APP-2026-00415', age: '15d', state: 'INSPECTION_SCHEDULED', desk: 'Inspection Desk', sla: 'Normal', reason: 'Inspection waiting' },
@@ -13442,9 +13372,9 @@ export function M37WorkloadPage({ onBack, onOpenSLA, onOpenInspection, onOpenAna
             <div className="text-[10px] text-[#374151] border border-[#e5eaf0] rounded p-2 italic">Capacity data not configured. Staff allocation and configured capacity data are not available in the prototype. This panel will show queue pressure vs. available capacity when that data is configured.</div>
           </div>
           <div className="flex gap-2 mt-3">
-            <button onClick={onOpenSLA} className="text-xs border border-[#d1d9e0] bg-white px-3 py-1.5 rounded text-[#1a2533] hover:bg-[#f8f9fb]">SLA Dashboard → M30</button>
-            <button onClick={() => onOpenInspection?.('INSP-2026-00418')} className="text-xs border border-[#d1d9e0] bg-white px-3 py-1.5 rounded text-[#1a2533] hover:bg-[#f8f9fb]">Inspection Queue → M21</button>
-            <button onClick={onOpenAnalytics} className="text-xs border border-[#d1d9e0] bg-white px-3 py-1.5 rounded text-[#1a2533] hover:bg-[#f8f9fb]">Dept Analytics → M35</button>
+            <button onClick={onOpenSLA} className="text-xs border border-[#d1d9e0] bg-white px-3 py-1.5 rounded text-[#1a2533] hover:bg-[#f8f9fb]">SLA Dashboard</button>
+            <button onClick={() => onOpenInspection?.('INSP-2026-00418')} className="text-xs border border-[#d1d9e0] bg-white px-3 py-1.5 rounded text-[#1a2533] hover:bg-[#f8f9fb]">Inspection Queue</button>
+            <button onClick={onOpenAnalytics} className="text-xs border border-[#d1d9e0] bg-white px-3 py-1.5 rounded text-[#1a2533] hover:bg-[#f8f9fb]">Dept Analytics</button>
           </div>
         </div>
       </div>
@@ -13455,8 +13385,8 @@ export function M37WorkloadPage({ onBack, onOpenSLA, onOpenInspection, onOpenAna
 // ─── M38 Audit / History ──────────────────────────────────────────────────────
 
 
-export function M38AuditPage({ onBack, onOpenApp }: { onBack: () => void; onOpenApp?: (applicationId: string) => void }) {
-  const [search, setSearch] = useState('MIDC-APP-2026-00418')
+export function M38AuditPage({ onBack, onOpenApp, initialSearch = '' }: { onBack: () => void; onOpenApp?: (applicationId: string) => void; initialSearch?: string }) {
+  const [search, setSearch] = useState(initialSearch)
   const [filterType, setFilterType] = useState<'all'|'CHANGE'|'VIEW'>('all')
   const [selectedEvent, setSelectedEvent] = useState<typeof M38_EVENTS[0] | null>(null)
 
@@ -13471,7 +13401,7 @@ export function M38AuditPage({ onBack, onOpenApp }: { onBack: () => void; onOpen
       <div className="px-6 py-5 space-y-5 max-w-6xl">
         <nav className="text-[11px] text-[#374151] flex items-center gap-1">
           <span className="cursor-pointer hover:text-[#1a3a5c]" onClick={onBack}>Department Home</span>
-          <span>›</span><span className="text-[#1a3a5c] font-semibold">Audit / History — M38</span>
+          <span>›</span><span className="text-[#1a3a5c] font-semibold">Audit / History</span>
         </nav>
         <div className="flex items-start justify-between">
           <div>
@@ -13504,7 +13434,7 @@ export function M38AuditPage({ onBack, onOpenApp }: { onBack: () => void; onOpen
                     <div className="w-32 flex-shrink-0"><p className="font-semibold text-[#1a2533]">{ev.actor}</p><p className="text-[10px] text-[#374151]">{ev.role}</p></div>
                     <div className="flex-1 min-w-0"><p className="font-semibold text-[#1a2533]">{ev.action}</p><p className="text-[10px] text-[#374151] truncate">{ev.record} · {ev.field}</p></div>
                     <div className="w-24 flex-shrink-0">
-                      {ev.type === 'CHANGE' && ev.old !== '—' && <p className="text-[10px]"><span className="text-red-600 line-through">{ev.old}</span> → <span className="text-emerald-700 font-semibold">{ev.new_}</span></p>}
+                      {ev.type === 'CHANGE' && ev.old !== '-' && <p className="text-[10px]"><span className="text-red-600 line-through">{ev.old}</span> → <span className="text-emerald-700 font-semibold">{ev.new_}</span></p>}
                       {ev.type === 'VIEW' && <span className="text-[10px] text-[#374151]">View only</span>}
                     </div>
                     <span className={`w-16 text-[10px] font-bold px-1.5 py-0.5 rounded flex-shrink-0 ${ev.type === 'CHANGE' ? 'bg-amber-50 text-amber-700' : 'bg-[#f0f4f8] text-[#1a2533]'}`}>{ev.type}</span>
@@ -13534,10 +13464,10 @@ export function M38AuditPage({ onBack, onOpenApp }: { onBack: () => void; onOpen
                   </div>
                 ))}
                 <div className="pt-2 flex gap-2">
-                  <button onClick={() => onOpenApp?.(selectedEvent.record)} className="text-[11px] text-[#1a56db] hover:underline">Open Application → M06</button>
+                  <button onClick={() => onOpenApp?.(selectedEvent.record)} className="text-[11px] text-[#1a56db] hover:underline">Open Application</button>
                 </div>
               </div>
-              <div className="text-[9px] text-[#374151] italic px-2">Historical audit records are immutable. If a correction is necessary, a new corrective event is created — the original record is preserved.</div>
+              <div className="text-[9px] text-[#374151] italic px-2">Historical audit records are immutable. If a correction is necessary, a new corrective event is created - the original record is preserved.</div>
             </div>
           )}
         </div>

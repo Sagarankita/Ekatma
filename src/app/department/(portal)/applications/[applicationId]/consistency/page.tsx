@@ -14,8 +14,8 @@ export default function Page() {
   return (
     <M16ConsistencyPage 
       
-      onBack={() => router.back()}
-      onBackToOverview={() => router.push(`/department/applications/${appId}`)}
+      onBack={() => router.push(`/department/applications/${appId}?tab=scrutiny`)}
+      onBackToOverview={() => router.push(`/department/applications/${appId}?tab=scrutiny`)}
       onOpenParamDetail={(id: string) => router.push(`/department/applications/${appId}/parameter/${id}`)}
       onOpenDocReview={(id: string) => router.push(`/department/applications/${appId}/document/${id}`)}
     

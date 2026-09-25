@@ -14,9 +14,9 @@ export default function Page() {
   return (
     <M12ParameterDetailPage 
       
-      onBack={() => router.back()}
-      onBackToOverview={() => router.push(`/department/applications/${appId}`)}
-      onOpenDna={() => router.push(`/department/applications/${appId}/dna`)}
+      onBack={() => router.push(`/department/applications/${appId}?tab=scrutiny`)}
+      onBackToOverview={() => router.push(`/department/applications/${appId}?tab=scrutiny`)}
+      onOpenDna={() => router.push(`/department/applications/${appId}?tab=business-dna`)}
       onOpenDocReview={(id: string) => router.push(`/department/applications/${appId}/document/${id}`)}
       onOpenDepView={() => router.push(`/department/applications/${appId}/dependency-view`)}
     

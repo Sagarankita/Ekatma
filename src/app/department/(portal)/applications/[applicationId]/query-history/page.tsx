@@ -14,9 +14,10 @@ export default function Page() {
   return (
     <M19QueryHistoryPage 
       
-      onBack={() => router.back()}
-      onBackToOverview={() => router.push(`/department/applications/${appId}`)}
+      onBack={() => router.push(`/department/applications/${appId}?tab=queries`)}
+      onBackToOverview={() => router.push(`/department/applications/${appId}?tab=queries`)}
       onOpenQueryBuilder={() => router.push(`/department/applications/${appId}/query-builder`)}
+      onOpenDeltaRescrutiny={() => router.push(`/department/applications/${appId}/delta-rescrutiny`)}
     
     />
   );

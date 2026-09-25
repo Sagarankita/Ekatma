@@ -1,13 +1,20 @@
-export type ApplicationState = 
-  | 'draft'
-  | 'submitted'
-  | 'under_scrutiny'
-  | 'query_raised'
-  | 'inspection_pending'
-  | 'decision_pending'
-  | 'approved'
-  | 'rejected'
-  | 'withdrawn';
+/** Canonical department-side application lifecycle contract. */
+export type ApplicationState =
+  | 'DRAFT'
+  | 'READY_TO_SUBMIT'
+  | 'SUBMITTED'
+  | 'FEE_CONFIRMED'
+  | 'DOCUMENT_SCRUTINY'
+  | 'INITIAL_SCRUTINY'
+  | 'TECHNICAL_SCRUTINY'
+  | 'QUERY_RAISED'
+  | 'CORRECTION_REQUIRED'
+  | 'RESUBMITTED'
+  | 'INSPECTION_PENDING'
+  | 'INSPECTION_SCHEDULED'
+  | 'FINAL_DECISION'
+  | 'APPROVED'
+  | 'REJECTED';
 
 export type AdaptiveQuestionState = 
   | 'unanswered'

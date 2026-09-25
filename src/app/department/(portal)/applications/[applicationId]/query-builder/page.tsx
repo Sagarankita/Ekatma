@@ -14,8 +14,8 @@ export default function Page() {
   return (
     <M18QueryBuilderPage 
       
-      onBack={() => router.back()}
-      onBackToOverview={() => router.push(`/department/applications/${appId}`)}
+      onBack={() => router.push(`/department/applications/${appId}?tab=queries`)}
+      onBackToOverview={() => router.push(`/department/applications/${appId}?tab=queries`)}
       onOpenQueryHistory={() => router.push(`/department/applications/${appId}/query-history`)}
     
     />

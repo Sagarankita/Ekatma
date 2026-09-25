@@ -5,7 +5,7 @@ import { ROUTES, DEPARTMENT_DESTINATIONS, departmentActiveItem, departmentNotifi
 const department = ROUTES.department;
 const recordBuilders = Object.entries(department).filter(
   (entry): entry is [string, (applicationId: string, childId: string) => string] =>
-    typeof entry[1] === 'function' && entry[0] !== 'searchQuery',
+    typeof entry[1] === 'function' && !['searchQuery', 'applicationTab', 'queueFilter'].includes(entry[0]),
 );
 
 describe('Department route contract', () => {
@@ -16,7 +16,7 @@ describe('Department route contract', () => {
       .map(file => '/department/' + file.split('/').filter(part => !part.startsWith('(')).join('/'))
       .map(path => path.replace(/\/page\.tsx$/, '').replace(/\[[^\]]+\]/g, ':id'));
     const contractRoutes = Object.entries(department)
-      .filter(([name]) => name !== 'searchQuery')
+      .filter(([name]) => !['searchQuery', 'applicationTab', 'queueFilter'].includes(name))
       .map(([, route]) => typeof route === 'string' ? route : route('record-id', 'record-id'))
       .map(path => path.replace(/record-id/g, ':id'));
 
@@ -56,6 +56,21 @@ describe('Department route contract', () => {
     expect(department.searchQuery('   ')).toBe(department.search);
   });
 
+  it('builds stable application tabs with an optional origin', () => {
+    const url = new URL(department.applicationTab('APP / मराठी', 'queries', 'scrutiny'), 'https://example.test');
+    expect(decodeURIComponent(url.pathname.split('/')[3])).toBe('APP / मराठी');
+    expect(url.searchParams.get('tab')).toBe('queries');
+    expect(url.searchParams.get('from')).toBe('scrutiny');
+  });
+
+  it('builds service queue filters without inventing a route', () => {
+    const url = new URL(department.queueFilter('Building / Planning', 'sla-risk'), 'https://example.test');
+    expect(url.pathname).toBe(department.queue);
+    expect(url.searchParams.get('service')).toBe('Building / Planning');
+    expect(url.searchParams.get('status')).toBe('sla-risk');
+    expect(departmentActiveItem(url.pathname + url.search)).toBe('dept-queue');
+  });
+
   it.each(Object.entries(DEPARTMENT_DESTINATIONS))('keeps %s in the existing sidebar IA', (id, route) => {
     const parent = id === 'dept-regimpact' ? 'dept-regchng' : id === 'dept-bottleneck' ? 'dept-analytics' : id;
     expect(departmentActiveItem(route)).toBe(parent);
@@ -63,7 +78,8 @@ describe('Department route contract', () => {
   });
 
   it.each(recordBuilders)('%s never highlights Department Home', (_name, build) => {
-    expect(departmentActiveItem(build('APP-2', 'CHILD-2'))).toBe('dept-apps');
+    expect(departmentActiveItem(build('APP-2', 'CHILD-2'))).not.toBe('dept-home');
+    expect(departmentActiveItem(build('APP-2', 'CHILD-2'))).not.toBe('');
   });
 
   it('does not highlight Home for an unknown route', () => {
@@ -75,9 +91,12 @@ describe('Department route contract', () => {
     ['delta-rescrutiny', '/delta-rescrutiny'],
     ['query-history', '/query-history'],
     ['inspection-queue', '/inspections'],
-    ['dna', '/dna'],
-  ] as const)('preserves notification application identity for %s', (link, suffix) => {
+  ] as const)('opens notification %s in its restored application view', (link, suffix) => {
     expect(departmentNotificationRoute(link, 'APP-SECOND')).toBe(`/department/applications/APP-SECOND${suffix}`);
+  });
+
+  it('keeps the Business DNA notification application-scoped', () => {
+    expect(departmentNotificationRoute('dna', 'APP-SECOND')).toBe(department.applicationDna('APP-SECOND'));
   });
 
   it('maps oversight notification screen IDs deterministically', () => {
@@ -92,7 +111,7 @@ describe('Department route contract', () => {
     ['consistency', '/consistency'], ['dependency-view', '/dependency-view'],
     ['query-builder', '/query-builder'], ['query-history', '/query-history'],
     ['delta-rescrutiny', '/delta-rescrutiny'], ['inspection-queue', '/inspections'],
-  ])('maps scrutiny destination %s without losing application identity', (destination, suffix) => {
+  ])('maps scrutiny destination %s to its restored view', (destination, suffix) => {
     expect(departmentScrutinyRoute('APP-SECOND', destination)).toBe(`/department/applications/APP-SECOND${suffix}`);
   });
 

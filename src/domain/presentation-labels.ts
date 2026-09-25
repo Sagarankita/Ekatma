@@ -6,15 +6,21 @@ export interface PresentationLabel {
 }
 
 export const ApplicationStateLabels: Record<States.ApplicationState, PresentationLabel> = {
-  draft: { label: 'Draft', colorCls: 'bg-gray-100 text-gray-800' },
-  submitted: { label: 'Submitted', colorCls: 'bg-blue-100 text-blue-800' },
-  under_scrutiny: { label: 'Under Scrutiny', colorCls: 'bg-purple-100 text-purple-800' },
-  query_raised: { label: 'Query Raised', colorCls: 'bg-amber-100 text-amber-800' },
-  inspection_pending: { label: 'Inspection Pending', colorCls: 'bg-indigo-100 text-indigo-800' },
-  decision_pending: { label: 'Decision Pending', colorCls: 'bg-cyan-100 text-cyan-800' },
-  approved: { label: 'Approved', colorCls: 'bg-emerald-100 text-emerald-800' },
-  rejected: { label: 'Rejected', colorCls: 'bg-rose-100 text-rose-800' },
-  withdrawn: { label: 'Withdrawn', colorCls: 'bg-gray-200 text-gray-600' },
+  DRAFT: { label: 'Draft', colorCls: 'bg-gray-100 text-gray-800' },
+  READY_TO_SUBMIT: { label: 'Ready to Submit', colorCls: 'bg-sky-100 text-sky-800' },
+  SUBMITTED: { label: 'Submitted', colorCls: 'bg-blue-100 text-blue-800' },
+  FEE_CONFIRMED: { label: 'Fee Confirmed', colorCls: 'bg-blue-100 text-blue-800' },
+  DOCUMENT_SCRUTINY: { label: 'Document Scrutiny', colorCls: 'bg-purple-100 text-purple-800' },
+  INITIAL_SCRUTINY: { label: 'Initial Scrutiny', colorCls: 'bg-purple-100 text-purple-800' },
+  TECHNICAL_SCRUTINY: { label: 'Technical Scrutiny', colorCls: 'bg-purple-100 text-purple-800' },
+  QUERY_RAISED: { label: 'Query Raised', colorCls: 'bg-amber-100 text-amber-800' },
+  CORRECTION_REQUIRED: { label: 'Correction Required', colorCls: 'bg-amber-100 text-amber-800' },
+  RESUBMITTED: { label: 'Resubmitted', colorCls: 'bg-violet-100 text-violet-800' },
+  INSPECTION_PENDING: { label: 'Inspection Pending', colorCls: 'bg-indigo-100 text-indigo-800' },
+  INSPECTION_SCHEDULED: { label: 'Inspection Scheduled', colorCls: 'bg-indigo-100 text-indigo-800' },
+  FINAL_DECISION: { label: 'Final Decision', colorCls: 'bg-cyan-100 text-cyan-800' },
+  APPROVED: { label: 'Approved', colorCls: 'bg-emerald-100 text-emerald-800' },
+  REJECTED: { label: 'Rejected', colorCls: 'bg-rose-100 text-rose-800' },
 };
 
 export const VerificationStateLabels: Record<States.VerificationState, PresentationLabel> = {

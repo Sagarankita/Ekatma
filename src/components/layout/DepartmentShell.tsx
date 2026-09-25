@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { AccessibilityStrip, PortalHeader, Footer } from '@/App';
+import { AccessibilityStrip } from '@/App';
 
 export default function DepartmentShell({ children, requireAuth = false }: { children: React.ReactNode, requireAuth?: boolean }) {
   const [lang, setLang] = useState<'en' | 'mr'>('en');
@@ -31,11 +31,18 @@ export default function DepartmentShell({ children, requireAuth = false }: { chi
         fontSize={fontSize} setFontSize={setFontSize} 
         highContrast={highContrast} setHighContrast={setHighContrast} 
       />
-      <PortalHeader isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
+      <header className="border-b border-[#d1d9e0] bg-white" role="banner">
+        <div className="mx-auto flex max-w-[1440px] items-center gap-4 px-6 py-2.5">
+          <img src="/assets/india-emblem.png" alt="National Emblem of India" className="h-10 w-auto object-contain" />
+          <div className="h-9 w-px bg-[#d1d9e0]" />
+          <img src="/assets/ekatma-logo.png" alt="EKATMA" className="h-8 w-auto object-contain" />
+          <div><p className="text-sm font-bold text-[#1a3a5c]">EKATMA</p><p className="text-[10px] text-[#4a5568]">Government of Maharashtra Portal</p></div>
+        </div>
+      </header>
       <main className="flex-1 flex flex-col">
         {children}
       </main>
-      <Footer />
+      <footer className="bg-[#0f2540] px-6 py-4 text-center text-xs text-white/70">Content owned by Government of Maharashtra · © 2026 Government of Maharashtra</footer>
     </div>
   );
 }

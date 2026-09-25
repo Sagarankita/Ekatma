@@ -1,10 +1,15 @@
 'use client';
+import { QueryWorklist } from '@/components/department/OperationalWorklists';
+import { useRouter } from 'next/navigation';
+import { ROUTES } from '@/lib/routes';
 
-export default function QueriesPlaceholderPage() {
+export default function QueriesPage() {
+  const router = useRouter();
+  
   return (
-    <div className="p-12 text-center text-[#4a5568]">
-      <h2 className="text-xl font-semibold mb-2">Queries / Deficiencies</h2>
-      <p>The Queries / Deficiencies view is currently being implemented.</p>
-    </div>
+    <QueryWorklist 
+      onOpen={(applicationId) => router.push(ROUTES.department.applicationQueryHistory(applicationId))}
+      onOpenBuilder={(applicationId) => router.push(ROUTES.department.applicationQueryBuilder(applicationId))}
+    />
   );
 }

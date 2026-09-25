@@ -14,7 +14,7 @@ export default function Page() {
   return (
     <M13DocumentReviewPage 
       
-      onBack={() => router.back()}
+      onBack={() => router.push(`/department/applications/${appId}?tab=documents`)}
       onOpenParamDetail={(id: string) => router.push(`/department/applications/${appId}/parameter/${id}`)}
     
     />

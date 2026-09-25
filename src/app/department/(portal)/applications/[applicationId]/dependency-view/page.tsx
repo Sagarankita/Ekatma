@@ -14,8 +14,8 @@ export default function Page() {
   return (
     <M17DependencyViewPage 
       
-      onBack={() => router.back()}
-      onBackToOverview={() => router.push(`/department/applications/${appId}`)}
+      onBack={() => router.push(`/department/applications/${appId}?tab=dependencies`)}
+      onBackToOverview={() => router.push(`/department/applications/${appId}?tab=dependencies`)}
     
     />
   );
