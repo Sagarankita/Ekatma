@@ -1,0 +1,123 @@
+'use client'
+
+import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { ENTREPRENEUR_ROUTES } from '@/lib/routes/entrepreneur'
+import { AccessibilityStrip, PortalHeader, DemoNotice, Footer, AuthShell } from './PublicChrome'
+import { IndustrialLoginPage, CreateAccountPage, CompleteRegistrationPage, RegistrationSuccessPage } from './AuthForms'
+import { useDisplayPreferences } from '../appearance/useDisplayPreferences'
+
+const VERIFIED_EMAIL_KEY = 'entrepreneur_demo_verified_email'
+const REGISTERED_EMAIL_KEY = 'entrepreneur_demo_registered_email'
+const AUTH_KEY = 'entrepreneur_demo_auth'
+
+function PublicFrame({ children, auth = false }: { children: React.ReactNode; auth?: boolean }) {
+  const router = useRouter()
+  const { fontSizeClass, contrastClass, ...sharedProps } = useDisplayPreferences()
+  return (
+    <div className={`min-h-screen flex flex-col ${fontSizeClass} ${contrastClass}`} style={{ fontFamily: 'Noto Sans, Noto Sans Devanagari, system-ui, sans-serif' }}>
+      {auth ? (
+        <AuthShell {...sharedProps} onGoToLogin={() => router.push(ENTREPRENEUR_ROUTES.login())} setIsLoggedIn={() => {}}>
+          {children}
+        </AuthShell>
+      ) : (
+        <>
+          <AccessibilityStrip {...sharedProps} />
+          <PortalHeader isLoggedIn={false} setIsLoggedIn={() => {}} onGoToLogin={() => router.push(ENTREPRENEUR_ROUTES.login())} />
+          <DemoNotice />
+          {children}
+          <Footer />
+        </>
+      )}
+    </div>
+  )
+}
+
+export function PublicLanding() {
+  const router = useRouter()
+  return (
+    <PublicFrame>
+      <main id="main-content" className="flex-1 bg-[#f8f9fb]" tabIndex={-1}>
+        <div className="max-w-[960px] mx-auto px-6 py-16 text-center">
+          <div className="flex justify-center mb-6">
+            <img src="/assets/india-emblem.png" alt="" aria-hidden="true" className="h-16 w-auto object-contain opacity-20" />
+          </div>
+          <h1 className="text-2xl font-bold text-[#1a3a5c] mb-3">Welcome to EKATMA</h1>
+          <p className="text-[#6b7a8d] text-sm max-w-lg mx-auto mb-8">
+            The official Government of Maharashtra industrial and entrepreneurship portal. Sign in or register to access services, track applications, and connect with government schemes.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <button onClick={() => router.push(ENTREPRENEUR_ROUTES.login())} className="bg-[#1a3a5c] text-white text-sm font-medium px-6 py-2.5 rounded hover:bg-[#0f2540] focus:ring-2 focus:ring-[#1a56db] focus:ring-offset-2 transition-colors">Industrial Login</button>
+            <button onClick={() => router.push('/department/login')} className="border border-[#1a3a5c] text-[#1a3a5c] text-sm font-medium px-6 py-2.5 rounded hover:bg-[#f0f4f8] focus:ring-2 focus:ring-[#1a56db] focus:ring-offset-2 transition-colors">Department Login</button>
+          </div>
+        </div>
+      </main>
+    </PublicFrame>
+  )
+}
+
+export function EntrepreneurLogin() {
+  const router = useRouter()
+  const [registeredEmail, setRegisteredEmail] = useState<string>()
+  useEffect(() => { setRegisteredEmail(sessionStorage.getItem(REGISTERED_EMAIL_KEY) || undefined) }, [])
+  return (
+    <PublicFrame auth>
+      <IndustrialLoginPage
+        onSignUp={() => router.push(ENTREPRENEUR_ROUTES.register())}
+        onLoginSuccess={() => {
+          sessionStorage.setItem(AUTH_KEY, 'true')
+          router.push(ENTREPRENEUR_ROUTES.businesses())
+        }}
+        onBack={() => router.push('/')}
+        registeredEmail={registeredEmail}
+      />
+    </PublicFrame>
+  )
+}
+
+export function EntrepreneurRegister() {
+  const router = useRouter()
+  return (
+    <PublicFrame auth>
+      <CreateAccountPage
+        onVerified={email => {
+          sessionStorage.setItem(VERIFIED_EMAIL_KEY, email)
+          router.push(ENTREPRENEUR_ROUTES.registerDetails())
+        }}
+        onBack={() => router.push(ENTREPRENEUR_ROUTES.login())}
+      />
+    </PublicFrame>
+  )
+}
+
+export function EntrepreneurRegisterDetails() {
+  const router = useRouter()
+  const [verifiedEmail, setVerifiedEmail] = useState<string | null>(null)
+  useEffect(() => {
+    const email = sessionStorage.getItem(VERIFIED_EMAIL_KEY)
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      router.replace(ENTREPRENEUR_ROUTES.register())
+      return
+    }
+    setVerifiedEmail(email)
+  }, [router])
+  if (!verifiedEmail) return null
+  return (
+    <PublicFrame auth>
+      <CompleteRegistrationPage
+        verifiedEmail={verifiedEmail}
+        onSuccess={() => {
+          sessionStorage.setItem(REGISTERED_EMAIL_KEY, verifiedEmail)
+          sessionStorage.removeItem(VERIFIED_EMAIL_KEY)
+          router.push(ENTREPRENEUR_ROUTES.registerSuccess())
+        }}
+        onBack={() => router.push(ENTREPRENEUR_ROUTES.register())}
+      />
+    </PublicFrame>
+  )
+}
+
+export function EntrepreneurRegisterSuccess() {
+  const router = useRouter()
+  return <PublicFrame auth><RegistrationSuccessPage onGoToLogin={() => router.push(ENTREPRENEUR_ROUTES.login())} /></PublicFrame>
+}

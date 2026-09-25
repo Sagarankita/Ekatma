@@ -1,5 +1,5 @@
-import EntrepreneurApp from '@/components/entrepreneur/EntrepreneurApp';
+import { PublicLanding } from '@/features/entrepreneur/public-auth/PublicAuth';
 
 export default function HomePage() {
-  return <EntrepreneurApp initialPage="portal" />;
+  return <PublicLanding />;
 }
