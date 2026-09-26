@@ -16,6 +16,9 @@ import { listJourneyNodesForBusiness } from '../journey/data'
 import { listDocumentsForBusiness } from '../documents/data'
 import { useDisplayPreferences } from '../appearance/useDisplayPreferences'
 import { AccessibilityStrip, DemoNotice, Footer, Icon, PortalHeader } from '../public-auth/PublicChrome'
+import { useRegulatoryAssistant } from '@/features/regulatory-assistant/Provider'
+import { enrichAssistantContext, entrepreneurPageContext, globalAssistantContext } from '@/features/regulatory-assistant/context'
+import { GlobalAssistantSurface } from '@/features/regulatory-assistant/GlobalAssistant'
 
 function Sidebar({ pathname, business, onSelectBusiness, closeMobile, collapsed, setCollapsed }: {
   pathname: string
@@ -303,6 +306,21 @@ export function AuthenticatedShell({ children }: { children: React.ReactNode }) 
   const routeBusiness = businessFromEntrepreneurPathname(pathname)
   const rememberedBusiness = rememberedBusinessId ? findBusinessById(rememberedBusinessId) : undefined
   const currentBusiness = routeBusiness ?? rememberedBusiness
+  const { openAssistant } = useRegulatoryAssistant()
+  const assistantPageContext = React.useMemo(() => {
+    const context = entrepreneurPageContext(pathname, currentBusiness?.name)
+    const businessId = context.entities.businessId
+    if (!businessId) return context
+    const entity = context.entities.requirementId ? findBusinessEntity('requirement', businessId, context.entities.requirementId)
+      : context.entities.documentId ? findBusinessEntity('document', businessId, context.entities.documentId)
+      : context.entities.applicationId ? findBusinessEntity('application', businessId, context.entities.applicationId)
+      : context.entities.complianceId ? findBusinessEntity('compliance', businessId, context.entities.complianceId)
+      : context.entities.incentiveId ? findBusinessEntity('incentive', businessId, context.entities.incentiveId)
+      : context.entities.claimId ? findBusinessEntity('claim', businessId, context.entities.claimId)
+      : context.entities.inspectionId ? findBusinessEntity('inspection', businessId, context.entities.inspectionId)
+      : undefined
+    return entity ? enrichAssistantContext(context, { recordTitle: entity.label }, entity.label) : context
+  }, [pathname, currentBusiness?.name])
 
   useEffect(() => {
     if (sessionStorage.getItem('entrepreneur_demo_auth') !== 'true') {
@@ -338,7 +356,7 @@ export function AuthenticatedShell({ children }: { children: React.ReactNode }) 
 
   return <div className={`min-h-screen flex flex-col ${fontSizeClass} ${contrastClass}`} style={{ fontFamily: 'Noto Sans, Noto Sans Devanagari, system-ui, sans-serif' }}>
     <AccessibilityStrip {...display} />
-    <PortalHeader isLoggedIn={true} setIsLoggedIn={value => { if (!value) logout() }} onGoToLogin={() => router.push(ENTREPRENEUR_ROUTES.login())} onGoToNotifications={() => router.push(ENTREPRENEUR_ROUTES.notifications())} onOpenRegAssistant={() => router.push(ENTREPRENEUR_ROUTES.assistant())} />
+    <PortalHeader isLoggedIn={true} setIsLoggedIn={value => { if (!value) logout() }} onGoToLogin={() => router.push(ENTREPRENEUR_ROUTES.login())} onGoToNotifications={() => router.push(ENTREPRENEUR_ROUTES.notifications())} onOpenRegAssistant={() => openAssistant({ origin: 'header', mode: 'global', context: globalAssistantContext(assistantPageContext) })} />
     <DemoNotice />
     <div className="lg:hidden flex items-center gap-3 px-4 py-2 bg-white border-b border-[#d1d9e0]">
       <button type="button" onClick={() => setMobileOpen(true)} className="flex items-center gap-2 text-xs text-[#1a3a5c] font-semibold hover:text-[#1a56db]" aria-label="Open navigation menu"><Icon.Menu />Menu</button>
@@ -351,5 +369,6 @@ export function AuthenticatedShell({ children }: { children: React.ReactNode }) 
       <div className="flex-1 min-w-0 overflow-auto">{children}</div>
     </div>
     <Footer />
+    <GlobalAssistantSurface pageContext={assistantPageContext} suppressed={mobileOpen || pathname.includes('/dependencies')} />
   </div>
 }

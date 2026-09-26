@@ -349,7 +349,7 @@ export function E29RegChangeImpactPage({ onBack, onGoToApplication, onGoToCompli
 
                     <div className="flex flex-wrap gap-2 pt-1 border-t border-[#e2e8f0]">
                       <button
-                        onClick={() => setRagOpen(true)}
+                        onClick={() => selected && onOpenRegAssistant?.({ entryPoint: 'reg-change', recordId: selected.id, recordName: selected.title, department: selected.department, initialQuestion: 'What exactly changed?' })}
                         className="text-xs border border-[#d1d9e0] text-[#1a3a5c] px-3 py-1.5 hover:bg-[#f1f5f9]"
                       >
                         Ask Assistant
@@ -366,11 +366,11 @@ export function E29RegChangeImpactPage({ onBack, onGoToApplication, onGoToCompli
         {/* Regulatory Assistant */}
         <div className="bg-white border border-[#e2e8f0]">
           <button
-            onClick={() => setRagOpen(v => !v)}
+            onClick={() => onOpenRegAssistant?.({ entryPoint: 'reg-change', initialQuestion: 'Which change requires my immediate attention?' })}
             className="w-full flex items-center justify-between px-5 py-3 text-xs font-semibold text-[#1a3a5c] hover:bg-[#f8f9fb] transition-colors"
           >
             <span>Regulatory Assistant — Change Impact Queries</span>
-            <span className="text-[#6b7a8d] font-normal">{ragOpen ? '▲ Hide' : '▼ Show'}</span>
+            <span className="text-[#6b7a8d] font-normal">Open shared assistant</span>
           </button>
           {ragOpen && (
             <div className="border-t border-[#e8edf2] px-5 py-4 space-y-3">

@@ -10,7 +10,6 @@ export function ScenariosScreen() {
   const { businessId } = useIncentiveWorkspace();
 
   const handleBack = () => router.push(ENTREPRENEUR_ROUTES.incentives(businessId));
-  const handleOpenRegAssistant = () => alert("Regulatory Assistant would open here.");
 
   const scenarios = [
     {

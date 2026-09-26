@@ -4,6 +4,8 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ENTREPRENEUR_ROUTES } from '@/lib/routes/entrepreneur'
+import { useRegulatoryAssistant } from '@/features/regulatory-assistant/Provider'
+import { inlineContext } from '@/features/regulatory-assistant/context'
 import type { BusinessProject } from '../businesses/catalog'
 import {
   listJourneyNodesForBusiness,
@@ -92,7 +94,10 @@ export function JourneyScreen({ project }: { project: BusinessProject }) {
   const [search, setSearch] = useState('')
   const [showNA, setShowNA] = useState(false)
   const [cteApproved, setCteApproved] = useState(false)
-  const [assistantOpen, setAssistantOpen] = useState(false)
+  const { openAssistant, pageContext } = useRegulatoryAssistant()
+  // Kept false until the legacy markup is removed; all live triggers use the shared drawer.
+  const assistantOpen = false
+  const setAssistantOpen = (_open: boolean) => undefined
 
   const nodes = listJourneyNodesForBusiness(project.id, cteApproved)
 
@@ -163,7 +168,7 @@ export function JourneyScreen({ project }: { project: BusinessProject }) {
             </Link>
             <button
               type="button"
-              onClick={() => setAssistantOpen(true)}
+              onClick={() => openAssistant({ origin: 'inline', mode: 'entity', context: inlineContext(pageContext, { pageType: 'regulatory-journey', pageTitle: 'Regulatory Journey', label: `${project.name} regulatory journey`, entities: { businessId: project.id }, recordTitle: project.name }) })}
               className="text-xs border border-[#d1d9e0] text-[#374151] px-3 py-2 rounded hover:bg-[#f0f4f8] font-medium transition-colors"
             >
               Ask Assistant

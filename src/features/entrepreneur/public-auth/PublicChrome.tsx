@@ -282,7 +282,7 @@ export function PortalHeader({
         {/* Right actions */}
         <div className="flex flex-wrap items-center justify-center xl:justify-end gap-3 w-full xl:w-auto">
           {showSearchAndHelp && (
-            <button aria-label="Help" onClick={onOpenRegAssistant} className="p-2 rounded hover:bg-[#f0f4f8] text-[#4a5568] hover:text-[#1a3a5c] transition-colors" title="Regulatory Assistant"><Icon.Help /></button>
+            <button aria-label="Regulatory Assistant" onClick={onOpenRegAssistant} className="flex items-center gap-1.5 p-2 rounded hover:bg-[#f0f4f8] text-[#4a5568] hover:text-[#1a3a5c] transition-colors" title="Regulatory Assistant"><Icon.Shield /><span className="hidden lg:inline text-xs font-medium">Regulatory Assistant</span></button>
           )}
           {isLoggedIn && (
             <button aria-label="Notifications — 3 unread" onClick={onGoToNotifications} className="p-2 rounded hover:bg-[#f0f4f8] text-[#4a5568] hover:text-[#1a3a5c] transition-colors relative">

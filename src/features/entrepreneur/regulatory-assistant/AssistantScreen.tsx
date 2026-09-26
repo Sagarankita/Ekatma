@@ -2,6 +2,8 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { Icon } from '../public-auth/PublicChrome';
+import { useRegulatoryAssistant } from '@/features/regulatory-assistant/Provider';
+import { inlineContext } from '@/features/regulatory-assistant/context';
 
 const inputDefault = 'w-full px-3 py-2 text-sm border rounded bg-white focus:outline-none focus:ring-2 focus:ring-[#1a56db] focus:border-[#1a56db] transition-colors placeholder:text-[#9aa5b4] border-[#d1d9e0]';
 
@@ -250,13 +252,6 @@ export function E34RegAssistantDrawer({
   const [sessionKey, setSessionKey] = useState(0)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
-
-  // Reset session when context changes
-  useEffect(() => {
-    setMessages([])
-    setInput('')
-    setSessionKey(k => k + 1)
-  }, [context?.entryPoint, context?.recordId])
 
   // Auto-inject initial question when drawer opens with a context
   useEffect(() => {
@@ -544,7 +539,13 @@ export function E34RegAssistantDrawer({
 
 // Standalone E34 page — accessible from dev toolbar and Help icon
 export function E34RegAssistantPage({ lang, context = { entryPoint: 'general' } }: { lang: 'en' | 'mr'; context?: RegAssistantContext }) {
-  const [drawerOpen, setDrawerOpen] = useState(true)
+  const { openAssistant, pageContext } = useRegulatoryAssistant()
+  const sharedContext = inlineContext(pageContext, {
+    pageType: context.entryPoint === 'general' ? 'assistant-research' : context.entryPoint,
+    pageTitle: 'Regulatory Assistant',
+    label: context.recordName ?? 'Regulatory Assistant',
+    recordTitle: context.recordName,
+  })
   const t = {
     en: { title: 'Regulatory Assistant', intro: 'Ask questions about requirements, documents, GRs, departmental queries, and regulatory changes. The assistant is open on the right.', open: 'Open Regulatory Assistant' },
     mr: { title: 'नियामक सहाय्यक', intro: 'आवश्यकता, दस्तऐवज, GR, विभागीय चौकशी आणि नियामक बदलांबद्दल प्रश्न विचारा.', open: 'नियामक सहाय्यक उघडा' },
@@ -566,12 +567,11 @@ export function E34RegAssistantPage({ lang, context = { entryPoint: 'general' } 
               <span key={ep} className="bg-[#f0f4f8] border border-[#d1d9e0] rounded px-3 py-1">{ep}</span>
             ))}
           </div>
-          <button onClick={() => setDrawerOpen(true)} className="bg-[#1a3a5c] text-white text-sm font-medium px-5 py-2 rounded hover:bg-[#0f2540] transition-colors">
+          <button onClick={() => openAssistant({ origin: 'full-page', mode: 'research', context: sharedContext, preset: context.initialQuestion })} className="bg-[#1a3a5c] text-white text-sm font-medium px-5 py-2 rounded hover:bg-[#0f2540] transition-colors">
             {t.open}
           </button>
         </div>
       </div>
-      <E34RegAssistantDrawer isOpen={drawerOpen} onClose={() => setDrawerOpen(false)} context={context} lang={lang} />
     </main>
   )
 }

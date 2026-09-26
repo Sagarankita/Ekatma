@@ -6,6 +6,8 @@ import { Icon } from '../public-auth/PublicChrome'
 import { SAMPLE_PROJECTS } from '../businesses/catalog'
 import { ENTREPRENEUR_ROUTES } from '@/lib/routes/entrepreneur'
 import type { E03Data, E04Data, E05Data } from './types'
+import { useRegulatoryAssistant } from '@/features/regulatory-assistant/Provider'
+import { inlineContext } from '@/features/regulatory-assistant/context'
 
 function Breadcrumb({ items }: { items: { label: string; href?: string }[] }) {
   const routeFor = (item: { label: string; href?: string }) => {
@@ -3894,6 +3896,7 @@ export function BusinessProfileReviewPage({ e03Data, e04Data, e05Data, expansion
   const [generating, setGenerating] = useState(false)
   const [generationStep, setGenerationStep] = useState(0)
   const [assistantOpen, setAssistantOpen] = useState(false)
+  const { openAssistant, pageContext } = useRegulatoryAssistant()
 
   // Simulate generation steps on confirm
   function handleConfirm() {
@@ -4586,7 +4589,7 @@ export function BusinessProfileReviewPage({ e03Data, e04Data, e05Data, expansion
           <button onClick={onBack} className="border border-[#d1d9e0] text-[#374151] text-sm font-medium px-5 py-2.5 rounded hover:bg-[#f0f4f8] transition-colors">
             Back
           </button>
-          <button onClick={() => setAssistantOpen(true)} className="border border-[#d1d9e0] text-[#374151] text-sm font-medium px-5 py-2.5 rounded hover:bg-[#f0f4f8] transition-colors flex items-center gap-2">
+          <button onClick={() => openAssistant({ origin: 'inline', mode: 'entity', context: inlineContext(pageContext, { pageType: 'business-dna-review', pageTitle: 'Business Profile Review', label: 'Business Profile Review' }) })} className="border border-[#d1d9e0] text-[#374151] text-sm font-medium px-5 py-2.5 rounded hover:bg-[#f0f4f8] transition-colors flex items-center gap-2">
             <Icon.Help /> Ask Assistant
           </button>
           <div className="flex-1" />

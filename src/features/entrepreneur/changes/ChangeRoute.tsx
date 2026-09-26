@@ -5,7 +5,9 @@ import { useRouter } from 'next/navigation';
 import { ENTREPRENEUR_ROUTES } from '@/lib/routes/entrepreneur';
 import type { BusinessProject } from '../businesses/catalog';
 import { findBusinessEntity } from '../identity/catalog';
-import { contextualAssistantDestination } from '../regulatory-assistant/context';
+import type { RegAssistantContext } from '../regulatory-assistant/AssistantScreen';
+import { useRegulatoryAssistant } from '@/features/regulatory-assistant/Provider';
+import { inlineContext } from '@/features/regulatory-assistant/context';
 import { E29RegChangeImpactPage, E30BusinessChangeSimulator, E31AmendmentsPage, type ChangeType } from './ChangeScreens';
 
 const getDraftKey = (businessId: string) => `entrepreneur_change_draft_${businessId}_v1`;
@@ -13,6 +15,11 @@ type ChangeDraft = { changeType: ChangeType; proposedValue: string };
 
 export function ChangeRoute({ project, screen }: { project: BusinessProject; screen: 'regulatory' | 'simulation' | 'amendments' }) {
   const router = useRouter();
+  const { openAssistant, pageContext } = useRegulatoryAssistant();
+  const openChangeAssistant = (context: RegAssistantContext) => openAssistant({
+    origin: 'inline', mode: 'entity', preset: context.initialQuestion,
+    context: inlineContext(pageContext, { pageType: 'regulatory-changes', pageTitle: 'Regulatory Changes', label: context.recordName ?? 'Regulatory Changes', entities: { businessId: project.id, regulatoryChangeId: context.recordId }, recordTitle: context.recordName }),
+  });
   const [draft, setDraft] = useState<ChangeDraft | null>(null);
   const draftKey = getDraftKey(project.id);
 
@@ -32,7 +39,7 @@ export function ChangeRoute({ project, screen }: { project: BusinessProject; scr
       return findBusinessEntity(record.type, project.id, record.id)?.label === record.label;
     }}
     onGoToE24={() => router.push(ENTREPRENEUR_ROUTES.compliance(project.id))}
-    onOpenRegAssistant={context => router.push(contextualAssistantDestination(context))}
+    onOpenRegAssistant={openChangeAssistant}
   />;
 
   if (screen === 'amendments') {

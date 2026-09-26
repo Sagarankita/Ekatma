@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ENTREPRENEUR_ROUTES } from '@/lib/routes/entrepreneur';
 import type { BusinessProject } from '../businesses/catalog';
+import { useRegulatoryAssistant } from '@/features/regulatory-assistant/Provider';
+import { inlineContext } from '@/features/regulatory-assistant/context';
 import {
   type AppSection,
   type SectionState,
@@ -31,6 +33,11 @@ export function ApplicationWorkspaceScreen({
   const [ragOpen, setRagOpen] = useState(false);
   const [ragInput, setRagInput] = useState('');
   const [ragMessages, setRagMessages] = useState<{ role: 'user' | 'assistant'; text: string }[]>([]);
+  const { openAssistant, pageContext } = useRegulatoryAssistant();
+  const openApplicationAssistant = () => openAssistant({
+    origin: 'inline', mode: 'entity',
+    context: inlineContext(pageContext, { pageType: 'application-workspace', pageTitle: 'Application Workspace', label: 'Application Workspace', entities: { businessId: project.id, requirementId: reqId }, recordTitle: reqId }),
+  });
 
   // Minimal form state for demo fields
   const [commonDone, setCommonDone] = useState(false);
@@ -598,7 +605,7 @@ export function ApplicationWorkspaceScreen({
               <p className="text-[10px] text-[#9aa5b4] mb-2">Why is this field required? Which section is affected? Which GR applies?</p>
               <button
                 type="button"
-                onClick={() => setRagOpen(true)}
+                onClick={openApplicationAssistant}
                 className="w-full text-xs font-semibold bg-[#1a56db] text-white px-3 py-2 rounded hover:bg-[#1e40af] transition-colors"
               >
                 Ask Regulatory Assistant →

@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ENTREPRENEUR_ROUTES } from '@/lib/routes/entrepreneur';
 import type { BusinessProject } from '../businesses/catalog';
+import { useRegulatoryAssistant } from '@/features/regulatory-assistant/Provider';
+import { inlineContext } from '@/features/regulatory-assistant/context';
 import {
   findDocumentForBusiness,
   reqBadge,
@@ -29,6 +31,7 @@ export function DocumentDetailScreen({
   const [ragOpen, setRagOpen] = useState(false);
   const [ragInput, setRagInput] = useState('');
   const [ragMessages, setRagMessages] = useState<{ role: 'user' | 'assistant'; text: string }[]>([]);
+  const { openAssistant, pageContext } = useRegulatoryAssistant();
 
   const SUGGESTED_PROMPTS = [
     'Why is this document required?',
@@ -78,6 +81,10 @@ export function DocumentDetailScreen({
       </main>
     );
   }
+  const openDocumentAssistant = () => openAssistant({
+    origin: 'inline', mode: 'entity',
+    context: inlineContext(pageContext, { pageType: 'document-detail', pageTitle: 'Document Detail', label: doc.name, entities: { businessId: project.id, documentId: doc.id }, recordTitle: doc.name }),
+  });
 
   return (
     <main id="main-content" className="flex-1 bg-[#f8f9fb]" tabIndex={-1}>
@@ -374,7 +381,7 @@ export function DocumentDetailScreen({
             <p className="text-xs text-[#6b7a8d] mb-3">Why is this required? What should it contain? Which GR applies?</p>
             <button
               type="button"
-              onClick={() => setRagOpen(true)}
+              onClick={openDocumentAssistant}
               className="w-full text-sm bg-[#1a3a5c] text-white rounded px-3 py-2 hover:bg-[#0f2540] text-center transition-colors"
             >
               Ask Regulatory Assistant

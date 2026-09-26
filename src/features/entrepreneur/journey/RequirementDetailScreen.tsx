@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { ENTREPRENEUR_ROUTES } from '@/lib/routes/entrepreneur';
 import type { BusinessProject } from '../businesses/catalog';
+import { useRegulatoryAssistant } from '@/features/regulatory-assistant/Provider';
+import { inlineContext } from '@/features/regulatory-assistant/context';
 import {
   listJourneyNodesForBusiness,
   journeyStateCfg,
@@ -34,6 +36,7 @@ export function RequirementDetailScreen({
   const [ragOpen, setRagOpen] = useState(false);
   const [ragQuestion, setRagQuestion] = useState('');
   const [ragAnswer, setRagAnswer] = useState<string | null>(null);
+  const { openAssistant, pageContext } = useRegulatoryAssistant();
 
   const nodes = listJourneyNodesForBusiness(project.id, cteApproved);
   const req = nodes.find(n => n.id === requirementId);
@@ -62,6 +65,10 @@ export function RequirementDetailScreen({
   const isReady = req.displayState === 'ready';
   const isApproved = req.displayState === 'approved';
   const isWaiting = req.displayState === 'waiting';
+  const openRequirementAssistant = () => openAssistant({
+    origin: 'inline', mode: 'entity',
+    context: inlineContext(pageContext, { pageType: 'requirement-detail', pageTitle: 'Requirement Detail', label: req.service, entities: { businessId: project.id, requirementId: req.id }, recordTitle: req.service }),
+  });
 
   const ragSuggestions = [
     'Why is this requirement applicable to my business?',
@@ -133,7 +140,7 @@ export function RequirementDetailScreen({
                 </span>
                 <button
                   type="button"
-                  onClick={() => setRagOpen(true)}
+                  onClick={openRequirementAssistant}
                   className="text-xs bg-[#1a56db] text-white px-3 py-1.5 rounded hover:bg-[#1a3a5c] font-medium flex items-center gap-1.5"
                 >
                   Ask Assistant
@@ -720,7 +727,7 @@ export function RequirementDetailScreen({
               </p>
               <button
                 type="button"
-                onClick={() => setRagOpen(true)}
+                onClick={openRequirementAssistant}
                 className="w-full text-xs font-semibold bg-[#1a56db] text-white px-3 py-2 rounded hover:bg-[#1e40af] transition-colors"
               >
                 Ask Regulatory Assistant →

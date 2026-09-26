@@ -4,17 +4,20 @@ import { useRouter } from 'next/navigation';
 import { ENTREPRENEUR_ROUTES } from '@/lib/routes/entrepreneur';
 import { useIncentiveWorkspace } from '../state';
 import { IncentiveWorkspaceHeader } from './IncentiveWorkspaceHeader';
+import { useRegulatoryAssistant } from '@/features/regulatory-assistant/Provider';
+import { inlineContext } from '@/features/regulatory-assistant/context';
 
 export function ROIResultsScreen() {
   const router = useRouter();
   const { businessId } = useIncentiveWorkspace();
   const [showExplain, setShowExplain] = useState(false);
+  const { openAssistant, pageContext } = useRegulatoryAssistant();
 
   const cashflows = [40, -20, 60, 100, 130, 160]; // net ₹ Lakh relative
 
   const handleBack = () => router.push(ENTREPRENEUR_ROUTES.incentives(businessId) + '/roi');
   const handleGoToScenarios = () => router.push(ENTREPRENEUR_ROUTES.incentives(businessId) + '/scenarios');
-  const handleOpenRegAssistant = () => alert("Regulatory Assistant would open here.");
+  const handleOpenRegAssistant = () => openAssistant({ origin: 'inline', mode: 'entity', context: inlineContext(pageContext, { pageType: 'roi-results', pageTitle: 'Investment Outlook', label: 'Investment Outlook', entities: { businessId } }) });
 
   return (
     <main id="main-content" className="flex-1 bg-[#f8f9fb]" tabIndex={-1}>

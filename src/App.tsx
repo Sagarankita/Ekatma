@@ -8,6 +8,8 @@ import { EmbeddedDocumentOcrViewer } from '@/components/department/EmbeddedDocum
 import { DocumentOcrInsightsPage } from '@/components/department/DocumentOcrInsightsPage';
 export { DocumentOcrInsightsPage } from '@/components/department/DocumentOcrInsightsPage';
 import { GovDependencyScreen } from '@/features/department/journey/GovDependencyScreen';
+import { useRegulatoryAssistant } from '@/features/regulatory-assistant/Provider';
+import { inlineContext } from '@/features/regulatory-assistant/context';
 
 
 import { createContext, useContext } from 'react';
@@ -1518,12 +1520,12 @@ export function DeptContextBar({ onLogout, onNotif, onRegAssistant, onSearch }: 
 
           {/* Regulatory Assistant */}
           <button
-            aria-label="Regulatory Assistant - AI-assisted regulatory reference"
+            aria-label="Regulatory Assistant"
             onClick={onRegAssistant}
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-white/70 hover:text-white hover:bg-white/10 transition-colors text-xs focus-visible:ring-2 focus-visible:ring-white/60"
           >
             <MIcon.Bot />
-            <span className="hidden lg:inline">Reg. Assistant</span>
+            <span className="hidden lg:inline">Regulatory Assistant</span>
           </button>
 
           <div className="w-px h-5 bg-white/20 mx-1" aria-hidden="true" />
@@ -6010,6 +6012,8 @@ export function M11ScrutinyWorkbenchPage({ onBack, onBackToOverview, onOpenDna, 
   onBack: () => void; onBackToOverview: () => void; onOpenDna?: () => void; onOpenTimeline?: () => void; onOpenParamDetail?: (id: string) => void; onOpenDocReview?: (id: string) => void; onOpenBldgScrutiny?: () => void; onOpenWaterScrutiny?: () => void; onOpenDepView?: () => void; onOpenConsistency?: () => void
 }) {
   const [activeSectionId, setActiveSectionId] = useState('land')
+  const { openAssistant, pageContext } = useRegulatoryAssistant()
+  const openRegulatoryReference = (label = 'MIDC regulatory reference') => openAssistant({ origin: 'inline', mode: 'entity', preset: `Explain ${label}`, context: inlineContext(pageContext, { label, pageType: 'scrutiny', recordTitle: label }) })
   const [activeParamId, setActiveParamId] = useState('plotarea')
   const [reviewStates, setReviewStates] = useState<Record<string, OfficerReviewState>>(() => {
     const m: Record<string, OfficerReviewState> = {}
@@ -6274,7 +6278,7 @@ export function M11ScrutinyWorkbenchPage({ onBack, onBackToOverview, onOpenDna, 
                         <button onClick={() => setQueryModal(true)} className="px-3 py-1.5 text-xs border border-amber-200 rounded text-amber-700 bg-amber-50 hover:bg-amber-100 font-semibold">Raise Query</button>
                         <button onClick={() => setReview(param.id, 'valid')} className="px-3 py-1.5 text-xs border border-emerald-200 rounded text-emerald-700 bg-emerald-50 hover:bg-emerald-100 font-semibold">Mark Valid</button>
                         <button onClick={() => setQueryModal(true)} className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb]">Request Evidence</button>
-                        <button onClick={() => alert('Regulatory Reference: Rule 14.2 MIDC Development Control Regulations 2024.')} className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#1a56db] hover:bg-[#ebf3ff]">Open Regulatory Reference</button>
+                        <button onClick={() => openRegulatoryReference('Rule 14.2, MIDC Development Control Regulations 2024')} className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#1a56db] hover:bg-[#ebf3ff]">Open Regulatory Reference</button>
                       </div>
                     </div>
                   </div>
@@ -6339,7 +6343,7 @@ export function M11ScrutinyWorkbenchPage({ onBack, onBackToOverview, onOpenDna, 
           <div className="px-4 py-3">
             <p className="text-[9px] text-[#374151] uppercase tracking-wider font-semibold mb-1">Regulatory Assistant</p>
             <p className="text-[10px] text-[#1a2533]">2 relevant references available for Plot Area.</p>
-            <button onClick={() => alert('Regulatory Reference: MIDC Land Allotment Policy 2024, Clause 8(a).')} className="mt-1 text-[10px] text-[#1a56db] hover:underline font-semibold">View references</button>
+            <button onClick={() => openRegulatoryReference('MIDC Land Allotment Policy 2024, Clause 8(a)')} className="mt-1 text-[10px] text-[#1a56db] hover:underline font-semibold">View references</button>
             <p className="text-[9px] text-[#6b7280] mt-2 italic">Retrieved regulatory context - not a legal finding or AI decision.</p>
           </div>
         </aside>
@@ -6354,6 +6358,8 @@ export function M12ParameterDetailPage({ onBack, onBackToOverview, onOpenDna, on
   onBack: () => void; onBackToOverview: () => void; onOpenDna?: () => void; onOpenDocReview?: (id: string) => void; onOpenDepView?: () => void
 }) {
   const [officerFinding, setOfficerFinding] = useState<OfficerReviewState>('needs-verification')
+  const { openAssistant, pageContext } = useRegulatoryAssistant()
+  const openRegulatoryReference = () => openAssistant({ origin: 'inline', mode: 'entity', preset: 'Explain Rule 14.2', context: inlineContext(pageContext, { label: 'Rule 14.2, MIDC Development Control Regulations 2024', pageType: 'parameter-detail', recordTitle: 'Rule 14.2' }) })
   const [officerNote, setOfficerNote] = useState('Supporting evidence requires officer confirmation against the current project record.')
   const [queryModal, setQueryModal] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -6602,7 +6608,7 @@ export function M12ParameterDetailPage({ onBack, onBackToOverview, onOpenDna, on
               <div className="p-4 text-[11px] space-y-2">
                 <p className="text-[#1a2533]">Configured Land / Plot service requirement - Plot area must correspond to the MIDC allotment record.</p>
                 <p className="text-[#374151] italic">Regulatory reference: Configured workflow rule. No official GR cited in current configuration.</p>
-                <button onClick={() => alert('Regulatory Reference: Rule 14.2 MIDC Development Control Regulations 2024.')} className="text-[10px] text-[#1a56db] hover:underline font-semibold">Open Regulatory Reference</button>
+                <button onClick={openRegulatoryReference} className="text-[10px] text-[#1a56db] hover:underline font-semibold">Open Regulatory Reference</button>
                 <p className="text-[9px] text-[#6b7280] italic">Retrieved regulatory context - not a legal finding or AI decision.</p>
               </div>
             </div>
@@ -6640,7 +6646,7 @@ export function M12ParameterDetailPage({ onBack, onBackToOverview, onOpenDna, on
           <button onClick={() => setOfficerFinding('needs-verification')} className="px-3 py-2 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb]">Flag</button>
           <button onClick={() => setQueryModal(true)} className="px-3 py-2 text-xs border border-amber-200 rounded text-amber-700 bg-amber-50 hover:bg-amber-100 font-semibold">Raise Query</button>
           <button onClick={() => setQueryModal(true)} className="px-3 py-2 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb]">Request Additional Evidence</button>
-          <button onClick={() => alert('Regulatory Reference: Rule 14.2 MIDC Development Control Regulations 2024.')} className="px-3 py-2 text-xs border border-[#d1d9e0] rounded text-[#1a56db] hover:bg-[#ebf3ff]">Open Regulatory Reference</button>
+          <button onClick={openRegulatoryReference} className="px-3 py-2 text-xs border border-[#d1d9e0] rounded text-[#1a56db] hover:bg-[#ebf3ff]">Open Regulatory Reference</button>
           <p className="ml-auto text-[10px] text-[#374151] italic">Approval / rejection belong to the Decision Workspace.</p>
         </div>
       </div>
@@ -6654,6 +6660,8 @@ export function M13DocumentReviewPage({ onBack, onOpenParamDetail }: {
   onBack: () => void; onOpenParamDetail?: (id: string) => void
 }) {
   const [docAction, setDocAction] = useState<'none'|'accept'|'correction'|'invalid'|'evidence'|'verify'>('none')
+  const { openAssistant, pageContext } = useRegulatoryAssistant()
+  const openRegulatoryReference = () => openAssistant({ origin: 'inline', mode: 'entity', preset: 'Explain Rule 14.2', context: inlineContext(pageContext, { label: 'Rule 14.2, MIDC Development Control Regulations 2024', pageType: 'document-detail', recordTitle: 'Rule 14.2' }) })
   const [officerNote, setOfficerNote] = useState('')
   const [actionNote, setActionNote] = useState('')
   const [confirmed, setConfirmed] = useState(false)
@@ -6892,7 +6900,7 @@ export function M13DocumentReviewPage({ onBack, onOpenParamDetail }: {
               <p className="text-[10px] text-[#374151] uppercase tracking-wider font-semibold">Regulatory Reference</p>
               <p className="text-[#1a2533]">Configured Land / Plot service: allotment record is a required supporting document.</p>
               <p className="text-[#374151] italic text-[10px]">Regulatory reference unavailable in current configuration - no official GR cited.</p>
-              <button onClick={() => alert('Regulatory Reference: Rule 14.2 MIDC Development Control Regulations 2024.')} className="text-[10px] text-[#1a56db] hover:underline font-semibold">Open Regulatory Reference</button>
+              <button onClick={openRegulatoryReference} className="text-[10px] text-[#1a56db] hover:underline font-semibold">Open Regulatory Reference</button>
             </div>
 
             {/* Officer notes */}
@@ -6926,6 +6934,8 @@ export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamD
   onBack: () => void; onBackToOverview: () => void; onOpenParamDetail?: (id: string) => void; onOpenDocReview?: (id: string) => void; onOpenConsistency?: () => void; onOpenDepView?: () => void
 }) {
   const [activeSection, setActiveSection] = useState('identity')
+  const { openAssistant, pageContext } = useRegulatoryAssistant()
+  const openRegulatoryReference = () => openAssistant({ origin: 'inline', mode: 'entity', preset: 'Explain the applicable building specification', context: inlineContext(pageContext, { label: 'Standard Building Specifications and MIDC DCR 2024', pageType: 'technical-scrutiny', recordTitle: 'Building scrutiny reference' }) })
   const [saveNotice, setSaveNotice] = useState<string | null>(null)
   const [reviewStates, setReviewStates] = useState<Record<string, OfficerReviewState>>(() => {
     const m: Record<string, OfficerReviewState> = {}
@@ -7310,7 +7320,7 @@ export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamD
             <p className="text-[9px] text-[#374151] uppercase tracking-wider font-semibold mb-2">Rule / Requirement</p>
             <p className="text-[11px] text-[#1a2533]">Configured Building / Planning service requirement. Review items must be consistent with Master Project Dossier and submitted application.</p>
             <p className="text-[10px] text-[#374151] mt-1 italic">Source: Configured workflow rule - no official GR cited.</p>
-            <button onClick={() => alert('Regulatory Reference: Standard Building Specifications & MIDC DCR 2024.')} className="mt-2 text-[10px] text-[#1a56db] hover:underline font-semibold">Open Regulatory Reference</button>
+            <button onClick={openRegulatoryReference} className="mt-2 text-[10px] text-[#1a56db] hover:underline font-semibold">Open Regulatory Reference</button>
             <p className="text-[9px] text-[#6b7280] mt-1 italic">Retrieved regulatory context - not a legal finding.</p>
           </div>
 
@@ -7352,6 +7362,8 @@ export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDeta
   onBack: () => void; onBackToOverview: () => void; onOpenParamDetail?: (id: string) => void; onOpenDocReview?: (id: string) => void; onOpenConsistency?: () => void; onOpenDepView?: () => void
 }) {
   const [activeSection, setActiveSection] = useState('applicability')
+  const { openAssistant, pageContext } = useRegulatoryAssistant()
+  const openRegulatoryReference = () => openAssistant({ origin: 'inline', mode: 'entity', preset: 'Explain the applicable water guideline', context: inlineContext(pageContext, { label: 'MIDC Water Supply and Drainage Guidelines 2024', pageType: 'technical-scrutiny', recordTitle: 'Water scrutiny reference' }) })
   const [applicabilityStatus, setApplicabilityStatus] = useState<'confirmed' | 'needs-verification' | null>(null)
   const [saveNotice, setSaveNotice] = useState<string | null>(null)
   const [reviewStates, setReviewStates] = useState<Record<string, OfficerReviewState>>(() => {
@@ -7788,7 +7800,7 @@ export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDeta
             <p className="text-[9px] text-[#374151] uppercase tracking-wider font-semibold mb-2">Rule / Requirement</p>
             <p className="text-[11px] text-[#1a2533]">Configured Water / Utility service requirement. Review items must be consistent with Business DNA and submitted application.</p>
             <p className="text-[10px] text-[#374151] mt-1 italic">Source: Configured workflow rule - no official GR cited.</p>
-            <button onClick={() => alert('Regulatory Reference: MIDC Water Supply & Drainage Guidelines 2024.')} className="mt-2 text-[10px] text-[#1a56db] hover:underline font-semibold">Open Regulatory Reference</button>
+            <button onClick={openRegulatoryReference} className="mt-2 text-[10px] text-[#1a56db] hover:underline font-semibold">Open Regulatory Reference</button>
             <p className="text-[9px] text-[#6b7280] mt-1 italic">Retrieved regulatory context - not a legal finding.</p>
           </div>
           <div className="px-4 py-3 border-b border-[#f0f4f8]">
@@ -15682,15 +15694,25 @@ export function M39NotificationDrawer({ open, onClose, onNavigate }: {
 
 
 export function M32RegRAGPage({ onBack, onOpenRegChange, applicationContext }: { onBack: () => void; onOpenRegChange?: () => void; applicationContext?: { id: string; business: string; service: string; dnaVersion: string } }) {
-  const [conversation, setConversation] = useState(M32_CONVERSATION)
   const [input, setInput] = useState('')
   const [lang, setLang] = useState<'en'|'mr'>('en')
   const [selectedSrc, setSelectedSrc] = useState<typeof M32_SOURCES[0]>(M32_SOURCES[0])
+  const { messages, sendMessage, setActiveContext, pageContext, loading } = useRegulatoryAssistant()
+  const conversation = messages.filter(message => message.role !== 'context').map(message => message.role === 'user'
+    ? { role: 'officer' as const, text: message.content, chip: false }
+    : { role: 'rag' as const, text: message.content, source: 'SRC-001', clause: message.citations?.[0]?.clause, version: message.citations?.[0]?.version, retrieval: message.needsVerification ? 'Needs Regulatory Review' as const : 'Source Found' as const })
+
+  useEffect(() => {
+    setActiveContext({ ...inlineContext(pageContext, {
+      pageType: 'assistant-research', pageTitle: 'Officer Regulatory Assistant',
+      label: applicationContext ? `${applicationContext.id} regulatory research` : 'Department regulatory research',
+      entities: { applicationId: applicationContext?.id }, recordTitle: applicationContext?.service,
+    }), origin: 'full-page', mode: 'research' })
+  }, [applicationContext?.id, applicationContext?.service, pageContext, setActiveContext])
 
   const addMessage = (text: string) => {
     setInput('')
-    const ragReply = { role: 'rag' as const, text: `Source-backed response for: "${text}". The configured MIDC regulatory repository has been searched. Where a specific clause is not configured in the prototype, the relevant source type and version reference is shown below.`, source: 'SRC-001', clause: 'Clause 4.3 - MIDC Building Regulations 2019', version: 'MIDC-RULE-2026-V3', retrieval: 'Source Found' as const }
-    setConversation(c => [...c, { role: 'officer', text, chip: false }, ragReply])
+    void sendMessage(text)
   }
 
   const retrievalColor = (r: string) =>
@@ -15757,7 +15779,7 @@ export function M32RegRAGPage({ onBack, onOpenRegChange, applicationContext }: {
           {/* Input */}
           <div className="px-4 py-3 border-t border-[#e5eaf0] bg-white flex gap-2">
             <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && input.trim() && addMessage(input.trim())} placeholder="Ask a regulatory question about this application or parameter..." className="flex-1 text-xs border border-[#d1d9e0] rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#1a56db]" />
-            <button onClick={() => input.trim() && addMessage(input.trim())} disabled={!input.trim()} className="text-xs bg-[#1a3a5c] text-white px-4 py-2 rounded hover:bg-[#0f2540] disabled:opacity-40">Ask</button>
+            <button onClick={() => input.trim() && addMessage(input.trim())} disabled={!input.trim() || loading} className="text-xs bg-[#1a3a5c] text-white px-4 py-2 rounded hover:bg-[#0f2540] disabled:opacity-40">{loading ? 'Consulting…' : 'Ask'}</button>
           </div>
         </div>
 

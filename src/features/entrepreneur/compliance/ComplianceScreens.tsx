@@ -428,13 +428,13 @@ export function E25ComplianceDetailPage({ obligationId, canOpenDocuments = false
           <div className="bg-white border border-[#e2e8f0]">
             <div className="px-4 py-2.5 border-b border-[#e8edf2] bg-[#f8f9fb] flex items-center justify-between">
               <p className="text-xs font-bold text-[#1a3a5c] uppercase tracking-wider">Regulatory Assistant</p>
-              <button onClick={() => setRagOpen(o => !o)} className="text-xs text-[#1a56db] hover:underline">{ragOpen ? 'Close' : 'Ask a question'}</button>
+              <button onClick={() => onOpenRegAssistant?.({ entryPoint: 'compliance', recordId: obl.id, recordName: obl.name, department: obl.dept })} className="text-xs text-[#1a56db] hover:underline">Ask a question</button>
             </div>
             {!ragOpen && (
               <div className="px-4 py-3">
                 <div className="flex flex-wrap gap-2">
                   {SUGGESTED_PROMPTS.map(p => (
-                    <button key={p} onClick={() => { setRagOpen(true); handleRagSend(p) }} className="text-xs border border-[#d1d9e0] text-[#475569] px-2.5 py-1 hover:bg-[#f1f5f9] hover:text-[#1a3a5c] hover:border-[#1a3a5c] transition-colors">{p}</button>
+                    <button key={p} onClick={() => onOpenRegAssistant?.({ entryPoint: 'compliance', recordId: obl.id, recordName: obl.name, department: obl.dept, initialQuestion: p })} className="text-xs border border-[#d1d9e0] text-[#475569] px-2.5 py-1 hover:bg-[#f1f5f9] hover:text-[#1a3a5c] hover:border-[#1a3a5c] transition-colors">{p}</button>
                   ))}
                 </div>
               </div>
@@ -484,7 +484,7 @@ export function E25ComplianceDetailPage({ obligationId, canOpenDocuments = false
               )}
               <button onClick={onGoToE23} disabled={!onGoToE23} title={!onGoToE23 ? SOURCE_APPROVAL_UNAVAILABLE : undefined} className="text-sm border border-[#d1d9e0] text-[#1a3a5c] px-3 py-1.5 hover:bg-[#f1f5f9] text-left disabled:opacity-50 disabled:cursor-not-allowed">View Source Approval (E23)</button>
               {obl.requiredDocs.length > 0 && <button onClick={onGoToE11} disabled={!canOpenDocuments} title={!canOpenDocuments ? DOCUMENT_UNAVAILABLE : undefined} className="text-sm border border-[#d1d9e0] text-[#1a3a5c] px-3 py-1.5 hover:bg-[#f1f5f9] text-left disabled:opacity-50 disabled:cursor-not-allowed">View Document Centre (E11)</button>}
-              <button onClick={() => setRagOpen(true)} className="text-sm border border-[#d1d9e0] text-[#1a3a5c] px-3 py-1.5 hover:bg-[#f1f5f9] text-left">Ask Regulatory Assistant</button>
+              <button onClick={() => onOpenRegAssistant?.({ entryPoint: 'compliance', recordId: obl.id, recordName: obl.name, department: obl.dept })} className="text-sm border border-[#d1d9e0] text-[#1a3a5c] px-3 py-1.5 hover:bg-[#f1f5f9] text-left">Ask Regulatory Assistant</button>
             </div>
           </div>
 

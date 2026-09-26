@@ -5,15 +5,18 @@ import { ENTREPRENEUR_ROUTES } from '@/lib/routes/entrepreneur';
 import { useIncentiveWorkspace } from '../state';
 import { getIncentivePolicyUpdates } from '../data';
 import { IncentiveWorkspaceHeader } from './IncentiveWorkspaceHeader';
+import { useRegulatoryAssistant } from '@/features/regulatory-assistant/Provider';
+import { inlineContext } from '@/features/regulatory-assistant/context';
 
 export function PolicyUpdatesScreen() {
   const router = useRouter();
   const { businessId } = useIncentiveWorkspace();
   const updates = getIncentivePolicyUpdates(businessId);
+  const { openAssistant, pageContext } = useRegulatoryAssistant();
 
   const handleBack = () => router.push(ENTREPRENEUR_ROUTES.incentives(businessId));
   const handleGoToDetail = (id: string) => router.push(ENTREPRENEUR_ROUTES.incentives(businessId) + '/portfolio/' + id);
-  const handleOpenRegAssistant = () => alert("Regulatory Assistant would open here.");
+  const handleOpenRegAssistant = () => openAssistant({ origin: 'inline', mode: 'entity', context: inlineContext(pageContext, { pageType: 'policy-updates', pageTitle: 'Incentive Policy Updates', label: 'Incentive Policy Updates', entities: { businessId } }) });
 
   return (
     <main id="main-content" className="flex-1 bg-[#f8f9fb]" tabIndex={-1}>

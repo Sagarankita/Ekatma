@@ -62,11 +62,13 @@ test.describe('Prompt 1 Department routing', () => {
     await expect(page).toHaveURL('/department/search');
   });
 
-  test('header assistant, notifications and logout navigate', async ({ page }) => {
+  test('header assistant opens the shared drawer without navigating', async ({ page }) => {
     await page.goto('/department');
-    await page.getByRole('button', { name: 'Regulatory Assistant — AI-assisted regulatory reference' }).click();
-    await expect(page).toHaveURL('/department/regasst');
-    await page.getByRole('button', { name: 'Notifications — 4 unread' }).click();
+    await page.getByRole('navigation', { name: 'Department context and utilities' }).getByRole('button', { name: 'Regulatory Assistant', exact: true }).click();
+    await expect(page).toHaveURL('/department');
+    await expect(page.getByRole('dialog', { name: 'Regulatory Assistant' })).toBeVisible();
+    await page.getByRole('button', { name: 'Close Regulatory Assistant' }).last().click();
+    await page.getByRole('button', { name: 'Notifications - 4 unread' }).click();
     await page.getByRole('button', { name: 'Open →', exact: true }).nth(3).click();
     await expect(page).toHaveURL('/department/applications/MIDC-APP-2026-00431/query-history');
     await page.getByRole('button', { name: 'Sign out', exact: true }).click();

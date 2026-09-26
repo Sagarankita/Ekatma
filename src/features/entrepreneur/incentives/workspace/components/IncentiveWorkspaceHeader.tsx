@@ -2,6 +2,8 @@ import React from 'react';
 import Link from 'next/link';
 import { findBusinessProjectById } from '@/features/entrepreneur/businesses/catalog';
 import { IncentiveStatus, ClaimStatus } from '../types';
+import { useRegulatoryAssistant } from '@/features/regulatory-assistant/Provider';
+import { inlineContext } from '@/features/regulatory-assistant/context';
 
 export function IncentiveStatusBadge({ status }: { status: IncentiveStatus }) {
   const cfg = {
@@ -54,6 +56,11 @@ export function IncentiveWorkspaceHeader({
   onOpenRegAssistant?: () => void;
 }) {
   const business = findBusinessProjectById(businessId);
+  const { openAssistant, pageContext } = useRegulatoryAssistant();
+  const handleAssistant = onOpenRegAssistant ?? (() => openAssistant({
+    origin: 'inline', mode: 'entity',
+    context: inlineContext(pageContext, { pageTitle: title, label: title, entities: { businessId }, recordTitle: title }),
+  }));
 
   return (
     <div className="bg-white border-b border-[#d1d9e0] px-6 py-4">
@@ -75,14 +82,12 @@ export function IncentiveWorkspaceHeader({
             {subtitle && <p className="text-xs text-[#6b7a8d] mt-0.5 max-w-2xl">{subtitle}</p>}
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            {onOpenRegAssistant && (
-              <button onClick={onOpenRegAssistant}
+            <button onClick={handleAssistant}
                 className="flex items-center gap-1.5 text-xs border border-[#6366f1] text-[#4338ca] px-3 py-1.5 hover:bg-[#eef2ff] transition-colors font-medium"
               >
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.3"/><path d="M7 4.5A1 1 0 019 5.5c0 .8-1 1.2-1 2M7 10v.3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
                 Ask Regulatory Assistant
               </button>
-            )}
           </div>
         </div>
         <div className="mt-3 flex items-center gap-3 flex-wrap">
