@@ -1,22 +1,21 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { M13DocumentReviewPage } from '@/App';
-import { ApplicationId } from '@/domain/ids';
+import { DocumentOcrInsightsPage } from '@/components/department/DocumentOcrInsightsPage';
+import { ROUTES } from '@/lib/routes';
 
 export default function Page() {
   const params = useParams();
   const router = useRouter();
-  
-  // Enforce canonical ApplicationId contract
-  const appId = (params.applicationId as string) as ApplicationId;
-  
+  const appId = (params.applicationId as string) || 'APP-2026-00418';
+  const docId = (params.documentId as string) || 'MIDC-REG-DEED-2024-C14';
+
   return (
-    <M13DocumentReviewPage 
-      
-      onBack={() => router.push(`/department/applications/${appId}?tab=documents`)}
-      onOpenParamDetail={(id: string) => router.push(`/department/applications/${appId}/parameter/${id}`)}
-    
+    <DocumentOcrInsightsPage
+      applicationId={appId}
+      documentId={docId}
+      onBackToWorkflow={() => router.push(ROUTES.department.applicationScrutinyWorkflow(appId))}
+      onForwardToQuery={(_queries) => router.push(ROUTES.department.applicationQueryBuilder(appId))}
     />
   );
 }

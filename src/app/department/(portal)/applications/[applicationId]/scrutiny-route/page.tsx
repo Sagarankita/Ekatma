@@ -3,6 +3,7 @@
 import { useParams, useRouter } from 'next/navigation';
 import { M10ScrutinyRoutePage } from '@/App';
 import { ApplicationId } from '@/domain/ids';
+import { ROUTES } from '@/lib/routes';
 
 export default function Page() {
   const params = useParams();
@@ -13,14 +14,19 @@ export default function Page() {
   
   return (
     <M10ScrutinyRoutePage 
-      
-      onBackToOverview={() => router.push(`/department/applications/${appId}`)}
-      onBackToPrecheck={() => router.push(`/department/applications/${appId}/precheck`)}
-      onOpenDna={() => router.push(`/department/applications/${appId}/dna`)}
-      onOpenTimeline={() => router.push(`/department/applications/${appId}/timeline`)}
-      onOpenScrutinyWorkbench={() => router.push(`/department/applications/${appId}/scrutiny-workbench`)}
-      onOpenDepView={() => router.push(`/department/applications/${appId}/dependency-view`)}
-    
+      onBackToOverview={() => router.push(ROUTES.department.application(appId))}
+      onBackToPrecheck={() => router.push(ROUTES.department.applicationPrecheck(appId))}
+      onOpenDna={() => router.push(ROUTES.department.applicationDna(appId))}
+      onOpenTimeline={() => router.push(ROUTES.department.applicationTimeline(appId))}
+      onOpenScrutinyWorkflow={() => router.push(ROUTES.department.applicationScrutinyWorkflow(appId))}
+      onOpenScrutinyWorkbench={() => router.push(ROUTES.department.applicationScrutinyWorkbench(appId))}
+      onOpenBuildingScrutiny={() => router.push(ROUTES.department.applicationBuildingScrutiny(appId))}
+      onOpenWaterScrutiny={() => router.push(ROUTES.department.applicationWaterScrutiny(appId))}
+      onOpenConsistency={() => router.push(ROUTES.department.applicationConsistency(appId))}
+      onOpenDepView={() => router.push(ROUTES.department.applicationDependencyView(appId))}
+      onOpenQueryBuilder={() => router.push(ROUTES.department.applicationQueryBuilder(appId))}
+      onOpenDelta={() => router.push(ROUTES.department.applicationDeltaRescrutiny(appId))}
+      onOpenInspections={() => router.push(ROUTES.department.applicationInspections(appId))}
     />
   );
 }

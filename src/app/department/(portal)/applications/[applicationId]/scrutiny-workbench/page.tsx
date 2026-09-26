@@ -1,27 +1,32 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { M11ScrutinyWorkbenchPage } from '@/App';
+import { GuidedScrutinyWorkflow } from '@/App';
 import { ApplicationId } from '@/domain/ids';
+import { ROUTES } from '@/lib/routes';
 
 export default function Page() {
   const params = useParams();
   const router = useRouter();
-  
-  // Enforce canonical ApplicationId contract
   const appId = (params.applicationId as string) as ApplicationId;
-  
+
   return (
-    <M11ScrutinyWorkbenchPage
-      onBack={() => router.push(`/department/applications/${appId}/scrutiny-route`)}
-      onBackToOverview={() => router.push(`/department/applications/${appId}?tab=scrutiny`)}
-      onOpenDna={() => router.push(`/department/applications/${appId}?tab=business-dna`)}
-      onOpenTimeline={() => router.push(`/department/applications/${appId}?tab=timeline`)}
-      onOpenParamDetail={(id: string) => router.push(`/department/applications/${appId}/parameter/${id}`)}
-      onOpenDocReview={(id: string) => router.push(`/department/applications/${appId}/document/${id}`)}
-      onOpenBldgScrutiny={() => router.push(`/department/applications/${appId}/building-scrutiny`)}
-      onOpenWaterScrutiny={() => router.push(`/department/applications/${appId}/water-scrutiny`)}
-      onOpenDepView={() => router.push(`/department/applications/${appId}/dependency-view`)}
+    <GuidedScrutinyWorkflow
+      applicationId={appId}
+      initialStageKey="land"
+      onBack={() => router.push(ROUTES.department.scrutiny)}
+      onOpenOverview={() => router.push(ROUTES.department.application(appId))}
+      onOpenPrecheck={() => router.push(ROUTES.department.applicationPrecheck(appId))}
+      onOpenRoute={() => router.push(ROUTES.department.applicationScrutinyRoute(appId))}
+      onOpenLandWorkbench={() => router.push(ROUTES.department.applicationScrutinyWorkbench(appId))}
+      onOpenBuildingScrutiny={() => router.push(ROUTES.department.applicationBuildingScrutiny(appId))}
+      onOpenWaterScrutiny={() => router.push(ROUTES.department.applicationWaterScrutiny(appId))}
+      onOpenConsistency={() => router.push(ROUTES.department.applicationConsistency(appId))}
+      onOpenDependencyView={() => router.push(ROUTES.department.applicationDependencyView(appId))}
+      onOpenQueryBuilder={() => router.push(ROUTES.department.applicationQueryBuilder(appId))}
+      onOpenDelta={() => router.push(ROUTES.department.applicationDeltaRescrutiny(appId))}
+      onOpenInspectionPlanning={() => router.push(ROUTES.department.applicationInspections(appId))}
+      onOpenDecisionWorkspace={() => router.push(ROUTES.department.applicationDecisionWorkspace(appId))}
     />
   );
 }

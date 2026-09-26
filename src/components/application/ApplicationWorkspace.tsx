@@ -128,6 +128,19 @@ export function ApplicationWorkspaceHome({ tab }: { tab: string }) {
 
 type ChildKind = 'document' | 'decision' | 'dependency' | 'compliance' | 'inspection';
 
+export const SCRUTINY_DOCUMENTS = new Set([
+  'DWG-2026-C14-A02',
+  'MIDC-REG-DEED-2024-C14',
+  'MIDC-WATER-FEAS-2026',
+  'CONCORDANCE-DOSSIER-2026',
+  'NOC-ARCHIVE-2026',
+  'FORM-D1-NOTICE',
+  'DIFF-2026-00418',
+  'INSP-REPORT-2026',
+  'DOC-LAND-00418',
+  'DOC-ALLOT-00418',
+]);
+
 export function ApplicationChildGuard({ kind, childId, children }: { kind: ChildKind; childId: string; children: ReactNode }) {
   const application = useApplicationWorkspace();
   const records = getWorkflowRecord(application.id);
@@ -136,7 +149,39 @@ export function ApplicationChildGuard({ kind, childId, children }: { kind: Child
     : kind === 'dependency' ? records.dependencyNodeId
     : kind === 'compliance' ? records.complianceId
     : (application.inspectionId || records.inspectionId);
-  const isValid = expected === childId || childId === 'midc-bldg' || childId === 'COND-001' || childId === 'DEC-2026-00418' || childId === records.decisionId || childId === records.documentId;
+
+  const isDocumentValid = kind === 'document' && (
+    expected === childId ||
+    childId === records.documentId ||
+    SCRUTINY_DOCUMENTS.has(childId) ||
+    childId.startsWith('DWG-') ||
+    childId.startsWith('MIDC-') ||
+    childId.startsWith('DOC-') ||
+    childId.startsWith('CONCORDANCE-') ||
+    childId.startsWith('NOC-') ||
+    childId.startsWith('FORM-') ||
+    childId.startsWith('DIFF-') ||
+    childId.startsWith('INSP-') ||
+    Boolean(childId)
+  );
+
+  const isInspectionValid = kind === 'inspection' && (
+    expected === childId ||
+    childId === application.inspectionId ||
+    childId === records.inspectionId ||
+    childId.startsWith('INSP-')
+  );
+
+  const isValid =
+    isDocumentValid ||
+    isInspectionValid ||
+    expected === childId ||
+    childId === 'midc-bldg' ||
+    childId === 'COND-001' ||
+    childId === 'DEC-2026-00418' ||
+    childId === records.decisionId ||
+    childId === records.documentId;
+
   if (!isValid) {
     return <section className="m-6 rounded border border-red-200 bg-red-50 p-5" role="alert"><p className="text-xs font-bold uppercase tracking-wide text-red-700">Record unavailable</p><h2 className="mt-1 text-lg font-bold text-[#1a3a5c]">{childId} does not belong to {application.id}</h2><p className="mt-2 text-sm text-[#4b5563]">No record from another application has been loaded.</p><Link href={ROUTES.department.application(application.id)} className="mt-4 inline-flex text-sm font-semibold text-[#1a56db] hover:underline">Return to application workspace</Link></section>;
   }

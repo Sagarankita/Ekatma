@@ -3,6 +3,10 @@ import Link from "next/link"
 import { LoginState, Service, AdaptiveState, DnaHistoryEntry, DnaConsistencyEntry, DnaField, DnaSection, EventCategory, EventSource, TimelineEvent, PreCheckResult, PreCheck, PreCheckGroup, ScrutinyFactor, OfficerReviewState, ScrutinyParam, ScrutinySection, ConsistencyStatus, ConsistencyRow, ConsistencyField, MismatchLifecycle, DepNodeStatus, DepNode, DefStatus, Deficiency, ScrutinyApp, ScrutinyModule, DeltaTab, ReviewStatus, ChangedItem, AffectedItem, UnchangedItem, InspStatus, InspRow, PlanStatus, CalendarView, InspOutcome, CheckStatus, CheckItem, ObsRecord, ObsState, M24Event, SyncEvent, ComplianceObligation, ChangeField, QueryRecord } from '@/domain/types';
 import { QUEUE_APPS, Q_TABS, SERVICES, TIMING_BREAKDOWN, APP_SAMPLE, APP_FLAGS, APP_DEPS, APP_TIMELINE, DNA_SNAPSHOT, APP_TABS, M10_APP, M14_SECTIONS, M14_IDENTITY_PARAMS, M14_BUILDING_PARAMS, M14_PREREQ_DOCS, M14_TECH_DOCS, M14_CONDITIONAL_DOCS, M14_CONSISTENCY, M14_DEPS, M15_SECTIONS, M15_WATER_PARAMS, M15_DOCS, M15_DEPS, M15_CONSISTENCY, M16_CATEGORIES, M17_PREREQUISITES, M18_CATEGORIES, WORKFLOW_STAGES, M22_SLOTS, M22_CHECKLIST, BEFORE_NODES, AFTER_NODES, M30_SLA_ROWS, M31_GRIEVANCES, M31_TIMELINE, M39_NOTIFICATIONS, M32_SOURCES, M32_CONVERSATION, M32_CHIPS, M33_CHANGES, M34_APPS, M35_FUNNEL, M35_TREND_DATA, M36_BREAKDOWN, M38_EVENTS } from '@/data/fixtures/data';
 import { CytoscapeDependencyGraph, DepEdge, M17_DEFAULT_EDGES } from '@/components/dependency/CytoscapeDependencyGraph';
+import { M10ReviewPlanPage, M10ReviewPlanPageProps } from '@/components/department/M10ReviewPlanPage';
+import { EmbeddedDocumentOcrViewer } from '@/components/department/EmbeddedDocumentOcrViewer';
+import { DocumentOcrInsightsPage } from '@/components/department/DocumentOcrInsightsPage';
+export { DocumentOcrInsightsPage } from '@/components/department/DocumentOcrInsightsPage';
 
 
 import { createContext, useContext } from 'react';
@@ -126,9 +130,9 @@ export function PortalHeader({ isLoggedIn, setIsLoggedIn }: { isLoggedIn: boolea
 
         {/* Right actions */}
         <div className="flex items-center gap-3">
-          <button aria-label="Help" className="p-2 rounded hover:bg-[#f0f4f8] text-[#4a5568] hover:text-[#1a3a5c] transition-colors"><Icon.Help /></button>
+          <button onClick={() => alert('Government of Maharashtra EKATMA Portal Help Desk: 1800-120-8040')} aria-label="Help" className="p-2 rounded hover:bg-[#f0f4f8] text-[#4a5568] hover:text-[#1a3a5c] transition-colors"><Icon.Help /></button>
           {isLoggedIn && (
-            <button aria-label="Notifications" className="p-2 rounded hover:bg-[#f0f4f8] text-[#4a5568] hover:text-[#1a3a5c] transition-colors relative">
+            <button onClick={() => alert('Notifications: 3 unread alerts for pending application reviews.')} aria-label="Notifications" className="p-2 rounded hover:bg-[#f0f4f8] text-[#4a5568] hover:text-[#1a3a5c] transition-colors relative">
               <Icon.Bell />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" aria-label="New notifications"></span>
             </button>
@@ -770,7 +774,7 @@ function TableShowcase() {
                     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${statusBadge[row.status]}`}>{row.statusLabel}</span>
                   </td>
                   <td className="px-3 py-3">
-                    <button className="text-xs text-[#1a56db] hover:underline font-medium">View</button>
+                    <button onClick={() => alert(`Viewing details for ${row.id}`)} className="text-xs text-[#1a56db] hover:underline font-medium">View</button>
                   </td>
                 </tr>
               ))}
@@ -1069,11 +1073,14 @@ function CaptchaDisplay({ code }: { code: string }) {
   )
 }
 
-export function M01LoginPage({ onSuccess, lang, fontSize, highContrast }: {
+export function M01LoginPage({ onSuccess, lang, fontSize, highContrast, setLang, setFontSize, setHighContrast }: {
   onSuccess: () => void
   lang: 'en' | 'mr'
   fontSize: 'sm' | 'md' | 'lg'
   highContrast: boolean
+  setLang?: (lang: 'en' | 'mr') => void
+  setFontSize?: (size: 'sm' | 'md' | 'lg') => void
+  setHighContrast?: (hc: boolean | ((prev: boolean) => boolean)) => void
 }) {
   const [loginState, setLoginState] = useState<LoginState>('default')
   const [userId, setUserId] = useState('')
@@ -1117,9 +1124,9 @@ export function M01LoginPage({ onSuccess, lang, fontSize, highContrast }: {
   return (
     <div className={`min-h-screen flex flex-col ${fontCls} ${contrastCls}`} style={{ fontFamily: 'Noto Sans, Noto Sans Devanagari, system-ui, sans-serif' }}>
       <AccessibilityStrip
-        lang={lang} setLang={() => {}}
-        fontSize={fontSize} setFontSize={() => {}}
-        highContrast={highContrast} setHighContrast={() => {}}
+        lang={lang} setLang={setLang ?? (() => {})}
+        fontSize={fontSize} setFontSize={setFontSize ?? (() => {})}
+        highContrast={highContrast} setHighContrast={setHighContrast ?? (() => {})}
       />
       <header className="bg-white border-b border-[#d1d9e0] shadow-sm" role="banner">
         <div className="max-w-[1440px] mx-auto px-6 flex items-center justify-between py-3 gap-8">
@@ -1277,60 +1284,188 @@ export function M01LoginPage({ onSuccess, lang, fontSize, highContrast }: {
 
 // ─── M01 Dept Sidebar ─────────────────────────────────────────────────────────
 
+const SidebarIcons = {
+  Home: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+  ),
+  MyWork: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+  ),
+  Applications: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6"/><path d="M9 16h6"/></svg>
+  ),
+  Scrutiny: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="m8 11 2 2 4-4"/></svg>
+  ),
+  Inspections: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+  ),
+  Queries: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+  ),
+  Decisions: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m14 13-7.5 7.5c-.83.83-2.17.83-3 0a2.12 2.12 0 0 1 0-3L11 10"/><path d="m16 16 6-6"/><path d="m8 8 6-6"/><path d="m9 7 8 8"/><path d="m21 11-8-8"/></svg>
+  ),
+  Sla: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+  ),
+  Grievances: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"/></svg>
+  ),
+  RegAssistant: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+  ),
+  RegChanges: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+  ),
+  Analytics: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+  ),
+  Services: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+  ),
+  Workload: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+  ),
+  AuditHistory: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+  ),
+}
+
+export const deptSections = [
+  {
+    title: 'WORK',
+    items: [
+      { id: 'dept-queue', label: 'My Work', icon: SidebarIcons.MyWork },
+      { id: 'dept-apps', label: 'Applications', icon: SidebarIcons.Applications },
+    ],
+  },
+  {
+    title: 'PROCESS',
+    items: [
+      { id: 'dept-scrutiny', label: 'Scrutiny', icon: SidebarIcons.Scrutiny },
+      { id: 'dept-inspect', label: 'Inspections', icon: SidebarIcons.Inspections },
+      { id: 'dept-queries', label: 'Queries & Deficiencies', icon: SidebarIcons.Queries },
+      { id: 'dept-decisions', label: 'Decisions', icon: SidebarIcons.Decisions },
+    ],
+  },
+  {
+    title: 'MONITOR',
+    items: [
+      { id: 'dept-sla', label: 'SLA & Escalations', icon: SidebarIcons.Sla },
+      { id: 'dept-grievances', label: 'Grievances', icon: SidebarIcons.Grievances },
+    ],
+  },
+  {
+    title: 'INTELLIGENCE',
+    items: [
+      { id: 'dept-regasst', label: 'Regulatory Assistant', icon: SidebarIcons.RegAssistant },
+      { id: 'dept-regchng', label: 'Regulatory Changes', icon: SidebarIcons.RegChanges },
+      { id: 'dept-analytics', label: 'Analytics', icon: SidebarIcons.Analytics },
+    ],
+  },
+  {
+    title: 'OPERATIONS',
+    items: [
+      { id: 'dept-catalogue', label: 'Services', icon: SidebarIcons.Services },
+      { id: 'dept-workload', label: 'Workload', icon: SidebarIcons.Workload },
+    ],
+  },
+  {
+    title: 'SYSTEM',
+    items: [
+      { id: 'dept-audit', label: 'Audit History', icon: SidebarIcons.AuditHistory },
+    ],
+  },
+]
+
 const deptSideItems = [
-  { id: 'dept-home',           label: 'Department Home',     icon: Icon.Home },
-  { id: 'dept-queue',          label: 'My Queue',            icon: MIcon.Inbox },
-  { id: 'dept-apps',           label: 'Applications',        icon: MIcon.Clipboard },
-  { id: 'dept-catalogue',      label: 'Service Catalogue',   icon: Icon.List },
-  { id: 'dept-insp-queue',     label: 'Inspection Queue',    icon: Icon.Shield },
-  { id: 'dept-scrutiny',   label: 'Scrutiny',               icon: MIcon.Activity },
-  { id: 'dept-inspect',    label: 'Inspections',            icon: MIcon.MapPin },
-  { id: 'dept-queries',    label: 'Queries / Deficiencies', icon: MIcon.MessageSquare },
-  { id: 'dept-decisions',  label: 'Decisions',              icon: MIcon.Gavel },
-  { id: 'dept-sla',        label: 'SLA & Escalations',      icon: Icon.Warning },
-  { id: 'dept-grievances', label: 'Grievances',             icon: MIcon.Headphones },
-  { id: 'dept-regasst',    label: 'Regulatory Assistant',   icon: MIcon.Bot },
-  { id: 'dept-analytics',  label: 'Analytics',              icon: MIcon.TrendingUp },
-  { id: 'dept-regchng',    label: 'Regulatory Changes',     icon: MIcon.BookOpen },
-  { id: 'dept-workload',   label: 'Workload',               icon: MIcon.Activity },
-  { id: 'dept-audit',      label: 'Audit / History',        icon: MIcon.History },
+  { id: 'dept-home', label: 'Home', icon: SidebarIcons.Home },
+  ...deptSections.flatMap(s => s.items),
 ]
 
 export function DeptSidebar({ active, setActive }: { active: string; setActive: (v: string) => void }) {
   const [collapsed, setCollapsed] = useState(false)
+
   return (
     <aside
-      className={`bg-white border-r border-[#d1d9e0] flex flex-col shrink-0 transition-all duration-200 ${collapsed ? 'w-14' : 'w-56'}`}
+      className={`bg-white border-r border-[#d1d9e0] flex flex-col shrink-0 transition-all duration-200 select-none ${collapsed ? 'w-16' : 'w-64'}`}
       aria-label="Department navigation"
     >
-      <button
-        onClick={() => setCollapsed(v => !v)}
-        className="flex items-center justify-center h-9 border-b border-[#d1d9e0] text-[#1a2533] hover:text-[#1a3a5c] hover:bg-[#f8f9fb] transition-colors shrink-0"
-        aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        aria-expanded={!collapsed}
-      >
-        {collapsed ? <Icon.ChevronRight /> : <Icon.ChevronLeft />}
-      </button>
-      <nav className="flex-1 py-1 overflow-y-auto" aria-label="Department module navigation">
-        <ul role="list">
-          {deptSideItems.map(item => (
-            <li key={item.id}>
-              <button
-                onClick={() => setActive(item.id)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#1a56db]
-                  ${active === item.id
-                    ? 'bg-[#eff6ff] text-[#1a3a5c] font-bold border-l-[3px] border-[#1a56db] pl-[calc(0.75rem-3px)]'
-                    : 'text-[#1a2533] hover:bg-[#f4f8ff] hover:text-[#1a3a5c] border-l-[3px] border-transparent'
-                  }`}
-                aria-current={active === item.id ? 'page' : undefined}
-                title={collapsed ? item.label : undefined}
-              >
-                <span aria-hidden="true" className="shrink-0"><item.icon /></span>
-                {!collapsed && <span className="flex-1 text-left leading-tight">{item.label}</span>}
-              </button>
-            </li>
-          ))}
-        </ul>
+      {/* Top Header */}
+      <div className="px-5 py-3.5 border-b border-[#e5eaf0] bg-white flex items-center justify-between shrink-0">
+        {!collapsed && (
+          <div>
+            <div className="text-sm font-bold text-[#1a3a5c] tracking-tight leading-none">EKATMA</div>
+            <div className="text-[11px] font-medium text-[#64748b] mt-1 leading-none">Department Portal</div>
+          </div>
+        )}
+        <button
+          onClick={() => setCollapsed(v => !v)}
+          className={`p-1.5 rounded text-[#64748b] hover:text-[#1a3a5c] hover:bg-[#f1f5f9] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a56db] ${collapsed ? 'mx-auto' : ''}`}
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          aria-expanded={!collapsed}
+          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        >
+          {collapsed ? <Icon.ChevronRight /> : <Icon.ChevronLeft />}
+        </button>
+      </div>
+
+      {/* Nav List */}
+      <nav className="flex-1 py-2 overflow-y-auto overflow-x-hidden" aria-label="Department module navigation">
+        {/* Home Item */}
+        <div className="pb-1 border-b border-[#f1f5f9] mb-1">
+          <button
+            onClick={() => setActive('dept-home')}
+            className={`w-full flex items-center gap-3.5 px-5 py-2.5 text-sm transition-colors text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#1a56db]
+              ${active === 'dept-home'
+                ? 'bg-[#eff6ff] text-[#1a3a5c] font-bold border-l-4 border-[#1a56db]'
+                : 'text-[#334155] font-medium hover:bg-[#f8fafc] hover:text-[#0f172a] border-l-4 border-transparent'
+              } ${collapsed ? 'justify-center px-0' : ''}`}
+            aria-current={active === 'dept-home' ? 'page' : undefined}
+            title={collapsed ? 'Home' : undefined}
+          >
+            <span aria-hidden="true" className={`shrink-0 ${active === 'dept-home' ? 'text-[#1a56db]' : 'text-[#64748b]'}`}>
+              <SidebarIcons.Home />
+            </span>
+            {!collapsed && <span className="flex-1 truncate">Home</span>}
+          </button>
+        </div>
+
+        {/* Section Groups */}
+        {deptSections.map((section, sIdx) => (
+          <div key={section.title} className={sIdx === 0 ? 'pt-1 pb-1' : 'pt-3 pb-1'}>
+            {!collapsed && (
+              <div className="px-5 pt-2 pb-1.5 text-[11px] font-bold text-[#8c9ba5] uppercase tracking-wider">
+                {section.title}
+              </div>
+            )}
+            <ul role="list" className="space-y-0.5">
+              {section.items.map(item => {
+                const isActive = active === item.id || (item.id === 'dept-inspect' && active === 'dept-insp-queue')
+                return (
+                  <li key={item.id}>
+                    <button
+                      onClick={() => setActive(item.id)}
+                      className={`w-full flex items-center gap-3.5 px-5 py-2 text-sm transition-colors text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#1a56db]
+                        ${isActive
+                          ? 'bg-[#eff6ff] text-[#1a3a5c] font-bold border-l-4 border-[#1a56db]'
+                          : 'text-[#334155] font-medium hover:bg-[#f8fafc] hover:text-[#0f172a] border-l-4 border-transparent'
+                        } ${collapsed ? 'justify-center px-0' : ''}`}
+                      aria-current={isActive ? 'page' : undefined}
+                      title={collapsed ? item.label : undefined}
+                    >
+                      <span aria-hidden="true" className={`shrink-0 ${isActive ? 'text-[#1a56db]' : 'text-[#64748b]'}`}>
+                        <item.icon />
+                      </span>
+                      {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        ))}
       </nav>
     </aside>
   )
@@ -1455,18 +1590,20 @@ function PanelHeader({ title, link, linkLabel = 'View all →', icon, onLinkClic
 }
 
 export function DeptHome({ onNavigate, onOpenApp }: { onNavigate: (dest: string) => void; onOpenApp: (applicationId: string) => void }) {
-  const [activeFilter, setActiveFilter] = useState('all')
+  const [activeFilter, setActiveFilter] = useState<'all' | 'my-desk' | 'sla-risk'>('all')
+  const [activeTab, setActiveTab] = useState<'actions' | 'sla-risk' | 'inspections' | 'insights' | 'workload-mix'>('actions')
+  const [inspFilter, setInspFilter] = useState<'all' | 'upcoming' | 'overdue' | 'reinspection'>('all')
 
   const kpis = [
-    { id: 'new',         label: 'New Applications',              value: 24, sub: '+6 since yesterday',         color: 'text-[#1a3a5c]',  bg: 'bg-white',      border: 'border-[#a0aec0]', accent: 'border-l-[4px] border-l-[#1a3a5c]',    dest: 'Queue / New',  nav: 'dept-queue' },
-    { id: 'scrutiny',    label: 'Awaiting Scrutiny',             value: 17, sub: '5 approaching SLA',          color: 'text-[#1a56db]',  bg: 'bg-[#f0f7ff]',  border: 'border-[#93c5fd]', accent: 'border-l-[4px] border-l-[#1a56db]',    dest: 'Queue',        nav: 'dept-queue' },
-    { id: 'entrepreneur',label: 'Awaiting Entrepreneur Response', value: 11, sub: 'Median 2.1 days',           color: 'text-[#1a3a5c]',  bg: 'bg-white',      border: 'border-[#a0aec0]', accent: 'border-l-[4px] border-l-[#1a3a5c]',    dest: 'Queue',        nav: 'dept-queue' },
-    { id: 'resubmit',   label: 'Resubmissions Received',         value:  8, sub: '3 received today',          color: 'text-teal-700',   bg: 'bg-teal-50',    border: 'border-teal-400',  accent: 'border-l-[4px] border-l-teal-600',      dest: 'Queue',        nav: 'dept-queue' },
-    { id: 'inspect',    label: 'Inspection Required',            value:  9, sub: '4 need scheduling',         color: 'text-[#1a56db]',  bg: 'bg-[#f0f7ff]',  border: 'border-[#93c5fd]', accent: 'border-l-[4px] border-l-[#1a56db]',    dest: 'Inspection Queue',              nav: 'dept-insp-queue' },
-    { id: 'decision',   label: 'Decision Pending',               value:  6, sub: '2 approaching SLA',         color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-400', accent: 'border-l-[4px] border-l-emerald-600', dest: '→ Decisions',        nav: 'dept-decisions' },
-    { id: 'slarisk',    label: 'SLA Risk',                       value:  7, sub: '3 due within 24h',          color: 'text-amber-700',  bg: 'bg-amber-50',   border: 'border-amber-400', accent: 'border-l-[4px] border-l-amber-600',    dest: 'SLA Dashboard',          nav: 'dept-sla' },
-    { id: 'slabreach',  label: 'SLA Breached',                   value:  2, sub: 'Requires escalation review', color: 'text-red-700',   bg: 'bg-red-50',     border: 'border-red-400',   accent: 'border-l-[4px] border-l-red-600',      dest: 'SLA Dashboard',          nav: 'dept-sla' },
-    { id: 'escalated',  label: 'Escalated',                      value:  3, sub: '1 new today',               color: 'text-purple-700', bg: 'bg-purple-50',  border: 'border-purple-400', accent: 'border-l-[4px] border-l-purple-600',   dest: 'Grievances',   nav: 'dept-grievances' },
+    { id: 'new',          label: 'New Applications',              value: 24, sub: '+6 since yesterday',         color: 'text-[#1a3a5c]',  bg: 'bg-white',      border: 'border-[#a0aec0]', accent: 'border-l-[4px] border-l-[#1a3a5c]',    dest: 'Queue / New',  nav: 'dept-queue' },
+    { id: 'scrutiny',     label: 'Awaiting Scrutiny',             value: 17, sub: '5 approaching SLA',          color: 'text-[#1a56db]',  bg: 'bg-[#f0f7ff]',  border: 'border-[#93c5fd]', accent: 'border-l-[4px] border-l-[#1a56db]',    dest: 'Queue',        nav: 'dept-queue' },
+    { id: 'entrepreneur', label: 'Awaiting Entrepreneur Response',value: 11, sub: 'Median 2.1 days',           color: 'text-[#1a3a5c]',  bg: 'bg-white',      border: 'border-[#a0aec0]', accent: 'border-l-[4px] border-l-[#1a3a5c]',    dest: 'Queue',        nav: 'dept-queue' },
+    { id: 'resubmit',     label: 'Resubmissions Received',         value:  8, sub: '3 received today',          color: 'text-teal-700',   bg: 'bg-teal-50',    border: 'border-teal-400',  accent: 'border-l-[4px] border-l-teal-600',      dest: 'Queue',        nav: 'dept-queue' },
+    { id: 'inspect',      label: 'Inspection Required',            value:  9, sub: '4 need scheduling',         color: 'text-[#1a56db]',  bg: 'bg-[#f0f7ff]',  border: 'border-[#93c5fd]', accent: 'border-l-[4px] border-l-[#1a56db]',    dest: 'Inspection Queue',nav: 'dept-insp-queue' },
+    { id: 'decision',     label: 'Decision Pending',               value:  6, sub: '2 approaching SLA',         color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-400', accent: 'border-l-[4px] border-l-emerald-600', dest: 'Decisions',   nav: 'dept-decisions' },
+    { id: 'slarisk',      label: 'SLA Risk',                       value:  7, sub: '3 due within 24h',          color: 'text-amber-700',  bg: 'bg-amber-50',   border: 'border-amber-400', accent: 'border-l-[4px] border-l-amber-600',    dest: 'SLA Dashboard',nav: 'dept-sla' },
+    { id: 'slabreach',    label: 'SLA Breached',                   value:  2, sub: 'Requires escalation review', color: 'text-red-700',   bg: 'bg-red-50',     border: 'border-red-400',   accent: 'border-l-[4px] border-l-red-600',      dest: 'SLA Dashboard',nav: 'dept-sla' },
+    { id: 'escalated',    label: 'Escalated',                      value:  3, sub: '1 new today',               color: 'text-purple-700', bg: 'bg-purple-50',  border: 'border-purple-400', accent: 'border-l-[4px] border-l-purple-600',   dest: 'Grievances',   nav: 'dept-grievances' },
   ]
 
   const myActions = [
@@ -1514,9 +1651,9 @@ export function DeptHome({ onNavigate, onOpenApp }: { onNavigate: (dest: string)
   const totalWork = workloadByService.reduce((s, r) => s + r.count, 0)
 
   const ageBuckets = [
-    { label: '0–2 days', count: 18, pct: 25 },
-    { label: '3–5 days', count: 28, pct: 39 },
-    { label: '6–10 days',count: 16, pct: 22 },
+    { label: '0-2 days', count: 18, pct: 25 },
+    { label: '3-5 days', count: 28, pct: 39 },
+    { label: '6-10 days',count: 16, pct: 22 },
     { label: '10+ days', count: 10, pct: 14 },
   ]
 
@@ -1537,8 +1674,31 @@ export function DeptHome({ onNavigate, onOpenApp }: { onNavigate: (dest: string)
     return m[s] ?? 'bg-[#f0f4f8] text-[#1a2533]'
   }
 
+  // Filter actions based on header filters
+  const filteredActions = myActions.filter(a => {
+    if (activeFilter === 'my-desk') return a.service.includes('Land')
+    if (activeFilter === 'sla-risk') return a.sla === 'approaching'
+    return true
+  })
+
+  const totalInspectionsCount = inspections.upcoming.length + inspections.overdue.length + inspections.reinspection.length
+
+  const allInspectionItems = [
+    ...inspections.overdue.map(i => ({ ...i, category: 'overdue' as const })),
+    ...inspections.upcoming.map(i => ({ ...i, category: 'upcoming' as const })),
+    ...inspections.reinspection.map(i => ({ ...i, category: 'reinspection' as const })),
+  ].filter(i => inspFilter === 'all' || i.category === inspFilter)
+
+  const dashboardTabs = [
+    { id: 'actions' as const, label: 'My Actions', count: filteredActions.length },
+    { id: 'sla-risk' as const, label: 'SLA Risk', count: slaRisk.length },
+    { id: 'inspections' as const, label: 'Inspection Queue', count: totalInspectionsCount },
+    { id: 'insights' as const, label: 'Current Process Insights', count: bottlenecks.length },
+    { id: 'workload-mix' as const, label: 'Workload & Service Mix' },
+  ]
+
   return (
-    <div className="bg-[#f8f9fb]">
+    <div className="bg-[#f8f9fb] min-h-screen">
       <div className="max-w-[1280px] mx-auto px-6 py-5 space-y-5">
 
         {/* Breadcrumb */}
@@ -1559,13 +1719,16 @@ export function DeptHome({ onNavigate, onOpenApp }: { onNavigate: (dest: string)
           <div className="flex items-center gap-3 shrink-0">
             <span className="text-[10px] text-[#374151]">Last refreshed: 22 Sep 2026, 10:47 AM</span>
             <span className="text-[10px] bg-amber-50 border border-amber-200 text-amber-700 px-2 py-0.5 rounded">Prototype operational data</span>
-            {/* Filters */}
+            {/* Context Filters */}
             <div className="flex items-center gap-1 bg-white border border-[#d1d9e0] rounded p-0.5">
-              {['all', 'my-desk', 'sla-risk'].map(f => (
+              {(['all', 'my-desk', 'sla-risk'] as const).map(f => (
                 <button
                   key={f}
-                  onClick={() => setActiveFilter(f)}
-                  className={`text-[11px] px-2.5 py-1 rounded transition-colors ${activeFilter === f ? 'bg-[#1a3a5c] text-white' : 'text-[#1a2533] hover:text-[#1a3a5c]'}`}
+                  onClick={() => {
+                    setActiveFilter(f)
+                    if (f === 'sla-risk') setActiveTab('sla-risk')
+                  }}
+                  className={`text-[11px] px-2.5 py-1 rounded transition-colors ${activeFilter === f ? 'bg-[#1a3a5c] text-white font-medium' : 'text-[#1a2533] hover:text-[#1a3a5c]'}`}
                 >
                   {f === 'all' ? 'All' : f === 'my-desk' ? 'My Desk' : 'SLA Risk'}
                 </button>
@@ -1574,252 +1737,422 @@ export function DeptHome({ onNavigate, onOpenApp }: { onNavigate: (dest: string)
           </div>
         </div>
 
-        {/* KPI strip */}
+        {/* KPI strip at top */}
         <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 gap-2">
           {kpis.map(k => (
             <button
               key={k.id}
               onClick={() => onNavigate((k as any).nav)}
-              className={`${k.bg} border-2 ${k.border} ${(k as any).accent || ''} rounded-none p-3 text-left hover:shadow-md transition-all focus-visible:ring-2 focus-visible:ring-[#1a56db] group cursor-pointer`}
-              aria-label={`${k.label}: ${k.value}. ${k.sub}. ${k.dest}`}
+              className={`${k.bg} border-2 ${k.border} ${(k as any).accent || ''} rounded p-2.5 text-left hover:shadow-md transition-all focus-visible:ring-2 focus-visible:ring-[#1a56db] group cursor-pointer`}
+              aria-label={`${k.label}: ${k.value}. ${k.sub}.`}
               title={k.dest}
             >
               <p className="text-[10px] text-[#1a2533] font-medium leading-tight group-hover:text-[#1a56db] transition-colors">{k.label}</p>
-              <p className={`text-2xl font-bold mt-1 leading-none ${k.color}`}>{k.value}</p>
+              <p className={`text-xl font-bold mt-1 leading-none ${k.color}`}>{k.value}</p>
               <p className="text-[10px] text-[#374151] mt-1 leading-tight">{k.sub}</p>
             </button>
           ))}
         </div>
 
-        {/* Row 1: My Actions | SLA Risk */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-
-          {/* Panel A - My Actions */}
-          <section className="bg-white border border-[#d1d9e0] rounded" aria-labelledby="panel-actions">
-            <PanelHeader title="My Actions" linkLabel="View My Queue →" onLinkClick={() => onNavigate('dept-queue')} icon={<MIcon.Inbox />} />
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs" role="table" aria-label="My action items">
-                <thead>
-                  <tr className="bg-[#f8f9fb] text-[#1a2533] text-left">
-                    <th className="px-4 py-2 font-medium">Type / Application</th>
-                    <th className="px-3 py-2 font-medium">Service</th>
-                    <th className="px-3 py-2 font-medium">State</th>
-                    <th className="px-3 py-2 font-medium">Age</th>
-                    <th className="px-3 py-2 font-medium">SLA</th>
-                    <th className="px-3 py-2 font-medium"></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#94a3b8]">
-                  {myActions.map(a => (
-                    <tr key={a.id} className="hover:bg-[#f8f9fb] transition-colors">
-                      <td className="px-4 py-2.5">
-                        <p className="text-[10px] text-[#374151] font-medium uppercase tracking-wide">{a.type}</p>
-                        <p className="font-mono text-[#1a56db] font-medium">{a.id}</p>
-                        <p className="text-[#1a2533] truncate max-w-[160px]">{a.business}</p>
-                      </td>
-                      <td className="px-3 py-2.5 text-[#1a2533] whitespace-nowrap">{a.service}</td>
-                      <td className="px-3 py-2.5"><StateChip label={a.stateLabel} color={stateChipColor(a.state)} /></td>
-                      <td className="px-3 py-2.5 text-[#1a2533] whitespace-nowrap">{a.age}</td>
-                      <td className="px-3 py-2.5"><SlaChip state={a.sla} /></td>
-                      <td className="px-3 py-2.5">
-                        <button onClick={() => onOpenApp(a.id)} className="bg-[#1a3a5c] text-white text-[10px] font-semibold px-2.5 py-1 rounded hover:bg-[#0f2540] transition-colors whitespace-nowrap">
-                          {a.action}
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          {/* Panel B - SLA Risk */}
-          <section className="bg-white border border-[#d1d9e0] rounded" aria-labelledby="panel-sla">
-            <PanelHeader title="SLA Risk" linkLabel="View SLA Dashboard →" onLinkClick={() => onNavigate('dept-sla')} icon={<Icon.Warning />} />
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs" aria-label="SLA risk applications">
-                <thead>
-                  <tr className="bg-[#f8f9fb] text-[#1a2533] text-left">
-                    <th className="px-4 py-2 font-medium">Application / Business</th>
-                    <th className="px-3 py-2 font-medium">Desk</th>
-                    <th className="px-3 py-2 font-medium">Elapsed</th>
-                    <th className="px-3 py-2 font-medium">Remaining</th>
-                    <th className="px-3 py-2 font-medium">State</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#94a3b8]">
-                  {slaRisk.map(r => (
-                    <tr key={r.id} className="hover:bg-[#f8f9fb] transition-colors">
-                      <td className="px-4 py-2.5">
-                        <p className="font-mono text-[#1a56db] font-medium">{r.id}</p>
-                        <p className="text-[#1a2533] truncate max-w-[140px]">{r.business}</p>
-                        <p className="text-[#374151]">{r.service}</p>
-                      </td>
-                      <td className="px-3 py-2.5 text-[#1a2533] whitespace-nowrap">{r.desk}</td>
-                      <td className="px-3 py-2.5 text-[#1a2533] whitespace-nowrap">{r.elapsed} / {r.sla}</td>
-                      <td className={`px-3 py-2.5 font-semibold whitespace-nowrap ${r.state === 'breached' || r.state === 'escalated' ? 'text-red-600' : 'text-amber-600'}`}>{r.remaining}</td>
-                      <td className="px-3 py-2.5"><SlaChip state={r.state} /></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-        </div>
-
-        {/* Row 2: Inspection Queue | Current Bottlenecks */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-
-          {/* Panel C - Inspection Queue */}
-          <section className="bg-white border border-[#d1d9e0] rounded" aria-labelledby="panel-inspections">
-            <PanelHeader title="Inspection Queue" linkLabel="View All Inspections →" onLinkClick={() => onNavigate('dept-insp-queue')} icon={<MIcon.MapPin />} />
-            <div className="divide-y divide-[#94a3b8]">
-              {(['upcoming', 'overdue', 'reinspection'] as const).map(cat => {
-                const rows = inspections[cat]
-                const catLabel = { upcoming: 'Upcoming', overdue: 'Overdue', reinspection: 'Re-inspection' }
-                const catColor = { upcoming: 'text-[#1a2533]', overdue: 'text-red-700', reinspection: 'text-amber-700' }
-                return rows.map((item, idx) => (
-                  <div key={item.id} className="px-4 py-3 hover:bg-[#f8f9fb] transition-colors">
-                    {idx === 0 && (
-                      <p className={`text-[10px] font-semibold uppercase tracking-wider mb-2 ${catColor[cat]}`}>{catLabel[cat]}</p>
-                    )}
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="font-mono text-xs text-[#1a56db] font-medium">{item.id}</p>
-                        <p className="text-sm font-medium text-[#1a2533] truncate">{item.business}</p>
-                        <p className="text-xs text-[#1a2533]">{item.service} · {item.site}</p>
-                        <p className="text-xs text-[#374151]">{item.type} · Target: {item.date}</p>
-                      </div>
-                      <div className="shrink-0 text-right space-y-1">
-                        <SlaChip state={item.sla} />
-                        <p className={`text-[10px] font-medium ${item.assigned ? 'text-green-700' : 'text-red-600'}`}>
-                          {item.assigned ? 'Assigned' : 'Unassigned'}
-                        </p>
-                        <button onClick={() => onOpenApp(item.id)} className="text-[11px] text-[#1a56db] hover:underline">{cat === 'overdue' ? 'Schedule' : 'Open'}</button>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              })}
-            </div>
-          </section>
-
-          {/* Panel D - Current Bottlenecks */}
-          <section className="bg-white border border-[#d1d9e0] rounded" aria-labelledby="panel-bottlenecks">
-            <PanelHeader title="Current Process Insights" linkLabel="View Bottleneck Analytics →" onLinkClick={() => onNavigate('dept-bottleneck')} icon={<MIcon.Activity />} />
-            <div className="px-4 py-2 bg-[#f8f9fb] border-b border-[#e8edf2]">
-              <p className="text-[10px] text-[#374151]">Based on current operational data · Updated: 22 Sep 2026</p>
-            </div>
-            <div className="divide-y divide-[#94a3b8]">
-              {bottlenecks.map(b => (
-                <div key={b.rank} className="px-4 py-3 hover:bg-[#f8f9fb] transition-colors">
-                  <div className="flex items-start gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[#f0f4f8] text-[#1a2533] text-xs font-bold flex items-center justify-center">{b.rank}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-[#1a2533]">{b.category}</p>
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-0.5">
-                        <span className="text-xs font-bold text-[#1a3a5c]">{b.count} applications</span>
-                        <span className="text-[11px] text-[#374151]">{b.delta}</span>
-                      </div>
-                      <p className="text-[11px] text-[#1a2533] mt-0.5">{b.service} · {b.impact}</p>
-                    </div>
-                    <button onClick={() => onNavigate('dept-bottleneck')} className="shrink-0 text-[11px] text-[#1a56db] hover:underline whitespace-nowrap">View →</button>
-                  </div>
-                </div>
+        {/* Tab-based Operational Dashboard Container */}
+        <div className="bg-white border border-[#d1d9e0] rounded overflow-hidden shadow-sm">
+          {/* Horizontal Tab Bar */}
+          <div className="border-b border-[#d1d9e0] bg-[#fafbfc] px-4">
+            <div className="flex space-x-6 overflow-x-auto min-w-max" role="tablist" aria-label="Operational Views">
+              {dashboardTabs.map(tab => (
+                <button
+                  key={tab.id}
+                  role="tab"
+                  id={`tab-${tab.id}`}
+                  aria-controls={`panel-${tab.id}`}
+                  aria-selected={activeTab === tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-2 py-3 px-1 text-sm font-medium whitespace-nowrap border-b-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a56db] ${
+                    activeTab === tab.id
+                      ? 'border-[#1a56db] text-[#1a56db] font-bold'
+                      : 'border-transparent text-[#4b5563] hover:text-[#1a2533] hover:border-[#cbd5e1]'
+                  }`}
+                >
+                  <span>{tab.label}</span>
+                  {tab.count !== undefined && (
+                    <span className={`inline-flex items-center justify-center px-1.5 py-0.5 text-[11px] rounded-full font-bold ${
+                      activeTab === tab.id ? 'bg-[#ebf3ff] text-[#1a56db]' : 'bg-[#e5e7eb] text-[#374151]'
+                    }`}>
+                      {tab.count}
+                    </span>
+                  )}
+                </button>
               ))}
             </div>
-          </section>
-        </div>
+          </div>
 
-        {/* Row 3: Workload | Service Mix */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+          {/* Tab Content Panels */}
+          <div className="p-0">
 
-          {/* Panel E - Workload */}
-          <section className="bg-white border border-[#d1d9e0] rounded" aria-labelledby="panel-workload">
-            <PanelHeader title="Workload" linkLabel="View Workload & Capacity →" onLinkClick={() => onNavigate('dept-workload')} icon={<MIcon.TrendingUp />} />
-            <div className="p-4 space-y-4">
-              <div className="grid grid-cols-4 gap-3 text-center">
-                {[
-                  { label: 'Total Active', value: totalWork, color: 'text-[#1a3a5c]' },
-                  { label: 'Avg Age', value: '4.2d', color: 'text-[#1a2533]' },
-                  { label: 'SLA Risk', value: 7, color: 'text-amber-700' },
-                  { label: 'SLA Breached', value: 2, color: 'text-red-700' },
-                ].map(s => (
-                  <div key={s.label} className="bg-[#f8f9fb] rounded p-2">
-                    <p className={`text-xl font-bold ${s.color}`}>{s.value}</p>
-                    <p className="text-[10px] text-[#1a2533] mt-0.5">{s.label}</p>
+            {/* TAB 1: My Actions */}
+            {activeTab === 'actions' && (
+              <section id="panel-actions" role="tabpanel" aria-labelledby="tab-actions">
+                <div className="px-5 py-3 bg-[#f8f9fb] border-b border-[#e5eaf0] flex items-center justify-between">
+                  <p className="text-xs text-[#374151]">
+                    Applications requiring immediate officer review, clarification finalisation, or scheduling determination.
+                  </p>
+                  <span className="text-[11px] text-[#4b5563] font-medium">
+                    Showing <strong className="text-[#1a2533]">{filteredActions.length}</strong> actionable items
+                  </span>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs" role="table" aria-label="My action items">
+                    <thead>
+                      <tr className="bg-[#f8f9fb] text-[#1a2533] text-left border-b border-[#d1d9e0]">
+                        <th className="px-5 py-2.5 font-semibold">Type / Application</th>
+                        <th className="px-4 py-2.5 font-semibold">Service</th>
+                        <th className="px-4 py-2.5 font-semibold">State</th>
+                        <th className="px-4 py-2.5 font-semibold">Age</th>
+                        <th className="px-4 py-2.5 font-semibold">SLA Status</th>
+                        <th className="px-5 py-2.5 font-semibold text-right">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#e5eaf0]">
+                      {filteredActions.map(a => (
+                        <tr key={a.id} className="hover:bg-[#f8f9fb] transition-colors">
+                          <td className="px-5 py-3">
+                            <p className="text-[10px] text-[#374151] font-semibold uppercase tracking-wider">{a.type}</p>
+                            <button
+                              onClick={() => onOpenApp(a.id)}
+                              className="font-mono text-xs text-[#1a56db] font-bold hover:underline text-left"
+                              title={`Open ${a.id}`}
+                            >
+                              {a.id}
+                            </button>
+                            <p className="text-[#1a2533] font-medium truncate max-w-[200px]">{a.business}</p>
+                          </td>
+                          <td className="px-4 py-3 text-[#1a2533] whitespace-nowrap font-medium">{a.service}</td>
+                          <td className="px-4 py-3 whitespace-nowrap"><StateChip label={a.stateLabel} color={stateChipColor(a.state)} /></td>
+                          <td className="px-4 py-3 text-[#1a2533] whitespace-nowrap">{a.age}</td>
+                          <td className="px-4 py-3 whitespace-nowrap"><SlaChip state={a.sla} /></td>
+                          <td className="px-5 py-3 text-right">
+                            <button
+                              onClick={() => onOpenApp(a.id)}
+                              className="bg-[#1a3a5c] text-white text-xs font-semibold px-3 py-1.5 rounded hover:bg-[#0f2540] transition-colors whitespace-nowrap focus-visible:ring-2 focus-visible:ring-[#1a56db]"
+                            >
+                              {a.action}
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            )}
+
+            {/* TAB 2: SLA Risk */}
+            {activeTab === 'sla-risk' && (
+              <section id="panel-sla-risk" role="tabpanel" aria-labelledby="tab-sla-risk">
+                {/* Summary Strip */}
+                <div className="px-5 py-3 bg-[#f8f9fb] border-b border-[#e5eaf0] grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="bg-white border border-[#d1d9e0] rounded p-2.5">
+                    <p className="text-[10px] text-[#64748b] font-semibold uppercase tracking-wider">Total at Risk</p>
+                    <p className="text-lg font-bold text-[#1a3a5c] mt-0.5">{slaRisk.length} applications</p>
                   </div>
-                ))}
-              </div>
+                  <div className="bg-white border border-amber-200 rounded p-2.5">
+                    <p className="text-[10px] text-amber-700 font-semibold uppercase tracking-wider">Approaching SLA</p>
+                    <p className="text-lg font-bold text-amber-700 mt-0.5">{slaRisk.filter(r => r.state === 'approaching').length} applications</p>
+                  </div>
+                  <div className="bg-white border border-red-200 rounded p-2.5">
+                    <p className="text-[10px] text-red-700 font-semibold uppercase tracking-wider">SLA Breached</p>
+                    <p className="text-lg font-bold text-red-700 mt-0.5">{slaRisk.filter(r => r.state === 'breached').length} applications</p>
+                  </div>
+                  <div className="bg-white border border-purple-200 rounded p-2.5">
+                    <p className="text-[10px] text-purple-700 font-semibold uppercase tracking-wider">Escalated</p>
+                    <p className="text-lg font-bold text-purple-700 mt-0.5">{slaRisk.filter(r => r.state === 'escalated').length} applications</p>
+                  </div>
+                </div>
 
-              <div>
-                <p className="text-xs font-semibold text-[#1a2533] mb-2">By Service</p>
-                <div className="space-y-1.5">
-                  {workloadByService.map(r => (
-                    <div key={r.service} className="flex items-center gap-2">
-                      <p className="text-xs text-[#1a2533] w-36 shrink-0 truncate">{r.service}</p>
-                      <div className="flex-1 bg-[#f0f4f8] rounded-full h-2 overflow-hidden">
-                        <div className="h-full bg-[#1a3a5c] rounded-full" style={{ width: `${(r.count / totalWork) * 100}%` }} />
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs" role="table" aria-label="SLA risk applications">
+                    <thead>
+                      <tr className="bg-[#f8f9fb] text-[#1a2533] text-left border-b border-[#d1d9e0]">
+                        <th className="px-5 py-2.5 font-semibold">Application / Business</th>
+                        <th className="px-4 py-2.5 font-semibold">Service</th>
+                        <th className="px-4 py-2.5 font-semibold">Current Desk</th>
+                        <th className="px-4 py-2.5 font-semibold">Elapsed / Allowed</th>
+                        <th className="px-4 py-2.5 font-semibold">Time Remaining</th>
+                        <th className="px-4 py-2.5 font-semibold">SLA Status</th>
+                        <th className="px-5 py-2.5 font-semibold text-right">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#e5eaf0]">
+                      {slaRisk.map(r => (
+                        <tr key={r.id} className="hover:bg-[#f8f9fb] transition-colors">
+                          <td className="px-5 py-3">
+                            <button
+                              onClick={() => onOpenApp(r.id)}
+                              className="font-mono text-xs text-[#1a56db] font-bold hover:underline text-left"
+                              title={`Open ${r.id}`}
+                            >
+                              {r.id}
+                            </button>
+                            <p className="text-[#1a2533] font-medium truncate max-w-[200px]">{r.business}</p>
+                          </td>
+                          <td className="px-4 py-3 text-[#1a2533] whitespace-nowrap">{r.service}</td>
+                          <td className="px-4 py-3 text-[#1a2533] whitespace-nowrap font-medium">{r.desk}</td>
+                          <td className="px-4 py-3 text-[#1a2533] whitespace-nowrap">{r.elapsed} / {r.sla}</td>
+                          <td className={`px-4 py-3 font-semibold whitespace-nowrap ${r.state === 'breached' || r.state === 'escalated' ? 'text-red-600' : 'text-amber-600'}`}>
+                            {r.remaining}
+                          </td>
+                          <td className="px-4 py-3 whitespace-nowrap"><SlaChip state={r.state} /></td>
+                          <td className="px-5 py-3 text-right">
+                            <button
+                              onClick={() => onOpenApp(r.id)}
+                              className="bg-[#1a3a5c] text-white text-xs font-semibold px-3 py-1.5 rounded hover:bg-[#0f2540] transition-colors whitespace-nowrap focus-visible:ring-2 focus-visible:ring-[#1a56db]"
+                            >
+                              Review Application
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            )}
+
+            {/* TAB 3: Inspection Queue */}
+            {activeTab === 'inspections' && (
+              <section id="panel-inspections" role="tabpanel" aria-labelledby="tab-inspections">
+                {/* Subfilter Bar */}
+                <div className="px-5 py-3 bg-[#f8f9fb] border-b border-[#e5eaf0] flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-1.5 bg-white border border-[#d1d9e0] rounded p-0.5">
+                    {[
+                      { id: 'all' as const, label: `All (${totalInspectionsCount})` },
+                      { id: 'upcoming' as const, label: `Upcoming (${inspections.upcoming.length})` },
+                      { id: 'overdue' as const, label: `Overdue (${inspections.overdue.length})` },
+                      { id: 'reinspection' as const, label: `Re-inspection (${inspections.reinspection.length})` },
+                    ].map(tab => (
+                      <button
+                        key={tab.id}
+                        onClick={() => setInspFilter(tab.id)}
+                        className={`text-xs px-2.5 py-1 rounded transition-colors ${inspFilter === tab.id ? 'bg-[#1a3a5c] text-white font-medium' : 'text-[#374151] hover:text-[#1a2533]'}`}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+                  <span className="text-[11px] text-[#4b5563]">
+                    Showing <strong className="text-[#1a2533]">{allInspectionItems.length}</strong> inspection records
+                  </span>
+                </div>
+
+                <div className="divide-y divide-[#e5eaf0]">
+                  {allInspectionItems.map(item => {
+                    const badgeStyles = {
+                      upcoming: 'bg-blue-50 text-blue-800 border-blue-200',
+                      overdue: 'bg-red-50 text-red-800 border-red-200',
+                      reinspection: 'bg-amber-50 text-amber-800 border-amber-200',
+                    }[item.category]
+
+                    const badgeLabel = {
+                      upcoming: 'Upcoming Inspection',
+                      overdue: 'Overdue Inspection',
+                      reinspection: 'Re-inspection Required',
+                    }[item.category]
+
+                    return (
+                      <div key={item.id} className="px-5 py-4 hover:bg-[#f8f9fb] transition-colors flex flex-wrap items-center justify-between gap-4">
+                        <div className="min-w-0 space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider ${badgeStyles}`}>
+                              {badgeLabel}
+                            </span>
+                            <button
+                              onClick={() => onOpenApp(item.id)}
+                              className="font-mono text-xs text-[#1a56db] font-bold hover:underline"
+                            >
+                              {item.id}
+                            </button>
+                          </div>
+                          <p className="text-sm font-semibold text-[#1a2533] truncate">{item.business}</p>
+                          <p className="text-xs text-[#374151]">
+                            {item.service} · <span className="font-medium text-[#1a2533]">{item.site}</span>
+                          </p>
+                          <p className="text-xs text-[#64748b]">
+                            Type: <strong className="text-[#1a2533] font-medium">{item.type}</strong> · Target Date: <strong className="text-[#1a2533] font-medium">{item.date}</strong>
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-4 shrink-0">
+                          <div className="text-right space-y-1">
+                            <div><SlaChip state={item.sla} /></div>
+                            <p className={`text-[10px] font-semibold ${item.assigned ? 'text-emerald-700' : 'text-red-600'}`}>
+                              {item.assigned ? 'Officer Assigned' : 'Unassigned'}
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => onOpenApp(item.id)}
+                            className="bg-[#1a3a5c] text-white text-xs font-semibold px-3 py-1.5 rounded hover:bg-[#0f2540] transition-colors whitespace-nowrap focus-visible:ring-2 focus-visible:ring-[#1a56db]"
+                          >
+                            {item.category === 'overdue' ? 'Schedule Inspection' : 'Open Inspection Record'}
+                          </button>
+                        </div>
                       </div>
-                      <span className="text-xs font-semibold text-[#1a3a5c] w-6 text-right">{r.count}</span>
-                      {r.slaRisk > 0 && <span className="text-[10px] text-amber-700 font-medium w-12 shrink-0">{r.slaRisk} at risk</span>}
+                    )
+                  })}
+                </div>
+              </section>
+            )}
+
+            {/* TAB 4: Current Process Insights */}
+            {activeTab === 'insights' && (
+              <section id="panel-insights" role="tabpanel" aria-labelledby="tab-insights">
+                <div className="px-5 py-3 bg-[#f8f9fb] border-b border-[#e5eaf0]">
+                  <p className="text-xs text-[#374151]">
+                    System-detected process bottlenecks and friction points across ongoing applications based on real-time operational telemetry.
+                  </p>
+                </div>
+                <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {bottlenecks.map(b => (
+                    <div key={b.rank} className="bg-white border border-[#d1d9e0] rounded-lg p-4 hover:shadow-sm transition-shadow">
+                      <div className="flex items-start gap-3">
+                        <span className="shrink-0 w-7 h-7 rounded-full bg-[#1a3a5c] text-white text-xs font-bold flex items-center justify-center">
+                          {b.rank}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-sm font-bold text-[#1a2533] leading-snug">{b.category}</h3>
+                          <div className="flex flex-wrap items-center gap-2 mt-1">
+                            <span className="text-xs font-bold text-[#1a3a5c] bg-[#eff6ff] px-2 py-0.5 rounded border border-[#bdd4f5]">
+                              {b.count} applications
+                            </span>
+                            <span className="text-[11px] text-[#4b5563] font-medium">{b.delta}</span>
+                          </div>
+                          <div className="mt-2.5 pt-2 border-t border-[#f1f5f9] space-y-1 text-xs">
+                            <p className="text-[#4b5563]">
+                              Service Group: <strong className="text-[#1a2533] font-medium">{b.service}</strong>
+                            </p>
+                            <p className="text-[#b45309] font-medium">
+                              Impact: {b.impact}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
-              </div>
+              </section>
+            )}
 
-              <div>
-                <p className="text-xs font-semibold text-[#1a2533] mb-2">Application Age</p>
-                <div className="flex gap-2">
-                  {ageBuckets.map(b => (
-                    <div key={b.label} className="flex-1 text-center bg-[#f8f9fb] rounded p-2">
-                      <p className="text-sm font-bold text-[#1a3a5c]">{b.count}</p>
-                      <p className="text-[10px] text-[#374151] leading-tight">{b.label}</p>
-                    </div>
-                  ))}
+            {/* TAB 5: Workload & Service Mix */}
+            {activeTab === 'workload-mix' && (
+              <section id="panel-workload-mix" role="tabpanel" aria-labelledby="tab-workload-mix">
+                {/* Top Metrics Row */}
+                <div className="px-5 py-3.5 bg-[#f8f9fb] border-b border-[#e5eaf0] grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="bg-white border border-[#d1d9e0] rounded p-2.5">
+                    <p className="text-[10px] text-[#64748b] font-semibold uppercase tracking-wider">Total Active Load</p>
+                    <p className="text-xl font-bold text-[#1a3a5c] mt-0.5">{totalWork} applications</p>
+                  </div>
+                  <div className="bg-white border border-[#d1d9e0] rounded p-2.5">
+                    <p className="text-[10px] text-[#64748b] font-semibold uppercase tracking-wider">Average Processing Age</p>
+                    <p className="text-xl font-bold text-[#1a2533] mt-0.5">4.2 days</p>
+                  </div>
+                  <div className="bg-white border border-amber-200 rounded p-2.5">
+                    <p className="text-[10px] text-amber-700 font-semibold uppercase tracking-wider">SLA Risk Cases</p>
+                    <p className="text-xl font-bold text-amber-700 mt-0.5">7 applications</p>
+                  </div>
+                  <div className="bg-white border border-red-200 rounded p-2.5">
+                    <p className="text-[10px] text-red-700 font-semibold uppercase tracking-wider">SLA Breached Cases</p>
+                    <p className="text-xl font-bold text-red-700 mt-0.5">2 applications</p>
+                  </div>
                 </div>
-              </div>
-            </div>
-          </section>
 
-          {/* Panel F - Service Mix */}
-          <section className="bg-white border border-[#d1d9e0] rounded" aria-labelledby="panel-servicemix">
-            <PanelHeader title="Service Mix" linkLabel="View Service Queues →" onLinkClick={() => onNavigate('dept-queue')} icon={<MIcon.Clipboard />} />
-            <div className="px-4 py-2 bg-[#f8f9fb] border-b border-[#e8edf2]">
-              <p className="text-[10px] text-[#374151]">Configurable service groups · not a fixed MIDC taxonomy</p>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs" aria-label="Service mix breakdown">
-                <thead>
-                  <tr className="bg-[#f8f9fb] text-[#1a2533] text-right">
-                    <th className="px-4 py-2 font-medium text-left">Service</th>
-                    <th className="px-3 py-2 font-medium">Active</th>
-                    <th className="px-3 py-2 font-medium">New</th>
-                    <th className="px-3 py-2 font-medium">Scrutiny</th>
-                    <th className="px-3 py-2 font-medium">Query</th>
-                    <th className="px-3 py-2 font-medium">Inspection</th>
-                    <th className="px-3 py-2 font-medium">Decision</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#94a3b8]">
-                  {serviceMix.map(s => (
-                    <tr key={s.service} className="hover:bg-[#f8f9fb] transition-colors text-right">
-                      <td className="px-4 py-2.5 text-left font-medium text-[#1a2533]">{s.service}</td>
-                      <td className="px-3 py-2.5 font-bold text-[#1a3a5c]">{s.active}</td>
-                      <td className="px-3 py-2.5 text-[#1a56db] font-semibold">{s.new}</td>
-                      <td className="px-3 py-2.5 text-[#1a2533]">{s.scrutiny}</td>
-                      <td className="px-3 py-2.5 text-amber-700">{s.query}</td>
-                      <td className="px-3 py-2.5 text-[#1a2533]">{s.inspection}</td>
-                      <td className="px-3 py-2.5 text-green-700 font-semibold">{s.decision}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div className="px-4 py-2 border-t border-[#f0f4f8]">
-              <p className="text-[10px] text-[#374151]">Showing configured workflow examples only. Actual service catalogue is system-configured.</p>
-            </div>
-          </section>
+                {/* Two Column Section */}
+                <div className="p-5 grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                  {/* Left Column: Workload Distribution & Aging */}
+                  <div className="space-y-5">
+                    <div className="bg-[#f8f9fb] border border-[#d1d9e0] rounded-lg p-4 space-y-3">
+                      <h3 className="text-xs font-bold text-[#1a2533] uppercase tracking-wider">Active Applications by Service</h3>
+                      <div className="space-y-2.5">
+                        {workloadByService.map(r => (
+                          <div key={r.service} className="space-y-1">
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="font-medium text-[#1a2533]">{r.service}</span>
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-[#1a3a5c]">{r.count}</span>
+                                {r.slaRisk > 0 && (
+                                  <span className="text-[10px] text-amber-700 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200 font-semibold">
+                                    {r.slaRisk} at risk
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="w-full bg-[#e2e8f0] rounded-full h-2 overflow-hidden">
+                              <div
+                                className="h-full bg-[#1a3a5c] rounded-full"
+                                style={{ width: `${(r.count / totalWork) * 100}%` }}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="bg-[#f8f9fb] border border-[#d1d9e0] rounded-lg p-4 space-y-3">
+                      <h3 className="text-xs font-bold text-[#1a2533] uppercase tracking-wider">Application Aging Distribution</h3>
+                      <div className="grid grid-cols-4 gap-2">
+                        {ageBuckets.map(b => (
+                          <div key={b.label} className="bg-white border border-[#d1d9e0] rounded p-2 text-center">
+                            <p className="text-base font-bold text-[#1a3a5c]">{b.count}</p>
+                            <p className="text-[10px] font-semibold text-[#1a2533] mt-0.5">{b.label}</p>
+                            <p className="text-[9px] text-[#64748b]">{b.pct}% of active</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Service Mix Lifecycle Matrix */}
+                  <div className="bg-[#f8f9fb] border border-[#d1d9e0] rounded-lg p-4 flex flex-col justify-between">
+                    <div>
+                      <h3 className="text-xs font-bold text-[#1a2533] uppercase tracking-wider mb-3">Service Stage Lifecycle Breakdown</h3>
+                      <div className="overflow-x-auto bg-white border border-[#d1d9e0] rounded">
+                        <table className="w-full text-xs" aria-label="Service mix breakdown">
+                          <thead>
+                            <tr className="bg-[#f1f5f9] text-[#1a2533] text-right border-b border-[#d1d9e0]">
+                              <th className="px-3 py-2 font-bold text-left">Service</th>
+                              <th className="px-2 py-2 font-bold">Total</th>
+                              <th className="px-2 py-2 font-semibold">New</th>
+                              <th className="px-2 py-2 font-semibold">Scrutiny</th>
+                              <th className="px-2 py-2 font-semibold">Query</th>
+                              <th className="px-2 py-2 font-semibold">Inspection</th>
+                              <th className="px-2 py-2 font-semibold">Decision</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-[#e5eaf0]">
+                            {serviceMix.map(s => (
+                              <tr key={s.service} className="hover:bg-[#f8f9fb] transition-colors text-right">
+                                <td className="px-3 py-2 text-left font-medium text-[#1a2533] whitespace-nowrap">{s.service}</td>
+                                <td className="px-2 py-2 font-bold text-[#1a3a5c]">{s.active}</td>
+                                <td className="px-2 py-2 text-[#1a56db] font-semibold">{s.new}</td>
+                                <td className="px-2 py-2 text-[#1a2533]">{s.scrutiny}</td>
+                                <td className="px-2 py-2 text-amber-700 font-medium">{s.query}</td>
+                                <td className="px-2 py-2 text-[#1a2533]">{s.inspection}</td>
+                                <td className="px-2 py-2 text-emerald-700 font-semibold">{s.decision}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <p className="text-[10px] text-[#64748b] mt-4 pt-2 border-t border-[#e2e8f0]">
+                      Showing configured operational distribution. Additional service types are dynamically aggregated from workflow registries.
+                    </p>
+                  </div>
+
+                </div>
+              </section>
+            )}
+
+          </div>
         </div>
 
       </div>
@@ -1864,7 +2197,7 @@ function DepCell({ dep }: { dep: string }) {
   return <span className={`text-[11px] font-medium ${isBlocking ? 'text-amber-700' : 'text-[#1a2533]'}`}>{dep}</span>
 }
 
-function QueueTable({ apps, onOpenApp }: { apps: typeof QUEUE_APPS; onOpenApp?: (applicationId: string) => void }) {
+function QueueTable({ apps, onOpenApp, onClearFilters }: { apps: typeof QUEUE_APPS; onOpenApp?: (applicationId: string) => void; onClearFilters?: () => void }) {
   const [selected, setSelected] = useState<Set<string>>(new Set())
 
   const toggleRow = (id: string) => setSelected(prev => {
@@ -1878,7 +2211,7 @@ function QueueTable({ apps, onOpenApp }: { apps: typeof QUEUE_APPS; onOpenApp?: 
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <p className="text-sm font-medium text-[#1a2533]">No applications match these filters.</p>
         <p className="text-xs text-[#374151] mt-1">Try adjusting filters or clearing the selection.</p>
-        <button className="mt-4 text-sm text-[#1a56db] hover:underline">Clear Filters</button>
+        <button onClick={onClearFilters} className="mt-4 text-sm text-[#1a56db] hover:underline">Clear Filters</button>
       </div>
     )
   }
@@ -1963,6 +2296,8 @@ export function M03QueuePage({ onOpenApp, initialService, initialStatus = 'all' 
   const [activeTab, setActiveTab] = useState(initialStatus)
   const [sortBy, setSortBy] = useState('sla-risk')
   const [activeFilters, setActiveFilters] = useState<{label: string; key: string}[]>(() => initialService ? [{ label: `Service: ${initialService}`, key: `service:${initialService}` }] : [])
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const [exportNotice, setExportNotice] = useState(false)
 
   const tabFilter = (tab: string, apps: typeof QUEUE_APPS) => {
     if (tab === 'all') return apps
@@ -2008,10 +2343,10 @@ export function M03QueuePage({ onOpenApp, initialService, initialStatus = 'all' 
           </div>
           <div className="flex items-center gap-2 shrink-0 flex-wrap">
             <span className="text-[10px] text-[#374151]">Last refreshed: 22 Sep 2026, 10:47 AM</span>
-            <button className="flex items-center gap-1.5 border border-[#d1d9e0] bg-white text-xs text-[#1a2533] px-3 py-1.5 rounded hover:bg-[#f0f4f8] transition-colors">
-              <MIcon.Refresh /> Refresh
+            <button onClick={() => { setIsRefreshing(true); setTimeout(() => setIsRefreshing(false), 500) }} className="flex items-center gap-1.5 border border-[#d1d9e0] bg-white text-xs text-[#1a2533] px-3 py-1.5 rounded hover:bg-[#f0f4f8] transition-colors">
+              <span className={isRefreshing ? 'animate-spin' : ''}><MIcon.Refresh /></span> {isRefreshing ? 'Refreshing...' : 'Refresh'}
             </button>
-            <button className="flex items-center gap-1.5 bg-[#1a3a5c] text-white text-xs font-medium px-3 py-1.5 rounded hover:bg-[#0f2540] transition-colors">
+            <button onClick={() => setActiveFilters([{ label: 'All Active Applications', key: 'service:all' }])} className="flex items-center gap-1.5 bg-[#1a3a5c] text-white text-xs font-medium px-3 py-1.5 rounded hover:bg-[#0f2540] transition-colors">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
               Search Applications
             </button>
@@ -2082,7 +2417,7 @@ export function M03QueuePage({ onOpenApp, initialService, initialStatus = 'all' 
             {activeFilters.length > 0 && (
               <button onClick={() => setActiveFilters([])} className="text-[11px] text-red-600 hover:underline ml-1">Clear All</button>
             )}
-            <button className="ml-auto text-[11px] border border-[#d1d9e0] text-[#1a2533] px-2.5 py-1 rounded hover:bg-[#f0f4f8] transition-colors flex items-center gap-1">
+            <button onClick={() => { setExportNotice(true); setTimeout(() => setExportNotice(false), 3000) }} className="ml-auto text-[11px] border border-[#d1d9e0] text-[#1a2533] px-2.5 py-1 rounded hover:bg-[#f0f4f8] transition-colors flex items-center gap-1">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               Export
             </button>
@@ -2101,9 +2436,15 @@ export function M03QueuePage({ onOpenApp, initialService, initialStatus = 'all' 
           )}
         </div>
 
+        {exportNotice && (
+          <div className="text-xs bg-emerald-50 text-emerald-800 border border-emerald-200 px-4 py-2 rounded flex items-center justify-between">
+            <span>Exporting {filtered.length} applications to CSV format... Download initiated.</span>
+            <button onClick={() => setExportNotice(false)} className="text-emerald-700 font-bold ml-2">✕</button>
+          </div>
+        )}
         {/* Table */}
         <div className="bg-white border border-[#d1d9e0] rounded overflow-hidden">
-          <QueueTable apps={filtered} onOpenApp={onOpenApp} />
+          <QueueTable apps={filtered} onOpenApp={onOpenApp} onClearFilters={() => setActiveFilters([])} />
           {/* Pagination */}
           <div className="flex items-center justify-between px-4 py-3 border-t border-[#d1d9e0] text-xs text-[#1a2533]">
             <span>Showing 1–{filtered.length} of {filtered.length} applications (prototype data)</span>
@@ -2351,11 +2692,12 @@ function RoutingChain() {
   )
 }
 
-export function M05ServicePage({ onOpenQueue }: { onOpenQueue?: (service: string, status?: string) => void } = {}) {
+export function M05ServicePage({ onOpenQueue, onOpenAnalytics }: { onOpenQueue?: (service: string, status?: string) => void; onOpenAnalytics?: () => void } = {}) {
   const [selected, setSelected] = useState<Service | null>(null)
   const [showRouting, setShowRouting] = useState(false)
   const [activeFilters, setActiveFilters] = useState<string[]>([])
   const [highlightId, setHighlightId] = useState<string | null>(null)
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   const totals = SERVICES.reduce((acc, s) => ({
     active:   acc.active   + s.active,
@@ -2387,7 +2729,9 @@ export function M05ServicePage({ onOpenQueue }: { onOpenQueue?: (service: string
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <span className="text-[10px] text-[#374151]">Updated: 22 Sep 2026, 10:47 AM</span>
-              <button className="flex items-center gap-1.5 border border-[#d1d9e0] bg-white text-xs text-[#1a2533] px-3 py-1.5 rounded hover:bg-[#f0f4f8] transition-colors"><MIcon.Refresh /> Refresh</button>
+              <button onClick={() => { setIsRefreshing(true); setTimeout(() => setIsRefreshing(false), 500) }} className="flex items-center gap-1.5 border border-[#d1d9e0] bg-white text-xs text-[#1a2533] px-3 py-1.5 rounded hover:bg-[#f0f4f8] transition-colors">
+                <span className={isRefreshing ? 'animate-spin' : ''}><MIcon.Refresh /></span> {isRefreshing ? 'Refreshing...' : 'Refresh'}
+              </button>
               <span className="text-[10px] bg-amber-50 border border-amber-200 text-amber-700 px-2 py-0.5 rounded">Prototype data</span>
             </div>
           </div>
@@ -2654,8 +2998,8 @@ export function M05ServicePage({ onOpenQueue }: { onOpenQueue?: (service: string
               View Queue - {selected.name} →
             </button>
             <div className="grid grid-cols-2 gap-2">
-              <button className="border border-[#d1d9e0] text-[#1a2533] text-[11px] py-1.5 rounded hover:bg-[#f0f4f8] transition-colors">Routing Context</button>
-              <button className="border border-[#d1d9e0] text-[#1a2533] text-[11px] py-1.5 rounded hover:bg-[#f0f4f8] transition-colors">Service Analytics</button>
+              <button onClick={() => setShowRouting(v => !v)} className="border border-[#d1d9e0] text-[#1a2533] text-[11px] py-1.5 rounded hover:bg-[#f0f4f8] transition-colors">Routing Context</button>
+              <button onClick={() => { if (onOpenAnalytics) onOpenAnalytics(); else alert('Service Analytics: 98.4% SLA adherence across all categories.'); }} className="border border-[#d1d9e0] text-[#1a2533] text-[11px] py-1.5 rounded hover:bg-[#f0f4f8] transition-colors">Service Analytics</button>
             </div>
           </div>
         </div>
@@ -3128,7 +3472,7 @@ function ProvenanceDrawer({ field, onClose }: { field: DnaField; onClose: () => 
               </div>
               <p className="text-[9px] text-amber-700 font-medium">Old value and new value remain traceable. Affected consumers identified. Confirmation workflow required.</p>
               <div className="flex gap-2">
-                <button className="flex-1 bg-[#1a3a5c] text-white text-[10px] font-semibold py-1.5 rounded hover:bg-[#0f2540] transition-colors">Submit for review</button>
+                <button onClick={() => { alert('Proposed correction submitted for supervisory review. Event logged.'); setShowCorrectionForm(false); }} className="flex-1 bg-[#1a3a5c] text-white text-[10px] font-semibold py-1.5 rounded hover:bg-[#0f2540] transition-colors">Submit for review</button>
                 <button onClick={() => setShowCorrectionForm(false)} className="flex-1 border border-[#d1d9e0] text-[#1a2533] text-[10px] py-1.5 rounded hover:bg-white transition-colors">Cancel</button>
               </div>
             </div>
@@ -4210,6 +4554,101 @@ const M09_RESULT_META: Record<PreCheckResult, { label: string; icon: string; dot
   judgment: { label:'Needs officer judgment', icon:'○', dotCls:'bg-[#9aa5b4]', textCls:'text-[#4a5568]', bgCls:'bg-[#f8f9fb]', borderCls:'border-[#d1d9e0]' },
 }
 
+// Canonical applicant-submitted data used during automated pre-check
+interface ApplicantSubmittedData {
+  field: string
+  applicantEntered: string
+  documentRef: string
+  ocrExtracted: string
+  ocrConfidence: string
+  sourceRecord: string
+  machineFinding: string
+  officerImplication: string
+}
+
+const APPLICANT_PRECHECK_DATA: ApplicantSubmittedData[] = [
+  {
+    field: 'Plot Area',
+    applicantEntered: '4,200 sq m (in Building Schedule)',
+    documentRef: 'MIDC Allotment Letter (DOC-ALLOT-00418)',
+    ocrExtracted: '4,800.00 SQ. METERS [OCR EXTRACTED - NOT AUTHORITATIVE]',
+    ocrConfidence: '98.4%',
+    sourceRecord: 'MIDC Estate Master Registry',
+    machineFinding: 'Discrepancy: Form entered 4,200 sq m vs. Registry 4,800 sq m vs. Fire context 4,600 sq m',
+    officerImplication: 'Officer must clarify correct plot area with applicant or verify against approved allotment deed.',
+  },
+  {
+    field: 'Building Built-up Area / FSI',
+    applicantEntered: '2,300 sq m (Proposed Built-up Area)',
+    documentRef: 'Proposed Architectural Layout Plan (DWG-2026-00418)',
+    ocrExtracted: 'GROUND: 1,450 sq m, FIRST: 850 sq m, TOTAL: 2,300 sq m [OCR EXTRACTED - NOT AUTHORITATIVE]',
+    ocrConfidence: '96.2%',
+    sourceRecord: 'Building Development Regulations (MIDC DC Rules)',
+    machineFinding: 'Permissible FSI 1.0 (4,800 sq m) - Proposed 2,300 sq m conforms (FSI 0.48).',
+    officerImplication: 'Conforms to permissible limits. Detailed structural scrutiny in M14.',
+  },
+  {
+    field: 'Fire Safety NOC',
+    applicantEntered: 'Provisional Fire NOC FIRE-NOC-2024-8891 (Valid till 10 Sep 2026)',
+    documentRef: 'Maharashtra Fire Services Provisional Certificate',
+    ocrExtracted: 'VALID UP TO: 10/09/2026 [OCR EXTRACTED - NOT AUTHORITATIVE]',
+    ocrConfidence: '99.1%',
+    sourceRecord: 'Fire Department Inter-agency Bridge',
+    machineFinding: 'Document expired on 10 Sep 2026 (12 days past validity at time of review).',
+    officerImplication: 'Officer must require renewed or revalidated Fire NOC before technical sanction.',
+  },
+  {
+    field: 'MPCB Consent to Establish (CTE)',
+    applicantEntered: 'Application Ref MPCB-CTE-2026-0881 (Applied on 14 Aug 2026)',
+    documentRef: 'MPCB Application Receipt & Acknowledgement',
+    ocrExtracted: 'APPLICATION NO: MPCB-CONSENT-000014920 [OCR EXTRACTED - NOT AUTHORITATIVE]',
+    ocrConfidence: '94.5%',
+    sourceRecord: 'MPCB Regulatory Linkage (External Prerequisite)',
+    machineFinding: 'External prerequisite status is PENDING. Scrutiny can proceed conditionally.',
+    officerImplication: 'Permissible for MIDC conditional scrutiny; final order cannot issue prior to MPCB CTE grant.',
+  },
+  {
+    field: 'Hazardous Waste Classification',
+    applicantEntered: 'Category: Class 5.1 & Class 28 (Chemical Solvents & Distillation Residues)',
+    documentRef: 'Process Flow Sheet & Material Balance Schedule',
+    ocrExtracted: 'SPENT SOLVENTS: 18.5 KL/MONTH, DISTILLATION RESIDUE: 4.2 MT/MONTH [OCR EXTRACTED - NOT AUTHORITATIVE]',
+    ocrConfidence: '92.0%',
+    sourceRecord: 'Business DNA Adaptive Profile (Hazardous Stream: CONFIRMED)',
+    machineFinding: 'Marked NEEDS_VERIFICATION. Generation rates require officer verification against production schedule.',
+    officerImplication: 'Verify storage layout and effluent containment details in technical scrutiny.',
+  },
+  {
+    field: 'Capital Investment & Capacity Change',
+    applicantEntered: 'Investment: Rs 42.00 Cr | Capacity: 550 MT/yr (API Intermediates)',
+    documentRef: 'Project DPR / Resubmission Schedule v3',
+    ocrExtracted: 'TOTAL PROJECT OUTLAY: RS 4,200 LAKHS | INSTALLED CAPACITY: 550 MTPA [OCR EXTRACTED - NOT AUTHORITATIVE]',
+    ocrConfidence: '97.8%',
+    sourceRecord: 'Previous Version v2 Record (Rs 40.00 Cr / 500 MT/yr)',
+    machineFinding: 'Delta detected: Investment +Rs 2.00 Cr, Capacity +50 MT/yr. May impact fee slab and pollution category.',
+    officerImplication: 'Delta scrutiny required to check fee differential and updated utility load requirements.',
+  },
+  {
+    field: 'Water Requirement & Connection',
+    applicantEntered: 'Industrial: 45,000 L/day, Domestic: 15,000 L/day (Total 60 KLD)',
+    documentRef: 'Water Balance Diagram & MIDC Water Supply Undertaking',
+    ocrExtracted: 'DAILY FRESH WATER INTAKE: 60 KLD [OCR EXTRACTED - NOT AUTHORITATIVE]',
+    ocrConfidence: '95.0%',
+    sourceRecord: 'MIDC Water Distribution Network (Available Capacity: 120 KLD)',
+    machineFinding: 'Sufficient supply available in estate pipeline feeder (Zone B).',
+    officerImplication: 'Verify internal recycling scheme (minimum 40% recycling mandatory for this zone).',
+  },
+  {
+    field: 'Fee Payment & Challan',
+    applicantEntered: 'Challan CH-2026-00482 | Amount: Rs 1,45,000 | Paid 18 Sep 2026',
+    documentRef: 'e-Payment Treasury Receipt (GRAS)',
+    ocrExtracted: 'CIN: 004829104820 | STATUS: SUCCESSFUL [OCR EXTRACTED - NOT AUTHORITATIVE]',
+    ocrConfidence: '99.9%',
+    sourceRecord: 'State Cyber Treasury Portal (Verified)',
+    machineFinding: 'Payment confirmed in MIDC Treasury Account.',
+    officerImplication: 'Fee requirement fulfilled. No further action needed.',
+  },
+]
+
 function PreCheckResultBadge({ result }: { result: PreCheckResult }) {
   const m = M09_RESULT_META[result]
   return (
@@ -4219,141 +4658,382 @@ function PreCheckResultBadge({ result }: { result: PreCheckResult }) {
   )
 }
 
-function PreCheckDrawer({ check, onClose }: { check: PreCheck; onClose: () => void }) {
-  const m = M09_RESULT_META[check.result]
+function PreCheckDrawer({
+  check,
+  officerReview,
+  onRecordReview,
+  onClose,
+  onOpenDocReview,
+  onOpenParamDetail,
+  onOpenConsistency,
+  onOpenDepView,
+  onOpenDelta,
+  onOpenQueryBuilder,
+}: {
+  check: PreCheck
+  officerReview?: OfficerReviewState
+  onRecordReview?: (state: OfficerReviewState, note?: string) => void
+  onClose: () => void
+  onOpenDocReview?: (id: string) => void
+  onOpenParamDetail?: (id: string) => void
+  onOpenConsistency?: () => void
+  onOpenDepView?: () => void
+  onOpenDelta?: () => void
+  onOpenQueryBuilder?: () => void
+}) {
+  const [internalNote, setInternalNote] = useState('')
+  const [activeState, setActiveState] = useState<OfficerReviewState>(officerReview || 'not-reviewed')
+  const [showRawOcr, setShowRawOcr] = useState(false)
+  const [showProvenance, setShowProvenance] = useState(false)
+
+  const matchingApplicantData = APPLICANT_PRECHECK_DATA.find(d =>
+    d.field.toLowerCase().includes(check.name.toLowerCase()) ||
+    check.name.toLowerCase().includes(d.field.toLowerCase()) ||
+    (check.id.startsWith('d3') && d.field.includes('Fire')) ||
+    (check.id.startsWith('b4') && d.field.includes('Hazardous')) ||
+    (check.id.startsWith('l4') && d.field.includes('Plot Area')) ||
+    (check.id.startsWith('x1') && d.field.includes('Plot Area')) ||
+    (check.id.startsWith('c2') && d.field.includes('Investment')) ||
+    (check.id.startsWith('c3') && d.field.includes('Capacity')) ||
+    (check.id.startsWith('dep1') && d.field.includes('MPCB')) ||
+    (check.id.startsWith('dep2') && d.field.includes('Fire'))
+  )
+
+  const handleSetState = (newState: OfficerReviewState) => {
+    setActiveState(newState)
+    onRecordReview?.(newState, internalNote)
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-label={`Check detail: ${check.name}`}>
-      <div className="absolute inset-0 bg-black/30" onClick={onClose} />
-      <div className="relative bg-white w-full max-w-md h-full overflow-y-auto shadow-xl flex flex-col">
-        <div className="flex items-center justify-between px-5 py-3 border-b border-[#d1d9e0] bg-[#f8f9fb] shrink-0">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]" onClick={onClose} />
+      <div className="relative bg-white w-full max-w-xl h-full overflow-y-auto shadow-2xl flex flex-col border-l border-[#d1d9e0]">
+        
+        {/* Drawer Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#d1d9e0] bg-[#f8f9fb] shrink-0">
           <div>
-            <p className="text-[10px] text-[#374151] uppercase tracking-wider font-semibold">Automated Check Detail</p>
-            <h3 className="text-sm font-bold text-[#1a2533]">{check.name}</h3>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-bold text-[#1a56db] uppercase tracking-wider">Automated Pre-check Finding</span>
+              <PreCheckResultBadge result={check.result} />
+            </div>
+            <h2 className="text-base font-bold text-[#1a2533] mt-1">{check.name}</h2>
           </div>
-          <button onClick={onClose} className="text-[#1a2533] hover:text-[#1a2533] p-1 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a56db]" aria-label="Close drawer">✕</button>
+          <button
+            onClick={onClose}
+            className="text-[#64748b] hover:text-[#1a2533] p-1.5 rounded-md hover:bg-[#e2e8f0] focus:outline-none text-base font-bold"
+            aria-label="Close drawer"
+          >
+            ✕
+          </button>
         </div>
-        <div className="p-5 space-y-5 flex-1">
-          <div>
-            <p className="text-[10px] text-[#374151] uppercase tracking-wider font-semibold mb-1">Result</p>
-            <PreCheckResultBadge result={check.result} />
-          </div>
-          <div>
-            <p className="text-[10px] text-[#374151] uppercase tracking-wider font-semibold mb-1">What was checked</p>
-            <p className="text-xs text-[#1a2533]">{check.explanation}</p>
-          </div>
-          {check.detail?.values && (
-            <div>
-              <p className="text-[10px] text-[#374151] uppercase tracking-wider font-semibold mb-2">Values</p>
-              <div className="border border-[#d1d9e0] rounded divide-y divide-[#d1d9e0]">
-                {check.detail.values.map(v => (
-                  <div key={v.label} className="flex items-start justify-between px-3 py-2 gap-4">
-                    <span className="text-[10px] text-[#374151] shrink-0">{v.label}</span>
-                    <span className={`text-[11px] font-medium text-right ${v.match === false ? 'text-amber-700' : v.match === true ? 'text-emerald-700' : 'text-[#1a2533]'}`}>{v.value}</span>
+
+        {/* Drawer Body */}
+        <div className="p-6 space-y-6 flex-1 text-xs">
+          
+          {/* Section 1: What the Applicant Submitted */}
+          <div className="bg-white border border-[#d1d9e0] rounded-lg p-4 space-y-3 shadow-xs">
+            <span className="text-[10px] font-bold text-[#475569] uppercase tracking-wider block">
+              1. What the applicant submitted
+            </span>
+
+            {matchingApplicantData?.documentRef && (
+              <div className="p-3 bg-[#f8fafc] rounded-md border border-[#e2e8f0] flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-8 h-8 rounded bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-700 font-bold shrink-0">
+                    📄
                   </div>
-                ))}
+                  <div className="min-w-0">
+                    <p className="font-semibold text-[#1a2533] truncate">{matchingApplicantData.documentRef}</p>
+                    <p className="text-[10px] text-[#64748b]">Submitted Application Document · 18 Sep 2026</p>
+                  </div>
+                </div>
+
+                {onOpenDocReview && (
+                  <button
+                    onClick={() => onOpenDocReview('DOC-ALLOT-00418')}
+                    className="text-[11px] font-semibold text-[#1a56db] hover:underline shrink-0 bg-white px-2.5 py-1 rounded border border-[#cbd5e1]"
+                  >
+                    Inspect Document →
+                  </button>
+                )}
+              </div>
+            )}
+
+            <div>
+              <span className="text-[10px] text-[#64748b] block font-semibold">Submitted Value / Record:</span>
+              <div className="p-3 bg-[#f8fafc] rounded border border-[#e2e8f0] text-[#1a2533] font-semibold mt-1">
+                {matchingApplicantData?.applicantEntered || check.explanation}
               </div>
             </div>
-          )}
-          {(check.detail?.prevValue || check.detail?.currValue) && (
-            <div>
-              <p className="text-[10px] text-[#374151] uppercase tracking-wider font-semibold mb-2">Change</p>
-              <div className="border border-[#d1d9e0] rounded divide-y divide-[#d1d9e0]">
-                <div className="flex items-center justify-between px-3 py-2"><span className="text-[10px] text-[#374151]">Previous</span><span className="text-[11px] font-medium text-[#1a2533]">{check.detail.prevValue}</span></div>
-                <div className="flex items-center justify-between px-3 py-2"><span className="text-[10px] text-[#374151]">Current</span><span className="text-[11px] font-medium text-amber-700">{check.detail.currValue}</span></div>
-                {check.detail.changedAt && <div className="flex items-center justify-between px-3 py-2"><span className="text-[10px] text-[#374151]">Changed</span><span className="text-[11px] text-[#1a2533]">{check.detail.changedAt}</span></div>}
+          </div>
+
+          {/* Section 2: What the System Found */}
+          <div className="bg-[#fffdfa] border border-amber-200 rounded-lg p-4 space-y-2 shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold text-amber-900 uppercase tracking-wider block">
+                2. What the system found
+              </span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300">
+                {check.result === 'judgment' ? 'Officer Judgment Required' : 'Review Required'}
+              </span>
+            </div>
+            <p className="text-xs text-[#1a2533] font-medium leading-relaxed">
+              {matchingApplicantData?.machineFinding || check.explanation}
+            </p>
+
+            {check.detail?.impact && (
+              <div className="text-[11px] text-amber-900 bg-amber-50 p-2 rounded border border-amber-200">
+                <strong>Regulatory Effect:</strong> {check.detail.impact}
               </div>
+            )}
+          </div>
+
+          {/* Section 3: OCR & System Extraction */}
+          <div className="bg-[#f0f7ff] border border-blue-200 rounded-lg p-4 space-y-2.5 shadow-xs">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold text-blue-900 uppercase tracking-wider">
+                  3. OCR & System Extraction
+                </span>
+                <span className="text-[9px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-bold border border-blue-200">
+                  OCR Extracted
+                </span>
+              </div>
+              {matchingApplicantData?.ocrConfidence && (
+                <span className="text-[10px] text-blue-800 font-semibold">
+                  Confidence: {matchingApplicantData.ocrConfidence}
+                </span>
+              )}
             </div>
-          )}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <p className="text-[10px] text-[#374151] uppercase tracking-wider font-semibold mb-1">Source</p>
-              <p className="text-[11px] text-[#1a2533]">{check.source}</p>
+
+            <div className="p-2.5 bg-white border border-blue-200 rounded font-mono text-xs text-blue-950">
+              {matchingApplicantData?.ocrExtracted || 'OCR reading confirmed matching document text.'}
             </div>
+
+            <div className="flex justify-end">
+              <button
+                onClick={() => setShowRawOcr(v => !v)}
+                className="text-[10px] text-[#1a56db] hover:underline font-semibold"
+              >
+                {showRawOcr ? 'Hide extracted data' : 'View extracted data'}
+              </button>
+            </div>
+
+            {showRawOcr && (
+              <div className="p-2.5 bg-slate-900 text-slate-200 font-mono text-[10px] rounded space-y-1">
+                <div>[OCR Engine: Tesseract v5 / Ekatma Pipeline v2]</div>
+                <div>Extracted Field: {matchingApplicantData?.field || check.name}</div>
+                <div>Raw Checksum: SHA256: 48f9a2e3...b71c</div>
+              </div>
+            )}
+          </div>
+
+          {/* Section 4: Officer Decision */}
+          <div className="bg-white border-2 border-[#1a3a5c] rounded-lg p-4 space-y-3 shadow-xs">
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-[10px] font-bold text-[#1a3a5c] uppercase tracking-wider block">
+                  4. Your Review & Decision
+                </span>
+                <p className="text-[11px] text-[#4b5563]">Select an action to record your verification on this finding.</p>
+              </div>
+              <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                activeState === 'valid' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' :
+                activeState === 'needs-verification' ? 'bg-amber-100 text-amber-800 border-amber-300' :
+                activeState === 'query' ? 'bg-blue-100 text-blue-800 border-blue-300' :
+                activeState === 'invalid' ? 'bg-purple-100 text-purple-800 border-purple-300' :
+                'bg-slate-100 text-slate-700 border-slate-300'
+              }`}>
+                {activeState === 'valid' ? 'Verified / Accepted' :
+                 activeState === 'needs-verification' ? 'Needs Verification' :
+                 activeState === 'query' ? 'Query Required' :
+                 activeState === 'invalid' ? 'Evidence Requested' :
+                 'Review Pending'}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => handleSetState('valid')}
+                className={`px-3 py-2 rounded text-xs font-bold border transition-colors flex items-center justify-center gap-1.5 ${
+                  activeState === 'valid' ? 'bg-emerald-700 text-white border-emerald-700 shadow-xs' : 'bg-white hover:bg-emerald-50 text-emerald-800 border-emerald-300'
+                }`}
+              >
+                <span>✓</span> Accept / Verify
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleSetState('needs-verification')}
+                className={`px-3 py-2 rounded text-xs font-bold border transition-colors flex items-center justify-center gap-1.5 ${
+                  activeState === 'needs-verification' ? 'bg-amber-600 text-white border-amber-600 shadow-xs' : 'bg-white hover:bg-amber-50 text-amber-800 border-amber-300'
+                }`}
+              >
+                <span>⚠</span> Needs Verification
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleSetState('query')}
+                className={`px-3 py-2 rounded text-xs font-bold border transition-colors flex items-center justify-center gap-1.5 ${
+                  activeState === 'query' ? 'bg-[#1a56db] text-white border-[#1a56db] shadow-xs' : 'bg-white hover:bg-blue-50 text-[#1a56db] border-blue-300'
+                }`}
+              >
+                <span>❓</span> Raise Query
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleSetState('invalid')}
+                className={`px-3 py-2 rounded text-xs font-bold border transition-colors flex items-center justify-center gap-1.5 ${
+                  activeState === 'invalid' ? 'bg-purple-700 text-white border-purple-700 shadow-xs' : 'bg-white hover:bg-purple-50 text-purple-800 border-purple-300'
+                }`}
+              >
+                <span>📎</span> Request Evidence
+              </button>
+            </div>
+
             <div>
-              <p className="text-[10px] text-[#374151] uppercase tracking-wider font-semibold mb-1">Checked at</p>
-              <p className="text-[11px] text-[#1a2533]">{check.checkedAt}</p>
+              <label className="text-[10px] font-semibold text-[#475569] uppercase tracking-wider block mb-1">
+                Internal Officer Note:
+              </label>
+              <textarea
+                value={internalNote}
+                onChange={e => setInternalNote(e.target.value)}
+                placeholder="Record observation notes or instructions for subsequent scrutiny desks..."
+                rows={2}
+                className="w-full text-xs p-2.5 border border-[#cbd5e1] rounded bg-white text-[#1a2533] focus:outline-none focus:ring-1 focus:ring-[#1a56db]"
+              />
             </div>
           </div>
-          {check.rule && (
-            <div>
-              <p className="text-[10px] text-[#374151] uppercase tracking-wider font-semibold mb-1">Check basis</p>
-              <p className="text-[11px] text-[#1a2533] font-mono">{check.rule}</p>
-            </div>
-          )}
-          {check.detail?.impact && (
-            <div>
-              <p className="text-[10px] text-[#374151] uppercase tracking-wider font-semibold mb-1">Impact</p>
-              <p className="text-[11px] text-[#1a2533]">{check.detail.impact}</p>
-            </div>
-          )}
-          {check.detail?.nextReview && (
-            <div>
-              <p className="text-[10px] text-[#374151] uppercase tracking-wider font-semibold mb-1">Next review</p>
-              <p className="text-[11px] text-[#1a56db] font-medium">{check.detail.nextReview}</p>
-            </div>
-          )}
-          <div className="pt-2 border-t border-[#d1d9e0]">
-            <p className="text-[10px] text-[#374151] italic">System finding - officer scrutiny determines the regulatory conclusion.</p>
+
+          {/* Section 5: Provenance (Collapsed by default) */}
+          <div className="border border-[#e2e8f0] rounded-lg overflow-hidden bg-white">
+            <button
+              onClick={() => setShowProvenance(v => !v)}
+              className="w-full px-4 py-2.5 bg-[#f8fafc] hover:bg-[#f1f5f9] transition-colors flex items-center justify-between text-left focus:outline-none"
+            >
+              <span className="text-[10px] font-bold text-[#64748b] uppercase tracking-wider">
+                {showProvenance ? '▾ Hide Provenance Details' : '▸ View Provenance & Audit Info'}
+              </span>
+              <span className="text-[10px] text-[#64748b] font-medium">Source: {check.source}</span>
+            </button>
+
+            {showProvenance && (
+              <div className="p-3.5 border-t border-[#e2e8f0] space-y-1.5 text-[11px] text-[#4b5563] bg-[#f8fafc]">
+                <div className="flex justify-between py-0.5 border-b border-slate-200">
+                  <span>Source Record:</span>
+                  <strong className="text-[#1a2533]">{check.source}</strong>
+                </div>
+                <div className="flex justify-between py-0.5 border-b border-slate-200">
+                  <span>Evaluated At:</span>
+                  <strong className="text-[#1a2533]">{check.checkedAt}</strong>
+                </div>
+                <div className="flex justify-between py-0.5 border-b border-slate-200">
+                  <span>Rule Reference:</span>
+                  <strong className="font-mono text-[#1a2533]">{check.rule || check.id.toUpperCase()}</strong>
+                </div>
+                <div className="flex justify-between py-0.5">
+                  <span>Verification Framework:</span>
+                  <strong className="text-[#1a2533]">MIDC Statutory Intake v3.2</strong>
+                </div>
+              </div>
+            )}
           </div>
+
         </div>
+
+        {/* Drawer Footer */}
+        <div className="p-4 border-t border-[#d1d9e0] bg-[#f8f9fb] flex items-center justify-between shrink-0">
+          <button
+            onClick={onClose}
+            className="px-3.5 py-1.5 border border-[#d1d9e0] text-[#374151] rounded text-xs font-semibold hover:bg-[#e2e8f0]"
+          >
+            Close
+          </button>
+          <button
+            onClick={() => {
+              onRecordReview?.(activeState, internalNote)
+              onClose()
+            }}
+            className="px-4 py-1.5 bg-[#1a3a5c] text-white rounded text-xs font-bold hover:bg-[#0f2540] shadow-xs"
+          >
+            Save Decision & Close
+          </button>
+        </div>
+
       </div>
     </div>
   )
 }
 
-function PreCheckGroupCard({ group, defaultExpanded }: { group: PreCheckGroup; defaultExpanded?: boolean }) {
-  const [expanded, setExpanded] = useState(defaultExpanded ?? false)
-  const [activeCheck, setActiveCheck] = useState<PreCheck | null>(null)
-  const counts = {
-    verified: group.checks.filter(c => c.result === 'verified').length,
-    warning:  group.checks.filter(c => c.result === 'warning').length,
-    judgment: group.checks.filter(c => c.result === 'judgment').length,
-  }
+function PreCheckCategorySummaryRow({
+  group,
+  officerReviews,
+  onOpenCheck,
+}: {
+  group: PreCheckGroup
+  officerReviews?: Record<string, OfficerReviewState>
+  onOpenCheck: (check: PreCheck) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const passed = group.checks.filter(c => c.result === 'verified').length
+  const review = group.checks.filter(c => c.result !== 'verified').length
+
   return (
-    <div className="border border-[#d1d9e0] rounded overflow-hidden">
-      {activeCheck && <PreCheckDrawer check={activeCheck} onClose={() => setActiveCheck(null)} />}
+    <div className="border border-[#e2e8f0] rounded-md overflow-hidden bg-white text-xs">
       <button
-        onClick={() => setExpanded(e => !e)}
-        className="w-full flex items-center justify-between px-4 py-3 bg-[#f8f9fb] hover:bg-[#f0f4f8] transition-colors text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#1a56db]"
-        aria-expanded={expanded}
+        onClick={() => setOpen(v => !v)}
+        className="w-full px-4 py-2.5 bg-white hover:bg-[#f8f9fb] transition-colors flex items-center justify-between text-left focus:outline-none"
       >
-        <div className="flex items-center gap-3 min-w-0">
-          <div>
-            <p className="text-xs font-bold text-[#1a2533]">{group.title}</p>
-            <p className="text-[10px] text-[#374151] mt-0.5 max-w-xs truncate">{group.desc}</p>
-          </div>
+        <div className="flex items-center gap-2.5">
+          <span className={`w-5 h-5 rounded-full flex items-center justify-center font-bold text-[10px] ${
+            review > 0 ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'
+          }`}>
+            {review > 0 ? '!' : '✓'}
+          </span>
+          <span className="font-bold text-[#1a2533]">{group.title}</span>
+          <span className="text-[#64748b]">
+            : {passed} passed{review > 0 ? `, ${review} review required` : ''}
+          </span>
         </div>
-        <div className="flex items-center gap-3 shrink-0 ml-4">
-          {counts.verified > 0 && <span className="flex items-center gap-1 text-[10px] text-emerald-700 font-semibold"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />{counts.verified}</span>}
-          {counts.warning > 0  && <span className="flex items-center gap-1 text-[10px] text-amber-700 font-semibold"><span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block" />{counts.warning}</span>}
-          {counts.judgment > 0 && <span className="flex items-center gap-1 text-[10px] text-[#1a2533] font-semibold"><span className="w-1.5 h-1.5 rounded-full bg-[#9aa5b4] inline-block" />{counts.judgment}</span>}
-          <span className="text-[#374151] text-xs ml-1">{expanded ? '▲' : '▼'}</span>
+
+        <div className="flex items-center gap-2 text-[#64748b]">
+          <span className="text-[11px] font-semibold">{open ? '▲ Collapse' : '▼ Expand'}</span>
         </div>
       </button>
-      {expanded && (
-        <div className="divide-y divide-[#94a3b8]">
+
+      {open && (
+        <div className="p-3 border-t border-[#e2e8f0] bg-[#f8fafc] space-y-2">
           {group.checks.map(check => {
-            const m = M09_RESULT_META[check.result]
+            const state = officerReviews?.[check.id]
             return (
-              <button
-                key={check.id}
-                onClick={() => setActiveCheck(check)}
-                className="w-full text-left px-4 py-3 hover:bg-[#f8f9fb] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#1a56db] group"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-semibold text-[#1a2533] group-hover:text-[#1a56db]">{check.name}</p>
-                    <p className="text-[10px] text-[#374151] mt-0.5 leading-relaxed">{check.explanation}</p>
-                    <div className="flex items-center gap-3 mt-1.5">
-                      <span className="text-[9px] text-[#6b7280]">Checked {check.checkedAt}</span>
-                      {check.rule && <span className="text-[9px] font-mono text-[#6b7280]">{check.rule}</span>}
-                    </div>
-                  </div>
-                  <div className="shrink-0 flex flex-col items-end gap-1">
+              <div key={check.id} className="p-2.5 bg-white rounded border border-[#e2e8f0] flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-[#1a2533]">{check.name}</span>
                     <PreCheckResultBadge result={check.result} />
+                    {state && state !== 'not-reviewed' && (
+                      <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-slate-100 text-slate-800 border">
+                        {state.toUpperCase()}
+                      </span>
+                    )}
                   </div>
+                  <p className="text-[11px] text-[#4b5563] mt-0.5">{check.explanation}</p>
                 </div>
-              </button>
+
+                {check.result !== 'verified' ? (
+                  <button
+                    onClick={() => onOpenCheck(check)}
+                    className="px-2.5 py-1 text-xs font-bold text-[#1a56db] bg-[#eff6ff] hover:bg-[#dbeafe] rounded border border-[#bfdbfe] shrink-0"
+                  >
+                    Review →
+                  </button>
+                ) : (
+                  <span className="text-[11px] text-emerald-700 font-semibold shrink-0">✓ Verified</span>
+                )}
+              </div>
             )
           })}
         </div>
@@ -4362,120 +5042,413 @@ function PreCheckGroupCard({ group, defaultExpanded }: { group: PreCheckGroup; d
   )
 }
 
-export function M09PreCheckPage({ onBackToOverview, onOpenDna, onOpenTimeline, onOpenScrutinyRoute }: { onBackToOverview: () => void; onOpenDna?: () => void; onOpenTimeline?: () => void; onOpenScrutinyRoute?: () => void }) {
+export function M09PreCheckPage({
+  onBackToOverview,
+  onOpenDna,
+  onOpenTimeline,
+  onOpenScrutinyRoute,
+  onOpenScrutinyWorkflow,
+  onOpenDocReview,
+  onOpenParamDetail,
+  onOpenConsistency,
+  onOpenDepView,
+  onOpenDelta,
+  onOpenQueryBuilder,
+}: {
+  onBackToOverview: () => void
+  onOpenDna?: () => void
+  onOpenTimeline?: () => void
+  onOpenScrutinyRoute?: () => void
+  onOpenScrutinyWorkflow?: () => void
+  onOpenDocReview?: (id: string) => void
+  onOpenParamDetail?: (id: string) => void
+  onOpenConsistency?: () => void
+  onOpenDepView?: () => void
+  onOpenDelta?: () => void
+  onOpenQueryBuilder?: () => void
+}) {
   const app = useMonolithData().APP_SAMPLE
-  const totalVerified = M09_GROUPS.flatMap(g => g.checks).filter(c => c.result === 'verified').length
-  const totalWarning  = M09_GROUPS.flatMap(g => g.checks).filter(c => c.result === 'warning').length
-  const totalJudgment = M09_GROUPS.flatMap(g => g.checks).filter(c => c.result === 'judgment').length
-  const totalChecks = totalVerified + totalWarning + totalJudgment
+  const [activeCheck, setActiveCheck] = useState<PreCheck | null>(null)
+  const [showVerifiedChecks, setShowVerifiedChecks] = useState(false)
+  const [showAllCategories, setShowAllCategories] = useState(false)
+  const [notification, setNotification] = useState<string | null>(null)
+
+  // Track officer reviews in component state
+  const [officerReviews, setOfficerReviews] = useState<Record<string, OfficerReviewState>>({
+    'd3': 'needs-verification',
+    'x1': 'query',
+    'b4': 'needs-verification',
+  })
+
+  function showNotice(msg: string) {
+    setNotification(msg)
+    setTimeout(() => setNotification(null), 3500)
+  }
+
+  const allChecks = M09_GROUPS.flatMap(g => g.checks)
+  const passedChecks = allChecks.filter(c => c.result === 'verified')
+  const priorityChecks = allChecks.filter(c => c.result !== 'verified')
+  const totalVerified = passedChecks.length
+  const totalWarning = allChecks.filter(c => c.result === 'warning').length
+  const totalJudgment = allChecks.filter(c => c.result === 'judgment').length
+
+  const reviewedCount = priorityChecks.filter(c => officerReviews[c.id] && officerReviews[c.id] !== 'not-reviewed').length
+  const unreviewedCount = priorityChecks.length - reviewedCount
+
+  const handleRecordReview = (checkId: string, state: OfficerReviewState, _note?: string) => {
+    setOfficerReviews(prev => ({ ...prev, [checkId]: state }))
+    showNotice(`Recorded determination: ${state === 'valid' ? 'Verified / Accepted' : state === 'needs-verification' ? 'Needs Verification' : state === 'query' ? 'Query Required' : 'Evidence Requested'}`)
+  }
+
+  const handleReviewRemaining = () => {
+    const nextUnreviewed = priorityChecks.find(c => !officerReviews[c.id] || officerReviews[c.id] === 'not-reviewed')
+    if (nextUnreviewed) {
+      setActiveCheck(nextUnreviewed)
+    } else if (priorityChecks.length > 0) {
+      setActiveCheck(priorityChecks[0])
+    }
+  }
+
+  const handleProceedToScrutinyPhase = () => {
+    if (onOpenScrutinyWorkflow) {
+      onOpenScrutinyWorkflow()
+    } else if (onOpenScrutinyRoute) {
+      onOpenScrutinyRoute()
+    } else {
+      onBackToOverview()
+    }
+  }
 
   return (
     <div className="flex-1 bg-[#f8f9fb] overflow-y-auto">
-      <div className="max-w-4xl mx-auto px-6 py-6 space-y-5">
+      {/* Floating Notification */}
+      {notification && (
+        <div className="fixed top-20 right-8 z-50 bg-[#1a2533] text-white px-4 py-2.5 rounded-lg shadow-lg text-xs font-semibold flex items-center gap-2 border border-slate-700 animate-in fade-in duration-200">
+          <span className="text-emerald-400">✓</span> {notification}
+        </div>
+      )}
 
-        {/* Breadcrumb */}
-        <Breadcrumb items={[
-          { label: 'Department Home', onClick: onBackToOverview },
-          { label: 'Applications', onClick: onBackToOverview },
-          { label: 'Application Overview', onClick: onBackToOverview },
-          { label: 'Automated Pre-check' },
-        ]} />
+      {/* Active Check Inspection Drawer */}
+      {activeCheck && (
+        <PreCheckDrawer
+          check={activeCheck}
+          officerReview={officerReviews[activeCheck.id]}
+          onRecordReview={(state, note) => handleRecordReview(activeCheck.id, state, note)}
+          onClose={() => setActiveCheck(null)}
+          onOpenDocReview={onOpenDocReview}
+          onOpenParamDetail={onOpenParamDetail}
+          onOpenConsistency={onOpenConsistency}
+          onOpenDepView={onOpenDepView}
+          onOpenDelta={onOpenDelta}
+          onOpenQueryBuilder={onOpenQueryBuilder}
+        />
+      )}
 
-        {/* Page header */}
-        <div className="flex items-start justify-between gap-4">
+      <div className="max-w-5xl mx-auto px-6 py-6 space-y-6">
+
+        {/* ── 1. Clean Breadcrumb Navigation ──────────────────────────────── */}
+        <div className="flex items-center gap-2 text-xs text-[#64748b]">
+          <button onClick={onBackToOverview} className="hover:text-[#1a56db] transition-colors">Department Home</button>
+          <span>&gt;</span>
+          <button onClick={handleProceedToScrutinyPhase} className="hover:text-[#1a56db] transition-colors">Scrutiny</button>
+          <span>&gt;</span>
+          <button onClick={onBackToOverview} className="hover:text-[#1a56db] transition-colors">Application</button>
+          <span>&gt;</span>
+          <span className="font-semibold text-[#1a2533]">Pre-check</span>
+        </div>
+
+        {/* ── Page Title & Subtitle ────────────────────────────────────────── */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-xl font-bold text-[#1a2533]">Automated Pre-check</h1>
-            <p className="text-sm text-[#1a2533] mt-0.5">Objective system checks completed before manual MIDC scrutiny.</p>
+            <h1 className="text-2xl font-bold text-[#1a2533]">Automated Pre-check</h1>
+            <p className="text-xs text-[#4b5563] mt-0.5">System checks completed before manual scrutiny.</p>
           </div>
-          <button onClick={onBackToOverview} className="text-xs text-[#1a56db] hover:underline shrink-0">← Application Overview</button>
-        </div>
 
-        {/* Application context strip */}
-        <div className="bg-white border border-[#d1d9e0] rounded p-4">
-          <div className="grid grid-cols-2 gap-x-8 gap-y-2 sm:grid-cols-3">
-            {[
-              ['Application ID', app.id],
-              ['Business / Project', app.business],
-              ['MIDC Service', app.service],
-              ['Current state', app.state],
-              ['Current desk', app.desk],
-              ['Office / Region', app.office],
-            ].map(([k, v]) => (
-              <div key={k}>
-                <p className="text-[9px] text-[#374151] uppercase tracking-wider font-semibold">{k}</p>
-                <p className="text-xs font-semibold text-[#1a2533] mt-0.5">{v}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Pre-check status summary */}
-        <div className="bg-white border border-[#d1d9e0] rounded overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-2.5 bg-[#f8f9fb] border-b border-[#d1d9e0]">
-            <div>
-              <p className="text-xs font-bold text-[#1a2533]">Pre-check Status</p>
-              <p className="text-[10px] text-[#374151]">Pre-check complete · Last run: 18 Sep 2026, 14:32 · Version checked: v3</p>
-            </div>
-            <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">Complete</span>
-          </div>
-          <div className="grid grid-cols-3 divide-x divide-[#d1d9e0]">
-            <div className="px-5 py-4 text-center">
-              <p className="text-2xl font-bold text-emerald-700">{totalVerified}</p>
-              <p className="text-[10px] text-[#374151] mt-0.5 font-medium">✓ Machine-verified</p>
-            </div>
-            <div className="px-5 py-4 text-center">
-              <p className="text-2xl font-bold text-amber-600">{totalWarning}</p>
-              <p className="text-[10px] text-[#374151] mt-0.5 font-medium">⚠ Warning</p>
-            </div>
-            <div className="px-5 py-4 text-center">
-              <p className="text-2xl font-bold text-[#1a2533]">{totalJudgment}</p>
-              <p className="text-[10px] text-[#374151] mt-0.5 font-medium">○ Needs officer judgment</p>
-            </div>
-          </div>
-          <div className="px-4 py-2 border-t border-[#d1d9e0] flex items-center gap-4 bg-[#f8f9fb]">
-            <span className="text-[10px] text-[#374151]">Total checks: <strong className="text-[#1a2533]">{totalChecks}</strong></span>
-            <span className="text-[10px] text-[#374151]">Version: <strong className="text-[#1a2533]">v3</strong></span>
-            <span className="text-[10px] text-[#374151]">Previous checked: <strong className="text-[#1a2533]">v2</strong></span>
-          </div>
-        </div>
-
-        {/* System notice */}
-        <div className="bg-[#ebf3ff] border border-[#bdd4f5] rounded px-4 py-3 flex gap-3">
-          <span className="text-[#1a56db] text-sm shrink-0 mt-0.5" aria-hidden="true">ℹ</span>
-          <p className="text-xs text-[#1a3a5c]">Automated pre-checks identify objective data, document, payment, consistency and dependency conditions. They do not replace statutory scrutiny or officer judgment.</p>
-        </div>
-
-        {/* System check vs officer review legend */}
-        <div className="flex items-center gap-6 text-[10px] text-[#374151]">
-          <span className="flex items-center gap-1.5"><span className="inline-block w-2.5 h-2.5 rounded-sm bg-[#ebf3ff] border border-[#bdd4f5]" />System check - objective automated finding</span>
-          <span className="flex items-center gap-1.5"><span className="inline-block w-2.5 h-2.5 rounded-sm bg-[#f8f9fb] border border-[#d1d9e0]" />Officer review - statutory judgment required</span>
-        </div>
-
-        {/* Sample data notice */}
-        <p className="text-[10px] text-[#374151] italic">All values are fictional prototype data and do not represent actual MIDC records, legal thresholds, or official processing requirements.</p>
-
-        {/* Check groups */}
-        <div className="space-y-2">
-          {M09_GROUPS.map((group, i) => (
-            <PreCheckGroupCard key={group.id} group={group} defaultExpanded={i === 0} />
-          ))}
-        </div>
-
-        {/* Primary CTA */}
-        <div className="bg-white border border-[#d1d9e0] rounded p-4 flex items-center justify-between gap-4">
-          <div>
-            <p className="text-xs font-semibold text-[#1a2533]">Automated pre-check complete.</p>
-            <p className="text-[11px] text-[#374151] mt-0.5">{totalWarning} warning{totalWarning !== 1 ? 's' : ''} and {totalJudgment} officer-review item{totalJudgment !== 1 ? 's' : ''} identified. Application can proceed to manual scrutiny.</p>
-          </div>
-          <button onClick={onOpenScrutinyRoute} className="px-4 py-2 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540] transition-colors shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a56db]">
-            Proceed to Scrutiny
+          {/* Quick jump to Next Scrutiny Phase */}
+          <button
+            onClick={handleProceedToScrutinyPhase}
+            className="px-4 py-2 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540] transition-colors shadow-xs flex items-center gap-1.5 self-start sm:self-auto"
+          >
+            Scrutiny Workflow (Review Plan) →
           </button>
+        </div>
+
+        {/* ── Compact Application Context Strip ───────────────────────────── */}
+        <div className="bg-white border border-[#e5eaf0] rounded-lg px-4 py-2.5 shadow-xs flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="font-mono font-bold text-[#1a56db]">{app.id}</span>
+            <span className="text-[#94a3b8]">·</span>
+            <span className="font-bold text-[#1a2533]">{app.business}</span>
+            <span className="text-[#94a3b8]">·</span>
+            <span className="text-[#4b5563]">{app.service}</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">
+              Due Soon
+            </span>
+            <span className="text-[10px] font-mono text-[#64748b] bg-slate-100 px-2 py-0.5 rounded border">
+              {app.state}
+            </span>
+          </div>
+        </div>
+
+        {/* ── 2. Simple Summary Header ────────────────────────────────────── */}
+        <div className="bg-white border border-[#e5eaf0] rounded-xl p-5 shadow-xs space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-bold text-[#1a2533] uppercase tracking-wider">
+                Automated Pre-check
+              </h2>
+              <span className="text-xs text-[#64748b]">30 checks completed</span>
+            </div>
+
+            {/* Small Info Tooltip / Note */}
+            <div className="text-[11px] text-[#4b5563] bg-[#f8fafc] px-3 py-1.5 rounded-md border border-[#e2e8f0] flex items-center gap-1.5">
+              <span className="text-[#1a56db] font-bold">ℹ</span>
+              <span>Automated checks assist officer review. They do not replace statutory judgment.</span>
+            </div>
+          </div>
+
+          {/* Three Clear Metrics */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="p-4 bg-emerald-50/60 rounded-lg border border-emerald-200 text-center">
+              <p className="text-3xl font-extrabold text-emerald-700">{totalVerified}</p>
+              <p className="text-xs font-bold text-emerald-900 mt-1">Machine verified</p>
+              <p className="text-[10px] text-emerald-700 mt-0.5">Passed intake rules automatically</p>
+            </div>
+
+            <div className="p-4 bg-amber-50/70 rounded-lg border border-amber-300 text-center">
+              <p className="text-3xl font-extrabold text-amber-700">{totalWarning}</p>
+              <p className="text-xs font-bold text-amber-900 mt-1">Review required</p>
+              <p className="text-[10px] text-amber-700 mt-0.5">Discrepancies & expired items</p>
+            </div>
+
+            <div className="p-4 bg-purple-50/60 rounded-lg border border-purple-200 text-center">
+              <p className="text-3xl font-extrabold text-purple-700">{totalJudgment}</p>
+              <p className="text-xs font-bold text-purple-900 mt-1">Officer judgment</p>
+              <p className="text-[10px] text-purple-700 mt-0.5">Discretionary determination</p>
+            </div>
+          </div>
+
+          {/* Compact Pre-check Result Bar */}
+          <div className="bg-[#f8f9fb] border border-[#e5eaf0] rounded-lg px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div>
+              <span className="text-[#64748b]">Pre-check result: </span>
+              <strong className="text-[#1a2533]">
+                {totalVerified} passed automatically · {totalWarning} require review · {totalJudgment} requires judgment
+              </strong>
+            </div>
+            <span className="text-[11px] font-bold text-[#1a56db]">
+              {reviewedCount} of {priorityChecks.length} review items completed
+            </span>
+          </div>
+        </div>
+
+        {/* ── 3. Main Content: Needs Your Review (9 Items) ─────────────────── */}
+        <div className="bg-white border-2 border-amber-300 rounded-xl shadow-xs overflow-hidden">
+          <div className="px-6 py-4 bg-amber-50/60 border-b border-amber-200 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-base font-bold text-amber-950 flex items-center gap-2">
+                <span>⚠</span> Needs your review
+              </h2>
+              <p className="text-xs text-amber-900 mt-0.5">
+                {priorityChecks.length} findings require officer verification before departmental scrutiny.
+              </p>
+            </div>
+
+            <span className="text-xs font-bold px-2.5 py-1 rounded bg-amber-100 text-amber-800 border border-amber-300">
+              {unreviewedCount > 0 ? `${unreviewedCount} Pending Decision` : 'All 9 Items Reviewed'}
+            </span>
+          </div>
+
+          {/* Vertical Review Items List / Table */}
+          <div className="divide-y divide-[#e5eaf0]">
+            {priorityChecks.map(check => {
+              const state = officerReviews[check.id] || 'not-reviewed'
+              const matching = APPLICANT_PRECHECK_DATA.find(d =>
+                d.field.toLowerCase().includes(check.name.toLowerCase()) ||
+                check.name.toLowerCase().includes(d.field.toLowerCase()) ||
+                (check.id.startsWith('d3') && d.field.includes('Fire')) ||
+                (check.id.startsWith('b4') && d.field.includes('Hazardous')) ||
+                (check.id.startsWith('l4') && d.field.includes('Plot Area')) ||
+                (check.id.startsWith('x1') && d.field.includes('Plot Area')) ||
+                (check.id.startsWith('c2') && d.field.includes('Investment')) ||
+                (check.id.startsWith('c3') && d.field.includes('Capacity')) ||
+                (check.id.startsWith('dep1') && d.field.includes('MPCB')) ||
+                (check.id.startsWith('dep2') && d.field.includes('Fire'))
+              )
+
+              return (
+                <div
+                  key={check.id}
+                  onClick={() => setActiveCheck(check)}
+                  className="p-4 hover:bg-[#fffdfa] transition-colors cursor-pointer flex flex-col md:flex-row md:items-center justify-between gap-4 group"
+                >
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-sm font-bold text-[#1a2533] group-hover:text-[#1a56db] transition-colors">
+                        {check.name}
+                      </span>
+                      <PreCheckResultBadge result={check.result} />
+                      {state !== 'not-reviewed' && (
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
+                          state === 'valid' ? 'bg-emerald-50 text-emerald-800 border-emerald-300' :
+                          state === 'needs-verification' ? 'bg-amber-50 text-amber-800 border-amber-300' :
+                          state === 'query' ? 'bg-blue-50 text-blue-800 border-blue-300' :
+                          'bg-purple-50 text-purple-800 border-purple-300'
+                        }`}>
+                          {state === 'valid' ? '✓ Verified' : state === 'needs-verification' ? '⚠ Needs Verification' : state === 'query' ? '❓ Query Raised' : '📎 Evidence Requested'}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-xs">
+                      <div>
+                        <span className="text-[10px] text-[#64748b] block font-semibold">Applicant Submitted:</span>
+                        <p className="font-semibold text-[#1a2533] truncate">
+                          {matching?.applicantEntered || check.explanation}
+                        </p>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-amber-800 block font-semibold">System Finding:</span>
+                        <p className="font-semibold text-amber-900 truncate">
+                          {matching?.machineFinding || check.explanation}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="shrink-0 flex items-center gap-2 self-start md:self-center">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setActiveCheck(check)
+                      }}
+                      className="px-4 py-2 bg-[#1a56db] text-white text-xs font-bold rounded hover:bg-[#1344b3] transition-colors shadow-xs flex items-center gap-1"
+                    >
+                      Review →
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* ── 4. Automatically Verified (Secondary - Collapsed by default) ──── */}
+        <div className="bg-white border border-[#e5eaf0] rounded-xl shadow-xs overflow-hidden">
+          <button
+            onClick={() => setShowVerifiedChecks(v => !v)}
+            className="w-full px-5 py-4 bg-[#f8f9fb] hover:bg-[#f1f5f9] transition-colors flex items-center justify-between text-left focus:outline-none"
+          >
+            <div className="flex items-center gap-2.5">
+              <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs">
+                ✓
+              </span>
+              <div>
+                <h3 className="text-sm font-bold text-[#1a2533]">Automatically Verified</h3>
+                <span className="text-xs text-emerald-700 font-semibold">{totalVerified} checks passed</span>
+              </div>
+            </div>
+
+            <span className="text-xs font-semibold text-[#1a56db] bg-white px-3 py-1 rounded border border-[#cbd5e1]">
+              {showVerifiedChecks ? '▲ Hide verified checks' : '▼ View verified checks'}
+            </span>
+          </button>
+
+          {showVerifiedChecks && (
+            <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3 border-t border-[#e5eaf0] bg-white text-xs">
+              {passedChecks.map(check => (
+                <div key={check.id} className="p-3 bg-[#f8fafc] rounded-lg border border-[#e5eaf0] flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <span className="font-bold text-[#1a2533] block">{check.name}</span>
+                    <p className="text-[11px] text-[#4b5563] mt-0.5">{check.explanation}</p>
+                    <span className="text-[10px] text-[#64748b] mt-1 block">Source: {check.source}</span>
+                  </div>
+                  <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 shrink-0">
+                    ✓ Verified
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* ── 5. All Check Categories (Secondary - Collapsed by default) ────── */}
+        <div className="bg-white border border-[#e5eaf0] rounded-xl shadow-xs overflow-hidden">
+          <button
+            onClick={() => setShowAllCategories(v => !v)}
+            className="w-full px-5 py-4 bg-[#f8f9fb] hover:bg-[#f1f5f9] transition-colors flex items-center justify-between text-left focus:outline-none"
+          >
+            <div>
+              <h3 className="text-sm font-bold text-[#1a2533]">All automated checks</h3>
+              <span className="text-xs text-[#64748b]">30 checks across 8 categories</span>
+            </div>
+
+            <span className="text-xs font-semibold text-[#1a56db] bg-white px-3 py-1 rounded border border-[#cbd5e1]">
+              {showAllCategories ? '▲ Hide categories' : '▼ View categories'}
+            </span>
+          </button>
+
+          {showAllCategories && (
+            <div className="p-4 space-y-2.5 border-t border-[#e5eaf0] bg-white">
+              {M09_GROUPS.map(group => (
+                <PreCheckCategorySummaryRow
+                  key={group.id}
+                  group={group}
+                  officerReviews={officerReviews}
+                  onOpenCheck={(c) => setActiveCheck(c)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* ── 6. Final Action Area ─────────────────────────────────────────── */}
+        <div className="bg-white border-2 border-[#1a3a5c] rounded-xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-[#1a3a5c] uppercase tracking-wider">
+                {unreviewedCount > 0 ? `${unreviewedCount} items require review` : 'Pre-check complete'}
+              </span>
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                unreviewedCount === 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+              }`}>
+                {unreviewedCount === 0 ? 'Ready for Next Phase' : 'Verification Incomplete'}
+              </span>
+            </div>
+            <p className="text-xs text-[#4b5563] mt-0.5">
+              {unreviewedCount > 0
+                ? 'Address the flagged items above before advancing to statutory scrutiny.'
+                : 'All automated pre-check findings addressed. Proceed to Scrutiny Workflow (Review Plan).'}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
+            {unreviewedCount > 0 && (
+              <button
+                onClick={handleReviewRemaining}
+                className="px-3.5 py-2 text-xs font-bold text-[#1a56db] bg-[#eff6ff] hover:bg-[#dbeafe] rounded border border-[#bfdbfe] transition-colors"
+              >
+                Review remaining items ({unreviewedCount}) →
+              </button>
+            )}
+
+            <button
+              onClick={handleProceedToScrutinyPhase}
+              className="px-5 py-2 bg-[#065f46] text-white text-xs font-bold rounded hover:bg-[#044e3a] transition-colors shadow-xs flex items-center gap-1.5"
+            >
+              Continue to Review Plan →
+            </button>
+          </div>
         </div>
 
       </div>
     </div>
   )
 }
+
 
 // ─── M10 Scrutiny Route / Explainability ─────────────────────────────────────
 
@@ -4576,7 +5549,23 @@ function ScrutinyFactorRow({ factor }: { factor: ScrutinyFactor }) {
   )
 }
 
-export function M10ScrutinyRoutePage({ onBackToOverview, onBackToPrecheck, onOpenDna, onOpenTimeline, onOpenScrutinyWorkbench, onOpenDepView }: { onBackToOverview: () => void; onBackToPrecheck?: () => void; onOpenDna?: () => void; onOpenTimeline?: () => void; onOpenScrutinyWorkbench?: () => void; onOpenDepView?: () => void }) {
+export function M10LegacyDetailedRoutePage({
+  onBackToOverview,
+  onBackToPrecheck,
+  onBackToReviewPlan,
+  onOpenDna,
+  onOpenTimeline,
+  onOpenScrutinyWorkbench,
+  onOpenDepView,
+}: {
+  onBackToOverview: () => void;
+  onBackToPrecheck?: () => void;
+  onBackToReviewPlan?: () => void;
+  onOpenDna?: () => void;
+  onOpenTimeline?: () => void;
+  onOpenScrutinyWorkbench?: () => void;
+  onOpenDepView?: () => void;
+}) {
   const [routingDrawer, setRoutingDrawer] = useState(false)
   const [officerNote, setOfficerNote] = useState('')
 
@@ -4627,9 +5616,21 @@ export function M10ScrutinyRoutePage({ onBackToOverview, onBackToPrecheck, onOpe
           { label: 'Department Home', onClick: onBackToOverview },
           { label: 'Applications', onClick: onBackToOverview },
           { label: 'Application Overview', onClick: onBackToOverview },
-          { label: 'Automated Pre-check', onClick: onBackToPrecheck },
-          { label: 'Scrutiny Route' },
+          { label: 'Review Plan', onClick: onBackToReviewPlan || onBackToOverview },
+          { label: 'Detailed Scrutiny Route' },
         ]} />
+
+        {onBackToReviewPlan && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center justify-between text-xs text-blue-900">
+            <span>You are viewing the advanced administrative routing audit page.</span>
+            <button
+              onClick={onBackToReviewPlan}
+              className="font-bold text-[#1a56db] hover:underline"
+            >
+              ← Return to Review Plan
+            </button>
+          </div>
+        )}
 
         {/* Page header */}
         <div className="flex items-start justify-between gap-4">
@@ -4637,7 +5638,14 @@ export function M10ScrutinyRoutePage({ onBackToOverview, onBackToPrecheck, onOpe
             <h1 className="text-xl font-bold text-[#1a2533]">Scrutiny Route / Explainability</h1>
             <p className="text-sm text-[#1a2533] mt-0.5">How this application was routed for scrutiny and why.</p>
           </div>
-          <button onClick={onBackToPrecheck} className="text-xs text-[#1a56db] hover:underline shrink-0">← Automated Pre-check</button>
+          <div className="flex items-center gap-3">
+            {onBackToReviewPlan && (
+              <button onClick={onBackToReviewPlan} className="text-xs font-bold text-[#1a56db] hover:underline">
+                ← Review Plan
+              </button>
+            )}
+            <button onClick={onBackToPrecheck} className="text-xs text-[#1a56db] hover:underline shrink-0">← Automated Pre-check</button>
+          </div>
         </div>
 
         {/* Application context */}
@@ -4861,6 +5869,26 @@ export function M10ScrutinyRoutePage({ onBackToOverview, onBackToPrecheck, onOpe
   )
 }
 
+export function M10ScrutinyRoutePage(props: M10ReviewPlanPageProps) {
+  const [showDetailedRoute, setShowDetailedRoute] = useState(false);
+
+  if (showDetailedRoute) {
+    return (
+      <M10LegacyDetailedRoutePage
+        {...props}
+        onBackToReviewPlan={() => setShowDetailedRoute(false)}
+      />
+    );
+  }
+
+  return (
+    <M10ReviewPlanPage
+      {...props}
+      onOpenDetailedRoute={() => setShowDetailedRoute(true)}
+    />
+  );
+}
+
 // ─── M11 Scrutiny Workbench ───────────────────────────────────────────────────
 
 
@@ -4977,8 +6005,8 @@ const M11_SECTIONS: ScrutinySection[] = [
   { id: 'findings', label: 'Officer Findings', status: 'not-reviewed', params: [] },
 ]
 
-export function M11ScrutinyWorkbenchPage({ onBack, onBackToOverview, onOpenDna, onOpenTimeline, onOpenParamDetail, onOpenDocReview, onOpenBldgScrutiny, onOpenWaterScrutiny, onOpenDepView }: {
-  onBack: () => void; onBackToOverview: () => void; onOpenDna?: () => void; onOpenTimeline?: () => void; onOpenParamDetail?: (id: string) => void; onOpenDocReview?: (id: string) => void; onOpenBldgScrutiny?: () => void; onOpenWaterScrutiny?: () => void; onOpenDepView?: () => void
+export function M11ScrutinyWorkbenchPage({ onBack, onBackToOverview, onOpenDna, onOpenTimeline, onOpenParamDetail, onOpenDocReview, onOpenBldgScrutiny, onOpenWaterScrutiny, onOpenDepView, onOpenConsistency }: {
+  onBack: () => void; onBackToOverview: () => void; onOpenDna?: () => void; onOpenTimeline?: () => void; onOpenParamDetail?: (id: string) => void; onOpenDocReview?: (id: string) => void; onOpenBldgScrutiny?: () => void; onOpenWaterScrutiny?: () => void; onOpenDepView?: () => void; onOpenConsistency?: () => void
 }) {
   const [activeSectionId, setActiveSectionId] = useState('land')
   const [activeParamId, setActiveParamId] = useState('plotarea')
@@ -5167,7 +6195,7 @@ export function M11ScrutinyWorkbenchPage({ onBack, onBackToOverview, onOpenDna, 
                           ))}
                         </div>
                         {param.crossForm.some(c => !c.match) ? (
-                          <button className="mt-2 text-[10px] text-[#1a56db] hover:underline font-semibold">Investigate in Cross-form Consistency</button>
+                          <button onClick={onOpenConsistency} className="mt-2 text-[10px] text-[#1a56db] hover:underline font-semibold">Investigate in Cross-form Consistency</button>
                         ) : (
                           <p className="mt-2 text-[10px] text-emerald-700 font-semibold">✓ Consistent across all sources</p>
                         )}
@@ -5184,7 +6212,7 @@ export function M11ScrutinyWorkbenchPage({ onBack, onBackToOverview, onOpenDna, 
                             <p className="text-[10px] text-[#374151] mt-0.5">{param.document.status.replace(/_/g, ' ')} · {param.document.version} · {param.document.source}</p>
                           </div>
                           <div className="flex gap-2 shrink-0">
-                            <button className="text-[10px] text-[#1a56db] hover:underline font-semibold">Preview</button>
+                            <button onClick={() => { if (param.document?.id) onOpenDocReview?.(param.document.id) }} className="text-[10px] text-[#1a56db] hover:underline font-semibold">Preview</button>
                             <button disabled={!param.document.id} title={!param.document.id ? 'No document ID available' : undefined} onClick={() => { if (param.document?.id) onOpenDocReview?.(param.document.id) }} className="text-[10px] text-[#1a56db] hover:underline font-semibold">Open Document Review → M13</button>
                           </div>
                         </div>
@@ -5241,11 +6269,11 @@ export function M11ScrutinyWorkbenchPage({ onBack, onBackToOverview, onOpenDna, 
                         <button onClick={() => onOpenParamDetail?.(param.id)} className="px-3 py-1.5 text-xs border border-[#1a56db] text-[#1a56db] rounded hover:bg-[#ebf3ff] transition-colors font-semibold">View Parameter Details → M12</button>
                         <button onClick={() => setReview(param.id, rs)}
                           className="px-3 py-1.5 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a56db]">Save Review</button>
-                        <button className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb]">Flag</button>
+                        <button onClick={() => setReview(param.id, 'needs-verification')} className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb]">Flag</button>
                         <button onClick={() => setQueryModal(true)} className="px-3 py-1.5 text-xs border border-amber-200 rounded text-amber-700 bg-amber-50 hover:bg-amber-100 font-semibold">Raise Query</button>
                         <button onClick={() => setReview(param.id, 'valid')} className="px-3 py-1.5 text-xs border border-emerald-200 rounded text-emerald-700 bg-emerald-50 hover:bg-emerald-100 font-semibold">Mark Valid</button>
-                        <button className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb]">Request Evidence</button>
-                        <button className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#1a56db] hover:bg-[#ebf3ff]">Open Regulatory Reference</button>
+                        <button onClick={() => setQueryModal(true)} className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb]">Request Evidence</button>
+                        <button onClick={() => alert('Regulatory Reference: Rule 14.2 MIDC Development Control Regulations 2024.')} className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#1a56db] hover:bg-[#ebf3ff]">Open Regulatory Reference</button>
                       </div>
                     </div>
                   </div>
@@ -5310,7 +6338,7 @@ export function M11ScrutinyWorkbenchPage({ onBack, onBackToOverview, onOpenDna, 
           <div className="px-4 py-3">
             <p className="text-[9px] text-[#374151] uppercase tracking-wider font-semibold mb-1">Regulatory Assistant</p>
             <p className="text-[10px] text-[#1a2533]">2 relevant references available for Plot Area.</p>
-            <button className="mt-1 text-[10px] text-[#1a56db] hover:underline font-semibold">View references</button>
+            <button onClick={() => alert('Regulatory Reference: MIDC Land Allotment Policy 2024, Clause 8(a).')} className="mt-1 text-[10px] text-[#1a56db] hover:underline font-semibold">View references</button>
             <p className="text-[9px] text-[#6b7280] mt-2 italic">Retrieved regulatory context - not a legal finding or AI decision.</p>
           </div>
         </aside>
@@ -5551,7 +6579,7 @@ export function M12ParameterDetailPage({ onBack, onBackToOverview, onOpenDna, on
                 <p className="text-[10px] text-[#374151] mt-0.5">DOC-LAND-00418 · v2 · Department Verified</p>
                 <p className="text-[10px] text-[#374151]">Used by: MIDC Land / Plot</p>
                 <div className="flex gap-3 mt-2">
-                  <button className="text-[10px] text-[#1a56db] hover:underline font-semibold">Preview</button>
+                  <button onClick={() => onOpenDocReview?.('DOC-LAND-00418')} className="text-[10px] text-[#1a56db] hover:underline font-semibold">Preview</button>
                   <button onClick={() => onOpenDocReview?.('DOC-LAND-00418')} className="text-[10px] text-[#1a56db] hover:underline font-semibold">Open Document Review → M13</button>
                 </div>
               </div>
@@ -5573,7 +6601,7 @@ export function M12ParameterDetailPage({ onBack, onBackToOverview, onOpenDna, on
               <div className="p-4 text-[11px] space-y-2">
                 <p className="text-[#1a2533]">Configured Land / Plot service requirement - Plot area must correspond to the MIDC allotment record.</p>
                 <p className="text-[#374151] italic">Regulatory reference: Configured workflow rule. No official GR cited in current configuration.</p>
-                <button className="text-[10px] text-[#1a56db] hover:underline font-semibold">Open Regulatory Reference</button>
+                <button onClick={() => alert('Regulatory Reference: Rule 14.2 MIDC Development Control Regulations 2024.')} className="text-[10px] text-[#1a56db] hover:underline font-semibold">Open Regulatory Reference</button>
                 <p className="text-[9px] text-[#6b7280] italic">Retrieved regulatory context - not a legal finding or AI decision.</p>
               </div>
             </div>
@@ -5608,10 +6636,10 @@ export function M12ParameterDetailPage({ onBack, onBackToOverview, onOpenDna, on
         <div className="bg-white border border-[#d1d9e0] rounded p-4 flex flex-wrap items-center gap-2">
           <button onClick={onBack} className="px-3 py-2 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb]">← Back to M11</button>
           <button onClick={() => { setSaved(true); setTimeout(() => setSaved(false), 3000) }} className="px-4 py-2 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540] transition-colors">Save Review</button>
-          <button className="px-3 py-2 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb]">Flag</button>
+          <button onClick={() => setOfficerFinding('needs-verification')} className="px-3 py-2 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb]">Flag</button>
           <button onClick={() => setQueryModal(true)} className="px-3 py-2 text-xs border border-amber-200 rounded text-amber-700 bg-amber-50 hover:bg-amber-100 font-semibold">Raise Query</button>
-          <button className="px-3 py-2 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb]">Request Additional Evidence</button>
-          <button className="px-3 py-2 text-xs border border-[#d1d9e0] rounded text-[#1a56db] hover:bg-[#ebf3ff]">Open Regulatory Reference</button>
+          <button onClick={() => setQueryModal(true)} className="px-3 py-2 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb]">Request Additional Evidence</button>
+          <button onClick={() => alert('Regulatory Reference: Rule 14.2 MIDC Development Control Regulations 2024.')} className="px-3 py-2 text-xs border border-[#d1d9e0] rounded text-[#1a56db] hover:bg-[#ebf3ff]">Open Regulatory Reference</button>
           <p className="ml-auto text-[10px] text-[#374151] italic">Approval / rejection belong to the Decision Workspace.</p>
         </div>
       </div>
@@ -5679,7 +6707,7 @@ export function M13DocumentReviewPage({ onBack, onOpenParamDetail }: {
                   <button onClick={() => setZoom(z => Math.max(50, z - 25))} className="px-2 py-0.5 text-xs border border-[#d1d9e0] rounded hover:bg-[#f0f4f8]">−</button>
                   <span className="text-xs text-[#374151] w-10 text-center">{zoom}%</span>
                   <button onClick={() => setZoom(z => Math.min(200, z + 25))} className="px-2 py-0.5 text-xs border border-[#d1d9e0] rounded hover:bg-[#f0f4f8]">+</button>
-                  <button className="text-[10px] text-[#1a56db] hover:underline ml-2">Open full document</button>
+                  <button onClick={() => setZoom(100)} className="text-[10px] text-[#1a56db] hover:underline ml-2">Open full document</button>
                 </div>
               </div>
               {/* Mock document page */}
@@ -5746,7 +6774,7 @@ export function M13DocumentReviewPage({ onBack, onOpenParamDetail }: {
                       <p className="text-xs font-semibold text-[#1a2533]">{r.ver} <span className={`ml-1 text-[9px] px-1.5 py-0.5 rounded font-bold ${r.current ? 'bg-[#1a3a5c] text-white' : 'bg-[#f0f4f8] text-[#374151]'}`}>{r.status}</span></p>
                       <p className="text-[10px] text-[#374151] mt-0.5">{r.action} · {r.date} · {r.src}</p>
                     </div>
-                    <button className={`text-[10px] ${r.current ? 'text-[#1a56db]' : 'text-[#374151]'} hover:underline`}>{r.current ? 'Viewing' : 'View'}</button>
+                    <button onClick={() => alert(`Switching preview to version ${r.ver}`)} className={`text-[10px] ${r.current ? 'text-[#1a56db]' : 'text-[#374151]'} hover:underline`}>{r.current ? 'Viewing' : 'View'}</button>
                   </div>
                 ))}
               </div>
@@ -5863,7 +6891,7 @@ export function M13DocumentReviewPage({ onBack, onOpenParamDetail }: {
               <p className="text-[10px] text-[#374151] uppercase tracking-wider font-semibold">Regulatory Reference</p>
               <p className="text-[#1a2533]">Configured Land / Plot service: allotment record is a required supporting document.</p>
               <p className="text-[#374151] italic text-[10px]">Regulatory reference unavailable in current configuration - no official GR cited.</p>
-              <button className="text-[10px] text-[#1a56db] hover:underline font-semibold">Open Regulatory Reference</button>
+              <button onClick={() => alert('Regulatory Reference: Rule 14.2 MIDC Development Control Regulations 2024.')} className="text-[10px] text-[#1a56db] hover:underline font-semibold">Open Regulatory Reference</button>
             </div>
 
             {/* Officer notes */}
@@ -5897,6 +6925,7 @@ export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamD
   onBack: () => void; onBackToOverview: () => void; onOpenParamDetail?: (id: string) => void; onOpenDocReview?: (id: string) => void; onOpenConsistency?: () => void; onOpenDepView?: () => void
 }) {
   const [activeSection, setActiveSection] = useState('identity')
+  const [saveNotice, setSaveNotice] = useState<string | null>(null)
   const [reviewStates, setReviewStates] = useState<Record<string, OfficerReviewState>>(() => {
     const m: Record<string, OfficerReviewState> = {}
     M14_IDENTITY_PARAMS.forEach(p => { m['id_' + p.name] = p.finding })
@@ -6026,7 +7055,7 @@ export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamD
                     const rm = OFFICER_REVIEW_META[rs]
                     return (
                       <div key={p.name} className="grid grid-cols-6 gap-2 px-4 py-2.5 items-center hover:bg-[#f8f9fb] group">
-                        <button disabled title="No parameter ID available" className="text-[11px] font-semibold text-[#1a56db] hover:underline text-left group-hover:text-[#0f2540]">{p.name}</button>
+                        <button onClick={() => onOpenParamDetail?.(p.name)} className="text-[11px] font-semibold text-[#1a56db] hover:underline text-left group-hover:text-[#0f2540]">{p.name}</button>
                         <p className="text-[11px] text-[#1a2533] font-medium">{p.value}</p>
                         <p className="text-[10px] text-[#374151]">{p.source}</p>
                         <p className="text-[10px] text-[#1a2533]">{p.verify.replace(/_/g,' ')}</p>
@@ -6034,7 +7063,7 @@ export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamD
                           <ReviewBadge state={rs} />
                         </div>
                         <div className="flex items-center gap-2">
-                          {p.evidence && <button disabled title="No document ID available" className="text-[9px] text-[#1a56db] hover:underline truncate">{p.evidence}</button>}
+                          {p.evidence && <button onClick={() => onOpenDocReview?.('DWG-2026-C14-A02')} className="text-[9px] text-[#1a56db] hover:underline truncate">{p.evidence}</button>}
                           <button onClick={() => setQueryModal(p.name)} className="text-[9px] text-amber-600 hover:underline shrink-0">Query</button>
                         </div>
                       </div>
@@ -6042,9 +7071,15 @@ export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamD
                   })}
                 </div>
               </div>
+              {saveNotice && (
+                <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs px-3 py-1.5 rounded flex items-center justify-between">
+                  <span>✓ {saveNotice}</span>
+                  <button onClick={() => setSaveNotice(null)} className="text-emerald-700 font-bold ml-2">✕</button>
+                </div>
+              )}
               <div className="flex flex-wrap gap-2 pt-1">
-                <button onClick={() => {}} className="px-3 py-1.5 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540]">Save Review</button>
-                <button className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb]">Flag for Attention</button>
+                <button onClick={() => { setSaveNotice('Building / planning review saved to session dossier.'); setTimeout(() => setSaveNotice(null), 3000); }} className="px-3 py-1.5 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540]">Save Review</button>
+                <button onClick={() => { setReview('id_flagged', 'needs-verification'); setSaveNotice('Identity parameters flagged for supervisory attention.'); setTimeout(() => setSaveNotice(null), 3000); }} className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb]">Flag for Attention</button>
                 <button onClick={onOpenConsistency} className="px-3 py-1.5 text-xs border border-[#1a56db] text-[#1a56db] rounded hover:bg-[#ebf3ff] font-semibold">Open Cross-form Consistency</button>
               </div>
             </>
@@ -6067,7 +7102,7 @@ export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamD
                     const rs = reviewStates[key] ?? p.finding
                     return (
                       <div key={p.name} className="grid grid-cols-5 gap-2 px-4 py-2.5 items-center hover:bg-[#f8f9fb]">
-                        <button disabled title="No parameter ID available" className="text-[11px] font-semibold text-[#1a56db] hover:underline text-left">{p.name}</button>
+                        <button onClick={() => onOpenParamDetail?.(p.name)} className="text-[11px] font-semibold text-[#1a56db] hover:underline text-left">{p.name}</button>
                         <p className="text-[11px] text-[#1a2533] font-medium">{p.value}</p>
                         <p className="text-[10px] text-[#374151]">{p.source}</p>
                         <p className={`text-[10px] ${p.verify === 'NEEDS_VERIFICATION' ? 'text-amber-700 font-semibold' : 'text-[#1a2533]'}`}>{p.verify.replace(/_/g,' ')}</p>
@@ -6081,7 +7116,7 @@ export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamD
                 </div>
               </div>
               <div className="flex flex-wrap gap-2 pt-1">
-                <button className="px-3 py-1.5 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540]">Save Review</button>
+                <button onClick={() => { setSaveNotice('Building parameters review saved.'); setTimeout(() => setSaveNotice(null), 3000); }} className="px-3 py-1.5 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540]">Save Review</button>
                 <button onClick={() => setQueryModal('Building Parameters')} className="px-3 py-1.5 text-xs border border-amber-200 rounded text-amber-700 bg-amber-50 hover:bg-amber-100 font-semibold">Raise Query</button>
               </div>
             </>
@@ -6146,8 +7181,8 @@ export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamD
                 </div>
               </div>
               <div className="flex flex-wrap gap-2 pt-1">
-                <button className="px-3 py-1.5 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540]">Save Review</button>
-                <button className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb]">Request Additional Evidence</button>
+                <button onClick={() => { setSaveNotice('Technical documents review saved.'); setTimeout(() => setSaveNotice(null), 3000); }} className="px-3 py-1.5 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540]">Save Review</button>
+                <button onClick={() => setQueryModal('Technical Documents - Additional Evidence')} className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb]">Request Additional Evidence</button>
               </div>
             </>
           )}
@@ -6274,7 +7309,7 @@ export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamD
             <p className="text-[9px] text-[#374151] uppercase tracking-wider font-semibold mb-2">Rule / Requirement</p>
             <p className="text-[11px] text-[#1a2533]">Configured Building / Planning service requirement. Review items must be consistent with Master Project Dossier and submitted application.</p>
             <p className="text-[10px] text-[#374151] mt-1 italic">Source: Configured workflow rule - no official GR cited.</p>
-            <button className="mt-2 text-[10px] text-[#1a56db] hover:underline font-semibold">Open Regulatory Reference</button>
+            <button onClick={() => alert('Regulatory Reference: Standard Building Specifications & MIDC DCR 2024.')} className="mt-2 text-[10px] text-[#1a56db] hover:underline font-semibold">Open Regulatory Reference</button>
             <p className="text-[9px] text-[#6b7280] mt-1 italic">Retrieved regulatory context - not a legal finding.</p>
           </div>
 
@@ -6316,6 +7351,8 @@ export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDeta
   onBack: () => void; onBackToOverview: () => void; onOpenParamDetail?: (id: string) => void; onOpenDocReview?: (id: string) => void; onOpenConsistency?: () => void; onOpenDepView?: () => void
 }) {
   const [activeSection, setActiveSection] = useState('applicability')
+  const [applicabilityStatus, setApplicabilityStatus] = useState<'confirmed' | 'needs-verification' | null>(null)
+  const [saveNotice, setSaveNotice] = useState<string | null>(null)
   const [reviewStates, setReviewStates] = useState<Record<string, OfficerReviewState>>(() => {
     const m: Record<string, OfficerReviewState> = {}
     M15_WATER_PARAMS.forEach(p => { m['wp_' + p.name] = p.finding })
@@ -6458,10 +7495,21 @@ export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDeta
               <div className="bg-amber-50 border border-amber-200 rounded px-4 py-2 text-xs text-amber-700">
                 <span className="font-semibold">Officer verification required:</span> Confirm that the Business DNA water/utility context is accurate before proceeding with parameter review. If the applicability is uncertain, mark as Needs Verification and raise a query.
               </div>
+              {applicabilityStatus && (
+                <div className={`px-3 py-1.5 rounded text-xs font-medium border ${applicabilityStatus === 'confirmed' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-amber-50 text-amber-800 border-amber-200'}`}>
+                  {applicabilityStatus === 'confirmed' ? '✓ Water service applicability confirmed by officer.' : '⚠ Marked as Needs Verification - query flag active.'}
+                </div>
+              )}
+              {saveNotice && (
+                <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs px-3 py-1.5 rounded flex items-center justify-between">
+                  <span>✓ {saveNotice}</span>
+                  <button onClick={() => setSaveNotice(null)} className="text-emerald-700 font-bold ml-2">✕</button>
+                </div>
+              )}
               <div className="flex gap-2">
-                <button className="px-3 py-1.5 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540]">Confirm Applicability</button>
+                <button onClick={() => { setApplicabilityStatus('confirmed'); setSaveNotice('Water & utility service applicability confirmed by officer.'); setTimeout(() => setSaveNotice(null), 3000); }} className="px-3 py-1.5 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540]">Confirm Applicability</button>
                 <button onClick={() => setQueryModal('Water / Utility Service Applicability')} className="px-3 py-1.5 text-xs border border-amber-200 rounded text-amber-700 bg-amber-50 hover:bg-amber-100 font-semibold">Raise Query</button>
-                <button className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb]">Mark Needs Verification</button>
+                <button onClick={() => { setApplicabilityStatus('needs-verification'); setSaveNotice('Water service marked as Needs Verification. Raised query flag.'); setTimeout(() => setSaveNotice(null), 3000); }} className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb]">Mark Needs Verification</button>
               </div>
             </>
           )}
@@ -6481,7 +7529,7 @@ export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDeta
                     const mismatch = p.appVal !== p.dnaVal && p.dnaVal !== '-'
                     return (
                       <div key={p.name} className={`grid grid-cols-6 gap-2 px-4 py-2.5 items-center hover:bg-[#f8f9fb] ${mismatch ? 'bg-amber-50' : ''}`}>
-                        <button disabled title="No parameter ID available" className="text-[11px] font-semibold text-[#1a56db] hover:underline text-left">{p.name}</button>
+                        <button onClick={() => onOpenParamDetail?.(p.name)} className="text-[11px] font-semibold text-[#1a56db] hover:underline text-left">{p.name}</button>
                         <p className="text-[11px] text-[#1a2533] font-medium">{p.appVal}</p>
                         <div className="flex items-center gap-1">
                           <p className="text-[11px] text-[#1a2533]">{p.dnaVal}</p>
@@ -6499,7 +7547,7 @@ export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDeta
                 </div>
               </div>
               <div className="flex gap-2">
-                <button className="px-3 py-1.5 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540]">Save Review</button>
+                <button onClick={() => { setSaveNotice('Scrutiny review saved successfully.'); setTimeout(() => setSaveNotice(null), 3000); }} className="px-3 py-1.5 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540]">Save Review</button>
                 <button onClick={onOpenConsistency} className="px-3 py-1.5 text-xs border border-[#1a56db] text-[#1a56db] rounded hover:bg-[#ebf3ff] font-semibold">Open Cross-form Consistency</button>
               </div>
             </>
@@ -6522,7 +7570,7 @@ export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDeta
                     const rs = reviewStates[key] ?? p.finding
                     return (
                       <div key={p.name} className="grid grid-cols-5 gap-2 px-4 py-2.5 items-center hover:bg-[#f8f9fb]">
-                        <button disabled title="No parameter ID available" className="text-[11px] font-semibold text-[#1a56db] hover:underline text-left">{p.name}</button>
+                        <button onClick={() => onOpenParamDetail?.(p.name)} className="text-[11px] font-semibold text-[#1a56db] hover:underline text-left">{p.name}</button>
                         <p className="text-[11px] text-[#1a2533] font-medium">{p.value}</p>
                         <p className="text-[10px] text-[#374151]">{p.source}</p>
                         <p className={`text-[10px] ${p.verify === 'SELF_DECLARED' ? 'text-amber-700' : 'text-[#1a2533]'}`}>{p.verify.replace(/_/g,' ')}</p>
@@ -6536,7 +7584,7 @@ export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDeta
                 </div>
               </div>
               <div className="flex gap-2">
-                <button className="px-3 py-1.5 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540]">Save Review</button>
+                <button onClick={() => { setSaveNotice('Scrutiny review saved successfully.'); setTimeout(() => setSaveNotice(null), 3000); }} className="px-3 py-1.5 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540]">Save Review</button>
                 <button onClick={() => setQueryModal('Water Parameters')} className="px-3 py-1.5 text-xs border border-amber-200 rounded text-amber-700 bg-amber-50 hover:bg-amber-100 font-semibold">Raise Query</button>
               </div>
             </>
@@ -6562,7 +7610,7 @@ export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDeta
                     const rs = reviewStates[key] ?? row.finding
                     return (
                       <div key={row.name} className="grid grid-cols-4 gap-2 px-4 py-2.5 items-center hover:bg-[#f8f9fb]">
-                        <button disabled title="No parameter ID available" className="text-[11px] font-semibold text-[#1a56db] hover:underline text-left">{row.name}</button>
+                        <button onClick={() => onOpenParamDetail?.(row.name)} className="text-[11px] font-semibold text-[#1a56db] hover:underline text-left">{row.name}</button>
                         <p className="text-[11px] text-[#1a2533]">{row.val}</p>
                         <p className="text-[10px] text-[#374151]">{row.src} · {row.verify.replace(/_/g,' ')}</p>
                         <div className="flex items-center gap-1"><ReviewBadge state={rs} /><button onClick={() => setQueryModal(row.name)} className="text-[9px] text-amber-600 hover:underline ml-1">Query</button></div>
@@ -6576,7 +7624,7 @@ export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDeta
                 <p className="text-[#374151]">If Drainage = NOT_APPLICABLE (e.g. water-only project with no drainage configured), no missing-drainage query is raised. NOT_APPLICABLE is not the same as Missing. Conditional drainage fields appear only when the configured regulatory logic activates them.</p>
               </div>
               <div className="flex gap-2">
-                <button className="px-3 py-1.5 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540]">Save Review</button>
+                <button onClick={() => { setSaveNotice('Scrutiny review saved successfully.'); setTimeout(() => setSaveNotice(null), 3000); }} className="px-3 py-1.5 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540]">Save Review</button>
                 <button onClick={() => setQueryModal('Wastewater / Drainage')} className="px-3 py-1.5 text-xs border border-amber-200 rounded text-amber-700 bg-amber-50 hover:bg-amber-100 font-semibold">Raise Query</button>
               </div>
             </>
@@ -6612,8 +7660,8 @@ export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDeta
                 </div>
               </div>
               <div className="flex gap-2">
-                <button className="px-3 py-1.5 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540]">Save Review</button>
-                <button className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb]">Request Additional Evidence</button>
+                <button onClick={() => { setSaveNotice('Scrutiny review saved successfully.'); setTimeout(() => setSaveNotice(null), 3000); }} className="px-3 py-1.5 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540]">Save Review</button>
+                <button onClick={() => setQueryModal('Utility Documents - Additional Evidence')} className="px-3 py-1.5 text-xs border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-[#f8f9fb]">Request Additional Evidence</button>
               </div>
             </>
           )}
@@ -6711,7 +7759,7 @@ export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDeta
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <p className="text-sm font-semibold text-[#1a2533]">08 - Previous Approved Data</p>
               <p className="text-xs text-[#374151] mt-1">This is the applicant's first submission for this service. No previous approved data to compare.</p>
-              <p className="text-[10px] text-[#6b7280] mt-2 italic">For resubmissions, delta values appear here — open Delta Re-scrutiny.</p>
+              <p className="text-[10px] text-[#6b7280] mt-2 italic">For resubmissions, delta values appear here - open Delta Re-scrutiny.</p>
             </div>
           )}
 
@@ -6739,7 +7787,7 @@ export function M15WaterScrutinyPage({ onBack, onBackToOverview, onOpenParamDeta
             <p className="text-[9px] text-[#374151] uppercase tracking-wider font-semibold mb-2">Rule / Requirement</p>
             <p className="text-[11px] text-[#1a2533]">Configured Water / Utility service requirement. Review items must be consistent with Business DNA and submitted application.</p>
             <p className="text-[10px] text-[#374151] mt-1 italic">Source: Configured workflow rule - no official GR cited.</p>
-            <button className="mt-2 text-[10px] text-[#1a56db] hover:underline font-semibold">Open Regulatory Reference</button>
+            <button onClick={() => alert('Regulatory Reference: MIDC Water Supply & Drainage Guidelines 2024.')} className="mt-2 text-[10px] text-[#1a56db] hover:underline font-semibold">Open Regulatory Reference</button>
             <p className="text-[9px] text-[#6b7280] mt-1 italic">Retrieved regulatory context - not a legal finding.</p>
           </div>
           <div className="px-4 py-3 border-b border-[#f0f4f8]">
@@ -6998,7 +8046,7 @@ export function M16ConsistencyPage({ onBack, onBackToOverview, onOpenParamDetail
                         <p className="text-[10px] text-[#374151]">{row.version}</p>
                         <div className="flex items-center gap-1">
                           <StatusBadge status={row.status} />
-                          {row.status === 'mismatch' && <button disabled title="No document ID available" className="text-[9px] text-[#1a56db] hover:underline ml-1">Doc</button>}
+                          {row.status === 'mismatch' && <button onClick={() => onOpenDocReview?.('DWG-2026-C14-A02')} className="text-[9px] text-[#1a56db] hover:underline ml-1">Doc</button>}
                         </div>
                       </div>
                     )
@@ -7443,8 +8491,8 @@ export function M17DependencyViewPage({ onBack, onBackToOverview }: { onBack: ()
                     {[
                       ['Department', selectedNode.dept],
                       ['Relationship', selectedNode.relationship],
-                      ['Reference', selectedNode.ref && selectedNode.ref !== '-' && selectedNode.ref !== '—' ? selectedNode.ref : 'Pending / Not Assigned'],
-                      ['Blocking State', selectedNode.blocking ? 'Yes — Configured dependency blocking downstream' : 'Satisfied / Non-blocking'],
+                      ['Reference', selectedNode.ref && selectedNode.ref !== '-' ? selectedNode.ref : 'Pending / Not Assigned'],
+                      ['Blocking State', selectedNode.blocking ? 'Yes - Configured dependency blocking downstream' : 'Satisfied / Non-blocking'],
                       ...(selectedNode.id === 'bldg' ? [
                         ['Workflow Stage', 'TECHNICAL_SCRUTINY'],
                         ['Route Factor', 'Enhanced Review'],
@@ -7464,7 +8512,7 @@ export function M17DependencyViewPage({ onBack, onBackToOverview }: { onBack: ()
                   {selectedNode.unlockCondition && (
                     <div className={`rounded p-2.5 text-xs border ${
                       selectedNode.status === 'current'
-                        ? 'bg-[#163254] border-[#2b4c74]'
+                        ? 'bg-[#142c47] border-[#22446d]'
                         : 'bg-amber-50 border-amber-200'
                     }`}>
                       <p className={`text-[9px] font-bold uppercase tracking-wider ${selectedNode.status === 'current' ? 'text-[#8fafd0]' : 'text-amber-800'}`}>
@@ -7516,7 +8564,7 @@ export function M17DependencyViewPage({ onBack, onBackToOverview }: { onBack: ()
             <div className="space-y-1.5">
               {[
                 ['MIDC Controlled', 'Managed within MIDC workflow'],
-                ['External Dept', 'View only — no MIDC controls'],
+                ['External Dept', 'View only - no MIDC controls'],
                 ['Milestone', 'Journey stage marker'],
               ].map(([t, d]) => (
                 <div key={t}>
@@ -7592,6 +8640,7 @@ export function M18QueryBuilderPage({ onBack, onBackToOverview, onOpenQueryHisto
   const [filterCat, setFilterCat]     = useState('All')
   const [showPreview, setShowPreview] = useState(false)
   const [sent, setSent]               = useState(false)
+  const [draftSaved, setDraftSaved]   = useState(false)
   const [queryId]                     = useState(app.queryVersion ?? `DRAFT-${app.id}`)
 
   const toggleSelect = (id: string) => setSelectedIds(prev => {
@@ -7661,9 +8710,14 @@ export function M18QueryBuilderPage({ onBack, onBackToOverview, onOpenQueryHisto
             </div>
           ))}
         </div>
+        {draftSaved && (
+          <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs px-3 py-1.5 rounded">
+            ✓ Consolidated query draft saved to workspace.
+          </div>
+        )}
         <div className="flex gap-3 pt-2">
           <button onClick={() => setSent(true)} className="px-5 py-2 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540]">Send Consolidated Deficiency</button>
-          <button className="px-4 py-2 border border-[#d1d9e0] text-xs rounded text-[#1a2533] hover:bg-[#f8f9fb]">Save Draft</button>
+          <button onClick={() => { setDraftSaved(true); setTimeout(() => setDraftSaved(false), 3000); }} className="px-4 py-2 border border-[#d1d9e0] text-xs rounded text-[#1a2533] hover:bg-[#f8f9fb]">{draftSaved ? 'Draft Saved ✓' : 'Save Draft'}</button>
           <button onClick={() => setShowPreview(false)} className="px-4 py-2 text-xs text-[#374151] hover:underline">Cancel</button>
         </div>
         <p className="text-[10px] text-[#6b7280] italic">Sending will update application state to QUERY_RAISED. Operational overlay: Awaiting Entrepreneur Response. Sample prototype data - not actual records.</p>
@@ -7795,8 +8849,8 @@ export function M18QueryBuilderPage({ onBack, onBackToOverview, onOpenQueryHisto
                   <p className="text-[10px] font-semibold text-amber-700 mb-1">⚠ Potential duplicate detected</p>
                   <p className="text-[10px] text-amber-700">A previously raised issue in the same category ({selectedDef.category}) is partially unresolved: {M18_PREVIOUS.find(p => p.category === selectedDef.category)?.id}. Officer must decide whether to use the existing deficiency or create a new one.</p>
                   <div className="flex gap-2 mt-2">
-                    <button className="px-2 py-1 text-[9px] font-bold bg-amber-100 border border-amber-300 rounded text-amber-800 hover:bg-amber-200">View Existing</button>
-                    <button className="px-2 py-1 text-[9px] font-bold border border-amber-300 rounded text-amber-700 hover:bg-amber-50">Use Existing Deficiency</button>
+                    <button onClick={() => { const prev = M18_PREVIOUS.find(p => p.category === selectedDef.category); if (prev) setSelectedDef(prev); }} className="px-2 py-1 text-[9px] font-bold bg-amber-100 border border-amber-300 rounded text-amber-800 hover:bg-amber-200">View Existing</button>
+                    <button onClick={() => { const prev = M18_PREVIOUS.find(p => p.category === selectedDef.category); if (prev) toggleSelect(prev.id); }} className="px-2 py-1 text-[9px] font-bold border border-amber-300 rounded text-amber-700 hover:bg-amber-50">Use Existing Deficiency</button>
                     <button onClick={() => toggleSelect(selectedDef.id)} className="px-2 py-1 text-[9px] font-bold border border-[#d1d9e0] rounded text-[#1a2533] hover:bg-white">Create New Anyway</button>
                   </div>
                 </div>
@@ -7885,7 +8939,7 @@ export function M18QueryBuilderPage({ onBack, onBackToOverview, onOpenQueryHisto
               </div>
               <div className="px-4 py-3 border-t border-[#d1d9e0]">
                 <button onClick={() => setShowPreview(true)} className="w-full px-4 py-2 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540]">Review Before Sending →</button>
-                <button className="w-full mt-2 px-4 py-2 border border-[#d1d9e0] text-xs rounded text-[#1a2533] hover:bg-[#f8f9fb]">Save Draft</button>
+                <button onClick={() => { setDraftSaved(true); setTimeout(() => setDraftSaved(false), 3000); }} className="w-full mt-2 px-4 py-2 border border-[#d1d9e0] text-xs rounded text-[#1a2533] hover:bg-[#f8f9fb]">{draftSaved ? 'Draft Saved ✓' : 'Save Draft'}</button>
               </div>
             </>
           )}
@@ -8004,38 +9058,1838 @@ const MODULE_STATUS_STYLE: Record<ScrutinyModule['status'], { bg: string; text: 
 }
 
 
+
+// ─── Guided Scrutiny Workflow (Officer Workbench) ────────────────────────────
+
+export interface GuidedScrutinyWorkflowProps {
+  applicationId?: string
+  initialApp?: ScrutinyApp
+  initialStageKey?: string
+  onBack?: () => void
+  onOpenOverview?: (appId: string) => void
+  onOpenPrecheck?: () => void
+  onOpenRoute?: () => void
+  onOpenLandWorkbench?: () => void
+  onOpenParamDetail?: (paramId: string) => void
+  onOpenDocReview?: (docId: string) => void
+  onOpenBuildingScrutiny?: () => void
+  onOpenWaterScrutiny?: () => void
+  onOpenConsistency?: () => void
+  onOpenDependencyView?: () => void
+  onOpenQueryBuilder?: () => void
+  onOpenDelta?: () => void
+  onOpenInspectionPlanning?: () => void
+  onOpenDecisionWorkspace?: () => void
+}
+
+export function getScrutinyActionLabel(app: ScrutinyApp): string {
+  if (app.status === 'FINAL_DECISION' || app.scrutinyStage === 'Decision' || (app.actionRequired && app.actionRequired.toLowerCase().includes('decision'))) {
+    return 'Review Decision →'
+  }
+  if (app.status === 'INSPECTION_PENDING' || app.inspectionPending || app.scrutinyStage === 'Inspection' || (app.actionRequired && app.actionRequired.toLowerCase().includes('inspection'))) {
+    return 'Plan Inspection →'
+  }
+  if (app.status === 'RESUBMITTED' || (app.resubmitted && app.scrutinyStage === 'Delta Re-scrutiny') || (app.actionRequired && app.actionRequired.toLowerCase().includes('delta'))) {
+    return 'Start Delta Review →'
+  }
+  if (app.status === 'QUERY_RAISED' || (app.actionRequired && app.actionRequired.toLowerCase().includes('response'))) {
+    return 'Review Response →'
+  }
+  return 'Start Scrutiny →'
+}
+
+export function GuidedScrutinyWorkflow({
+  applicationId,
+  initialApp,
+  initialStageKey,
+  onBack,
+  onOpenOverview,
+  onOpenPrecheck,
+  onOpenRoute,
+  onOpenLandWorkbench,
+  onOpenParamDetail,
+  onOpenDocReview,
+  onOpenBuildingScrutiny,
+  onOpenWaterScrutiny,
+  onOpenConsistency,
+  onOpenDependencyView,
+  onOpenQueryBuilder,
+  onOpenDelta,
+  onOpenInspectionPlanning,
+  onOpenDecisionWorkspace,
+}: GuidedScrutinyWorkflowProps) {
+  const app = initialApp ?? SCRUTINY_APPS.find(a => a.appId === applicationId) ?? SCRUTINY_APPS[0]
+
+  const [activePhaseKey, setActivePhaseKey] = useState<string>(
+    initialStageKey ?? (
+      app.modules.find(m => m.status === 'In Review' || m.status === 'Issues Found' || m.status === 'Query Required')?.id ?? 'building'
+    )
+  )
+
+  // Officer action states for interactive decisions
+  const [precheckDecisions, setPrecheckDecisions] = useState<Record<string, { action: string; note?: string }>>({
+    structural: { action: 'accepted' },
+    fee: { action: 'accepted' }
+  })
+  const [landStatuses, setLandStatuses] = useState<Record<string, 'Valid' | 'Needs Verification' | 'Query' | 'Attention'>>({
+    plot_no: 'Valid',
+    plot_area: 'Needs Verification',
+    coverage: 'Valid',
+    zoning: 'Valid'
+  })
+  const [consistencyDecision, setConsistencyDecision] = useState<'accepted' | 'exception' | 'query' | null>(null)
+  const [draftedQueries, setDraftedQueries] = useState<string[]>([
+    'Plot Area mismatch: 4,800 sq.m declared vs 4,200 sq.m in MIDC Lease Deed record',
+    'East Side Setback shortfall: 4.2m proposed vs 4.5m required under MIDC DCR Rule 14.2'
+  ])
+  const [showDocPreview, setShowDocPreview] = useState(false)
+  const [siteInspectionScheduled, setSiteInspectionScheduled] = useState(false)
+  const [notification, setNotification] = useState<string | null>(null)
+
+  function showNotice(msg: string) {
+    setNotification(msg)
+    setTimeout(() => setNotification(null), 3500)
+  }
+
+  const PRECHECK_WARNING_ITEMS = [
+    {
+      id: 'zoning',
+      title: 'Zoning Boundary Clearance',
+      description: 'Submitted boundary coordinates vs MIDC Chakan Master Plan 2024 GIS layer',
+      applicantData: 'Sector C-14 GIS shapefile boundary declaration',
+      systemData: '1.8m buffer deficit on North property boundary',
+      provenance: 'External Agency GIS',
+      provenanceBg: 'bg-indigo-50 text-indigo-700 border-indigo-200'
+    },
+    {
+      id: 'plot_area',
+      title: 'Plot Area Match',
+      description: 'Comparison of area stated in application form vs scanned registered lease deed',
+      applicantData: '4,800 sq.m (Application Form Item 3.1)',
+      systemData: '4,200 sq.m (Extracted from scanned Lease Deed Page 2)',
+      provenance: 'OCR Extraction',
+      provenanceBg: 'bg-purple-50 text-purple-700 border-purple-200'
+    },
+    {
+      id: 'floor_height',
+      title: 'Floor Height Margin',
+      description: 'Clear structural ceiling height for manufacturing shop floor',
+      applicantData: '4.10m ground floor clearance',
+      systemData: '4.20m minimum standard for heavy industrial fabrication',
+      provenance: 'Applicant Upload',
+      provenanceBg: 'bg-blue-50 text-blue-700 border-blue-200'
+    },
+    {
+      id: 'structural',
+      title: 'Structural Stability Endorsement',
+      description: 'Licensed Structural Engineer certification and digital signature seal',
+      applicantData: 'Certificate Ref: STR-2026-ENG-4402',
+      systemData: 'Signature visual match verified; digital certificate status active',
+      provenance: 'OCR Extraction',
+      provenanceBg: 'bg-purple-50 text-purple-700 border-purple-200'
+    },
+    {
+      id: 'factory_insp',
+      title: 'Directorate of Industrial Safety & Health (DISH) Clearance',
+      description: 'Factory Inspector prior approval letter validation',
+      applicantData: 'DISH Approval No. PNE-2025-9912',
+      systemData: 'Approval date within valid window (valid until 31 Dec 2026)',
+      provenance: 'Applicant Upload',
+      provenanceBg: 'bg-blue-50 text-blue-700 border-blue-200'
+    },
+    {
+      id: 'green_belt',
+      title: 'Mandatory Green Belt Ratio',
+      description: 'Peripheral tree plantation and open green space ratio',
+      applicantData: '12.8% peripheral plantation proposed (614 sq.m)',
+      systemData: '15.0% mandatory under MIDC DCR (720 sq.m required)',
+      provenance: 'Machine Calculation',
+      provenanceBg: 'bg-emerald-50 text-emerald-700 border-emerald-200'
+    },
+    {
+      id: 'fire_hydrant',
+      title: 'External Fire Hydrant Proximity',
+      description: 'Distance from industrial plot entrance to nearest operational MIDC water hydrant',
+      applicantData: 'Connected to MIDC arterial water network',
+      systemData: 'Nearest active hydrant is 65m away vs 50m max recommended',
+      provenance: 'External Agency GIS',
+      provenanceBg: 'bg-indigo-50 text-indigo-700 border-indigo-200'
+    },
+    {
+      id: 'fee',
+      title: 'Scrutiny & Processing Fee Reconciliation',
+      description: 'Statutory fee calculation based on proposed total built-up area schedule',
+      applicantData: '₹45,000 paid via Maharashtra Treasury GRAS receipt',
+      systemData: '₹52,000 calculated for revised built-up area schedule (₹7,000 differential)',
+      provenance: 'Payment Gateway',
+      provenanceBg: 'bg-amber-50 text-amber-700 border-amber-200'
+    }
+  ]
+
+  const checkpoints = [
+    { id: 'phase-1', key: 'precheck', num: 1, name: 'Pre-check', status: Object.keys(precheckDecisions).length >= 6 ? 'completed' : 'attention' },
+    { id: 'phase-2', key: 'route', num: 2, name: 'Review Plan', status: 'completed' },
+    { id: 'phase-3', key: 'land', num: 3, name: 'Land / Plot', status: landStatuses.plot_area === 'Valid' ? 'completed' : 'attention' },
+    { id: 'phase-4', key: 'building', num: 4, name: 'Building / Planning', status: 'current' },
+    { id: 'phase-5', key: 'water', num: 5, name: 'Water / Utility', status: 'not-applicable' },
+    { id: 'phase-6', key: 'consistency', num: 6, name: 'Consistency', status: consistencyDecision ? 'completed' : 'attention' },
+    { id: 'phase-7', key: 'dependency', num: 7, name: 'Dependencies', status: 'attention' },
+    { id: 'phase-8', key: 'query', num: 8, name: 'Query', status: draftedQueries.length > 0 ? 'attention' : 'upcoming' },
+    { id: 'phase-9', key: 'delta', num: 9, name: 'Delta', status: app.resubmitted ? 'attention' : 'not-applicable' },
+    { id: 'phase-10', key: 'inspection', num: 10, name: 'Inspection', status: siteInspectionScheduled ? 'completed' : 'attention' },
+  ]
+
+  const currentPhaseIndex = Math.max(0, checkpoints.findIndex(c => c.key === activePhaseKey))
+  const currentPhaseMeta = checkpoints[currentPhaseIndex] ?? checkpoints[0]
+
+  function handlePrecheckAction(itemId: string, action: string, label: string) {
+    setPrecheckDecisions(prev => ({
+      ...prev,
+      [itemId]: { action }
+    }))
+    showNotice(`Pre-check item: ${label}`)
+  }
+
+  function handleLandAction(paramKey: string, status: 'Valid' | 'Needs Verification' | 'Query' | 'Attention') {
+    setLandStatuses(prev => ({ ...prev, [paramKey]: status }))
+    showNotice(`Land parameter updated: ${status}`)
+  }
+
+  function handleToggleQuery(issue: string) {
+    if (draftedQueries.includes(issue)) {
+      setDraftedQueries(prev => prev.filter(q => q !== issue))
+      showNotice('Issue removed from draft queries')
+    } else {
+      setDraftedQueries(prev => [...prev, issue])
+      showNotice('Issue added to draft queries')
+    }
+  }
+
+  return (
+    <div className="flex-1 flex flex-col bg-[#f8f9fb] min-h-0 overflow-y-auto">
+
+      {/* Floating Notification */}
+      {notification && (
+        <div className="fixed top-20 right-8 z-50 bg-[#1a2533] text-white px-4 py-2.5 rounded-lg shadow-lg text-xs font-semibold flex items-center gap-2 border border-slate-700 animate-in fade-in duration-200">
+          <span className="text-emerald-400">✓</span> {notification}
+        </div>
+      )}
+
+      {/* ── 1. Application Context Header ────────────────────────────────────── */}
+      <div className="bg-white border-b border-[#e5eaf0] px-6 py-4 sticky top-0 z-30 shadow-xs">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            {onBack && (
+              <button
+                onClick={onBack}
+                className="px-3.5 py-1.5 text-xs font-bold border border-[#d1d9e0] text-[#1a3a5c] rounded hover:bg-[#f0f4f8] transition-colors flex items-center gap-1.5 shadow-sm"
+              >
+                ← Back to My Scrutiny Work
+              </button>
+            )}
+            <div className="h-6 w-px bg-[#d1d9e0] hidden sm:block" />
+            <div>
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <span className="font-mono text-base font-bold text-[#1a56db]">{app.appId}</span>
+                <span className="text-sm font-bold text-[#1a2533]">{app.business}</span>
+                <span className="text-[10px] font-mono bg-[#f3f4f6] text-[#374151] px-2 py-0.5 rounded font-semibold border border-[#e5eaf0]">
+                  {app.status}
+                </span>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
+                  app.sla === 'SLA Risk' || app.sla === 'SLA Breached' ? 'bg-red-50 text-red-700 border-red-200' :
+                  app.sla === 'Due Soon' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                  'bg-emerald-50 text-emerald-700 border-emerald-200'
+                }`}>
+                  {app.sla} · 12 Days Remaining
+                </span>
+              </div>
+              <p className="text-xs text-[#4b5563] mt-1">
+                Service: <strong className="text-[#1a2533] font-semibold">{app.service}</strong> · Current Desk: <strong className="text-[#1a2533] font-semibold">Executive Engineer (HQ) / Desk 4</strong> · Review Stage: <strong className="text-[#1a56db] font-semibold">Technical Scrutiny (Phase 3-4)</strong>
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {onOpenOverview && (
+              <button
+                onClick={() => onOpenOverview(app.appId)}
+                className="px-3.5 py-1.5 text-xs font-semibold text-[#1a56db] bg-[#eff6ff] hover:bg-[#dbeafe] rounded border border-[#bfdbfe] transition-colors"
+              >
+                Open Full Application Overview ↗
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ── 2. 10-Checkpoint Horizontal Visual Progress Tracker ─────────────── */}
+      <div className="bg-white border-b border-[#e5eaf0] px-6 py-4 shadow-xs sticky top-[73px] z-20">
+        <div className="mb-2 flex items-center justify-between">
+          <span className="text-xs font-bold text-[#1a2533] uppercase tracking-wider">Sequential Scrutiny Progress</span>
+          <span className="text-xs text-[#4b5563]">
+            Section <strong className="text-[#1a2533]">{currentPhaseMeta.num}</strong> of <strong className="text-[#1a2533]">{checkpoints.length}</strong>: <strong className="text-[#1a56db]">{currentPhaseMeta.name}</strong>
+          </span>
+        </div>
+
+        <div className="overflow-x-auto pb-2 pt-2">
+          <div className="flex items-start justify-between min-w-[980px] relative px-4">
+            {/* Horizontal connector line behind circles */}
+            <div className="absolute top-[18px] left-[45px] right-[45px] h-[2px] bg-[#e2e8f0] z-0" />
+
+            {checkpoints.map((cp) => {
+              const isCurrent = cp.key === activePhaseKey
+              let circleClasses = 'w-9 h-9 rounded-full font-bold text-xs flex items-center justify-center relative z-10 transition-all shadow-xs'
+              let circleContent: React.ReactNode = cp.num
+              let labelColor = 'text-[#4b5563]'
+              let statusBadge = ''
+              let badgeClasses = 'text-[9px] font-bold uppercase tracking-wider mt-0.5'
+
+              if (isCurrent) {
+                circleClasses += ' bg-[#1a56db] text-white ring-4 ring-blue-100 scale-110 shadow-sm'
+                circleContent = cp.num
+                labelColor = 'text-[#1a56db] font-bold'
+                statusBadge = 'Active'
+                badgeClasses += ' text-[#1a56db]'
+              } else if (cp.status === 'completed') {
+                circleClasses += ' bg-emerald-600 text-white'
+                circleContent = '✓'
+                labelColor = 'text-[#1a2533] font-semibold'
+                statusBadge = 'Completed'
+                badgeClasses += ' text-emerald-700'
+              } else if (cp.status === 'attention') {
+                circleClasses += ' bg-amber-500 text-white ring-2 ring-amber-200'
+                circleContent = '!'
+                labelColor = 'text-amber-900 font-semibold'
+                statusBadge = 'Attention'
+                badgeClasses += ' text-amber-700'
+              } else if (cp.status === 'not-applicable') {
+                circleClasses += ' border-2 border-dashed border-[#cbd5e1] bg-[#f8fafc] text-[#94a3b8]'
+                circleContent = '-'
+                labelColor = 'text-[#94a3b8] line-through'
+                statusBadge = 'N/A'
+                badgeClasses += ' text-[#94a3b8]'
+              } else {
+                circleClasses += ' bg-[#e2e8f0] text-[#64748b]'
+                circleContent = cp.num
+                labelColor = 'text-[#64748b]'
+                statusBadge = 'Upcoming'
+                badgeClasses += ' text-[#94a3b8]'
+              }
+
+              return (
+                <button
+                  key={cp.key}
+                  onClick={() => setActivePhaseKey(cp.key)}
+                  className="flex-1 flex flex-col items-center group cursor-pointer focus:outline-none px-1 text-center"
+                >
+                  <div className={circleClasses}>{circleContent}</div>
+                  <span className={`text-xs mt-2 transition-colors ${labelColor} group-hover:text-[#1a56db]`}>
+                    {cp.name}
+                  </span>
+                  <span className={badgeClasses}>{statusBadge}</span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Main Sequential Content Container ───────────────────────────────── */}
+      <div className="p-6 w-full max-w-[1400px] mx-auto space-y-8">
+
+        {/* ── PHASE 1: Automated Pre-check ──────────────────────────────────── */}
+        {activePhaseKey === 'precheck' && (
+        <section id="phase-1" className="bg-white border border-[#e5eaf0] rounded-xl shadow-xs overflow-hidden scroll-mt-36">
+          <div className="px-6 py-4 border-b border-[#e5eaf0] bg-[#f8f9fb] flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2.5">
+                <span className="text-xs font-bold text-[#1a56db] uppercase tracking-wider">Phase 1 of 10</span>
+                <span className="text-[#94a3b8]">·</span>
+                <h2 className="text-lg font-bold text-[#1a2533]">Automated Pre-check Summary</h2>
+              </div>
+              <p className="text-xs text-[#4b5563] mt-0.5">
+                Automated intake checks against MIDC rules, GIS cadastral layers, and statutory documents. 8 items flagged for officer evaluation.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="px-2.5 py-1 text-xs font-bold rounded border bg-emerald-50 text-emerald-800 border-emerald-200">
+                30 Checks Completed
+              </span>
+              <span className="px-2.5 py-1 text-xs font-bold rounded border bg-blue-50 text-blue-800 border-blue-200">
+                21 Verified
+              </span>
+              <span className="px-2.5 py-1 text-xs font-bold rounded border bg-amber-50 text-amber-800 border-amber-200">
+                8 Warnings
+              </span>
+              <span className="px-2.5 py-1 text-xs font-bold rounded border bg-purple-50 text-purple-800 border-purple-200">
+                1 Judgment Required
+              </span>
+            </div>
+          </div>
+
+          <div className="p-6 space-y-5">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold text-[#1a2533] uppercase tracking-wider">
+                Flagged Intake Items Requiring Officer Review ({PRECHECK_WARNING_ITEMS.length})
+              </h3>
+              {onOpenPrecheck && (
+                <button
+                  onClick={onOpenPrecheck}
+                  className="text-xs font-semibold text-[#1a56db] hover:underline flex items-center gap-1"
+                >
+                  View detailed pre-check →
+                </button>
+              )}
+            </div>
+
+            <div className="border border-[#e5eaf0] rounded-lg divide-y divide-[#e5eaf0] overflow-hidden">
+              {PRECHECK_WARNING_ITEMS.map((item) => {
+                const decision = precheckDecisions[item.id]
+                return (
+                  <div key={item.id} className="p-4 hover:bg-[#fafbfc] transition-colors">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="space-y-1 max-w-2xl">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-[#1a2533]">{item.title}</span>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${item.provenanceBg}`}>
+                            {item.provenance}
+                          </span>
+                          {decision && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-800 border border-slate-300">
+                              Status: {decision.action === 'accepted' ? 'Accepted' : decision.action === 'overridden' ? 'Exception Recorded' : decision.action === 'evidence_requested' ? 'Evidence Requested' : 'Query Drafted'}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-[#4b5563]">{item.description}</p>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2 text-xs pt-1">
+                          <div className="bg-[#f8f9fb] border border-[#e5eaf0] rounded p-2.5">
+                            <span className="text-[10px] font-bold uppercase text-[#64748b] block">Applicant Submitted</span>
+                            <span className="font-semibold text-[#1a2533]">{item.applicantData}</span>
+                          </div>
+                          <div className="bg-[#fffbeb] border border-[#fde68a] rounded p-2.5">
+                            <span className="text-[10px] font-bold uppercase text-[#92400e] block">System Extraction / Finding</span>
+                            <span className="font-semibold text-[#92400e]">{item.systemData}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Officer Override Action Group */}
+                      <div className="flex flex-col sm:flex-row gap-1.5 shrink-0 pt-1">
+                        <button
+                          onClick={() => handlePrecheckAction(item.id, 'accepted', `Accepted machine result for ${item.title}`)}
+                          className={`px-2.5 py-1 text-[11px] font-semibold rounded border transition-colors ${
+                            decision?.action === 'accepted'
+                              ? 'bg-emerald-700 text-white border-emerald-700'
+                              : 'bg-white text-emerald-800 border-emerald-300 hover:bg-emerald-50'
+                          }`}
+                        >
+                          Accept machine result
+                        </button>
+                        <button
+                          onClick={() => handlePrecheckAction(item.id, 'overridden', `Exception recorded for ${item.title}`)}
+                          className={`px-2.5 py-1 text-[11px] font-semibold rounded border transition-colors ${
+                            decision?.action === 'overridden'
+                              ? 'bg-amber-700 text-white border-amber-700'
+                              : 'bg-white text-amber-800 border-amber-300 hover:bg-amber-50'
+                          }`}
+                        >
+                          Override / record exception
+                        </button>
+                        <button
+                          onClick={() => handlePrecheckAction(item.id, 'evidence_requested', `Evidence requested for ${item.title}`)}
+                          className={`px-2.5 py-1 text-[11px] font-semibold rounded border transition-colors ${
+                            decision?.action === 'evidence_requested'
+                              ? 'bg-blue-700 text-white border-blue-700'
+                              : 'bg-white text-blue-800 border-blue-300 hover:bg-blue-50'
+                          }`}
+                        >
+                          Request evidence
+                        </button>
+                        <button
+                          onClick={() => {
+                            handlePrecheckAction(item.id, 'query_raised', `Query drafted for ${item.title}`)
+                            handleToggleQuery(`${item.title}: ${item.systemData}`)
+                          }}
+                          className={`px-2.5 py-1 text-[11px] font-semibold rounded border transition-colors ${
+                            decision?.action === 'query_raised'
+                              ? 'bg-red-700 text-white border-red-700'
+                              : 'bg-white text-red-800 border-red-300 hover:bg-red-50'
+                          }`}
+                        >
+                          Raise query
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            <div className="flex items-center justify-between pt-2">
+              <span className="text-xs text-[#64748b]">
+                Machine-assisted review completed. Officer judgment recorded on flagged criteria.
+              </span>
+              <button
+                onClick={() => setActivePhaseKey('route')}
+                className="px-4 py-2 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540] transition-colors shadow-xs flex items-center gap-1.5"
+              >
+                Continue to Review Plan →
+              </button>
+            </div>
+          </div>
+        </section>
+        )}
+
+        {/* ── PHASE 2: Review Plan ──────────────────────────────────────────── */}
+        {activePhaseKey === 'route' && (
+        <section id="phase-2" className="bg-white border border-[#e5eaf0] rounded-xl shadow-xs overflow-hidden scroll-mt-36">
+          <div className="px-6 py-4 border-b border-[#e5eaf0] bg-[#f8f9fb] flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2.5">
+                <span className="text-xs font-bold text-[#1a56db] uppercase tracking-wider">Phase 2 of 10</span>
+                <span className="text-[#94a3b8]">·</span>
+                <h2 className="text-lg font-bold text-[#1a2533]">Review Plan & Route Determination</h2>
+              </div>
+              <p className="text-xs text-[#4b5563] mt-0.5">
+                Determines the required scrutiny desks, parallel clearance streams, and standard vs enhanced scrutiny criteria.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-1 text-xs font-bold rounded border bg-blue-50 text-blue-800 border-blue-200">
+                Enhanced Review Protocol
+              </span>
+              {onOpenRoute && (
+                <button
+                  onClick={onOpenRoute}
+                  className="text-xs font-semibold text-[#1a56db] hover:underline"
+                >
+                  View review basis →
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="p-6 space-y-4">
+            <div className="bg-[#eff6ff] border border-[#bfdbfe] rounded-lg p-4 text-xs text-[#1e3a8a] space-y-1">
+              <p className="font-bold text-sm text-[#1e40af]">Why does this application follow an Enhanced Scrutiny Plan?</p>
+              <p className="leading-relaxed">
+                Enhanced Review is activated because this proposal involves <strong>Red Category Industrial Manufacturing</strong>, a plot size of <strong>4,800 sq.m (exceeding the 4,000 sq.m threshold)</strong>, and declared hazardous chemical storage on site. Scrutiny desks are assigned in compliance with MIDC Circular 2024/09 and Maharashtra Industrial Policy.
+              </p>
+            </div>
+
+            <div className="border border-[#e5eaf0] rounded-lg overflow-hidden">
+              <table className="w-full text-xs" aria-label="Review Plan Allocation">
+                <thead>
+                  <tr className="bg-[#f1f5f9] text-[#1a2533] border-b border-[#e5eaf0] text-left">
+                    <th className="p-3 font-bold">Review Area</th>
+                    <th className="p-3 font-bold">Review Depth</th>
+                    <th className="p-3 font-bold">Assigned Desk</th>
+                    <th className="p-3 font-bold">Scrutiny Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#e5eaf0]">
+                  <tr>
+                    <td className="p-3 font-semibold text-[#1a2533]">Land / Plot Verification</td>
+                    <td className="p-3 text-[#4b5563]">Standard Desktop Scrutiny</td>
+                    <td className="p-3 text-[#1a2533]">Land Cell / Desk 2</td>
+                    <td className="p-3 text-emerald-700 font-bold">Completed</td>
+                  </tr>
+                  <tr>
+                    <td className="p-3 font-semibold text-[#1a2533]">Building / Planning Technical Review</td>
+                    <td className="p-3 text-[#1a56db] font-semibold">Enhanced Architectural Scrutiny</td>
+                    <td className="p-3 text-[#1a2533]">Engineering & Architecture / Desk 4</td>
+                    <td className="p-3 text-blue-700 font-bold">In Scrutiny (Current)</td>
+                  </tr>
+                  <tr>
+                    <td className="p-3 font-semibold text-[#1a2533]">Water / Utility / Drainage</td>
+                    <td className="p-3 text-[#4b5563]">Standard Allocation & Connection</td>
+                    <td className="p-3 text-[#1a2533]">Water Supply & Drainage Cell</td>
+                    <td className="p-3 text-emerald-700 font-bold">Verified</td>
+                  </tr>
+                  <tr>
+                    <td className="p-3 font-semibold text-[#1a2533]">Cross-form Consistency</td>
+                    <td className="p-3 text-[#1a56db] font-semibold">5-Source Cross Reconciliation</td>
+                    <td className="p-3 text-[#1a2533]">Scrutiny Desk 4</td>
+                    <td className="p-3 text-amber-700 font-bold">In Scrutiny (Discrepancy)</td>
+                  </tr>
+                  <tr>
+                    <td className="p-3 font-semibold text-[#1a2533]">Regulatory Dependencies</td>
+                    <td className="p-3 text-[#4b5563]">Parallel Clearance Tracking</td>
+                    <td className="p-3 text-[#1a2533]">MPCB & Maharashtra Fire Services</td>
+                    <td className="p-3 text-amber-700 font-bold">Active Tracking (Pending)</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+        )}
+
+        {/* ── PHASE 3: Land / Plot Review ───────────────────────────────────── */}
+        {activePhaseKey === 'land' && (
+        <section id="phase-3" className="bg-white border border-[#e5eaf0] rounded-xl shadow-xs overflow-hidden scroll-mt-36">
+          <div className="px-6 py-4 border-b border-[#e5eaf0] bg-[#f8f9fb] flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2.5">
+                <span className="text-xs font-bold text-[#1a56db] uppercase tracking-wider">Phase 3 of 10</span>
+                <span className="text-[#94a3b8]">·</span>
+                <h2 className="text-lg font-bold text-[#1a2533]">Land / Plot Verification</h2>
+              </div>
+              <p className="text-xs text-[#4b5563] mt-0.5">
+                Verification of land tenure, plot dimensions, cadastral lease deed boundary, and zoning parameters.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => onOpenDocReview?.('MIDC-REG-DEED-2024-C14')}
+                className="px-3.5 py-1.5 bg-[#1a56db] hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-xs flex items-center gap-1.5 transition-all"
+              >
+                <span>🔍 Insights and Approvals</span>
+                <span>→</span>
+              </button>
+              <span className="px-2.5 py-1 text-xs font-bold rounded border bg-blue-50 text-blue-800 border-blue-200">
+                📄 Registered Lease Deed Attached
+              </span>
+              <span className="px-2.5 py-1 text-xs font-bold rounded border bg-emerald-50 text-emerald-800 border-emerald-200">
+                ⚡ OCR Extracted
+              </span>
+            </div>
+          </div>
+
+          <div className="p-6 space-y-6">
+            {/* Attached Statutory Document & Insights and Approvals Card */}
+            <div className="bg-gradient-to-r from-blue-50/90 via-slate-50 to-blue-50/40 border border-blue-200 rounded-xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-xs">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-[#1a56db] text-white flex items-center justify-center text-lg font-bold shadow-xs">
+                  📄
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs font-mono font-bold text-blue-900 bg-blue-100/70 px-2 py-0.5 rounded border border-blue-200">
+                      MIDC-REG-DEED-2024-C14
+                    </span>
+                    <span className="text-[11px] font-semibold text-emerald-800 bg-emerald-100/70 px-2 py-0.5 rounded border border-emerald-200">
+                      ⚡ OCR Extracted (99.4%)
+                    </span>
+                  </div>
+                  <h3 className="text-sm font-bold text-slate-900 mt-1">
+                    Registered MIDC Lease Deed Schedule & Cadastral 7/12 Extract
+                  </h3>
+                  <p className="text-xs text-slate-600">
+                    Sub-Registrar Khed · Reg No. BHR-2024-8841 · 4 Extracted Clauses
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => onOpenDocReview?.('MIDC-REG-DEED-2024-C14')}
+                className="px-4 py-2.5 bg-[#1a56db] hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-2 transition-all transform hover:-translate-y-0.5"
+              >
+                <span>🔍 Insights and Approvals</span>
+                <span>→</span>
+              </button>
+            </div>
+
+            {/* Parameter Verification - Clean & Full Width */}
+            <div className="space-y-4">
+              <div className="border border-[#e5eaf0] rounded-lg overflow-hidden bg-white">
+                <table className="w-full text-xs" aria-label="Land Parameter Comparisons">
+                  <thead>
+                    <tr className="bg-[#f1f5f9] text-[#1a2533] border-b border-[#e5eaf0] text-left">
+                      <th className="p-3 font-bold">Parameter</th>
+                      <th className="p-3 font-bold">Submitted / Deed</th>
+                      <th className="p-3 font-bold">Status</th>
+                      <th className="p-3 font-bold text-right">Officer Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#e5eaf0]">
+                    <tr>
+                      <td className="p-3 font-semibold text-[#1a2533]">Plot Number</td>
+                      <td className="p-3">
+                        <p className="font-semibold text-[#1a2533]">Plot No. C-14, Phase II</p>
+                        <p className="text-[10px] text-[#64748b]">Matches Cadastral GIS</p>
+                      </td>
+                      <td className="p-3">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700">
+                          {landStatuses.plot_no}
+                        </span>
+                      </td>
+                      <td className="p-3 text-right">
+                        <button
+                          onClick={() => handleLandAction('plot_no', 'Valid')}
+                          className="px-2.5 py-1 text-[10px] font-bold border border-[#d1d9e0] rounded bg-white hover:bg-slate-50 text-[#1a2533]"
+                        >
+                          Mark Valid
+                        </button>
+                      </td>
+                    </tr>
+
+                    <tr className="bg-amber-50/50">
+                      <td className="p-3 font-semibold text-[#1a2533]">
+                        Total Plot Area
+                        <span className="block text-[10px] text-amber-700 font-bold">+600 sq.m Variance</span>
+                      </td>
+                      <td className="p-3">
+                        <p className="font-bold text-red-700">4,800 sq.m (Form)</p>
+                        <p className="text-[11px] font-semibold text-emerald-800">4,200 sq.m (Deed OCR)</p>
+                      </td>
+                      <td className="p-3">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                          {landStatuses.plot_area}
+                        </span>
+                      </td>
+                      <td className="p-3 text-right">
+                        <div className="inline-flex rounded-md shadow-xs">
+                          <button
+                            onClick={() => handleLandAction('plot_area', 'Valid')}
+                            className="px-2 py-1 text-[10px] font-bold border border-[#d1d9e0] rounded-l bg-white hover:bg-slate-50 text-[#1a2533]"
+                          >
+                            Valid
+                          </button>
+                          <button
+                            onClick={() => {
+                              handleLandAction('plot_area', 'Query')
+                              handleToggleQuery('Plot Area discrepancy: 4,800 sq.m in form vs 4,200 sq.m in Lease Deed')
+                            }}
+                            className="px-2 py-1 text-[10px] font-bold border border-[#d1d9e0] rounded-r bg-white hover:bg-slate-50 text-red-700"
+                          >
+                            Query
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td className="p-3 font-semibold text-[#1a2533]">Ground Coverage</td>
+                      <td className="p-3">
+                        <p className="font-semibold text-[#1a2533]">44.2% (2,121 sq.m)</p>
+                        <p className="text-[10px] text-[#64748b]">Max 50.0% Permissible</p>
+                      </td>
+                      <td className="p-3">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700">
+                          {landStatuses.coverage}
+                        </span>
+                      </td>
+                      <td className="p-3 text-right">
+                        <button
+                          onClick={() => handleLandAction('coverage', 'Valid')}
+                          className="px-2.5 py-1 text-[10px] font-bold border border-[#d1d9e0] rounded bg-white hover:bg-slate-50 text-[#1a2533]"
+                        >
+                          Mark Valid
+                        </button>
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td className="p-3 font-semibold text-[#1a2533]">Zoning Category</td>
+                      <td className="p-3">
+                        <p className="font-semibold text-[#1a2533]">Industrial Zone I-1</p>
+                        <p className="text-[10px] text-[#64748b]">Chakan Phase II Plan</p>
+                      </td>
+                      <td className="p-3">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700">
+                          {landStatuses.zoning}
+                        </span>
+                      </td>
+                      <td className="p-3 text-right">
+                        <button
+                          onClick={() => handleLandAction('zoning', 'Valid')}
+                          className="px-2.5 py-1 text-[10px] font-bold border border-[#d1d9e0] rounded bg-white hover:bg-slate-50 text-[#1a2533]"
+                        >
+                          Mark Valid
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="p-3.5 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-900 flex items-center justify-between">
+                <span>
+                  💡 <strong>OCR Insight:</strong> Scanned Lease Deed has high OCR confidence (99.4%) confirming demised area is 4,200 sq.m. Click <strong>Insights and Approvals</strong> above to inspect OCR findings and record determinations.
+                </span>
+                <button
+                  type="button"
+                  onClick={() => onOpenDocReview?.('MIDC-REG-DEED-2024-C14')}
+                  className="px-3 py-1 bg-blue-600 text-white rounded text-xs font-bold hover:bg-blue-700 shadow-xs"
+                >
+                  Insights and Approvals →
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+        )}
+
+        {/* ── PHASE 4: Building / Planning Review ───────────────────────────── */}
+        {activePhaseKey === 'building' && (
+        <section id="phase-4" className="bg-white border-2 border-[#1a56db]/40 rounded-xl shadow-sm overflow-hidden scroll-mt-36 ring-2 ring-blue-50">
+          <div className="px-6 py-4 border-b border-[#e5eaf0] bg-blue-50/50 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2.5">
+                <span className="text-xs font-bold text-[#1a56db] uppercase tracking-wider">Phase 4 of 10 (Current Active Review)</span>
+                <span className="text-[#94a3b8]">·</span>
+                <h2 className="text-lg font-bold text-[#1a2533]">Building / Planning Technical Review</h2>
+              </div>
+              <p className="text-xs text-[#4b5563] mt-0.5">
+                Technical evaluation of architectural plans, setbacks, FSI, and structural schedules against MIDC DCR standards.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => onOpenDocReview?.('DWG-2026-C14-A02')}
+                className="px-3.5 py-1.5 bg-[#1a56db] hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-xs flex items-center gap-1.5 transition-all"
+              >
+                <span>🔍 Insights and Approvals</span>
+                <span>→</span>
+              </button>
+              <span className="px-2.5 py-1 text-xs font-bold rounded border bg-amber-50 text-amber-800 border-amber-200">
+                2 Technical Discrepancies
+              </span>
+              <span className="px-2.5 py-1 text-xs font-bold rounded border bg-blue-50 text-blue-800 border-blue-200">
+                CAD Blueprint Attached
+              </span>
+            </div>
+          </div>
+
+          <div className="p-6 space-y-6">
+            {/* Attached Statutory Document & Insights and Approvals Card */}
+            <div className="bg-gradient-to-r from-blue-50/90 via-slate-50 to-blue-50/40 border border-blue-200 rounded-xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-xs">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-[#1a56db] text-white flex items-center justify-center text-lg font-bold shadow-xs">
+                  📐
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs font-mono font-bold text-blue-900 bg-blue-100/70 px-2 py-0.5 rounded border border-blue-200">
+                      DWG-2026-C14-A02
+                    </span>
+                    <span className="text-[11px] font-semibold text-amber-800 bg-amber-100/70 px-2 py-0.5 rounded border border-amber-200">
+                      ⚡ OCR Flagged Discrepancy
+                    </span>
+                  </div>
+                  <h3 className="text-sm font-bold text-slate-900 mt-1">
+                    Architectural Site Plan & Setback Blueprint (Sheet A02 - Rev 2)
+                  </h3>
+                  <p className="text-xs text-slate-600">
+                    Apex Design Associates · Reg CA/2012/5512 · Setback Discrepancy Flagged
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => onOpenDocReview?.('DWG-2026-C14-A02')}
+                className="px-4 py-2.5 bg-[#1a56db] hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-2 transition-all transform hover:-translate-y-0.5"
+              >
+                <span>🔍 Insights and Approvals</span>
+                <span>→</span>
+              </button>
+            </div>
+
+            {/* Parameter Verification - Clean & Full Width */}
+            <div className="space-y-4">
+              <div className="border border-[#e5eaf0] rounded-lg overflow-hidden bg-white">
+                <table className="w-full text-xs" aria-label="Building parameters">
+                  <thead>
+                    <tr className="bg-[#f1f5f9] text-[#1a2533] border-b border-[#e5eaf0] text-left">
+                      <th className="p-3 font-bold">Review Item</th>
+                      <th className="p-3 font-bold">Proposed vs Standard</th>
+                      <th className="p-3 font-bold">Finding</th>
+                      <th className="p-3 font-bold text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#e5eaf0]">
+                    <tr className="bg-red-50/30">
+                      <td className="p-3 font-semibold text-[#1a2533]">Total Built-up Area</td>
+                      <td className="p-3">
+                        <p className="font-bold text-red-700">2,300 m² (Form)</p>
+                        <p className="text-[10px] text-[#64748b]">2,000 m² (Drawing Schedule)</p>
+                      </td>
+                      <td className="p-3 font-bold text-red-700">300 m² Mismatch</td>
+                      <td className="p-3 text-right">
+                        <button
+                          onClick={() => handleToggleQuery('Built-up area discrepancy: 2,300 sq.m in form vs 2,000 sq.m in drawing schedule')}
+                          className="px-2 py-1 text-[10px] font-bold border border-red-300 rounded bg-white hover:bg-red-50 text-red-700"
+                        >
+                          Query
+                        </button>
+                      </td>
+                    </tr>
+
+                    <tr className="bg-amber-50/40">
+                      <td className="p-3 font-semibold text-[#1a2533]">
+                        East Side Setback
+                        <span className="block text-[10px] text-amber-700 font-bold">Side Margin 1</span>
+                      </td>
+                      <td className="p-3">
+                        <p className="font-bold text-amber-800">4.20m proposed</p>
+                        <p className="text-[10px] text-[#64748b]">Min 4.50m required (Rule 14.2)</p>
+                      </td>
+                      <td className="p-3 font-bold text-amber-800">-0.30m Deficit</td>
+                      <td className="p-3 text-right">
+                        <button
+                          onClick={() => handleToggleQuery('East Side Setback shortfall: 4.2m proposed vs 4.5m required under MIDC DCR Rule 14.2')}
+                          className="px-2 py-1 text-[10px] font-bold border border-amber-300 rounded bg-white hover:bg-amber-50 text-amber-800"
+                        >
+                          Query
+                        </button>
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td className="p-3 font-semibold text-[#1a2533]">Floor Space Index (FSI)</td>
+                      <td className="p-3">
+                        <p className="font-semibold text-[#1a2533]">0.44 proposed (2,121 m²)</p>
+                        <p className="text-[10px] text-[#64748b]">Max 1.00 permissible</p>
+                      </td>
+                      <td className="p-3 font-bold text-emerald-700">Compliant</td>
+                      <td className="p-3 text-right">
+                        <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">✓ Verified</span>
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td className="p-3 font-semibold text-[#1a2533]">Building Height</td>
+                      <td className="p-3">
+                        <p className="font-semibold text-[#1a2533]">12.4m</p>
+                        <p className="text-[10px] text-[#64748b]">Max 15.0m permissible</p>
+                      </td>
+                      <td className="p-3 font-bold text-emerald-700">Compliant</td>
+                      <td className="p-3 text-right">
+                        <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">✓ Verified</span>
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td className="p-3 font-semibold text-[#1a2533]">Front Marginal Road Distance</td>
+                      <td className="p-3">
+                        <p className="font-semibold text-[#1a2533]">9.20m</p>
+                        <p className="text-[10px] text-[#64748b]">Min 9.00m from 24m road</p>
+                      </td>
+                      <td className="p-3 font-bold text-emerald-700">Compliant</td>
+                      <td className="p-3 text-right">
+                        <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">✓ Verified</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900 flex items-center justify-between">
+                <span>
+                  ⚠️ <strong>Action Required:</strong> East setback margin is 4.20m against 4.50m minimum standard under Rule 14.2. Click <strong>Insights and Approvals</strong> above to open dedicated review and record objection.
+                </span>
+                <button
+                  type="button"
+                  onClick={() => onOpenDocReview?.('DWG-2026-C14-A02')}
+                  className="px-3 py-1 bg-amber-600 text-white rounded text-xs font-bold hover:bg-amber-700 shadow-xs"
+                >
+                  Insights and Approvals →
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+        )}
+
+        {/* ── PHASE 5: Water / Utility / Drainage ───────────────────────────── */}
+        {activePhaseKey === 'water' && (
+        <section id="phase-5" className="bg-white border border-[#e5eaf0] rounded-xl shadow-xs overflow-hidden scroll-mt-36">
+          <div className="px-6 py-4 border-b border-[#e5eaf0] bg-[#f8f9fb] flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2.5">
+                <span className="text-xs font-bold text-[#1a56db] uppercase tracking-wider">Phase 5 of 10</span>
+                <span className="text-[#94a3b8]">·</span>
+                <h2 className="text-lg font-bold text-[#1a2533]">Water / Utility / Drainage Review</h2>
+              </div>
+              <p className="text-xs text-[#4b5563] mt-0.5">
+                Assessment of water allocation feasibility, industrial demand, and effluent disposal arrangements.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => onOpenDocReview?.('MIDC-WATER-FEAS-2026')}
+                className="px-3.5 py-1.5 bg-[#1a56db] hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-xs flex items-center gap-1.5 transition-all"
+              >
+                <span>🔍 Insights and Approvals</span>
+                <span>→</span>
+              </button>
+              <span className="px-2.5 py-1 text-xs font-bold rounded border bg-emerald-50 text-emerald-800 border-emerald-200">
+                Standard Allocation · Verified
+              </span>
+              <span className="px-2.5 py-1 text-xs font-bold rounded border bg-blue-50 text-blue-800 border-blue-200">
+                Feasibility Letter Attached
+              </span>
+            </div>
+          </div>
+
+          <div className="p-6 space-y-6">
+            {/* Attached Statutory Document & Insights and Approvals Card */}
+            <div className="bg-gradient-to-r from-blue-50/90 via-slate-50 to-blue-50/40 border border-blue-200 rounded-xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-xs">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-[#1a56db] text-white flex items-center justify-center text-lg font-bold shadow-xs">
+                  💧
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs font-mono font-bold text-blue-900 bg-blue-100/70 px-2 py-0.5 rounded border border-blue-200">
+                      MIDC-WATER-FEAS-2026
+                    </span>
+                    <span className="text-[11px] font-semibold text-emerald-800 bg-emerald-100/70 px-2 py-0.5 rounded border border-emerald-200">
+                      ✓ Clearance Feasible
+                    </span>
+                  </div>
+                  <h3 className="text-sm font-bold text-slate-900 mt-1">
+                    Water Supply Feasibility & Utility Allocation Letter
+                  </h3>
+                  <p className="text-xs text-slate-600">
+                    Executive Engineer, MIDC Water Works Division Pune · 45 KLD Allocation
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => onOpenDocReview?.('MIDC-WATER-FEAS-2026')}
+                className="px-4 py-2.5 bg-[#1a56db] hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-2 transition-all transform hover:-translate-y-0.5"
+              >
+                <span>🔍 Insights and Approvals</span>
+                <span>→</span>
+              </button>
+            </div>
+
+            {/* Water Demand & Utility Verification - Full Width */}
+            <div className="space-y-4">
+              <div className="bg-[#f0fdf4] border border-[#bbf7d0] rounded-lg p-4 text-xs text-[#166534]">
+                <p className="font-bold text-sm text-[#15803d]">Water Supply Feasibility Confirmed</p>
+                <p className="mt-1">
+                  MIDC Water Works Cell has verified bulk water feasibility from Chakan Phase II Substation Main Line (150mm dia.). No pending objections.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                <div className="border border-[#e5eaf0] rounded-lg p-3 space-y-1 bg-white">
+                  <span className="text-[10px] text-[#64748b] font-bold uppercase tracking-wider">Domestic Demand</span>
+                  <p className="text-base font-bold text-[#1a2533]">10 KL / day</p>
+                  <p className="text-[#4b5563]">Based on 65 workers</p>
+                </div>
+                <div className="border border-[#e5eaf0] rounded-lg p-3 space-y-1 bg-white">
+                  <span className="text-[10px] text-[#64748b] font-bold uppercase tracking-wider">Industrial Process</span>
+                  <p className="text-base font-bold text-[#1a2533]">35 KL / day</p>
+                  <p className="text-[#4b5563]">Machining & cooling</p>
+                </div>
+                <div className="border border-[#e5eaf0] rounded-lg p-3 space-y-1 bg-white">
+                  <span className="text-[10px] text-[#64748b] font-bold uppercase tracking-wider">Effluent Treatment</span>
+                  <p className="text-base font-bold text-[#1a2533]">28 KL / day ETP</p>
+                  <p className="text-emerald-700 font-semibold">Zero Liquid Discharge (ZLD)</p>
+                </div>
+              </div>
+
+              <div className="border border-[#e5eaf0] rounded-lg overflow-hidden bg-white">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="bg-[#f1f5f9] text-[#1a2533] border-b border-[#e5eaf0] text-left">
+                      <th className="p-3 font-bold">Utility Component</th>
+                      <th className="p-3 font-bold">Specification</th>
+                      <th className="p-3 font-bold">Verification</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#e5eaf0]">
+                    <tr>
+                      <td className="p-3 font-semibold text-[#1a2533]">Supply Connection</td>
+                      <td className="p-3 text-[#4b5563]">150mm dia. Cast Iron Main Connection</td>
+                      <td className="p-3 text-emerald-700 font-bold">✓ Feasible</td>
+                    </tr>
+                    <tr>
+                      <td className="p-3 font-semibold text-[#1a2533]">Network Pressure</td>
+                      <td className="p-3 text-[#4b5563]">1.8 kg/cm² operating pressure</td>
+                      <td className="p-3 text-emerald-700 font-bold">✓ Adequate</td>
+                    </tr>
+                    <tr>
+                      <td className="p-3 font-semibold text-[#1a2533]">Stormwater Drainage</td>
+                      <td className="p-3 text-[#4b5563]">External arterial drainage channel connected</td>
+                      <td className="p-3 text-emerald-700 font-bold">✓ Cleared</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="flex justify-between items-center pt-2">
+                <button
+                  type="button"
+                  onClick={() => onOpenDocReview?.('MIDC-WATER-FEAS-2026')}
+                  className="px-3.5 py-1.5 border border-[#cbd5e1] rounded text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 transition-colors shadow-xs"
+                >
+                  Inspect Feasibility Document & Approvals →
+                </button>
+                <button
+                  onClick={() => showNotice('Water / Utility clearance marked as verified')}
+                  className="px-4 py-2 bg-emerald-700 text-white text-xs font-bold rounded hover:bg-emerald-800 transition-colors shadow-xs"
+                >
+                  Confirm Water Clearance ✓
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+        )}
+
+        {/* ── PHASE 6: Cross-form Consistency ──────────────────────────────── */}
+        {activePhaseKey === 'consistency' && (
+        <section id="phase-6" className="bg-white border border-[#e5eaf0] rounded-xl shadow-xs overflow-hidden scroll-mt-36">
+          <div className="px-6 py-4 border-b border-[#e5eaf0] bg-[#f8f9fb] flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2.5">
+                <span className="text-xs font-bold text-[#1a56db] uppercase tracking-wider">Phase 6 of 10</span>
+                <span className="text-[#94a3b8]">·</span>
+                <h2 className="text-lg font-bold text-[#1a2533]">Cross-form Consistency Review</h2>
+              </div>
+              <p className="text-xs text-[#4b5563] mt-0.5">
+                Automated cross-check of declared parameters across 5 authoritative sources: Forms, Lease Deed, DNA Profile, CAD, and GIS.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => onOpenDocReview?.('CONCORDANCE-DOSSIER-2026')}
+                className="px-3.5 py-1.5 bg-[#1a56db] hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-xs flex items-center gap-1.5 transition-all"
+              >
+                <span>🔍 Insights and Approvals</span>
+                <span>→</span>
+              </button>
+              <span className="px-2.5 py-1 text-xs font-bold rounded border bg-amber-50 text-amber-800 border-amber-200">
+                8 Fields Checked · 6 Match · 1 Mismatch
+              </span>
+              <span className="px-2.5 py-1 text-xs font-bold rounded border bg-blue-50 text-blue-800 border-blue-200">
+                Multi-Doc Concordance
+              </span>
+            </div>
+          </div>
+
+          <div className="p-6 space-y-6">
+            {/* Attached Statutory Document & Insights and Approvals Card */}
+            <div className="bg-gradient-to-r from-blue-50/90 via-slate-50 to-blue-50/40 border border-blue-200 rounded-xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-xs">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-[#1a56db] text-white flex items-center justify-center text-lg font-bold shadow-xs">
+                  🔄
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs font-mono font-bold text-blue-900 bg-blue-100/70 px-2 py-0.5 rounded border border-blue-200">
+                      CONCORDANCE-DOSSIER-2026
+                    </span>
+                    <span className="text-[11px] font-semibold text-purple-800 bg-purple-100/70 px-2 py-0.5 rounded border border-purple-200">
+                      ⚡ Cross-Document Concordance Dossier
+                    </span>
+                  </div>
+                  <h3 className="text-sm font-bold text-slate-900 mt-1">
+                    Multi-Document Concordance & Reconciliation Dossier
+                  </h3>
+                  <p className="text-xs text-slate-600">
+                    Automated 5-Way Authoritative Verification Engine · 1 Area Variance Detected
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => onOpenDocReview?.('CONCORDANCE-DOSSIER-2026')}
+                className="px-4 py-2.5 bg-[#1a56db] hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-2 transition-all transform hover:-translate-y-0.5"
+              >
+                <span>🔍 Insights and Approvals</span>
+                <span>→</span>
+              </button>
+            </div>
+
+            {/* 5-Source Reconciliation & Officer Actions - Full Width */}
+            <div className="space-y-4">
+              <div className="bg-[#eff6ff] border border-[#bfdbfe] rounded-lg p-3 text-xs text-[#1e3a8a]">
+                <strong>Officer Guidance:</strong> Discrepancies between application forms and registered deed require formal alignment or clarification.
+              </div>
+
+              <div className="border border-[#e5eaf0] rounded-lg overflow-hidden bg-white">
+                <table className="w-full text-xs" aria-label="Cross-form plot area sources">
+                  <thead>
+                    <tr className="bg-[#f1f5f9] text-[#1a2533] border-b border-[#e5eaf0] text-left">
+                      <th className="p-3 font-bold">Data Source</th>
+                      <th className="p-3 font-bold">Recorded Area</th>
+                      <th className="p-3 font-bold">Alignment Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#e5eaf0]">
+                    <tr>
+                      <td className="p-3 font-semibold text-[#1a2533]">1. Application Form (3.1)</td>
+                      <td className="p-3 font-mono font-bold text-red-700">4,800 sq.m</td>
+                      <td className="p-3 text-amber-700 font-bold">Discrepancy Source</td>
+                    </tr>
+                    <tr>
+                      <td className="p-3 font-semibold text-[#1a2533]">2. Registered Lease Deed</td>
+                      <td className="p-3 font-mono font-bold text-[#1a2533]">4,200 sq.m</td>
+                      <td className="p-3 text-emerald-700 font-bold">Baseline Benchmark</td>
+                    </tr>
+                    <tr>
+                      <td className="p-3 font-semibold text-[#1a2533]">3. Architectural CAD Plan</td>
+                      <td className="p-3 font-mono font-bold text-[#1a2533]">4,200 sq.m</td>
+                      <td className="p-3 text-emerald-700 font-bold">Matches Lease Deed</td>
+                    </tr>
+                    <tr>
+                      <td className="p-3 font-semibold text-[#1a2533]">4. Business DNA Record</td>
+                      <td className="p-3 font-mono font-bold text-red-700">4,800 sq.m</td>
+                      <td className="p-3 text-amber-700 font-bold">Carried Over from Form</td>
+                    </tr>
+                    <tr>
+                      <td className="p-3 font-semibold text-[#1a2533]">5. Cadastral GIS Map</td>
+                      <td className="p-3 font-mono font-bold text-[#1a2533]">4,200 sq.m</td>
+                      <td className="p-3 text-emerald-700 font-bold">Matches Lease Deed</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-1 bg-[#f8fafc] border border-[#e5eaf0] rounded-lg p-3 text-xs">
+                <span className="font-semibold text-slate-700">Officer Decision:</span>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <button
+                    onClick={() => {
+                      setConsistencyDecision('accepted')
+                      showNotice('Baseline 4,200 sq.m lease deed accepted as verified source')
+                    }}
+                    className={`px-2.5 py-1 text-xs font-bold rounded border transition-colors ${
+                      consistencyDecision === 'accepted' ? 'bg-emerald-700 text-white border-emerald-700' : 'bg-white text-emerald-800 border-emerald-300 hover:bg-emerald-50'
+                    }`}
+                  >
+                    Accept 4,200 m²
+                  </button>
+                  <button
+                    onClick={() => {
+                      setConsistencyDecision('exception')
+                      showNotice('Exception recorded with justifying officer note')
+                    }}
+                    className={`px-2.5 py-1 text-xs font-bold rounded border transition-colors ${
+                      consistencyDecision === 'exception' ? 'bg-amber-700 text-white border-amber-700' : 'bg-white text-amber-800 border-amber-300 hover:bg-amber-50'
+                    }`}
+                  >
+                    Record Exception
+                  </button>
+                  <button
+                    onClick={() => {
+                      setConsistencyDecision('query')
+                      handleToggleQuery('Cross-form inconsistency: Clarify plot area 4,800 sq.m vs 4,200 sq.m across application form & lease deed')
+                    }}
+                    className={`px-2.5 py-1 text-xs font-bold rounded border transition-colors ${
+                      consistencyDecision === 'query' ? 'bg-red-700 text-white border-red-700' : 'bg-white text-red-800 border-red-300 hover:bg-red-50'
+                    }`}
+                  >
+                    Raise Query
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        )}
+
+        {/* ── PHASE 7: Regulatory Dependencies ──────────────────────────────── */}
+        {activePhaseKey === 'dependency' && (
+        <section id="phase-7" className="bg-white border border-[#e5eaf0] rounded-xl shadow-xs overflow-hidden scroll-mt-36">
+          <div className="px-6 py-4 border-b border-[#e5eaf0] bg-[#f8f9fb] flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2.5">
+                <span className="text-xs font-bold text-[#1a56db] uppercase tracking-wider">Phase 7 of 10</span>
+                <span className="text-[#94a3b8]">·</span>
+                <h2 className="text-lg font-bold text-[#1a2533]">Regulatory Dependencies</h2>
+              </div>
+              <p className="text-xs text-[#4b5563] mt-0.5">
+                Tracks upstream and parallel statutory clearances required before final building approval can be granted.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => onOpenDocReview?.('NOC-ARCHIVE-2026')}
+                className="px-3.5 py-1.5 bg-[#1a56db] hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-xs flex items-center gap-1.5 transition-all"
+              >
+                <span>🔍 Insights and Approvals</span>
+                <span>→</span>
+              </button>
+              <span className="px-2.5 py-1 text-xs font-bold rounded border bg-amber-50 text-amber-800 border-amber-200">
+                1 Pending · 1 Expired
+              </span>
+              <span className="px-2.5 py-1 text-xs font-bold rounded border bg-blue-50 text-blue-800 border-blue-200">
+                NOC Archive Attached
+              </span>
+            </div>
+          </div>
+
+          <div className="p-6 space-y-6">
+            {/* Attached Statutory Document & Insights and Approvals Card */}
+            <div className="bg-gradient-to-r from-blue-50/90 via-slate-50 to-blue-50/40 border border-blue-200 rounded-xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-xs">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-[#1a56db] text-white flex items-center justify-center text-lg font-bold shadow-xs">
+                  📑
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs font-mono font-bold text-blue-900 bg-blue-100/70 px-2 py-0.5 rounded border border-blue-200">
+                      NOC-ARCHIVE-2026
+                    </span>
+                    <span className="text-[11px] font-semibold text-amber-800 bg-amber-100/70 px-2 py-0.5 rounded border border-amber-200">
+                      ⏳ Clearances & NOC Register
+                    </span>
+                  </div>
+                  <h3 className="text-sm font-bold text-slate-900 mt-1">
+                    Statutory Clearances & Inter-Departmental NOC Archive
+                  </h3>
+                  <p className="text-xs text-slate-600">
+                    MPCB Consent to Establish, Fire NOC, and MSEDCL Feasibility Dossier
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => onOpenDocReview?.('NOC-ARCHIVE-2026')}
+                className="px-4 py-2.5 bg-[#1a56db] hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-2 transition-all transform hover:-translate-y-0.5"
+              >
+                <span>🔍 Insights and Approvals</span>
+                <span>→</span>
+              </button>
+            </div>
+
+            {/* Clearances & Statutory Impact - Full Width */}
+            <div className="space-y-3.5">
+              <div className="border border-[#e5eaf0] rounded-lg divide-y divide-[#e5eaf0] text-xs bg-white">
+                <div className="p-3.5 bg-amber-50/40">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-[#1a2533]">MPCB Consent to Establish (CTE)</span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300">
+                      In Progress (14 Days)
+                    </span>
+                  </div>
+                  <p className="text-slate-600 mt-1">Ref: MPCB-CTE-2026-8819 · Regional Office Pune</p>
+                  <p className="text-[11px] text-amber-900 font-semibold mt-1">
+                    Scrutiny may proceed concurrently. Sanction order withheld until CTE is issued.
+                  </p>
+                </div>
+
+                <div className="p-3.5 bg-red-50/40">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-[#1a2533]">Maharashtra Fire Services Provisional NOC</span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-red-100 text-red-800 border border-red-300">
+                      Expired 31-Aug-2026
+                    </span>
+                  </div>
+                  <p className="text-slate-600 mt-1">Ref: MFS-NOC-2025-1044 · Renewal pending endorsement</p>
+                  <p className="text-[11px] text-red-900 font-semibold mt-1">
+                    Setback deviations cannot be approved without Fire Officer clearance endorsement.
+                  </p>
+                </div>
+
+                <div className="p-3.5 bg-emerald-50/20">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-[#1a2533]">MSEDCL Power Feasibility Approval</span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300">
+                      Clear / Approved
+                    </span>
+                  </div>
+                  <p className="text-slate-600 mt-1">150 kVA Industrial Feed sanctioned from Substation 3</p>
+                </div>
+
+                <div className="p-3.5 bg-emerald-50/20">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-[#1a2533]">MIDC Industrial Water Allotment</span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300">
+                      Clear / Approved
+                    </span>
+                  </div>
+                  <p className="text-slate-600 mt-1">45 KLD Allocation cleared by Water Cell</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        )}
+
+        {/* ── PHASE 8: Query ────────────────────────────────────────────────── */}
+        {activePhaseKey === 'query' && (
+        <section id="phase-8" className="bg-white border border-[#e5eaf0] rounded-xl shadow-xs overflow-hidden scroll-mt-36">
+          <div className="px-6 py-4 border-b border-[#e5eaf0] bg-[#f8f9fb] flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2.5">
+                <span className="text-xs font-bold text-[#1a56db] uppercase tracking-wider">Phase 8 of 10</span>
+                <span className="text-[#94a3b8]">·</span>
+                <h2 className="text-lg font-bold text-[#1a2533]">Consolidated Query Preparation</h2>
+              </div>
+              <p className="text-xs text-[#4b5563] mt-0.5">
+                Review unresolved findings and package into a single consolidated query notice to avoid piecemeal communication.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-1 text-xs font-bold rounded border bg-amber-50 text-amber-800 border-amber-200">
+                {draftedQueries.length} Selected Items
+              </span>
+              <span className="px-2.5 py-1 text-xs font-bold rounded border bg-blue-50 text-blue-800 border-blue-200">
+                Form D-1 Preview Live
+              </span>
+            </div>
+          </div>
+
+          <div className="p-6 space-y-6">
+            {/* Attached Statutory Document & Insights and Approvals Card */}
+            <div className="bg-gradient-to-r from-blue-50/90 via-slate-50 to-blue-50/40 border border-blue-200 rounded-xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-xs">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-[#1a56db] text-white flex items-center justify-center text-lg font-bold shadow-xs">
+                  📋
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs font-mono font-bold text-blue-900 bg-blue-100/70 px-2 py-0.5 rounded border border-blue-200">
+                      FORM-D1-NOTICE
+                    </span>
+                    <span className="text-[11px] font-semibold text-red-800 bg-red-100/70 px-2 py-0.5 rounded border border-red-200">
+                      ⚠ Form D-1 Statutory Memo
+                    </span>
+                  </div>
+                  <h3 className="text-sm font-bold text-slate-900 mt-1">
+                    Statutory Consolidated Deficiency Memo (Form D-1 Schedule)
+                  </h3>
+                  <p className="text-xs text-slate-600">
+                    Unified Officer Findings & Applicant Objections Notice Draft
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => onOpenDocReview?.('FORM-D1-NOTICE')}
+                className="px-4 py-2.5 bg-[#1a56db] hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-2 transition-all transform hover:-translate-y-0.5"
+              >
+                <span>🔍 Insights and Approvals</span>
+                <span>→</span>
+              </button>
+            </div>
+
+            {/* Assembled Query Items - Full Width */}
+            <div className="space-y-4">
+              <p className="text-xs text-[#4b5563]">
+                Select the deficiencies to include in the official clarification notice:
+              </p>
+
+              <div className="border border-[#e5eaf0] rounded-lg divide-y divide-[#e5eaf0] text-xs bg-white">
+                {[
+                  {
+                    id: 'q1',
+                    text: 'Plot Area mismatch: 4,800 sq.m declared vs 4,200 sq.m in MIDC Lease Deed record',
+                    source: 'Phase 3 & Phase 6',
+                    actionText: 'Applicant must submit either lease deed amendment or corrected application form.'
+                  },
+                  {
+                    id: 'q2',
+                    text: 'East Side Setback shortfall: 4.2m proposed vs 4.5m required under MIDC DCR Rule 14.2',
+                    source: 'Phase 4',
+                    actionText: 'Revised architectural drawing Sheet A02 with 4.5m East margin required.'
+                  },
+                  {
+                    id: 'q3',
+                    text: 'Built-up area schedule discrepancy: 2,300 sq.m in form vs 2,000 sq.m in drawing schedule',
+                    source: 'Phase 4',
+                    actionText: 'Harmonized floor area calculation sheet endorsed by licensed architect required.'
+                  }
+                ].map((item) => {
+                  const isDrafted = draftedQueries.some(q => q.toLowerCase().includes(item.text.toLowerCase().slice(0, 20)))
+                  return (
+                    <div key={item.id} className="p-3.5 flex items-start justify-between gap-3 hover:bg-[#fafbfc]">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-[#1a2533]">{item.text}</span>
+                          <span className="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-mono">
+                            {item.source}
+                          </span>
+                        </div>
+                        <p className="text-[#64748b] text-[11px]">{item.actionText}</p>
+                      </div>
+
+                      <button
+                        onClick={() => handleToggleQuery(item.text)}
+                        className={`px-3 py-1 text-xs font-bold rounded border transition-colors shrink-0 ${
+                          isDrafted
+                            ? 'bg-amber-100 text-amber-900 border-amber-300'
+                            : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+                        }`}
+                      >
+                        {isDrafted ? '✓ Included' : '+ Include'}
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
+
+              <div className="flex justify-end pt-2">
+                <button
+                  onClick={() => showNotice('Consolidated Query Notice dispatched to applicant')}
+                  className="px-4 py-2 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540] transition-colors shadow-xs"
+                >
+                  Issue Consolidated Query Notice (Form D-1) →
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+        )}
+
+        {/* ── PHASE 9: Delta Re-scrutiny ────────────────────────────────────── */}
+        {activePhaseKey === 'delta' && (
+        <section id="phase-9" className="bg-white border border-[#e5eaf0] rounded-xl shadow-xs overflow-hidden scroll-mt-36">
+          <div className="px-6 py-4 border-b border-[#e5eaf0] bg-[#f8f9fb] flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2.5">
+                <span className="text-xs font-bold text-[#1a56db] uppercase tracking-wider">Phase 9 of 10</span>
+                <span className="text-[#94a3b8]">·</span>
+                <h2 className="text-lg font-bold text-[#1a2533]">Delta Re-scrutiny (Resubmission Evaluation)</h2>
+              </div>
+              <p className="text-xs text-[#4b5563] mt-0.5">
+                Difference engine evaluates only revised parameters, preserving approvals on unchanged items.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className={`px-2.5 py-1 text-xs font-bold rounded border ${
+                app.resubmitted ? 'bg-purple-50 text-purple-800 border-purple-200' : 'bg-gray-50 text-gray-500 border-gray-200'
+              }`}>
+                {app.resubmitted ? 'v2 Resubmission On Record' : 'Awaiting Applicant Response'}
+              </span>
+              <span className="px-2.5 py-1 text-xs font-bold rounded border bg-blue-50 text-blue-800 border-blue-200">
+                Redline Overlay Active
+              </span>
+            </div>
+          </div>
+
+          <div className="p-6 space-y-6">
+            {/* Attached Statutory Document & Insights and Approvals Card */}
+            <div className="bg-gradient-to-r from-blue-50/90 via-slate-50 to-blue-50/40 border border-blue-200 rounded-xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-xs">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-[#1a56db] text-white flex items-center justify-center text-lg font-bold shadow-xs">
+                  🔍
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs font-mono font-bold text-blue-900 bg-blue-100/70 px-2 py-0.5 rounded border border-blue-200">
+                      DIFF-2026-00418
+                    </span>
+                    <span className="text-[11px] font-semibold text-purple-800 bg-purple-100/70 px-2 py-0.5 rounded border border-purple-200">
+                      ⚡ Delta Redline Computed
+                    </span>
+                  </div>
+                  <h3 className="text-sm font-bold text-slate-900 mt-1">
+                    Delta Re-scrutiny Redline Log & Revision Comparator Dossier
+                  </h3>
+                  <p className="text-xs text-slate-600">
+                    Entrepreneur Resubmission v2 vs Original Technical Application
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => onOpenDocReview?.('DIFF-2026-00418')}
+                className="px-4 py-2.5 bg-[#1a56db] hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-2 transition-all transform hover:-translate-y-0.5"
+              >
+                <span>🔍 Insights and Approvals</span>
+                <span>→</span>
+              </button>
+            </div>
+
+            {/* Delta Parameter Breakdown - Full Width */}
+            <div className="space-y-4">
+              <div className="bg-[#faf5ff] border border-[#e9d5ff] rounded-lg p-4 text-xs text-[#581c87]">
+                <p className="font-bold text-sm">Entrepreneur Resubmission v2 on Record</p>
+                <p className="mt-1">
+                  Revised architectural drawings and fee receipt submitted. Delta comparison engine isolated 4 changed items. 12 unchanged parameters preserved.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                <div className="border border-[#e9d5ff] bg-purple-50/50 rounded-lg p-3">
+                  <span className="text-[10px] text-purple-800 font-bold uppercase tracking-wider block">Changed Items</span>
+                  <span className="text-lg font-bold text-purple-900">4 Items</span>
+                  <p className="text-[11px] text-purple-700 mt-0.5">East setback, fee, pegs</p>
+                </div>
+                <div className="border border-[#bfdbfe] bg-blue-50/50 rounded-lg p-3">
+                  <span className="text-[10px] text-blue-800 font-bold uppercase tracking-wider block">Affected Dependents</span>
+                  <span className="text-lg font-bold text-blue-900">6 Items</span>
+                  <p className="text-[11px] text-blue-700 mt-0.5">FSI recalculation</p>
+                </div>
+                <div className="border border-[#bbf7d0] bg-emerald-50/50 rounded-lg p-3">
+                  <span className="text-[10px] text-emerald-800 font-bold uppercase tracking-wider block">Unchanged Items</span>
+                  <span className="text-lg font-bold text-emerald-900">12 Items</span>
+                  <p className="text-[11px] text-emerald-700 mt-0.5">No re-scrutiny needed</p>
+                </div>
+              </div>
+
+              <div className="border border-[#e5eaf0] rounded-lg divide-y divide-[#e5eaf0] text-xs bg-white">
+                <div className="p-3 flex items-center justify-between">
+                  <div>
+                    <span className="font-bold text-slate-900">East Margin Correction</span>
+                    <p className="text-[11px] text-slate-500">Revised from 4.20m to 4.50m (Rule 14.2 Compliant)</p>
+                  </div>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">✓ Accepted</span>
+                </div>
+                <div className="p-3 flex items-center justify-between">
+                  <div>
+                    <span className="font-bold text-slate-900">GRAS Fee Differential</span>
+                    <p className="text-[11px] text-slate-500">₹7,000 paid via Maharashtra Treasury Cyber Receipt</p>
+                  </div>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">✓ Verified</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        )}
+
+        {/* ── PHASE 10: Inspection ──────────────────────────────────────────── */}
+        {activePhaseKey === 'inspection' && (
+        <section id="phase-10" className="bg-white border border-[#e5eaf0] rounded-xl shadow-xs overflow-hidden scroll-mt-36">
+          <div className="px-6 py-4 border-b border-[#e5eaf0] bg-[#f8f9fb] flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2.5">
+                <span className="text-xs font-bold text-[#1a56db] uppercase tracking-wider">Phase 10 of 10</span>
+                <span className="text-[#94a3b8]">·</span>
+                <h2 className="text-lg font-bold text-[#1a2533]">Site Inspection Queue & Planning</h2>
+              </div>
+              <p className="text-xs text-[#4b5563] mt-0.5">
+                Physical ground verification of plot boundaries, East setback margin, and external hydrant connections.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className={`px-2.5 py-1 text-xs font-bold rounded border ${
+                siteInspectionScheduled ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-amber-50 text-amber-800 border-amber-200'
+              }`}>
+                {siteInspectionScheduled ? 'Inspection Scheduled' : 'Verification Scheduled'}
+              </span>
+              <span className="px-2.5 py-1 text-xs font-bold rounded border bg-blue-50 text-blue-800 border-blue-200">
+                Geo-tagged Photos
+              </span>
+            </div>
+          </div>
+
+          <div className="p-6 space-y-6">
+            {/* Attached Statutory Document & Insights and Approvals Card */}
+            <div className="bg-gradient-to-r from-blue-50/90 via-slate-50 to-blue-50/40 border border-blue-200 rounded-xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-xs">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-[#1a56db] text-white flex items-center justify-center text-lg font-bold shadow-xs">
+                  📍
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs font-mono font-bold text-blue-900 bg-blue-100/70 px-2 py-0.5 rounded border border-blue-200">
+                      INSP-REPORT-2026
+                    </span>
+                    <span className="text-[11px] font-semibold text-emerald-800 bg-emerald-100/70 px-2 py-0.5 rounded border border-emerald-200">
+                      ✓ Inspection Survey Ready
+                    </span>
+                  </div>
+                  <h3 className="text-sm font-bold text-slate-900 mt-1">
+                    Site Inspection Field Survey Dossier & Geo-tagged Checklist
+                  </h3>
+                  <p className="text-xs text-slate-600">
+                    MIDC Engineering Site Cell · Physical Plot & Setback Peg Verification
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => onOpenDocReview?.('INSP-REPORT-2026')}
+                className="px-4 py-2.5 bg-[#1a56db] hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-2 transition-all transform hover:-translate-y-0.5"
+              >
+                <span>🔍 Insights and Approvals</span>
+                <span>→</span>
+              </button>
+            </div>
+
+            {/* Inspection Planning & Triggers - Full Width */}
+            <div className="space-y-4">
+              <div className="bg-[#fefce8] border border-[#fef08a] rounded-lg p-4 text-xs text-[#854d0e] space-y-1">
+                <p className="font-bold text-sm">Site Inspection Trigger Identified</p>
+                <p>
+                  Physical verification required due to plot boundary peg coordinates and East setback margin verification. Assigned to <strong>Junior Engineer (Site Cell), Chakan Industrial Area</strong>.
+                </p>
+              </div>
+
+              <div className="border border-[#e5eaf0] rounded-lg overflow-hidden bg-white text-xs divide-y divide-[#e5eaf0]">
+                <div className="p-3 flex justify-between items-center">
+                  <span className="text-slate-600">Assigned Inspection Cell:</span>
+                  <strong className="text-slate-900">MIDC Site Cell / Pune Zone</strong>
+                </div>
+                <div className="p-3 flex justify-between items-center">
+                  <span className="text-slate-600">Inspection Target Date:</span>
+                  <strong className="text-slate-900">28 Sep 2026 (Within SLA)</strong>
+                </div>
+                <div className="p-3 flex justify-between items-center">
+                  <span className="text-slate-600">Field Checklist Generated:</span>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">3 Verification Items</span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-2">
+                <span className="text-xs text-[#64748b]">
+                  {siteInspectionScheduled ? 'Inspection scheduled with applicant coordination.' : 'Inspection date and checklist ready.'}
+                </span>
+                <button
+                  onClick={() => {
+                    setSiteInspectionScheduled(s => !s)
+                    showNotice(siteInspectionScheduled ? 'Site inspection status reset' : 'Site inspection marked as scheduled')
+                  }}
+                  className="px-3.5 py-1.5 text-xs font-bold rounded border border-[#d1d9e0] bg-white hover:bg-slate-50 text-[#1a2533] transition-colors shadow-xs"
+                >
+                  {siteInspectionScheduled ? 'Re-plan Inspection' : 'Confirm Inspection Schedule ✓'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+        )}
+
+        {/* ── Section Navigation Bar ────────────────────────────────────────── */}
+        <div className="bg-white border border-[#e5eaf0] rounded-xl p-4 flex items-center justify-between shadow-xs">
+          {currentPhaseIndex > 0 ? (
+            <button
+              onClick={() => setActivePhaseKey(checkpoints[currentPhaseIndex - 1].key)}
+              className="px-4 py-2 border border-[#d1d9e0] text-xs font-bold text-[#1a2533] rounded hover:bg-[#f8f9fb] transition-colors flex items-center gap-1.5 shadow-xs"
+            >
+              ← Previous: {checkpoints[currentPhaseIndex - 1].name}
+            </button>
+          ) : <div />}
+
+          <div className="text-xs text-[#4b5563] hidden sm:block">
+            Showing section <strong className="text-[#1a2533] font-bold">{currentPhaseIndex + 1}</strong> of <strong className="text-[#1a2533] font-bold">{checkpoints.length}</strong> ({currentPhaseMeta.name})
+          </div>
+
+          {currentPhaseIndex < checkpoints.length - 1 ? (
+            <button
+              onClick={() => setActivePhaseKey(checkpoints[currentPhaseIndex + 1].key)}
+              className="px-4 py-2 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540] transition-colors shadow-xs flex items-center gap-1.5"
+            >
+              Next: {checkpoints[currentPhaseIndex + 1].name} →
+            </button>
+          ) : (
+            <span className="text-xs font-bold text-emerald-700">✓ All Scrutiny Phases Completed</span>
+          )}
+        </div>
+
+        {/* ── Scrutiny Review Summary & Final Action Bar ──────────────────────── */}
+        <div className="bg-white border-2 border-[#1a3a5c] rounded-xl shadow-md p-6 sticky bottom-4 z-20">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <span className="text-xs font-bold uppercase tracking-wider text-[#1a3a5c] block">
+                Scrutiny Phase Completion Summary
+              </span>
+              <div className="flex items-center gap-3 mt-1 text-xs">
+                <span className="text-emerald-700 font-bold">✓ 7 Completed Checks</span>
+                <span className="text-[#94a3b8]">·</span>
+                <span className="text-amber-700 font-bold">! 3 Outstanding Issues</span>
+                <span className="text-[#94a3b8]">·</span>
+                <span className="text-[#1a56db] font-bold">📎 {draftedQueries.length} Queries Ready</span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2.5 flex-wrap">
+              {onOpenQueryBuilder && (
+                <button
+                  onClick={onOpenQueryBuilder}
+                  className="px-4 py-2 text-xs font-bold bg-[#9a3412] text-white rounded hover:bg-[#7c2d12] transition-colors shadow-xs"
+                >
+                  Raise Consolidated Query ({draftedQueries.length})
+                </button>
+              )}
+
+              {onOpenInspectionPlanning && (
+                <button
+                  onClick={onOpenInspectionPlanning}
+                  className="px-4 py-2 text-xs font-bold bg-[#1a56db] text-white rounded hover:bg-[#1545b2] transition-colors shadow-xs"
+                >
+                  Schedule Site Inspection
+                </button>
+              )}
+
+              {onOpenDecisionWorkspace && (
+                <button
+                  onClick={onOpenDecisionWorkspace}
+                  className="px-4 py-2 text-xs font-bold bg-[#065f46] text-white rounded hover:bg-[#044e3a] transition-colors shadow-xs"
+                >
+                  Approve & Forward to Executive Engineer
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  )
+}
+
+
 export function ScrutinyCommandCentre({ onOpenScrutinyApp }: { onOpenScrutinyApp: (appId: string, dest: string) => void }) {
   const [selectedApp, setSelectedApp] = useState<ScrutinyApp>(SCRUTINY_APPS[0])
+  const [isWorkspaceOpen, setIsWorkspaceOpen] = useState(false)
+  const [activeStageKey, setActiveStageKey] = useState<string>('building')
   const [search, setSearch] = useState('')
   const [stageFilter, setStageFilter] = useState('All')
   const [slaFilter, setSlaFilter] = useState('All')
-  const [showAppDetail, setShowAppDetail] = useState(true)
 
   const COUNTS = [
-    { label:'New',           count:1,  color:'text-[#1a56db]' },
-    { label:'In Scrutiny',   count:14, color:'text-[#1a2533]' },
-    { label:'Query Required',count:5,  color:'text-[#9a3412]' },
-    { label:'Resubmitted',   count:3,  color:'text-[#6b21a8]' },
-    { label:'Delta Review',  count:2,  color:'text-[#6b21a8]' },
-    { label:'Inspection',    count:4,  color:'text-[#854d0e]' },
-    { label:'SLA Risk',      count:1,  color:'text-[#dc2626]' },
+    { label: 'In Scrutiny',    count: 14, color: 'text-[#1a3a5c]', bg: 'bg-blue-50 border-blue-200' },
+    { label: 'Query Required', count: 5,  color: 'text-[#9a3412]', bg: 'bg-amber-50 border-amber-200' },
+    { label: 'Resubmitted',    count: 3,  color: 'text-[#6b21a8]', bg: 'bg-purple-50 border-purple-200' },
+    { label: 'Inspection',     count: 4,  color: 'text-[#854d0e]', bg: 'bg-yellow-50 border-yellow-200' },
+    { label: 'SLA Risk',       count: 1,  color: 'text-[#dc2626]', bg: 'bg-red-50 border-red-200' },
   ]
 
   const ATTENTION_ITEMS = [
-    { text:'2 unresolved Building / Planning issues', sub:'MIDC-APP-2026-00418', dest:'bldg-scrutiny', appId:'MIDC-APP-2026-00418' },
-    { text:'1 cross-form inconsistency - Plot Area mismatch', sub:'MIDC-APP-2026-00418', dest:'consistency', appId:'MIDC-APP-2026-00418' },
-    { text:'1 upstream dependency pending', sub:'MIDC-APP-2026-00418', dest:'dependency-view', appId:'MIDC-APP-2026-00418' },
-    { text:'Entrepreneur resubmitted - Delta Re-scrutiny required', sub:'MIDC-APP-2026-00418', dest:'delta-rescrutiny', appId:'MIDC-APP-2026-00418' },
-    { text:'Entrepreneur response received - Building Plan v3', sub:'MIDC-APP-2026-00405', dest:'query-history', appId:'MIDC-APP-2026-00405' },
-    { text:'Delta Re-scrutiny required', sub:'MIDC-APP-2026-00391', dest:'delta-rescrutiny', appId:'MIDC-APP-2026-00391' },
+    { text: '2 unresolved Building / Planning issues', sub: 'MIDC-APP-2026-00418', stageKey: 'building', dest: 'bldg-scrutiny', appId: 'MIDC-APP-2026-00418', service: 'Building / Planning', business: 'Aster Precision Components Pvt. Ltd.' },
+    { text: 'Cross-form inconsistency: Plot Area mismatch', sub: 'MIDC-APP-2026-00418', stageKey: 'consistency', dest: 'consistency', appId: 'MIDC-APP-2026-00418', service: 'Building / Planning', business: 'Aster Precision Components Pvt. Ltd.' },
+    { text: 'Upstream dependency pending: Fire Provisional NOC', sub: 'MIDC-APP-2026-00418', stageKey: 'dependency', dest: 'dependency-view', appId: 'MIDC-APP-2026-00418', service: 'Building / Planning', business: 'Aster Precision Components Pvt. Ltd.' },
+    { text: 'Entrepreneur resubmitted: Delta Re-scrutiny required', sub: 'MIDC-APP-2026-00418', stageKey: 'delta', dest: 'delta-rescrutiny', appId: 'MIDC-APP-2026-00418', service: 'Building / Planning', business: 'Aster Precision Components Pvt. Ltd.' },
+    { text: 'Entrepreneur response received: Building Plan v3', sub: 'MIDC-APP-2026-00405', stageKey: 'query', dest: 'query-history', appId: 'MIDC-APP-2026-00405', service: 'Land / Plot', business: 'Example Manufacturing Pvt. Ltd.' },
+    { text: 'Delta Re-scrutiny required: 3 field changes', sub: 'MIDC-APP-2026-00391', stageKey: 'delta', dest: 'delta-rescrutiny', appId: 'MIDC-APP-2026-00391', service: 'Water / Utility', business: 'Example Utilities Pvt. Ltd.' },
   ]
 
   const RECENT_ACTIVITY = [
-    { date:'18 Sep', appId:'MIDC-APP-2026-00418', event:'Entrepreneur resubmitted application v2', action:'Delta Re-scrutiny required', dest:'delta-rescrutiny' },
-    { date:'18 Sep', appId:'MIDC-APP-2026-00418', event:'Business DNA changed after submission - v3 → v4', action:'View Business DNA change', dest:'dna' },
-    { date:'17 Sep', appId:'MIDC-APP-2026-00405', event:'Building Plan v3 uploaded', action:'Document review required', dest:'doc-review' },
-    { date:'16 Sep', appId:'MIDC-APP-2026-00372', event:'Inspection requirement identified during Building / Planning scrutiny', action:'Plan inspection', dest:'inspection-queue' },
-    { date:'15 Sep', appId:'MIDC-APP-2026-00391', event:'Cross-form inconsistency detected - Water / Utility vs Master Project', action:'Review consistency', dest:'consistency' },
+    { date: '18 Sep', appId: 'MIDC-APP-2026-00418', business: 'Aster Precision Components', event: 'Entrepreneur resubmitted application v2', action: 'Delta re-scrutiny required', stageKey: 'delta', dest: 'delta-rescrutiny' },
+    { date: '18 Sep', appId: 'MIDC-APP-2026-00418', business: 'Aster Precision Components', event: 'Business DNA updated from v3 to v4', action: 'Consistency check required', stageKey: 'consistency', dest: 'consistency' },
+    { date: '17 Sep', appId: 'MIDC-APP-2026-00405', business: 'Example Manufacturing', event: 'Building Plan v3 uploaded by applicant', action: 'Document review required', stageKey: 'building', dest: 'bldg-scrutiny' },
+    { date: '16 Sep', appId: 'MIDC-APP-2026-00372', business: 'Example Industrial', event: 'Inspection requirement identified during Building scrutiny', action: 'Site inspection scheduling required', stageKey: 'inspection', dest: 'inspection-queue' },
+    { date: '15 Sep', appId: 'MIDC-APP-2026-00391', business: 'Example Utilities', event: 'Cross-form inconsistency detected: Water demand vs Master Project', action: 'Verification required', stageKey: 'water', dest: 'water-scrutiny' },
+  ]
+
+  const STAGES = [
+    { key: 'precheck',    num: 1,  name: 'Automated Pre-check',     short: 'Pre-check',     dest: 'precheck' },
+    { key: 'route',       num: 2,  name: 'Scrutiny Route',          short: 'Route',         dest: 'scrutiny-route' },
+    { key: 'land',        num: 3,  name: 'Land / Plot',             short: 'Land / Plot',   dest: 'scrutiny-workbench' },
+    { key: 'building',    num: 4,  name: 'Building / Planning',     short: 'Building',      dest: 'bldg-scrutiny' },
+    { key: 'water',       num: 5,  name: 'Water / Utility',         short: 'Water',         dest: 'water-scrutiny' },
+    { key: 'consistency', num: 6,  name: 'Cross-form Consistency',  short: 'Consistency',   dest: 'consistency' },
+    { key: 'dependency',  num: 7,  name: 'Regulatory Dependencies', short: 'Dependencies',  dest: 'dependency-view' },
+    { key: 'query',       num: 8,  name: 'Consolidated Query',      short: 'Query',         dest: 'query-builder' },
+    { key: 'delta',       num: 9,  name: 'Delta Re-scrutiny',       short: 'Delta',         dest: 'delta-rescrutiny' },
+    { key: 'inspection',  num: 10, name: 'Inspection Queue',        short: 'Inspection',    dest: 'inspection-queue' },
   ]
 
   const filtered = SCRUTINY_APPS.filter(a => {
@@ -8046,271 +10900,322 @@ export function ScrutinyCommandCentre({ onOpenScrutinyApp }: { onOpenScrutinyApp
     return matchSearch && matchStage && matchSla
   })
 
-  function getStageIcon(status: ScrutinyModule['status']) {
-    if (status === 'Completed') return '✓'
-    if (status === 'Issues Found' || status === 'Query Required') return '!'
-    if (status === 'In Review' || status === 'Pending' || status === 'Resubmission Received') return '●'
-    if (status === 'Not Applicable') return '-'
-    return '○'
+  function getStageState(app: ScrutinyApp, stageKey: string): 'current' | 'completed' | 'attention' | 'upcoming' | 'not-applicable' {
+    if (stageKey === activeStageKey) return 'current'
+    const mod = app.modules.find(m => m.id === stageKey)
+    if (!mod || mod.status === 'Not Applicable') return 'not-applicable'
+    if (mod.status === 'Completed') return 'completed'
+    if (mod.status === 'Issues Found' || mod.status === 'Query Required' || mod.status === 'Resubmission Received') return 'attention'
+    if (mod.status === 'In Review' || mod.status === 'Pending' || mod.status === 'Review Required' || mod.status === 'Needs Verification') return 'attention'
+    return 'upcoming'
   }
 
-  function ModuleStatusBadge({ status }: { status: ScrutinyModule['status'] }) {
-    const s = MODULE_STATUS_STYLE[status]
-    return <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold border ${s.bg} ${s.text} ${s.border}`}>{status}</span>
-  }
-
-  function moduleDestination(moduleId: string): string {
+  function moduleDestination(stageKey: string): string {
     const map: Record<string, string> = {
-      precheck:'precheck', route:'scrutiny-route', land:'scrutiny-workbench',
-      building:'bldg-scrutiny', water:'water-scrutiny', consistency:'consistency',
-      dependency:'dependency-view', query:'query-builder', queryhistory:'query-history',
-      delta:'delta-rescrutiny', inspection:'inspection-queue',
+      precheck: 'precheck',
+      route: 'scrutiny-route',
+      land: 'scrutiny-workbench',
+      building: 'bldg-scrutiny',
+      water: 'water-scrutiny',
+      consistency: 'consistency',
+      dependency: 'dependency-view',
+      query: 'query-builder',
+      delta: 'delta-rescrutiny',
+      inspection: 'inspection-queue',
     }
-    return map[moduleId] ?? 'overview'
+    return map[stageKey] ?? 'overview'
   }
+
+  function handleStartScrutiny(app: ScrutinyApp, _stageKey?: string) {
+    setSelectedApp(app)
+    if (onOpenScrutinyApp) {
+      onOpenScrutinyApp(app.appId, 'scrutiny-workflow')
+    } else {
+      setIsWorkspaceOpen(true)
+    }
+  }
+
+  const currentStageIndex = STAGES.findIndex(s => s.key === activeStageKey)
+  const currentStageMeta = STAGES[currentStageIndex] ?? STAGES[0]
+  const currentModule = selectedApp.modules.find(m => m.id === activeStageKey)
+  const currentModuleStatus = currentModule?.status ?? 'In Review'
 
   return (
     <div className="flex-1 flex flex-col bg-[#f8f9fb] min-h-0 overflow-y-auto">
-      {/* Page header */}
-      <div className="bg-white border-b border-[#e5eaf0] px-6 py-4">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-base font-bold text-[#1a2533]">Scrutiny <span className="text-[11px] font-normal text-[#374151] ml-2">Central Scrutiny Workbench</span></h1>
-            <p className="text-xs text-[#1a2533] mt-0.5">Review submitted applications, identify unresolved scrutiny items, and continue application-specific review.</p>
-          </div>
-          <div className="flex gap-5 shrink-0 flex-wrap">
-            {COUNTS.map(c => (
-              <button key={c.label} className="text-center hover:opacity-80 transition-opacity">
-                <div className={`text-lg font-black ${c.color}`}>{c.count}</div>
-                <div className="text-[9px] text-[#374151] uppercase tracking-wider font-bold">{c.label}</div>
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
 
-      <div className="px-6 py-4 space-y-5">
+      {/* ── WORKSPACE VIEW: Shown when an application is opened ─────────────────────── */}
+      {isWorkspaceOpen ? (
+        <GuidedScrutinyWorkflow
+          applicationId={selectedApp.appId}
+          initialApp={selectedApp}
+          initialStageKey={activeStageKey}
+          onBack={() => setIsWorkspaceOpen(false)}
+          onOpenOverview={() => onOpenScrutinyApp(selectedApp.appId, 'overview')}
+          onOpenPrecheck={() => onOpenScrutinyApp(selectedApp.appId, 'precheck')}
+          onOpenRoute={() => onOpenScrutinyApp(selectedApp.appId, 'scrutiny-route')}
+          onOpenLandWorkbench={() => onOpenScrutinyApp(selectedApp.appId, 'scrutiny-workbench')}
+          onOpenParamDetail={(id) => onOpenScrutinyApp(selectedApp.appId, 'param-detail')}
+          onOpenDocReview={(id) => onOpenScrutinyApp(selectedApp.appId, 'doc-review')}
+          onOpenBuildingScrutiny={() => onOpenScrutinyApp(selectedApp.appId, 'bldg-scrutiny')}
+          onOpenWaterScrutiny={() => onOpenScrutinyApp(selectedApp.appId, 'water-scrutiny')}
+          onOpenConsistency={() => onOpenScrutinyApp(selectedApp.appId, 'consistency')}
+          onOpenDependencyView={() => onOpenScrutinyApp(selectedApp.appId, 'dependency-view')}
+          onOpenQueryBuilder={() => onOpenScrutinyApp(selectedApp.appId, 'query-builder')}
+          onOpenDelta={() => onOpenScrutinyApp(selectedApp.appId, 'delta-rescrutiny')}
+          onOpenInspectionPlanning={() => onOpenScrutinyApp(selectedApp.appId, 'inspection-planning')}
+          onOpenDecisionWorkspace={() => onOpenScrutinyApp(selectedApp.appId, 'decision-workspace')}
+        />) : (
 
-        {/* Resubmission + Query response alerts */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-[#fdf4ff] border border-[#d8b4fe] rounded-lg px-4 py-3 flex items-start gap-3">
-            <Icon.AlertCircle />
-            <div className="flex-1 min-w-0">
-              <div className="text-xs font-bold text-[#6b21a8]">Resubmission Received</div>
-              <div className="text-[11px] text-[#6b21a8] mt-0.5">MIDC-APP-2026-00418 - v1 → v2 · 4 changed fields · 3 affected areas</div>
-            </div>
-            <button onClick={() => { setSelectedApp(SCRUTINY_APPS[0]); setShowAppDetail(true); onOpenScrutinyApp('MIDC-APP-2026-00418', 'delta-rescrutiny') }}
-              className="shrink-0 text-[11px] font-bold text-[#6b21a8] underline hover:text-[#7e22ce]">Open Delta</button>
-          </div>
-          <div className="bg-[#eff6ff] border border-[#93c5fd] rounded-lg px-4 py-3 flex items-start gap-3">
-            <Icon.Info />
-            <div className="flex-1 min-w-0">
-              <div className="text-xs font-bold text-[#1e40af]">Entrepreneur Response Received</div>
-              <div className="text-[11px] text-[#1e40af] mt-0.5">QRY-2026-0042 · DEF-2026-0092 · Building Plan v3 uploaded</div>
-            </div>
-            <button onClick={() => onOpenScrutinyApp('MIDC-APP-2026-00405', 'query-history')}
-              className="shrink-0 text-[11px] font-bold text-[#1e40af] underline hover:text-[#1d4ed8]">Review Response</button>
-          </div>
-        </div>
-
-        {/* My Scrutiny Work table */}
-        <div className="bg-white border border-[#e5eaf0] rounded-lg overflow-hidden">
-          <div className="px-4 py-3 border-b border-[#e5eaf0] flex items-center gap-3 flex-wrap">
-            <div className="text-xs font-bold text-[#1a2533]">My Scrutiny Work</div>
-            <div className="relative ml-auto">
-              <input
-                value={search} onChange={e => setSearch(e.target.value)}
-                placeholder="Search Application ID, Business, Service…"
-                className="pl-7 pr-3 py-1.5 text-xs border border-[#d1d9e0] rounded bg-white focus:outline-none focus:ring-1 focus:ring-[#1a56db] w-64"
-              />
-              <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[#374151] pointer-events-none"><Icon.Search /></span>
-            </div>
-            <select value={stageFilter} onChange={e => setStageFilter(e.target.value)} className="text-xs border border-[#d1d9e0] rounded px-2 py-1.5 bg-white focus:outline-none">
-              {['All','Pre-check','Scrutiny Route','Land / Plot','Building / Planning','Water / Utility','Cross-form','Dependency Review','Query','Delta Re-scrutiny','Inspection'].map(s => <option key={s}>{s}</option>)}
-            </select>
-            <select value={slaFilter} onChange={e => setSlaFilter(e.target.value)} className="text-xs border border-[#d1d9e0] rounded px-2 py-1.5 bg-white focus:outline-none">
-              {['All','Within SLA','Due Soon','SLA Risk','SLA Breached'].map(s => <option key={s}>{s}</option>)}
-            </select>
-          </div>
-          <table className="w-full text-xs border-collapse">
-            <thead>
-              <tr className="bg-[#f8f9fb] border-b border-[#e5eaf0]">
-                {['Application / Business','Service','Scrutiny Stage','Action Required','Last Updated','SLA','Status','Open'].map(h => (
-                  <th key={h} className="px-3 py-2.5 text-left text-[10px] font-bold text-[#374151] uppercase tracking-wider whitespace-nowrap">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map(app => (
-                <tr
-                  key={app.appId}
-                  onClick={() => { setSelectedApp(app); setShowAppDetail(true) }}
-                  className={`border-b border-[#f0f4f8] cursor-pointer transition-colors ${selectedApp.appId === app.appId && showAppDetail ? 'bg-[#ebf3ff]' : 'hover:bg-[#f8f9fb]'}`}
-                >
-                  <td className="px-3 py-2.5">
-                    <div className="font-mono text-[11px] font-bold text-[#1a3a5c]">{app.appId}</div>
-                    <div className="text-[11px] text-[#1a2533] truncate max-w-[180px]">{app.business}</div>
-                    {app.resubmitted && <span className="text-[8px] bg-[#fdf4ff] text-[#6b21a8] px-1 py-0.5 rounded font-bold border border-[#d8b4fe] mr-1">Resubmitted</span>}
-                    {app.deltaRequired && <span className="text-[8px] bg-[#fdf4ff] text-[#6b21a8] px-1 py-0.5 rounded font-bold border border-[#d8b4fe]">Delta</span>}
-                  </td>
-                  <td className="px-3 py-2.5 text-[#1a2533] whitespace-nowrap">{app.service}</td>
-                  <td className="px-3 py-2.5">
-                    <span className="text-[10px] bg-[#f8f9fb] border border-[#d1d9e0] px-1.5 py-0.5 rounded text-[#1a2533] font-semibold">{app.scrutinyStage}</span>
-                  </td>
-                  <td className="px-3 py-2.5 font-semibold text-[#1a2533]">{app.actionRequired}</td>
-                  <td className="px-3 py-2.5 text-[#1a2533] whitespace-nowrap">{app.lastUpdated}</td>
-                  <td className="px-3 py-2.5">
-                    <span className={`text-[10px] font-semibold ${app.sla === 'SLA Risk' || app.sla === 'SLA Breached' ? 'text-[#dc2626]' : app.sla === 'Due Soon' ? 'text-[#92400e]' : 'text-[#065f46]'}`}>{app.sla}</span>
-                  </td>
-                  <td className="px-3 py-2.5">
-                    <span className="text-[10px] font-mono bg-[#f3f4f6] text-[#374151] px-1.5 py-0.5 rounded">{app.status}</span>
-                  </td>
-                  <td className="px-3 py-2.5">
-                    <button
-                      onClick={e => { e.stopPropagation(); setSelectedApp(app); setShowAppDetail(true); onOpenScrutinyApp(app.appId, 'overview') }}
-                      className="px-2.5 py-1 text-[10px] font-bold bg-[#1a3a5c] text-white rounded hover:bg-[#0f2540] transition-colors"
-                    >OPEN</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Selected application scrutiny workbench */}
-        {showAppDetail && (
-          <div className="bg-white border border-[#e5eaf0] rounded-lg overflow-hidden">
-            <div className="px-4 py-3 border-b border-[#e5eaf0] bg-[#f8f9fb] flex items-center gap-3">
+        /* ── MAIN SCRUTINY WORKLIST: Entry point of Scrutiny Command Centre ────────── */
+        <div className="flex-1 flex flex-col">
+          {/* Main Scrutiny Header */}
+          <div className="bg-white border-b border-[#e5eaf0] px-6 py-5">
+            <div className="flex items-start justify-between gap-4 flex-wrap">
               <div>
-                <span className="text-[10px] font-bold text-[#374151] uppercase tracking-wider">Selected Application</span>
-                <div className="flex items-center gap-2 mt-0.5">
-                  <span className="font-mono text-xs font-bold text-[#1a3a5c]">{selectedApp.appId}</span>
-                  <span className="text-xs text-[#1a2533]">{selectedApp.business}</span>
-                  <span className="text-[10px] font-mono bg-[#f3f4f6] text-[#374151] px-1.5 py-0.5 rounded">{selectedApp.status}</span>
-                  <span className={`text-[10px] font-semibold ${selectedApp.sla === 'SLA Risk' || selectedApp.sla === 'SLA Breached' ? 'text-[#dc2626]' : selectedApp.sla === 'Due Soon' ? 'text-[#92400e]' : 'text-[#065f46]'}`}>{selectedApp.sla}</span>
-                </div>
+                <h1 className="text-xl font-bold text-[#1a2533]">Scrutiny Command Centre</h1>
+                <p className="text-sm text-[#4b5563] mt-1">
+                  Task-oriented operational workbench for reviewing applications, resolving technical findings, and advancing scrutiny stages.
+                </p>
               </div>
-              <div className="ml-auto flex gap-2">
-                <button onClick={() => onOpenScrutinyApp(selectedApp.appId, 'overview')} className="text-[10px] text-[#1a56db] hover:underline font-semibold">View Application → M06</button>
+
+              {/* Metric summary pills */}
+              <div className="flex items-center gap-2.5 flex-wrap">
+                {COUNTS.map(c => (
+                  <div key={c.label} className={`px-3 py-1.5 rounded-lg border flex items-center gap-2 ${c.bg}`}>
+                    <span className={`text-base font-black ${c.color}`}>{c.count}</span>
+                    <span className="text-[11px] font-bold text-[#1a2533] uppercase tracking-wider">{c.label}</span>
+                  </div>
+                ))}
               </div>
             </div>
+          </div>
 
-            {/* Workflow strip */}
-            <div className="px-4 py-3 border-b border-[#e5eaf0] overflow-x-auto">
-              <div className="flex items-center gap-1 min-w-max">
-                {WORKFLOW_STAGES.map((stage, i) => {
-                  const mod = selectedApp.modules.find(m => m.id === stage.key)
-                  const icon = mod ? getStageIcon(mod.status) : '○'
-                  const iconColor = mod?.status === 'Completed' ? 'text-[#059669]' : mod?.status === 'Issues Found' || mod?.status === 'Query Required' ? 'text-[#dc2626]' : mod?.status === 'In Review' || mod?.status === 'Pending' || mod?.status === 'Resubmission Received' ? 'text-[#92400e]' : mod?.status === 'Not Applicable' ? 'text-[#d1d5db]' : 'text-[#374151]'
-                  return (
-                    <div key={stage.key} className="flex items-center">
-                      <button
-                        onClick={() => mod && mod.status !== 'Not Applicable' && onOpenScrutinyApp(selectedApp.appId, moduleDestination(stage.key))}
-                        className={`flex flex-col items-center px-2 py-1 rounded hover:bg-[#f0f4f8] transition-colors ${mod?.status === 'Not Applicable' ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'}`}
+          <div className="p-6 space-y-6 max-w-7xl mx-auto w-full">
+
+            {/* My Scrutiny Work Table */}
+            <div className="bg-white border border-[#e5eaf0] rounded-xl shadow-xs overflow-hidden">
+              <div className="px-5 py-4 border-b border-[#e5eaf0] bg-[#f8f9fb] flex items-center justify-between gap-4 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-sm font-bold text-[#1a2533] uppercase tracking-wider">My Scrutiny Work</h2>
+                  <span className="text-xs bg-[#e2e8f0] text-[#374151] px-2 py-0.5 rounded-full font-bold">
+                    {filtered.length} Applications
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-3 ml-auto flex-wrap">
+                  <div className="relative">
+                    <input
+                      value={search}
+                      onChange={e => setSearch(e.target.value)}
+                      placeholder="Search Application ID, Business, Service..."
+                      className="pl-8 pr-3 py-1.5 text-xs border border-[#d1d9e0] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#1a56db] w-64 text-[#1a2533]"
+                    />
+                    <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#64748b] pointer-events-none text-xs">
+                      🔍
+                    </span>
+                  </div>
+
+                  <select
+                    value={stageFilter}
+                    onChange={e => setStageFilter(e.target.value)}
+                    className="text-xs border border-[#d1d9e0] rounded-lg px-2.5 py-1.5 bg-white text-[#1a2533] focus:outline-none focus:ring-1 focus:ring-[#1a56db]"
+                  >
+                    <option value="All">All Stages</option>
+                    <option value="Pre-check">Pre-check</option>
+                    <option value="Scrutiny Route">Scrutiny Route</option>
+                    <option value="Land / Plot">Land / Plot</option>
+                    <option value="Building / Planning">Building / Planning</option>
+                    <option value="Water / Utility">Water / Utility</option>
+                    <option value="Cross-form">Cross-form Consistency</option>
+                    <option value="Query">Query</option>
+                    <option value="Delta Re-scrutiny">Delta Re-scrutiny</option>
+                    <option value="Inspection">Inspection</option>
+                  </select>
+
+                  <select
+                    value={slaFilter}
+                    onChange={e => setSlaFilter(e.target.value)}
+                    className="text-xs border border-[#d1d9e0] rounded-lg px-2.5 py-1.5 bg-white text-[#1a2533] focus:outline-none focus:ring-1 focus:ring-[#1a56db]"
+                  >
+                    <option value="All">All SLA Status</option>
+                    <option value="Within SLA">Within SLA</option>
+                    <option value="Due Soon">Due Soon</option>
+                    <option value="SLA Risk">SLA Risk</option>
+                    <option value="SLA Breached">SLA Breached</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs" aria-label="My Scrutiny Work">
+                  <thead>
+                    <tr className="bg-[#f1f5f9] text-[#1a2533] border-b border-[#e5eaf0] text-left">
+                      <th className="px-4 py-3 font-bold uppercase tracking-wider text-[11px]">Application ID</th>
+                      <th className="px-4 py-3 font-bold uppercase tracking-wider text-[11px]">Business</th>
+                      <th className="px-4 py-3 font-bold uppercase tracking-wider text-[11px]">Service</th>
+                      <th className="px-4 py-3 font-bold uppercase tracking-wider text-[11px]">Scrutiny Stage</th>
+                      <th className="px-4 py-3 font-bold uppercase tracking-wider text-[11px]">Action Required</th>
+                      <th className="px-4 py-3 font-bold uppercase tracking-wider text-[11px] whitespace-nowrap">Last Updated</th>
+                      <th className="px-4 py-3 font-bold uppercase tracking-wider text-[11px]">SLA</th>
+                      <th className="px-4 py-3 font-bold uppercase tracking-wider text-[11px]">Status</th>
+                      <th className="px-4 py-3 font-bold uppercase tracking-wider text-[11px] text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#e5eaf0]">
+                    {filtered.map(app => (
+                      <tr
+                        key={app.appId}
+                        onClick={() => handleStartScrutiny(app)}
+                        className="hover:bg-[#f8f9fb] transition-colors cursor-pointer group"
                       >
-                        <span className={`text-sm font-black ${iconColor}`}>{icon}</span>
-                        <span className="text-[8px] font-bold text-[#1a2533] uppercase mt-0.5">{stage.short}</span>
-                      </button>
-                      {i < WORKFLOW_STAGES.length - 1 && <span className="text-[#d1d5db] text-xs mx-0.5">→</span>}
-                    </div>
-                  )
-                })}
+                        <td className="px-4 py-3.5">
+                          <button
+                            aria-label="OPEN"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              onOpenScrutinyApp(app.appId, 'overview')
+                            }}
+                            className="font-mono text-xs font-bold text-[#1a56db] hover:underline"
+                          >
+                            {app.appId}
+                          </button>
+                          {app.resubmitted && (
+                            <span className="ml-1.5 text-[9px] bg-purple-50 text-purple-700 px-1.5 py-0.2 rounded font-bold border border-purple-200">
+                              v2 Resubmission
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3.5 font-semibold text-[#1a2533] max-w-[200px] truncate">
+                          {app.business}
+                        </td>
+                        <td className="px-4 py-3.5 text-[#374151] whitespace-nowrap">
+                          {app.service}
+                        </td>
+                        <td className="px-4 py-3.5 whitespace-nowrap">
+                          <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-[#eff6ff] text-[#1a56db] border border-[#bfdbfe]">
+                            {app.scrutinyStage}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3.5 font-medium text-[#1a2533]">
+                          {app.actionRequired}
+                        </td>
+                        <td className="px-4 py-3.5 text-[#64748b] whitespace-nowrap">
+                          {app.lastUpdated}
+                        </td>
+                        <td className="px-4 py-3.5 whitespace-nowrap">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                            app.sla === 'SLA Risk' || app.sla === 'SLA Breached' ? 'bg-red-50 text-red-700 border-red-200' :
+                            app.sla === 'Due Soon' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                            'bg-emerald-50 text-emerald-700 border-emerald-200'
+                          }`}>
+                            {app.sla}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3.5 whitespace-nowrap font-mono text-[11px] text-[#4b5563]">
+                          {app.status}
+                        </td>
+                        <td className="px-4 py-3.5 text-right whitespace-nowrap">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleStartScrutiny(app)
+                            }}
+                            className="px-3.5 py-1.5 text-xs font-bold bg-[#1a3a5c] text-white rounded hover:bg-[#0f2540] transition-colors shadow-xs"
+                          >
+                            {getScrutinyActionLabel(app)}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
 
-            {/* Module cards */}
-            <div className="p-4">
-              <div className="text-[10px] font-bold text-[#374151] uppercase tracking-wider mb-3">Scrutiny Modules - {selectedApp.appId}</div>
-              <div className="grid grid-cols-4 gap-3">
-                {selectedApp.modules.map(mod => {
-                  const s = MODULE_STATUS_STYLE[mod.status]
-                  return (
-                    <div key={mod.id} className={`border rounded-lg p-3 flex flex-col gap-2 ${mod.status === 'Not Applicable' ? 'opacity-50' : ''}`}>
-                      <div className="flex items-start justify-between gap-1">
-                        <div>
-                          
-                          <div className="text-xs font-bold text-[#1a2533] leading-tight">{mod.name}</div>
+            {/* Bottom Row: Requires Attention (Left) + Recent Scrutiny Activity (Right) */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+              {/* Requires Attention */}
+              <div className="bg-white border border-[#e5eaf0] rounded-xl shadow-xs overflow-hidden">
+                <div className="px-5 py-3.5 border-b border-[#e5eaf0] bg-[#f8f9fb] flex items-center justify-between">
+                  <h3 className="text-xs font-bold text-[#1a2533] uppercase tracking-wider flex items-center gap-2">
+                    <span className="text-red-600 font-black">!</span>
+                    Requires Attention
+                  </h3>
+                  <span className="text-[11px] font-bold text-red-700 bg-red-50 px-2 py-0.5 rounded border border-red-200">
+                    {ATTENTION_ITEMS.length} Action Items
+                  </span>
+                </div>
+
+                <div className="divide-y divide-[#e5eaf0]">
+                  {ATTENTION_ITEMS.map((item, idx) => {
+                    const matchedApp = SCRUTINY_APPS.find(a => a.appId === item.appId) ?? SCRUTINY_APPS[0]
+                    return (
+                      <div
+                        key={idx}
+                        onClick={() => handleStartScrutiny(matchedApp, item.stageKey)}
+                        className="px-5 py-3.5 hover:bg-[#f8f9fb] transition-colors cursor-pointer flex items-center justify-between gap-4 group"
+                      >
+                        <div className="space-y-0.5 min-w-0">
+                          <p className="text-xs font-bold text-[#1a2533] group-hover:text-[#1a56db] transition-colors">
+                            {item.text}
+                          </p>
+                          <p className="text-[11px] text-[#64748b]">
+                            {item.business} · <span className="font-mono font-medium text-[#1a3a5c]">{item.appId}</span>
+                          </p>
                         </div>
-                        {(mod.issues ?? 0) > 0 && (
-                          <span className="shrink-0 w-5 h-5 rounded-full bg-[#fef2f2] border border-[#fca5a5] text-[#991b1b] text-[9px] font-black flex items-center justify-center">{mod.issues}</span>
-                        )}
+                        <span className="text-xs font-bold text-[#1a56db] group-hover:underline shrink-0">
+                          Review →
+                        </span>
                       </div>
-                      <span className={`inline-flex px-1.5 py-0.5 rounded text-[9px] font-bold border self-start ${s.bg} ${s.text} ${s.border}`}>{mod.status}</span>
-                      {mod.lastUpdated && <div className="text-[9px] text-[#374151]">{mod.lastUpdated}</div>}
-                      {mod.status !== 'Not Applicable' && (
-                        <button
-                          onClick={() => onOpenScrutinyApp(selectedApp.appId, moduleDestination(mod.id))}
-                          className="mt-auto text-[10px] font-bold text-[#1a56db] hover:underline text-left"
-                        >Open →</button>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-
-              {/* Next actions panel */}
-              <div className="mt-4 bg-[#f8f9fb] border border-[#e5eaf0] rounded-lg p-3">
-                <div className="text-[10px] font-bold text-[#374151] uppercase tracking-wider mb-2">Next Actions - {selectedApp.appId}</div>
-                <div className="space-y-1.5">
-                  {selectedApp.modules.filter(m => ['In Review','Issues Found','Query Required','Resubmission Received','Review Required','Pending','Needs Verification'].includes(m.status)).map((m, i) => (
-                    <div key={m.id} className="flex items-center gap-2">
-                      <span className="text-[10px] font-bold text-[#374151] w-4">{i + 1}.</span>
-                      <span className="text-xs text-[#1a2533] flex-1">
-                        {m.status === 'Issues Found' ? `Resolve ${m.issues ?? ''} issue${(m.issues ?? 0) > 1 ? 's' : ''} - ${m.name}` :
-                         m.status === 'Resubmission Received' ? `Perform Delta Re-scrutiny - ${m.issues ?? 0} changes` :
-                         m.status === 'Review Required' ? `Review responses - ${m.name}` :
-                         m.status === 'Pending' ? `${m.name} - action required` :
-                         `Continue - ${m.name}`}
-                      </span>
-                      <button onClick={() => onOpenScrutinyApp(selectedApp.appId, moduleDestination(m.id))} className="shrink-0 text-[10px] font-bold text-white bg-[#1a3a5c] px-2 py-0.5 rounded hover:bg-[#0f2540]">Open</button>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </div>
-            </div>
-          </div>
-        )}
 
-        {/* Requires Attention + Recent Activity row */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-white border border-[#e5eaf0] rounded-lg p-4">
-            <div className="text-[10px] font-bold text-[#374151] uppercase tracking-wider mb-3">Requires Attention</div>
-            <div className="space-y-2">
-              {ATTENTION_ITEMS.map((item, i) => (
-                <div key={i} className="flex items-start gap-2 pb-2 border-b border-[#f0f4f8] last:border-0 last:pb-0">
-                  <Icon.AlertCircle />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs font-semibold text-[#1a2533]">{item.text}</div>
-                    <div className="text-[10px] text-[#374151] font-mono">{item.sub}</div>
-                  </div>
-                  <button
-                    onClick={() => { const a = SCRUTINY_APPS.find(x => x.appId === item.appId); if(a) setSelectedApp(a); onOpenScrutinyApp(item.appId, item.dest) }}
-                    className="shrink-0 text-[10px] text-[#1a56db] hover:underline font-semibold whitespace-nowrap"
-                  >Open →</button>
+              {/* Recent Scrutiny Activity */}
+              <div className="bg-white border border-[#e5eaf0] rounded-xl shadow-xs overflow-hidden">
+                <div className="px-5 py-3.5 border-b border-[#e5eaf0] bg-[#f8f9fb] flex items-center justify-between">
+                  <h3 className="text-xs font-bold text-[#1a2533] uppercase tracking-wider">
+                    Recent Scrutiny Activity
+                  </h3>
+                  <span className="text-[11px] font-semibold text-[#64748b]">
+                    Latest Audit Events
+                  </span>
                 </div>
-              ))}
-            </div>
-          </div>
 
-          <div className="bg-white border border-[#e5eaf0] rounded-lg p-4">
-            <div className="text-[10px] font-bold text-[#374151] uppercase tracking-wider mb-3">Recent Scrutiny Activity</div>
-            <div className="space-y-2">
-              {RECENT_ACTIVITY.map((item, i) => (
-                <div key={i} className="flex items-start gap-2 pb-2 border-b border-[#f0f4f8] last:border-0 last:pb-0">
-                  <div className="text-[10px] font-bold text-[#374151] shrink-0 w-10">{item.date}</div>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-mono text-[9px] text-[#374151]">{item.appId}</div>
-                    <div className="text-xs text-[#1a2533]">{item.event}</div>
-                    <div className="text-[10px] text-[#1a2533] italic">→ {item.action}</div>
-                  </div>
-                  <button disabled={item.dest === 'doc-review'} title={item.dest === 'doc-review' ? 'No document ID available for this activity' : undefined} onClick={() => { if (item.dest !== 'doc-review') onOpenScrutinyApp(item.appId, item.dest) }} className="shrink-0 text-[10px] text-[#1a56db] hover:underline font-semibold">Open</button>
+                <div className="divide-y divide-[#e5eaf0]">
+                  {RECENT_ACTIVITY.map((item, idx) => {
+                    const matchedApp = SCRUTINY_APPS.find(a => a.appId === item.appId) ?? SCRUTINY_APPS[0]
+                    return (
+                      <div
+                        key={idx}
+                        onClick={() => handleStartScrutiny(matchedApp, item.stageKey)}
+                        className="px-5 py-3 hover:bg-[#f8f9fb] transition-colors cursor-pointer flex items-start gap-3.5 group"
+                      >
+                        <div className="px-2 py-1 rounded bg-[#f1f5f9] text-[10px] font-bold text-[#475569] shrink-0 text-center">
+                          {item.date}
+                        </div>
+                        <div className="min-w-0 flex-1 space-y-0.5">
+                          <p className="text-xs font-semibold text-[#1a2533] group-hover:text-[#1a56db] transition-colors">
+                            {item.event}
+                          </p>
+                          <p className="text-[11px] text-[#64748b]">
+                            <span className="font-mono font-medium text-[#1a3a5c]">{item.appId}</span> · <span className="text-[#1a56db] font-medium">{item.action}</span>
+                          </p>
+                        </div>
+                      </div>
+                    )
+                  })}
                 </div>
-              ))}
+              </div>
+
             </div>
+
           </div>
         </div>
+      )}
 
-      </div>
     </div>
   )
 }
@@ -8781,7 +11686,7 @@ export function M20DeltaRescrutinyPage({ onBackToOverview, onOpenDna, onOpenDocR
                     <Row label="Review" value="No review required" />
                   </div>
                   <div className="pt-2 border-t border-[#e5eaf0]">
-                    <button className="text-xs text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded w-full text-left">Open Record (reference only)</button>
+                    <button onClick={onOpenDna} className="text-xs text-[#1a56db] hover:underline px-2 py-1 bg-[#eff6ff] rounded w-full text-left">Open Record (reference only)</button>
                   </div>
                 </div>
               )}
@@ -9425,12 +12330,15 @@ export function M22InspectionPlanningPage({ onBack, onBackToQueue, onOpenDna, on
           {/* Shared documents */}
           <div className="bg-white border border-[#e5eaf0] rounded-lg p-4">
             <div className="text-[10px] font-bold text-[#374151] uppercase tracking-wider mb-2">Shared Documents</div>
-            {['Building Plan v2','Land / Plot Record','MIDC Application Documents'].map(d => (
-              <div key={d} className="flex items-center justify-between py-1 border-b border-[#f0f4f8] last:border-0">
-                <span className="text-[11px] text-[#1a2533]">{d}</span>
-                <button disabled title="No document ID available" className="text-[10px] text-[#1a56db] hover:underline">View</button>
-              </div>
-            ))}
+            {['Building Plan v2','Land / Plot Record','MIDC Application Documents'].map(d => {
+              const docId = d.includes('Building') ? 'DWG-2026-C14-A02' : d.includes('Land') ? 'MIDC-REG-DEED-2024-C14' : 'MIDC-WATER-FEAS-2026';
+              return (
+                <div key={d} className="flex items-center justify-between py-1 border-b border-[#f0f4f8] last:border-0">
+                  <span className="text-[11px] text-[#1a2533]">{d}</span>
+                  <button onClick={() => onOpenDocReview?.(docId)} className="text-[10px] text-[#1a56db] hover:underline">View</button>
+                </div>
+              );
+            })}
           </div>
 
           {/* MIDC checklist */}
@@ -9585,7 +12493,7 @@ export function M23InspectionWorkspacePage({ onBack, onBackToQueue, onOpenM24, o
                 {d.note && <div className="text-[9px] text-[#92400e] italic">{d.note}</div>}
                 <div className="flex items-center justify-between mt-0.5">
                   <span className={`text-[9px] font-semibold ${d.status === 'Needs Verification' ? 'text-[#1e40af]' : 'text-[#065f46]'}`}>{d.status}</span>
-                  <button disabled title="No document ID available" className="text-[9px] text-[#1a56db] hover:underline">View</button>
+                  <button onClick={() => onOpenDocReview?.(d.name.includes('Building') ? 'DWG-2026-C14-A02' : d.name.includes('Land') ? 'MIDC-REG-DEED-2024-C14' : 'MIDC-WATER-FEAS-2026')} className="text-[9px] text-[#1a56db] hover:underline">View</button>
                 </div>
               </div>
             ))}
@@ -9752,7 +12660,7 @@ export function M23InspectionWorkspacePage({ onBack, onBackToQueue, onOpenM24, o
             {!completed ? (
               <>
                 <button onClick={() => { setInspStatus('Correction Required'); setCompleted(true) }} className="w-full px-3 py-2 text-xs font-bold bg-[#1a3a5c] text-white rounded hover:bg-[#0f2540]">Complete Inspection</button>
-                <button className="w-full px-3 py-1.5 text-xs font-semibold border border-[#d1d9e0] text-[#1a2533] rounded hover:bg-[#f8f9fb]">Save Progress</button>
+                <button onClick={() => { alert('Inspection progress and checklist answers saved.'); }} className="w-full px-3 py-1.5 text-xs font-semibold border border-[#d1d9e0] text-[#1a2533] rounded hover:bg-[#f8f9fb]">Save Progress</button>
               </>
             ) : (
               <>
@@ -11662,8 +14570,8 @@ export function M29AmendmentIntakePage({ onBack, onOpenM26, onOpenM28, onOpenDoc
               <div className="text-xs font-bold text-[#1a2533] mb-2">Officer Actions</div>
               <div className="flex gap-2 flex-wrap">
                 {[
-                  { label:'Mark Impact Reviewed', fn:() => {} },
-                  { label:'Request Clarification', fn:() => {} },
+                  { label:'Mark Impact Reviewed', fn:() => alert('Amendment impact marked as reviewed by scrutiny officer.') },
+                  { label:'Request Clarification', fn:() => alert('Clarification requested from entrepreneur regarding amendment scope.') },
                 ].map(action => (
                   <button key={action.label} onClick={action.fn} className="text-xs border border-[#d1d9e0] text-[#1a2533] px-3 py-1.5 rounded hover:bg-[#f8f9fb]">{action.label}</button>
                 ))}
@@ -11697,7 +14605,13 @@ export function M29AmendmentIntakePage({ onBack, onOpenM26, onOpenM28, onOpenDoc
                     <td className="px-3 py-2.5 font-semibold text-[#9a3412]">{row.req}</td>
                     <td className="px-3 py-2.5 text-[10px] text-[#1a2533]">{row.reason}</td>
                     <td className="px-3 py-2.5"><span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${row.changed ? 'bg-[#fff7ed] text-[#9a3412] border-[#fdba74]' : 'bg-[#ecfdf5] text-[#065f46] border-[#6ee7b7]'}`}>{row.ver}</span></td>
-                    <td className="px-3 py-2.5"><button disabled title="No document ID available" className="text-[10px] text-[#1a56db] hover:underline">{row.action}</button></td>
+                    <td className="px-3 py-2.5">
+                      {row.action !== '-' ? (
+                        <button onClick={() => onOpenDocReview?.(row.doc.includes('Building') ? 'DWG-2026-C14-A02' : 'MIDC-WATER-FEAS-2026')} className="text-[10px] text-[#1a56db] hover:underline font-semibold">{row.action}</button>
+                      ) : (
+                        <span className="text-[10px] text-[#374151]">-</span>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -11766,8 +14680,8 @@ const M19_STATUS: Record<QueryRecord['status'], { label: string; textCls: string
   'draft':             { label:'Draft',             textCls:'text-[#374151]',   bgCls:'bg-[#f8f9fb]',   borderCls:'border-[#d1d9e0]' },
 }
 
-export function M19QueryHistoryPage({ onBack, onBackToOverview, onOpenQueryBuilder, onOpenDeltaRescrutiny }: {
-  onBack: () => void; onBackToOverview: () => void; onOpenQueryBuilder?: () => void; onOpenDeltaRescrutiny?: () => void
+export function M19QueryHistoryPage({ onBack, onBackToOverview, onOpenQueryBuilder, onOpenDeltaRescrutiny, onOpenParamDetail, onOpenDocReview }: {
+  onBack: () => void; onBackToOverview: () => void; onOpenQueryBuilder?: () => void; onOpenDeltaRescrutiny?: () => void; onOpenParamDetail?: (id: string) => void; onOpenDocReview?: (id: string) => void
 }) {
   const app = useMonolithData().APP_SAMPLE
   const [selectedQuery, setSelectedQuery] = useState(M19_QUERY_LIST[0])
@@ -11901,9 +14815,9 @@ export function M19QueryHistoryPage({ onBack, onBackToOverview, onOpenQueryBuild
                         </div>
                       )}
                       <div className="px-4 py-2 flex gap-2">
-                        <button className="text-[10px] text-[#1a56db] hover:underline">View Parameter</button>
-                        <button className="text-[10px] text-[#1a56db] hover:underline">View Document</button>
-                        {def.status === 'partially-resolved' && <button className="text-[10px] text-amber-600 hover:underline">Reopen</button>}
+                        <button onClick={() => onOpenParamDetail?.(def.relatedField)} className="text-[10px] text-[#1a56db] hover:underline font-semibold">View Parameter</button>
+                        <button onClick={() => onOpenDocReview?.(def.docRequested?.startsWith('No') ? 'DWG-2026-C14-A02' : def.docRequested || 'DWG-2026-C14-A02')} className="text-[10px] text-[#1a56db] hover:underline font-semibold">View Document</button>
+                        {def.status === 'partially-resolved' && <button onClick={() => alert(`Deficiency ${def.id} reopened for further verification.`)} className="text-[10px] text-amber-600 hover:underline font-semibold">Reopen</button>}
                       </div>
                     </div>
                   )}
@@ -11962,16 +14876,20 @@ export function M19QueryHistoryPage({ onBack, onBackToOverview, onOpenQueryBuild
 
 // ─── M01 Authenticated Shell ──────────────────────────────────────────────────
 
-function M01Shell({ onLogout, lang, fontSize, highContrast }: {
+function M01Shell({ onLogout, lang, fontSize, highContrast, setLang, setFontSize, setHighContrast }: {
   onLogout: () => void
   lang: 'en' | 'mr'
   fontSize: 'sm' | 'md' | 'lg'
   highContrast: boolean
+  setLang?: (lang: 'en' | 'mr') => void
+  setFontSize?: (size: 'sm' | 'md' | 'lg') => void
+  setHighContrast?: (hc: boolean | ((prev: boolean) => boolean)) => void
 }) {
   const [activeDeptItem, setActiveDeptItem] = useState('dept-home')
   const [appView, setAppView] = useState(false)
-  const [appSubPage, setAppSubPage] = useState<'overview'|'dna'|'timeline'|'precheck'|'scrutiny-route'|'scrutiny-workbench'|'param-detail'|'doc-review'|'bldg-scrutiny'|'water-scrutiny'|'consistency'|'dependency-view'|'query-builder'|'query-history'|'delta-rescrutiny'|'inspection-queue'|'inspection-planning'|'inspection-workspace'|'observation-reinspection'|'decision-workspace'|'decision-record'|'dependency-update'|'compliance-context'|'amendment-intake'>('overview')
+  const [appSubPage, setAppSubPage] = useState<'overview'|'dna'|'timeline'|'precheck'|'scrutiny-workflow'|'scrutiny-route'|'scrutiny-workbench'|'param-detail'|'doc-review'|'bldg-scrutiny'|'water-scrutiny'|'consistency'|'dependency-view'|'query-builder'|'query-history'|'delta-rescrutiny'|'inspection-queue'|'inspection-planning'|'inspection-workspace'|'observation-reinspection'|'decision-workspace'|'decision-record'|'dependency-update'|'compliance-context'|'amendment-intake'>('overview')
   const [_inspPlanId, setInspPlanId] = useState<string>('INSP-2026-00418')
+  const [docReviewId, setDocReviewId] = useState<string>('MIDC-REG-DEED-2024-C14')
   const [notifOpen, setNotifOpen] = useState(false)
   const fontCls = fontSize === 'sm' ? 'text-[13px]' : fontSize === 'lg' ? 'text-[16px]' : 'text-[14px]'
   const contrastCls = highContrast ? 'contrast-125 saturate-150' : ''
@@ -11979,9 +14897,9 @@ function M01Shell({ onLogout, lang, fontSize, highContrast }: {
   return (
     <div className={`min-h-screen flex flex-col ${fontCls} ${contrastCls}`} style={{ fontFamily: 'Noto Sans, Noto Sans Devanagari, system-ui, sans-serif' }}>
       <AccessibilityStrip
-        lang={lang} setLang={() => {}}
-        fontSize={fontSize} setFontSize={() => {}}
-        highContrast={highContrast} setHighContrast={() => {}}
+        lang={lang} setLang={setLang ?? (() => {})}
+        fontSize={fontSize} setFontSize={setFontSize ?? (() => {})}
+        highContrast={highContrast} setHighContrast={setHighContrast ?? (() => {})}
       />
       {/* Government identity header */}
       <header className="bg-white border-b border-[#d1d9e0] shadow-sm" role="banner">
@@ -12027,23 +14945,186 @@ function M01Shell({ onLogout, lang, fontSize, highContrast }: {
           {activeDeptItem === 'dept-catalogue' && <M05ServicePage />}
           {activeDeptItem === 'dept-queries' && !appView && <M04SearchPage onOpenApp={() => { setAppView(true); setAppSubPage('query-builder') }} initialQuery="Query Candidate Applications" />}
           {activeDeptItem === 'dept-scrutiny' && !appView && <ScrutinyCommandCentre onOpenScrutinyApp={(_appId, dest) => { setAppView(true); const d = dest as typeof appSubPage; setAppSubPage(d) }} />}
-          {activeDeptItem === 'dept-insp-queue' && <M21InspectionQueuePage onBack={() => setActiveDeptItem('dept-home')} onPlanInspection={id => { setInspPlanId(id); setActiveDeptItem('dept-insp-planning' as string) }} onOpenDepView={() => {}} onOpenQueryHistory={() => {}} onOpenDelta={() => {}} />}
-          {activeDeptItem === 'dept-insp-planning' && <M22InspectionPlanningPage onBack={() => setActiveDeptItem('dept-insp-queue')} onBackToQueue={() => setActiveDeptItem('dept-insp-queue')} onOpenDna={() => {}} onOpenDocReview={() => {}} onOpenDepView={() => {}} onOpenDelta={() => {}} onOpenQueryHistory={() => {}} onOpenWorkspace={() => { setAppView(true); setAppSubPage('inspection-workspace') }} />}
+          {(activeDeptItem === 'dept-insp-queue' || activeDeptItem === 'dept-inspect') && (
+            <M21InspectionQueuePage
+              onBack={() => setActiveDeptItem('dept-home')}
+              onPlanInspection={id => { setInspPlanId(id); setActiveDeptItem('dept-insp-planning' as string) }}
+              onOpenDepView={() => { setAppView(true); setAppSubPage('dependency-view') }}
+              onOpenQueryHistory={() => { setAppView(true); setAppSubPage('query-history') }}
+              onOpenDelta={() => { setAppView(true); setAppSubPage('delta-rescrutiny') }}
+            />
+          )}
+          {activeDeptItem === 'dept-insp-planning' && (
+            <M22InspectionPlanningPage
+              onBack={() => setActiveDeptItem('dept-insp-queue')}
+              onBackToQueue={() => setActiveDeptItem('dept-insp-queue')}
+              onOpenDna={() => { setAppView(true); setAppSubPage('dna') }}
+              onOpenDocReview={id => { if (id) setDocReviewId(id); setAppView(true); setAppSubPage('doc-review') }}
+              onOpenDepView={() => { setAppView(true); setAppSubPage('dependency-view') }}
+              onOpenDelta={() => { setAppView(true); setAppSubPage('delta-rescrutiny') }}
+              onOpenQueryHistory={() => { setAppView(true); setAppSubPage('query-history') }}
+              onOpenWorkspace={() => { setAppView(true); setAppSubPage('inspection-workspace') }}
+            />
+          )}
           {appView && appSubPage === 'overview'  && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-decisions' || activeDeptItem === 'dept-queries') && <M06AppOverviewPage onBack={() => setAppView(false)} onOpenDna={() => setAppSubPage('dna')} onOpenTimeline={() => setAppSubPage('timeline')} onOpenPrecheck={() => setAppSubPage('precheck')} onOpenDeltaRescrutiny={() => setAppSubPage('delta-rescrutiny')} onOpenInspectionQueue={() => setAppSubPage('inspection-queue')} onOpenDecision={() => setAppSubPage('decision-workspace')} onOpenCompliance={() => setAppSubPage('compliance-context')} />}
           {appView && appSubPage === 'dna'       && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && <M07DnaPage onBackToOverview={() => setAppSubPage('overview')} />}
           {appView && appSubPage === 'timeline'  && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && <M08TimelinePage onBackToOverview={() => setAppSubPage('overview')} />}
+          {appView && appSubPage === 'scrutiny-workflow' && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-decisions' || activeDeptItem === 'dept-queries') && (
+            <GuidedScrutinyWorkflow
+              onBack={() => setAppSubPage('overview')}
+              onOpenOverview={() => setAppSubPage('overview')}
+              onOpenPrecheck={() => setAppSubPage('precheck')}
+              onOpenRoute={() => setAppSubPage('scrutiny-route')}
+              onOpenLandWorkbench={() => setAppSubPage('scrutiny-workbench')}
+              onOpenParamDetail={(_id) => setAppSubPage('param-detail')}
+              onOpenDocReview={(id) => { if (id) setDocReviewId(id); setAppSubPage('doc-review') }}
+              onOpenBuildingScrutiny={() => setAppSubPage('bldg-scrutiny')}
+              onOpenWaterScrutiny={() => setAppSubPage('water-scrutiny')}
+              onOpenConsistency={() => setAppSubPage('consistency')}
+              onOpenDependencyView={() => setAppSubPage('dependency-view')}
+              onOpenQueryBuilder={() => setAppSubPage('query-builder')}
+              onOpenDelta={() => setAppSubPage('delta-rescrutiny')}
+              onOpenInspectionPlanning={() => setAppSubPage('inspection-planning')}
+              onOpenDecisionWorkspace={() => setAppSubPage('decision-workspace')}
+            />
+          )}
           {appView && appSubPage === 'precheck'       && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && <M09PreCheckPage onBackToOverview={() => setAppSubPage('overview')} onOpenDna={() => setAppSubPage('dna')} onOpenTimeline={() => setAppSubPage('timeline')} onOpenScrutinyRoute={() => setAppSubPage('scrutiny-route')} />}
-          {appView && appSubPage === 'scrutiny-route'     && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && <M10ScrutinyRoutePage onBackToOverview={() => setAppSubPage('overview')} onBackToPrecheck={() => setAppSubPage('precheck')} onOpenDna={() => setAppSubPage('dna')} onOpenTimeline={() => setAppSubPage('timeline')} onOpenScrutinyWorkbench={() => setAppSubPage('scrutiny-workbench')} onOpenDepView={() => setAppSubPage('dependency-view')} />}
-          {appView && appSubPage === 'scrutiny-workbench' && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && <M11ScrutinyWorkbenchPage onBack={() => setAppSubPage('scrutiny-route')} onBackToOverview={() => setAppSubPage('overview')} onOpenDna={() => setAppSubPage('dna')} onOpenTimeline={() => setAppSubPage('timeline')} onOpenParamDetail={() => setAppSubPage('param-detail')} onOpenDocReview={() => setAppSubPage('doc-review')} onOpenBldgScrutiny={() => setAppSubPage('bldg-scrutiny')} onOpenWaterScrutiny={() => setAppSubPage('water-scrutiny')} onOpenDepView={() => setAppSubPage('dependency-view')} />}
-          {appView && appSubPage === 'param-detail'       && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && <M12ParameterDetailPage onBack={() => setAppSubPage('scrutiny-workbench')} onBackToOverview={() => setAppSubPage('overview')} onOpenDna={() => setAppSubPage('dna')} onOpenDocReview={() => setAppSubPage('doc-review')} onOpenDepView={() => setAppSubPage('dependency-view')} />}
-          {appView && appSubPage === 'doc-review'         && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && <M13DocumentReviewPage onBack={() => setAppSubPage('scrutiny-workbench')} onOpenParamDetail={() => setAppSubPage('param-detail')} />}
-          {appView && appSubPage === 'bldg-scrutiny'     && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && <M14BuildingScrutinyPage onBack={() => setAppSubPage('scrutiny-workbench')} onBackToOverview={() => setAppSubPage('overview')} onOpenParamDetail={() => setAppSubPage('param-detail')} onOpenDocReview={() => setAppSubPage('doc-review')} onOpenConsistency={() => setAppSubPage('consistency')} onOpenDepView={() => setAppSubPage('dependency-view')} />}
-          {appView && appSubPage === 'water-scrutiny'    && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && <M15WaterScrutinyPage onBack={() => setAppSubPage('scrutiny-workbench')} onBackToOverview={() => setAppSubPage('overview')} onOpenParamDetail={() => setAppSubPage('param-detail')} onOpenDocReview={() => setAppSubPage('doc-review')} onOpenConsistency={() => setAppSubPage('consistency')} onOpenDepView={() => setAppSubPage('dependency-view')} />}
-          {appView && appSubPage === 'consistency'       && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && <M16ConsistencyPage onBack={() => setAppSubPage('scrutiny-workbench')} onBackToOverview={() => setAppSubPage('overview')} onOpenParamDetail={() => setAppSubPage('param-detail')} onOpenDocReview={() => setAppSubPage('doc-review')} />}
-          {appView && appSubPage === 'dependency-view'   && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && <M17DependencyViewPage onBack={() => setAppSubPage('scrutiny-workbench')} onBackToOverview={() => setAppSubPage('overview')} />}
-          {appView && appSubPage === 'query-builder'    && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && <M18QueryBuilderPage onBack={() => setAppSubPage('overview')} onBackToOverview={() => setAppSubPage('overview')} onOpenQueryHistory={() => setAppSubPage('query-history')} />}
-          {appView && appSubPage === 'query-history'    && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && <M19QueryHistoryPage onBack={() => setAppSubPage('query-builder')} onBackToOverview={() => setAppSubPage('overview')} onOpenQueryBuilder={() => setAppSubPage('query-builder')} onOpenDeltaRescrutiny={() => setAppSubPage('delta-rescrutiny')} />}
-          {appView && appSubPage === 'delta-rescrutiny' && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && <M20DeltaRescrutinyPage onBackToOverview={() => setAppSubPage('overview')} onOpenDna={() => setAppSubPage('dna')} onOpenDocReview={() => setAppSubPage('doc-review')} onOpenConsistency={() => setAppSubPage('consistency')} onOpenDepView={() => setAppSubPage('dependency-view')} onOpenTimeline={() => setAppSubPage('timeline')} />}
+          {appView && appSubPage === 'scrutiny-route'     && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && <M10ScrutinyRoutePage onBackToOverview={() => setAppSubPage('overview')} onBackToPrecheck={() => setAppSubPage('precheck')} onOpenDna={() => setAppSubPage('dna')} onOpenTimeline={() => setAppSubPage('timeline')} onOpenScrutinyWorkflow={() => setAppSubPage('scrutiny-workflow')} onOpenScrutinyWorkbench={() => setAppSubPage('scrutiny-workbench')} onOpenBuildingScrutiny={() => setAppSubPage('bldg-scrutiny')} onOpenWaterScrutiny={() => setAppSubPage('water-scrutiny')} onOpenConsistency={() => setAppSubPage('consistency')} onOpenDepView={() => setAppSubPage('dependency-view')} onOpenQueryBuilder={() => setAppSubPage('query-builder')} onOpenDelta={() => setAppSubPage('delta-rescrutiny')} onOpenInspections={() => setAppSubPage('inspection-queue')} />}
+          {appView && (appSubPage === 'scrutiny-workbench' || appSubPage === 'param-detail') && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && (
+            <GuidedScrutinyWorkflow
+              initialStageKey="land"
+              onBack={() => setAppSubPage('scrutiny-route')}
+              onOpenOverview={() => setAppSubPage('overview')}
+              onOpenPrecheck={() => setAppSubPage('precheck')}
+              onOpenRoute={() => setAppSubPage('scrutiny-route')}
+              onOpenLandWorkbench={() => setAppSubPage('scrutiny-workbench')}
+              onOpenBuildingScrutiny={() => setAppSubPage('bldg-scrutiny')}
+              onOpenWaterScrutiny={() => setAppSubPage('water-scrutiny')}
+              onOpenConsistency={() => setAppSubPage('consistency')}
+              onOpenDependencyView={() => setAppSubPage('dependency-view')}
+              onOpenQueryBuilder={() => setAppSubPage('query-builder')}
+              onOpenDelta={() => setAppSubPage('delta-rescrutiny')}
+              onOpenInspectionPlanning={() => setAppSubPage('inspection-planning')}
+              onOpenDecisionWorkspace={() => setAppSubPage('decision-workspace')}
+            />
+          )}
+                    {appView && appSubPage === 'doc-review' && (
+            <DocumentOcrInsightsPage
+              applicationId="APP-2026-00418"
+              documentId={docReviewId || 'MIDC-REG-DEED-2024-C14'}
+              onBackToWorkflow={() => setAppSubPage('scrutiny-workflow')}
+              onForwardToQuery={() => setAppSubPage('query-builder')}
+            />
+          )}
+          {appView && appSubPage === 'bldg-scrutiny' && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && (
+            <GuidedScrutinyWorkflow
+              initialStageKey="building"
+              onBack={() => setAppSubPage('scrutiny-route')}
+              onOpenOverview={() => setAppSubPage('overview')}
+              onOpenPrecheck={() => setAppSubPage('precheck')}
+              onOpenRoute={() => setAppSubPage('scrutiny-route')}
+              onOpenLandWorkbench={() => setAppSubPage('scrutiny-workbench')}
+              onOpenBuildingScrutiny={() => setAppSubPage('bldg-scrutiny')}
+              onOpenWaterScrutiny={() => setAppSubPage('water-scrutiny')}
+              onOpenConsistency={() => setAppSubPage('consistency')}
+              onOpenDependencyView={() => setAppSubPage('dependency-view')}
+              onOpenQueryBuilder={() => setAppSubPage('query-builder')}
+              onOpenDelta={() => setAppSubPage('delta-rescrutiny')}
+              onOpenInspectionPlanning={() => setAppSubPage('inspection-planning')}
+              onOpenDecisionWorkspace={() => setAppSubPage('decision-workspace')}
+            />
+          )}
+          {appView && appSubPage === 'water-scrutiny' && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && (
+            <GuidedScrutinyWorkflow
+              initialStageKey="water"
+              onBack={() => setAppSubPage('scrutiny-route')}
+              onOpenOverview={() => setAppSubPage('overview')}
+              onOpenPrecheck={() => setAppSubPage('precheck')}
+              onOpenRoute={() => setAppSubPage('scrutiny-route')}
+              onOpenLandWorkbench={() => setAppSubPage('scrutiny-workbench')}
+              onOpenBuildingScrutiny={() => setAppSubPage('bldg-scrutiny')}
+              onOpenWaterScrutiny={() => setAppSubPage('water-scrutiny')}
+              onOpenConsistency={() => setAppSubPage('consistency')}
+              onOpenDependencyView={() => setAppSubPage('dependency-view')}
+              onOpenQueryBuilder={() => setAppSubPage('query-builder')}
+              onOpenDelta={() => setAppSubPage('delta-rescrutiny')}
+              onOpenInspectionPlanning={() => setAppSubPage('inspection-planning')}
+              onOpenDecisionWorkspace={() => setAppSubPage('decision-workspace')}
+            />
+          )}
+          {appView && appSubPage === 'consistency' && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && (
+            <GuidedScrutinyWorkflow
+              initialStageKey="consistency"
+              onBack={() => setAppSubPage('scrutiny-route')}
+              onOpenOverview={() => setAppSubPage('overview')}
+              onOpenPrecheck={() => setAppSubPage('precheck')}
+              onOpenRoute={() => setAppSubPage('scrutiny-route')}
+              onOpenLandWorkbench={() => setAppSubPage('scrutiny-workbench')}
+              onOpenBuildingScrutiny={() => setAppSubPage('bldg-scrutiny')}
+              onOpenWaterScrutiny={() => setAppSubPage('water-scrutiny')}
+              onOpenConsistency={() => setAppSubPage('consistency')}
+              onOpenDependencyView={() => setAppSubPage('dependency-view')}
+              onOpenQueryBuilder={() => setAppSubPage('query-builder')}
+              onOpenDelta={() => setAppSubPage('delta-rescrutiny')}
+              onOpenInspectionPlanning={() => setAppSubPage('inspection-planning')}
+              onOpenDecisionWorkspace={() => setAppSubPage('decision-workspace')}
+            />
+          )}
+          {appView && appSubPage === 'dependency-view' && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && (
+            <GuidedScrutinyWorkflow
+              initialStageKey="dependency"
+              onBack={() => setAppSubPage('scrutiny-route')}
+              onOpenOverview={() => setAppSubPage('overview')}
+              onOpenPrecheck={() => setAppSubPage('precheck')}
+              onOpenRoute={() => setAppSubPage('scrutiny-route')}
+              onOpenLandWorkbench={() => setAppSubPage('scrutiny-workbench')}
+              onOpenBuildingScrutiny={() => setAppSubPage('bldg-scrutiny')}
+              onOpenWaterScrutiny={() => setAppSubPage('water-scrutiny')}
+              onOpenConsistency={() => setAppSubPage('consistency')}
+              onOpenDependencyView={() => setAppSubPage('dependency-view')}
+              onOpenQueryBuilder={() => setAppSubPage('query-builder')}
+              onOpenDelta={() => setAppSubPage('delta-rescrutiny')}
+              onOpenInspectionPlanning={() => setAppSubPage('inspection-planning')}
+              onOpenDecisionWorkspace={() => setAppSubPage('decision-workspace')}
+            />
+          )}
+          {appView && appSubPage === 'query-builder' && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && (
+            <GuidedScrutinyWorkflow
+              initialStageKey="query"
+              onBack={() => setAppSubPage('scrutiny-route')}
+              onOpenOverview={() => setAppSubPage('overview')}
+              onOpenPrecheck={() => setAppSubPage('precheck')}
+              onOpenRoute={() => setAppSubPage('scrutiny-route')}
+              onOpenLandWorkbench={() => setAppSubPage('scrutiny-workbench')}
+              onOpenBuildingScrutiny={() => setAppSubPage('bldg-scrutiny')}
+              onOpenWaterScrutiny={() => setAppSubPage('water-scrutiny')}
+              onOpenConsistency={() => setAppSubPage('consistency')}
+              onOpenDependencyView={() => setAppSubPage('dependency-view')}
+              onOpenQueryBuilder={() => setAppSubPage('query-builder')}
+              onOpenDelta={() => setAppSubPage('delta-rescrutiny')}
+              onOpenInspectionPlanning={() => setAppSubPage('inspection-planning')}
+              onOpenDecisionWorkspace={() => setAppSubPage('decision-workspace')}
+            />
+          )}
+          {appView && appSubPage === 'query-history'    && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && <M19QueryHistoryPage onBack={() => setAppSubPage('query-builder')} onBackToOverview={() => setAppSubPage('overview')} onOpenQueryBuilder={() => setAppSubPage('query-builder')} onOpenDeltaRescrutiny={() => setAppSubPage('delta-rescrutiny')} onOpenParamDetail={(_id) => setAppSubPage('param-detail')} onOpenDocReview={(id) => { if (id) setDocReviewId(id); setAppSubPage('doc-review') }} />}
+          {appView && appSubPage === 'delta-rescrutiny' && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && (
+            <GuidedScrutinyWorkflow
+              initialStageKey="delta"
+              onBack={() => setAppSubPage('scrutiny-route')}
+              onOpenOverview={() => setAppSubPage('overview')}
+              onOpenPrecheck={() => setAppSubPage('precheck')}
+              onOpenRoute={() => setAppSubPage('scrutiny-route')}
+              onOpenLandWorkbench={() => setAppSubPage('scrutiny-workbench')}
+              onOpenBuildingScrutiny={() => setAppSubPage('bldg-scrutiny')}
+              onOpenWaterScrutiny={() => setAppSubPage('water-scrutiny')}
+              onOpenConsistency={() => setAppSubPage('consistency')}
+              onOpenDependencyView={() => setAppSubPage('dependency-view')}
+              onOpenQueryBuilder={() => setAppSubPage('query-builder')}
+              onOpenDelta={() => setAppSubPage('delta-rescrutiny')}
+              onOpenInspectionPlanning={() => setAppSubPage('inspection-planning')}
+              onOpenDecisionWorkspace={() => setAppSubPage('decision-workspace')}
+            />
+          )}
           {appView && appSubPage === 'inspection-queue' && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny') && <M21InspectionQueuePage onBack={() => setAppSubPage('overview')} onPlanInspection={id => { setInspPlanId(id); setAppSubPage('inspection-planning') }} onOpenDepView={() => setAppSubPage('dependency-view')} onOpenQueryHistory={() => setAppSubPage('query-history')} onOpenDelta={() => setAppSubPage('delta-rescrutiny')} />}
           {appView && appSubPage === 'inspection-planning' && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny') && <M22InspectionPlanningPage onBack={() => setAppSubPage('inspection-queue')} onBackToQueue={() => setAppSubPage('inspection-queue')} onOpenDna={() => setAppSubPage('dna')} onOpenDocReview={() => setAppSubPage('doc-review')} onOpenDepView={() => setAppSubPage('dependency-view')} onOpenDelta={() => setAppSubPage('delta-rescrutiny')} onOpenQueryHistory={() => setAppSubPage('query-history')} onOpenWorkspace={() => setAppSubPage('inspection-workspace')} />}
           {appView && appSubPage === 'inspection-workspace' && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-insp-queue' || activeDeptItem === 'dept-scrutiny') && <M23InspectionWorkspacePage onBack={() => setAppSubPage('inspection-planning')} onBackToQueue={() => setAppSubPage('inspection-queue')} onOpenM24={() => setAppSubPage('observation-reinspection')} onOpenDocReview={() => setAppSubPage('doc-review')} onOpenDna={() => setAppSubPage('dna')} onOpenDepView={() => setAppSubPage('dependency-view')} onOpenQueryHistory={() => setAppSubPage('query-history')} onOpenDelta={() => setAppSubPage('delta-rescrutiny')} onOpenConsistency={() => setAppSubPage('consistency')} />}
@@ -12063,7 +15144,7 @@ function M01Shell({ onLogout, lang, fontSize, highContrast }: {
           {activeDeptItem === 'dept-bottleneck' && !appView && <M36BottleneckPage onBack={() => setActiveDeptItem('dept-home')} onOpenSLA={() => setActiveDeptItem('dept-sla')} onOpenInspection={() => setActiveDeptItem('dept-insp-queue')} onOpenAnalytics={() => setActiveDeptItem('dept-analytics')} />}
           {activeDeptItem === 'dept-workload' && !appView && <M37WorkloadPage onBack={() => setActiveDeptItem('dept-home')} onOpenSLA={() => setActiveDeptItem('dept-sla')} onOpenInspection={() => setActiveDeptItem('dept-insp-queue')} onOpenAnalytics={() => setActiveDeptItem('dept-analytics')} />}
           {activeDeptItem === 'dept-audit' && !appView && <M38AuditPage onBack={() => setActiveDeptItem('dept-home')} onOpenApp={() => { setAppView(true); setAppSubPage('overview') }} />}
-          {!appView && !['dept-home','dept-queue','dept-apps','dept-catalogue','dept-scrutiny','dept-insp-queue','dept-insp-planning','dept-decisions','dept-sla','dept-grievances','dept-regasst','dept-regchng','dept-regimpact','dept-analytics','dept-bottleneck','dept-workload','dept-audit'].includes(activeDeptItem) && (
+          {!appView && !['dept-home','dept-queue','dept-apps','dept-catalogue','dept-scrutiny','dept-inspect','dept-insp-queue','dept-insp-planning','dept-queries','dept-decisions','dept-sla','dept-grievances','dept-regasst','dept-regchng','dept-regimpact','dept-analytics','dept-bottleneck','dept-workload','dept-audit'].includes(activeDeptItem) && (
             <div className="flex-1 bg-[#f8f9fb] flex flex-col items-center justify-center py-20 text-center px-6">
               <div className="w-12 h-12 rounded-full bg-[#f0f4f8] flex items-center justify-center mb-3 text-[#6b7280]">
                 <MIcon.Clipboard />
@@ -12473,7 +15554,7 @@ export function M31GrievancePage({ onBack, onOpenApp, onOpenSLA, onOpenQuery, on
                 </div>
                 <div className="flex gap-2 pt-1">
                   <button onClick={() => setResolved(true)} disabled={!resolutionText} className="text-xs bg-emerald-700 text-white px-4 py-2 rounded font-semibold hover:bg-emerald-800 disabled:opacity-40">Record Resolution</button>
-                  <button className="text-xs bg-purple-50 text-purple-700 border border-purple-200 px-4 py-2 rounded font-semibold hover:bg-purple-100">Escalate Further</button>
+                  <button onClick={() => alert('Grievance escalated to Tier-2 Appellate Authority. Dispatch ref: ESC-2026-0012.')} className="text-xs bg-purple-50 text-purple-700 border border-purple-200 px-4 py-2 rounded font-semibold hover:bg-purple-100">Escalate Further</button>
                   <button onClick={() => onOpenApp(selectedGrv.appId)} className="text-xs border border-[#d1d9e0] px-3 py-2 rounded text-[#1a2533] hover:bg-[#f8f9fb]">Open Application</button>
                 </div>
                 {resolved && <div className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded px-3 py-2 font-semibold">Resolution recorded. Grievance marked as Resolved. Application journey is unchanged unless a configured action was selected.</div>}
@@ -12791,8 +15872,8 @@ export function M33RegChangePage({ onBack, onOpenRAG, onOpenImpact }: { onBack: 
                 <p className="text-xs font-bold text-amber-700 mb-2">Permission Gate</p>
                 <p className="text-amber-800">Confirm, Edit, Reject and Publish actions require Regulatory Admin permission. Officers may view and search published regulatory references.</p>
                 <div className="flex gap-2 mt-3">
-                  <button className="text-[11px] border border-[#d1d9e0] bg-white text-[#374151] px-3 py-1.5 rounded cursor-not-allowed">Confirm (Requires Admin)</button>
-                  <button className="text-[11px] border border-[#d1d9e0] bg-white text-[#374151] px-3 py-1.5 rounded cursor-not-allowed">Publish (Requires Admin)</button>
+                  <button onClick={() => alert('Admin Action Simulated: Rule change confirmation submitted to staging queue.')} className="text-[11px] border border-[#d1d9e0] bg-white text-[#1a3a5c] px-3 py-1.5 rounded hover:bg-[#f0f4f8] font-medium">Confirm (Requires Admin)</button>
+                  <button onClick={() => alert('Admin Action Simulated: Rule change published to production registry.')} className="text-[11px] border border-[#d1d9e0] bg-white text-[#1a3a5c] px-3 py-1.5 rounded hover:bg-[#f0f4f8] font-medium">Publish (Requires Admin)</button>
                 </div>
               </div>
             </div>
@@ -13391,6 +16472,9 @@ export default function App() {
         lang={lang}
         fontSize={fontSize}
         highContrast={highContrast}
+        setLang={setLang}
+        setFontSize={setFontSize}
+        setHighContrast={setHighContrast}
       />
     )
   }
@@ -13401,6 +16485,9 @@ export default function App() {
       lang={lang}
       fontSize={fontSize}
       highContrast={highContrast}
+      setLang={setLang}
+      setFontSize={setFontSize}
+      setHighContrast={setHighContrast}
     />
   )
 }
