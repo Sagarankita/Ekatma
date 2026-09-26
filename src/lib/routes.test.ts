@@ -13,7 +13,7 @@ describe('Department route contract', () => {
     const pageRoutes = readdirSync('src/app/department', { recursive: true })
       .map(String)
       .filter(file => file.endsWith('page.tsx'))
-      .map(file => '/department/' + file.split('/').filter(part => !part.startsWith('(')).join('/'))
+      .map(file => '/department/' + file.replace(/\\/g, '/').split('/').filter(part => !part.startsWith('(')).join('/'))
       .map(path => path.replace(/\/page\.tsx$/, '').replace(/\[[^\]]+\]/g, ':id'));
     const contractRoutes = Object.entries(department)
       .filter(([name]) => !['searchQuery', 'applicationTab', 'queueFilter'].includes(name))

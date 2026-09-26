@@ -91,42 +91,8 @@ export const Icon = {
 }
 
 // ─── Accessibility Strip ──────────────────────────────────────────────────────
-export function AccessibilityStrip({ lang, setLang, fontSize, setFontSize, highContrast, setHighContrast }: {
-  lang: 'en' | 'mr', setLang: (l: 'en' | 'mr') => void
-  fontSize: 'sm' | 'md' | 'lg', setFontSize: (s: 'sm' | 'md' | 'lg') => void
-  highContrast: boolean, setHighContrast: (v: boolean) => void
-}) {
-  return (
-    <div className="bg-[#0f2540] text-white text-xs" role="navigation" aria-label="Accessibility and language options">
-      <div className="max-w-[1440px] mx-auto px-6 flex items-center justify-between h-8">
-        <div className="flex items-center gap-2">
-          <span className="font-medium">Government of Maharashtra</span>
-          <span className="text-white/40">|</span>
-          <span style={{ fontFamily: 'Noto Sans Devanagari, sans-serif' }}>महाराष्ट्र शासन</span>
-        </div>
-        <div className="flex items-center gap-1 text-white/80">
-          <a href="#main-content" className="skip-link">Skip to Main Content</a>
-          <button className="px-2 py-0.5 hover:text-white hover:underline transition-colors">Skip to Main Content</button>
-          <span className="text-white/30">|</span>
-          <button className="px-2 py-0.5 hover:text-white hover:underline transition-colors">Screen Reader Access</button>
-          <span className="text-white/30">|</span>
-          <span className="flex items-center gap-0.5">
-            <button onClick={() => setFontSize('sm')} className={`px-1.5 py-0.5 rounded transition-colors text-[10px] ${fontSize === 'sm' ? 'bg-white text-[#0f2540] font-bold' : 'hover:text-white'}`} aria-label="Decrease font size" aria-pressed={fontSize === 'sm'}>A−</button>
-            <button onClick={() => setFontSize('md')} className={`px-1.5 py-0.5 rounded transition-colors text-xs ${fontSize === 'md' ? 'bg-white text-[#0f2540] font-bold' : 'hover:text-white'}`} aria-label="Default font size" aria-pressed={fontSize === 'md'}>A</button>
-            <button onClick={() => setFontSize('lg')} className={`px-1.5 py-0.5 rounded transition-colors text-sm ${fontSize === 'lg' ? 'bg-white text-[#0f2540] font-bold' : 'hover:text-white'}`} aria-label="Increase font size" aria-pressed={fontSize === 'lg'}>A+</button>
-          </span>
-          <span className="text-white/30">|</span>
-          <button onClick={() => setHighContrast(!highContrast)} className={`px-2 py-0.5 rounded transition-colors ${highContrast ? 'bg-yellow-400 text-black font-semibold' : 'hover:text-white'}`} aria-pressed={highContrast}>High Contrast</button>
-          <span className="text-white/30">|</span>
-          <button onClick={() => setLang('en')} className={`px-2 py-0.5 rounded transition-colors ${lang === 'en' ? 'bg-white text-[#0f2540] font-semibold' : 'hover:text-white'}`} aria-pressed={lang === 'en'}>English</button>
-          <button onClick={() => setLang('mr')} className={`px-2 py-0.5 rounded transition-colors ${lang === 'mr' ? 'bg-white text-[#0f2540] font-semibold' : 'hover:text-white'}`} aria-pressed={lang === 'mr'}>मराठी</button>
-          <span className="text-white/30">|</span>
-          <button className="px-2 py-0.5 hover:text-white hover:underline transition-colors">Sitemap</button>
-        </div>
-      </div>
-    </div>
-  )
-}
+import { AccessibilityStrip } from '@/features/entrepreneur/public-auth/PublicChrome';
+export { AccessibilityStrip };
 
 // ─── Portal Header ────────────────────────────────────────────────────────────
 export function PortalHeader({ isLoggedIn, setIsLoggedIn }: { isLoggedIn: boolean, setIsLoggedIn: (v: boolean) => void }) {
@@ -160,10 +126,6 @@ export function PortalHeader({ isLoggedIn, setIsLoggedIn }: { isLoggedIn: boolea
 
         {/* Right actions */}
         <div className="flex items-center gap-3">
-          <div className="relative hidden md:block">
-            <input type="search" placeholder="Search…" aria-label="Search" className="pl-9 pr-4 py-2 text-sm border border-[#d1d9e0] rounded bg-[#f8f9fb] focus:outline-none focus:ring-2 focus:ring-[#1a56db] w-56 placeholder:text-[#9aa5b4]" />
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#374151]"><Icon.Search /></span>
-          </div>
           <button aria-label="Help" className="p-2 rounded hover:bg-[#f0f4f8] text-[#4a5568] hover:text-[#1a3a5c] transition-colors"><Icon.Help /></button>
           {isLoggedIn && (
             <button aria-label="Notifications" className="p-2 rounded hover:bg-[#f0f4f8] text-[#4a5568] hover:text-[#1a3a5c] transition-colors relative">
@@ -1304,38 +1266,6 @@ export function M01LoginPage({ onSuccess, lang, fontSize, highContrast }: {
               {busy ? <><MIcon.Spinner /> Authenticating…</> : 'Login'}
             </button>
 
-            <div className="flex items-center justify-between pt-0.5 border-t border-[#f0f4f8]">
-              <a href="#" className="text-xs text-[#1a56db] hover:underline focus-visible:ring-2 focus-visible:ring-[#1a56db] rounded" onClick={e => e.preventDefault()}>
-                Forgot Password
-              </a>
-              <a href="#" className="text-xs text-[#1a56db] hover:underline focus-visible:ring-2 focus-visible:ring-[#1a56db] rounded" onClick={e => e.preventDefault()}>
-                Help / Contact Support
-              </a>
-            </div>
-          </div>
-
-          <p className="text-[11px] text-[#374151] text-center mt-4 leading-relaxed px-4">
-            Your assigned department, office, desk and permissions are loaded automatically after sign-in.
-          </p>
-
-          {/* Prototype state preview */}
-          <div className="mt-8 border border-dashed border-[#c8d4de] rounded p-3 bg-white/60">
-            <p className="text-[10px] font-semibold text-[#1a2533] uppercase tracking-wider mb-2">Prototype - State preview</p>
-            <div className="flex flex-wrap gap-1.5">
-              {(['default', 'invalid-creds', 'incorrect-captcha', 'captcha-refreshed', 'authenticating'] as LoginState[]).map(s => (
-                <button
-                  key={s}
-                  onClick={() => {
-                    if (s === 'captcha-refreshed') { setCaptchaCode(makeCaptchaCode()); setCaptchaInput(''); setShowRefreshedMsg(true) }
-                    if (s === 'authenticating') { setLoginState('authenticating'); setTimeout(() => onSuccess(), 2200); return }
-                    setLoginState(s)
-                  }}
-                  className={`text-[10px] px-2 py-1 rounded border transition-colors ${loginState === s ? 'bg-[#1a3a5c] text-white border-[#1a3a5c]' : 'border-[#d1d9e0] text-[#1a2533] hover:border-[#1a3a5c] hover:text-[#1a3a5c]'}`}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
           </div>
         </div>
       </main>
@@ -1437,21 +1367,6 @@ export function DeptContextBar({ onLogout, onNotif, onRegAssistant, onSearch }: 
             <span className="text-white/90">Scrutiny Officer</span>
           </span>
         </div>
-
-        {/* Global search */}
-        <form className="flex-1 max-w-sm mx-auto relative" onSubmit={event => { event.preventDefault(); onSearch?.(searchQuery) }}>
-          <input
-            type="search"
-            value={searchQuery}
-            onChange={event => setSearchQuery(event.target.value)}
-            placeholder="Search application ID, business or service"
-            aria-label="Search application ID, business or service"
-            className="w-full pl-8 pr-3 py-1.5 text-xs rounded border border-white/20 bg-white/10 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-white/50 focus:bg-white/15 transition-colors"
-          />
-          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/40" aria-hidden="true">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          </span>
-        </form>
 
         {/* Right utilities */}
         <div className="flex items-center gap-1 ml-auto shrink-0">
@@ -1975,21 +1890,7 @@ function QueueTable({ apps, onOpenApp }: { apps: typeof QUEUE_APPS; onOpenApp?: 
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-xs min-w-[1200px] border-collapse" aria-label="Application queue">
-        <colgroup>
-          <col className="w-8" />
-          <col className="w-36" />   {/* App ID */}
-          <col className="w-44" />   {/* Business */}
-          <col className="w-32" />   {/* Service */}
-          <col className="w-28" />   {/* Stage */}
-          <col className="w-36" />   {/* Desk */}
-          <col className="w-28" />   {/* Received */}
-          <col className="w-36" />   {/* SLA - generous width */}
-          <col className="w-36" />   {/* Route */}
-          <col className="w-28" />   {/* Dependency */}
-          <col className="w-36" />   {/* Status */}
-          <col className="w-36" />   {/* Action Required */}
-          <col className="w-16" />   {/* Open */}
-        </colgroup>
+        <colgroup><col className="w-8" /><col className="w-36" /><col className="w-44" /><col className="w-32" /><col className="w-28" /><col className="w-36" /><col className="w-28" /><col className="w-36" /><col className="w-36" /><col className="w-28" /><col className="w-36" /><col className="w-36" /><col className="w-16" /></colgroup>
         <thead className="sticky top-0 z-10">
           <tr className="bg-[#1a3a5c] text-white text-left border-b-2 border-[#0f2540]">
             <th className={`px-3 py-3 w-8 ${colBorder}`}><input type="checkbox" checked={allSelected} onChange={toggleAll} className="rounded border-white/30" aria-label="Select all rows" /></th>

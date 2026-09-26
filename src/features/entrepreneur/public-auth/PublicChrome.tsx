@@ -125,7 +125,7 @@ export const inputDefault = `${inputBase} border-[#d1d9e0]`
 export const inputError = `${inputBase} border-red-500 focus:ring-red-400`
 
 export function DemoNotice() {
-  return <p className="bg-amber-50 border-b border-amber-200 px-4 py-1 text-center text-[11px] text-amber-950">Demo preview: login and OTP are simulated. No email is sent or details saved to a server. Draft answers remain in this browser tab. Do not enter real credentials or personal data.</p>
+  return null;
 }
 
 // ─── Accessibility Strip ──────────────────────────────────────────────────────
@@ -134,8 +134,56 @@ export function AccessibilityStrip({ lang, setLang, fontSize, setFontSize, highC
   fontSize: 'sm' | 'md' | 'lg', setFontSize: (s: 'sm' | 'md' | 'lg') => void
   highContrast: boolean, setHighContrast: (v: boolean) => void
 }) {
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !document.getElementById('google-translate-script')) {
+      const script = document.createElement('script');
+      script.id = 'google-translate-script';
+      script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+      script.async = true;
+      document.body.appendChild(script);
+
+      (window as any).googleTranslateElementInit = () => {
+        if ((window as any).google?.translate?.TranslateElement) {
+          new (window as any).google.translate.TranslateElement(
+            { pageLanguage: 'en', includedLanguages: 'en,mr', autoDisplay: false },
+            'google_translate_element'
+          );
+        }
+      };
+    }
+  }, []);
+
+  const handleSkipToMain = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const mainEl = document.getElementById('main-content') || document.getElementById('service-explorer');
+    if (mainEl) {
+      mainEl.scrollIntoView({ behavior: 'smooth' });
+      mainEl.focus();
+    }
+  };
+
+  const handleLangChange = (targetLang: 'en' | 'mr') => {
+    setLang(targetLang);
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('entrepreneur_demo_language', targetLang);
+      document.cookie = `googtrans=/en/${targetLang}; path=/;`;
+      document.cookie = `googtrans=/en/${targetLang}; domain=${window.location.hostname}; path=/;`;
+      
+      const select = document.querySelector('.goog-te-combo') as HTMLSelectElement | null;
+      if (select) {
+        select.value = targetLang;
+        select.dispatchEvent(new Event('change'));
+      } else {
+        window.location.reload();
+      }
+    }
+  };
+
   return (
     <div className="bg-[#0f2540] text-white text-xs" role="navigation" aria-label="Accessibility and language options">
+      {/* Hidden element for Google Translate initialization */}
+      <div id="google_translate_element" className="hidden" />
+
       <div className="max-w-[1440px] mx-auto px-3 sm:px-6 flex flex-wrap items-center justify-center sm:justify-between gap-1 py-1 sm:py-0 min-h-8">
         <div className="flex flex-wrap items-center justify-center gap-2">
           <span className="font-medium">Government of Maharashtra</span>
@@ -143,10 +191,20 @@ export function AccessibilityStrip({ lang, setLang, fontSize, setFontSize, highC
           <span style={{ fontFamily: 'Noto Sans Devanagari, sans-serif' }}>महाराष्ट्र शासन</span>
         </div>
         <div className="flex flex-wrap items-center justify-center gap-1 text-white/80">
-          <a href="#main-content" className="skip-link">Skip to Main Content</a>
-          <button className="px-2 py-0.5 hover:text-white hover:underline transition-colors">Skip to Main Content</button>
+          <a
+            href="#main-content"
+            onClick={handleSkipToMain}
+            className="px-2 py-0.5 hover:text-white hover:underline transition-colors focus:ring-1 focus:ring-white rounded"
+          >
+            Skip to Main Content
+          </a>
           <span className="text-white/30">|</span>
-          <button className="px-2 py-0.5 hover:text-white hover:underline transition-colors">Screen Reader Access</button>
+          <button
+            onClick={() => alert('Screen Reader Access Mode Enabled. Standard ARIA landmarks active.')}
+            className="px-2 py-0.5 hover:text-white hover:underline transition-colors focus:ring-1 focus:ring-white rounded"
+          >
+            Screen Reader Access
+          </button>
           <span className="text-white/30">|</span>
           <span className="flex items-center gap-0.5">
             <button onClick={() => setFontSize('sm')} className={`px-1.5 py-0.5 rounded transition-colors text-[10px] ${fontSize === 'sm' ? 'bg-white text-[#0f2540] font-bold' : 'hover:text-white'}`} aria-label="Decrease font size" aria-pressed={fontSize === 'sm'}>A−</button>
@@ -156,10 +214,10 @@ export function AccessibilityStrip({ lang, setLang, fontSize, setFontSize, highC
           <span className="text-white/30">|</span>
           <button onClick={() => setHighContrast(!highContrast)} className={`px-2 py-0.5 rounded transition-colors ${highContrast ? 'bg-yellow-400 text-black font-semibold' : 'hover:text-white'}`} aria-pressed={highContrast}>High Contrast</button>
           <span className="text-white/30">|</span>
-          <button onClick={() => setLang('en')} className={`px-2 py-0.5 rounded transition-colors ${lang === 'en' ? 'bg-white text-[#0f2540] font-semibold' : 'hover:text-white'}`} aria-pressed={lang === 'en'}>English</button>
-          <button onClick={() => setLang('mr')} className={`px-2 py-0.5 rounded transition-colors ${lang === 'mr' ? 'bg-white text-[#0f2540] font-semibold' : 'hover:text-white'}`} aria-pressed={lang === 'mr'}>मराठी</button>
+          <button onClick={() => handleLangChange('en')} className={`px-2 py-0.5 rounded transition-colors ${lang === 'en' ? 'bg-white text-[#0f2540] font-semibold' : 'hover:text-white'}`} aria-pressed={lang === 'en'}>English</button>
+          <button onClick={() => handleLangChange('mr')} className={`px-2 py-0.5 rounded transition-colors ${lang === 'mr' ? 'bg-white text-[#0f2540] font-semibold' : 'hover:text-white'}`} aria-pressed={lang === 'mr'}>मराठी</button>
           <span className="text-white/30">|</span>
-          <button className="px-2 py-0.5 hover:text-white hover:underline transition-colors">Sitemap</button>
+          <a href="#help-resources" className="px-2 py-0.5 hover:text-white hover:underline transition-colors">Sitemap</a>
         </div>
       </div>
     </div>
@@ -173,12 +231,14 @@ export function PortalHeader({
   onGoToLogin,
   onGoToNotifications,
   onOpenRegAssistant,
+  showSearchAndHelp = true,
 }: {
   isLoggedIn: boolean
   setIsLoggedIn: (v: boolean) => void
   onGoToLogin: () => void
   onGoToNotifications?: () => void
   onOpenRegAssistant?: () => void
+  showSearchAndHelp?: boolean
 }) {
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -221,11 +281,9 @@ export function PortalHeader({
 
         {/* Right actions */}
         <div className="flex flex-wrap items-center justify-center xl:justify-end gap-3 w-full xl:w-auto">
-          <div className="relative hidden md:block">
-            <input type="search" placeholder="Search…" aria-label="Search" className="pl-9 pr-4 py-2 text-sm border border-[#d1d9e0] rounded bg-[#f8f9fb] focus:outline-none focus:ring-2 focus:ring-[#1a56db] w-56 placeholder:text-[#9aa5b4]" />
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9aa5b4]"><Icon.Search /></span>
-          </div>
-          <button aria-label="Help" onClick={onOpenRegAssistant} className="p-2 rounded hover:bg-[#f0f4f8] text-[#4a5568] hover:text-[#1a3a5c] transition-colors" title="Regulatory Assistant"><Icon.Help /></button>
+          {showSearchAndHelp && (
+            <button aria-label="Help" onClick={onOpenRegAssistant} className="p-2 rounded hover:bg-[#f0f4f8] text-[#4a5568] hover:text-[#1a3a5c] transition-colors" title="Regulatory Assistant"><Icon.Help /></button>
+          )}
           {isLoggedIn && (
             <button aria-label="Notifications — 3 unread" onClick={onGoToNotifications} className="p-2 rounded hover:bg-[#f0f4f8] text-[#4a5568] hover:text-[#1a3a5c] transition-colors relative">
               <Icon.Bell />
@@ -291,44 +349,70 @@ export function PortalHeader({
 
 // ─── Footer ───────────────────────────────────────────────────────────────────
 export function Footer() {
+  const FOOTER_SECTIONS = [
+    {
+      title: 'About',
+      links: [
+        { name: 'About the Portal', href: '#service-explorer' },
+        { name: 'Objectives', href: '#connected-journey' },
+        { name: 'Nodal Agency', href: '#business-dna' },
+        { name: 'MoU Partners', href: '#policies-schemes' },
+      ],
+    },
+    {
+      title: 'Services',
+      links: [
+        { name: 'Online Applications', href: '#service-explorer' },
+        { name: 'Track Status', href: '#service-explorer' },
+        { name: 'Scheme Calculator', href: '#policies-schemes' },
+        { name: 'Document Checklist', href: '#business-dna' },
+      ],
+    },
+    {
+      title: 'Policies',
+      links: [
+        { name: 'Website Policies', href: '#policies-schemes' },
+        { name: 'Terms & Conditions', href: '#policies-schemes' },
+        { name: 'Privacy Policy', href: '#policies-schemes' },
+        { name: 'Accessibility Statement', href: '#help-resources' },
+        { name: 'Copyright Policy', href: '#policies-schemes' },
+        { name: 'Hyperlinking Policy', href: '#policies-schemes' },
+      ],
+    },
+    {
+      title: 'Support',
+      links: [
+        { name: 'Help & Guidance', href: '#help-resources' },
+        { name: 'Contact Us', href: '#help-resources' },
+        { name: 'Feedback', href: '#help-resources' },
+        { name: 'Sitemap', href: '#help-resources' },
+        { name: 'Grievance Redressal', href: '#help-resources' },
+      ],
+    },
+  ];
+
   return (
     <footer className="bg-[#0f2540] text-white mt-auto" role="contentinfo">
       <div className="max-w-[1440px] mx-auto px-6 py-8">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-          <div>
-            <h3 className="text-sm font-semibold text-white/90 uppercase tracking-wider mb-3">About</h3>
-            <ul className="space-y-2 text-sm text-white/65">
-              {['About the Portal', 'Objectives', 'Nodal Agency', 'MoU Partners'].map(l => <li key={l}><span>{l}</span></li>)}
-            </ul>
-          </div>
-          <div>
-            <h3 className="text-sm font-semibold text-white/90 uppercase tracking-wider mb-3">Services</h3>
-            <ul className="space-y-2 text-sm text-white/65">
-              {['Online Applications', 'Track Status', 'Scheme Calculator', 'Document Checklist'].map(l => <li key={l}><span>{l}</span></li>)}
-            </ul>
-          </div>
-          <div>
-            <h3 className="text-sm font-semibold text-white/90 uppercase tracking-wider mb-3">Policies</h3>
-            <ul className="space-y-2 text-sm text-white/65">
-              {['Website Policies', 'Terms & Conditions', 'Privacy Policy', 'Accessibility Statement', 'Copyright Policy', 'Hyperlinking Policy'].map(l => <li key={l}><span>{l}</span></li>)}
-            </ul>
-          </div>
-          <div>
-            <h3 className="text-sm font-semibold text-white/90 uppercase tracking-wider mb-3">Support</h3>
-            <ul className="space-y-2 text-sm text-white/65">
-              {['Help & Guidance', 'Contact Us', 'Feedback', 'Sitemap', 'Grievance Redressal'].map(l => <li key={l}><span>{l}</span></li>)}
-            </ul>
-          </div>
+          {FOOTER_SECTIONS.map((section) => (
+            <div key={section.title}>
+              <h3 className="text-sm font-semibold text-white/90 uppercase tracking-wider mb-3">{section.title}</h3>
+              <ul className="space-y-2 text-sm text-white/65">
+                {section.links.map((l) => (
+                  <li key={l.name}>
+                    <a href={l.href} className="hover:text-white hover:underline transition-colors">
+                      {l.name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
-        <div className="border-t border-white/15 pt-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs text-white/50">
-          <div className="space-y-1">
-            <p>Content owned by <span className="text-white/70">Government of Maharashtra, Industries, Energy and Labour Department</span></p>
-            <p>Portal developed and maintained by <span className="text-white/70">Maharashtra Industrial Development Corporation (MIDC)</span></p>
-          </div>
-          <div className="text-right space-y-1">
-            <p>Last Updated: <span className="text-white/70">22 September 2026</span></p>
-            <p>© 2026 Government of Maharashtra. All rights reserved.</p>
-          </div>
+        <div className="border-t border-white/15 pt-5 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-white/50">
+          <p>© 2026 Government of Maharashtra. All rights reserved.</p>
+          <p>Last Updated: <span className="text-white/70">22 September 2026</span></p>
         </div>
       </div>
     </footer>

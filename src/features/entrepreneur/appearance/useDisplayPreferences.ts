@@ -15,11 +15,33 @@ export function useDisplayPreferences() {
     setHighContrast(sessionStorage.getItem('entrepreneur_demo_high_contrast') === 'true')
   }, [])
 
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      const sizeMap = { sm: '14px', md: '16px', lg: '18.5px' };
+      document.documentElement.style.fontSize = sizeMap[fontSize] || '16px';
+    }
+  }, [fontSize]);
+
   return {
     lang,
-    setLang: (value: 'en' | 'mr') => { sessionStorage.setItem('entrepreneur_demo_language', value); setLang(value) },
+    setLang: (value: 'en' | 'mr') => {
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('entrepreneur_demo_language', value);
+        document.cookie = `googtrans=/en/${value}; path=/;`;
+        document.cookie = `googtrans=/en/${value}; domain=${window.location.hostname}; path=/;`;
+        const select = document.querySelector('.goog-te-combo') as HTMLSelectElement | null;
+        if (select) {
+          select.value = value;
+          select.dispatchEvent(new Event('change'));
+        }
+      }
+      setLang(value);
+    },
     fontSize,
-    setFontSize: (value: 'sm' | 'md' | 'lg') => { sessionStorage.setItem('entrepreneur_demo_font_size', value); setFontSize(value) },
+    setFontSize: (value: 'sm' | 'md' | 'lg') => {
+      sessionStorage.setItem('entrepreneur_demo_font_size', value);
+      setFontSize(value);
+    },
     highContrast,
     setHighContrast: (value: boolean) => { sessionStorage.setItem('entrepreneur_demo_high_contrast', String(value)); setHighContrast(value) },
     fontSizeClass: fontSize === 'sm' ? 'text-[13px]' : fontSize === 'lg' ? 'text-[16px]' : 'text-[14px]',

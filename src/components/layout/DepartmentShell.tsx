@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { AccessibilityStrip } from '@/App';
+import { AccessibilityStrip } from '@/features/entrepreneur/public-auth/PublicChrome';
 
 export default function DepartmentShell({ children, requireAuth = false }: { children: React.ReactNode, requireAuth?: boolean }) {
   const [lang, setLang] = useState<'en' | 'mr'>('en');
   const [fontSize, setFontSize] = useState<'sm' | 'md' | 'lg'>('md');
   const [highContrast, setHighContrast] = useState(false);
-    const router = useRouter();
+  const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
@@ -18,7 +18,19 @@ export default function DepartmentShell({ children, requireAuth = false }: { chi
     } else {
       setIsLoggedIn(auth || !requireAuth);
     }
+
+    const storedLang = sessionStorage.getItem('entrepreneur_demo_language');
+    if (storedLang === 'en' || storedLang === 'mr') {
+      setLang(storedLang);
+    }
   }, [requireAuth, router]);
+
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      const sizeMap = { sm: '14px', md: '16px', lg: '18.5px' };
+      document.documentElement.style.fontSize = sizeMap[fontSize] || '16px';
+    }
+  }, [fontSize]);
 
   if (requireAuth && !isLoggedIn) return null;
 
@@ -42,7 +54,9 @@ export default function DepartmentShell({ children, requireAuth = false }: { chi
       <main className="flex-1 flex flex-col">
         {children}
       </main>
-      <footer className="bg-[#0f2540] px-6 py-4 text-center text-xs text-white/70">Content owned by Government of Maharashtra · © 2026 Government of Maharashtra</footer>
+      <footer className="bg-[#0f2540] px-6 py-4 text-center text-xs text-white/70">
+        © 2026 Government of Maharashtra. All rights reserved.
+      </footer>
     </div>
   );
 }

@@ -184,17 +184,6 @@ function SearchFilterToolbar({ search, setSearch, stageFilter, setStageFilter, s
 
   return (
     <div className="bg-white border border-[#d1d9e0] rounded p-3 mb-5 flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-      <div className="relative flex-1 min-w-[200px]">
-        <input
-          type="search"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="Search by business, project, industry or location"
-          aria-label="Search businesses and projects"
-          className="w-full pl-9 pr-3 py-2 text-sm border border-[#d1d9e0] rounded bg-[#f8f9fb] focus:outline-none focus:ring-2 focus:ring-[#1a56db] focus:border-[#1a56db] placeholder:text-[#9aa5b4] transition-colors"
-        />
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9aa5b4]"><Icon.Search /></span>
-      </div>
       <div className="flex items-center gap-2 shrink-0">
         <span className="text-[#9aa5b4]"><Icon.Filter /></span>
         <select

@@ -7,11 +7,22 @@ import { AccessibilityStrip, PortalHeader, DemoNotice, Footer, AuthShell } from 
 import { IndustrialLoginPage, CreateAccountPage, CompleteRegistrationPage, RegistrationSuccessPage } from './AuthForms'
 import { useDisplayPreferences } from '../appearance/useDisplayPreferences'
 
+import { HeroCarousel } from '../public-landing/HeroCarousel'
+import { AnnouncementStrip } from '../public-landing/AnnouncementStrip'
+import { GuidedDiscovery } from '../public-landing/GuidedDiscovery'
+import { RoleGateway } from '../public-landing/RoleGateway'
+import { ServiceExplorer } from '../public-landing/ServiceExplorer'
+import { ConnectedJourney } from '../public-landing/ConnectedJourney'
+import { IntelligentEkatma } from '../public-landing/IntelligentEkatma'
+import { BusinessDnaSection } from '../public-landing/BusinessDnaSection'
+import { UpdatesCarousel } from '../public-landing/UpdatesCarousel'
+import { HelpResources } from '../public-landing/HelpResources'
+
 const VERIFIED_EMAIL_KEY = 'entrepreneur_demo_verified_email'
 const REGISTERED_EMAIL_KEY = 'entrepreneur_demo_registered_email'
 const AUTH_KEY = 'entrepreneur_demo_auth'
 
-function PublicFrame({ children, auth = false }: { children: React.ReactNode; auth?: boolean }) {
+function PublicFrame({ children, auth = false, isLanding = false }: { children: React.ReactNode; auth?: boolean; isLanding?: boolean }) {
   const router = useRouter()
   const { fontSizeClass, contrastClass, ...sharedProps } = useDisplayPreferences()
   return (
@@ -23,8 +34,8 @@ function PublicFrame({ children, auth = false }: { children: React.ReactNode; au
       ) : (
         <>
           <AccessibilityStrip {...sharedProps} />
-          <PortalHeader isLoggedIn={false} setIsLoggedIn={() => {}} onGoToLogin={() => router.push(ENTREPRENEUR_ROUTES.login())} />
-          <DemoNotice />
+          <PortalHeader isLoggedIn={false} setIsLoggedIn={() => {}} onGoToLogin={() => router.push(ENTREPRENEUR_ROUTES.login())} showSearchAndHelp={!isLanding} />
+          {!isLanding && <DemoNotice />}
           {children}
           <Footer />
         </>
@@ -34,23 +45,19 @@ function PublicFrame({ children, auth = false }: { children: React.ReactNode; au
 }
 
 export function PublicLanding() {
-  const router = useRouter()
   return (
-    <PublicFrame>
+    <PublicFrame isLanding>
       <main id="main-content" className="flex-1 bg-[#f8f9fb]" tabIndex={-1}>
-        <div className="max-w-[960px] mx-auto px-6 py-16 text-center">
-          <div className="flex justify-center mb-6">
-            <img src="/assets/india-emblem.png" alt="" aria-hidden="true" className="h-16 w-auto object-contain opacity-20" />
-          </div>
-          <h1 className="text-2xl font-bold text-[#1a3a5c] mb-3">Welcome to EKATMA</h1>
-          <p className="text-[#6b7a8d] text-sm max-w-lg mx-auto mb-8">
-            The official Government of Maharashtra industrial and entrepreneurship portal. Sign in or register to access services, track applications, and connect with government schemes.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <button onClick={() => router.push(ENTREPRENEUR_ROUTES.login())} className="bg-[#1a3a5c] text-white text-sm font-medium px-6 py-2.5 rounded hover:bg-[#0f2540] focus:ring-2 focus:ring-[#1a56db] focus:ring-offset-2 transition-colors">Industrial Login</button>
-            <button onClick={() => router.push('/department/login')} className="border border-[#1a3a5c] text-[#1a3a5c] text-sm font-medium px-6 py-2.5 rounded hover:bg-[#f0f4f8] focus:ring-2 focus:ring-[#1a56db] focus:ring-offset-2 transition-colors">Department Login</button>
-          </div>
-        </div>
+        <HeroCarousel />
+        <AnnouncementStrip />
+        <GuidedDiscovery />
+        <RoleGateway />
+        <ServiceExplorer />
+        <ConnectedJourney />
+        <IntelligentEkatma />
+        <BusinessDnaSection />
+        <UpdatesCarousel />
+        <HelpResources />
       </main>
     </PublicFrame>
   )
