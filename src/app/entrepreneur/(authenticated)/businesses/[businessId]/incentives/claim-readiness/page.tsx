@@ -1,0 +1,1 @@
+export default function Page() { return <div>Scaffold for claim-readiness</div>; }

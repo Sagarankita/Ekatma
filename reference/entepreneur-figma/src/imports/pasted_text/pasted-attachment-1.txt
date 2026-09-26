@@ -1,0 +1,632 @@
+Create the following screens as the **next steps of the existing E14 Approval Application Workspace flow**:
+
+* **E15 — Pre-validation**
+* **E16 — Cross-form Consistency**
+* **E17 — Payment / Submission**
+
+These screens must visually and structurally belong to the same existing EKATMA Government of Maharashtra portal and use the same established components, typography, spacing, buttons, status treatments, header, breadcrumb, forms, and page structure already used in E14 and the existing EKATMA screens.
+
+**Do not introduce a new visual style for these screens.**
+
+**Important:** Do NOT use emojis or decorative/AI-generated icons anywhere in these screens. Do not use symbols such as 📋, ✓, ⚠️, 🤖, ✨, 🔍, etc. as decorative UI elements. Use the existing EKATMA icon system only where an icon already exists in the established interface; otherwise use plain text, standard status badges, or simple controls.
+
+---
+
+# E15 — PRE-VALIDATION
+
+E15 is the objective validation step immediately after the entrepreneur completes/reviews the E14 application.
+
+Flow:
+
+**E14 Application Workspace**
+→ **Review Application**
+→ **E15 Pre-validation**
+
+The purpose is to identify objective application issues before submission.
+
+## 1. PAGE STRUCTURE
+
+Use the established EKATMA page structure:
+
+* Existing Government of Maharashtra / EKATMA header
+* Existing breadcrumb
+* Page title
+* Application context
+* Main validation content
+* Existing EKATMA action/footer pattern
+
+Show application context such as:
+
+**MPCB — Consent to Establish**
+
+**Sahyadri Bio-Pharma Pvt Ltd — Chakan Industrial Area Phase II**
+
+Do not create a separate dark application header or a new dashboard-style shell.
+
+---
+
+# 2. VALIDATION CHECKS
+
+Objectively check:
+
+* Mandatory fields
+* Mandatory documents
+* Data formats
+* Valid dates
+* Certificate expiry
+* Dependent forms / annexures
+* Declarations
+* Numeric values
+* Calculations
+* Contradictory answers
+* Unexpected common-data changes
+* Conditional requirements
+* Prior approval requirements
+* Unresolved blocking `Needs Verification` items where configured
+
+Only identify issues that can be objectively determined from the application data/configuration.
+
+Do not make subjective legal interpretations.
+
+---
+
+# 3. GROUP ISSUES BY SECTION
+
+Organize validation issues according to the relevant application section.
+
+For example:
+
+### Common Information
+
+* Missing/invalid common information
+
+### Service-Specific Questions
+
+* Missing mandatory answer
+* Contradictory value
+
+### Forms & Annexures
+
+* Required dependent form incomplete
+* Missing annexure
+
+### Documents
+
+* Missing required document
+* Expired certificate
+* Invalid document state
+
+### Declarations
+
+* Required declaration incomplete
+
+This should allow the entrepreneur to immediately understand **where the problem exists and what needs attention**.
+
+---
+
+# 4. ISSUE STATES
+
+Clearly distinguish:
+
+### Blocking
+
+The application cannot proceed until resolved.
+
+### Warning / Attention
+
+The entrepreneur should review the issue, but it does not necessarily prevent submission.
+
+### Passed
+
+The objective check has been satisfied.
+
+Do not use a single generic "Validation Status" to hide the underlying issue.
+
+---
+
+# 5. ISSUE ACTIONS
+
+For each issue, where applicable, provide an action such as:
+
+**Fix this**
+
+**Review section**
+
+**View document**
+
+**Review source**
+
+The action should take the entrepreneur directly to the relevant E14 section/document where possible.
+
+Do not force the user to manually search for the issue.
+
+---
+
+# 6. SUBMISSION CONTROL
+
+If one or more **blocking objective errors** remain:
+
+**Submit Application must remain disabled.**
+
+Clearly explain why submission is blocked.
+
+Example:
+
+**3 blocking issues must be resolved before submission.**
+
+Do not disable the button without explaining the reason.
+
+If only non-blocking warnings remain, allow the application to proceed according to the configured service rules.
+
+---
+
+# 7. LEGAL / AI BOUNDARY
+
+Pre-validation is an objective application-quality check.
+
+Do NOT present:
+
+* AI interpretation
+* predicted approval
+* legal conclusion
+* legal eligibility judgment
+* department decision
+
+as a validation result.
+
+Use factual language such as:
+
+**“Required field is missing.”**
+
+rather than:
+
+**“Your application will be rejected.”**
+
+---
+
+# 8. E15 ACTIONS
+
+Provide the existing EKATMA-style actions:
+
+* Back / Previous
+* Save Draft
+* Review Issues
+* Continue / Proceed where allowed
+
+The primary action should continue to **E16 Cross-form Consistency** when the configured E15 checks are satisfied.
+
+Flow:
+
+**E15**
+→ **E16**
+
+---
+
+# E16 — CROSS-FORM CONSISTENCY
+
+E16 checks whether common Business DNA / Master Project Dossier facts remain consistent across the entrepreneur's digital applications.
+
+This is a **cross-application consistency check**, not a legal approval check.
+
+---
+
+# 9. PAGE STRUCTURE
+
+Use the same EKATMA page structure as E15 and E14.
+
+Do not introduce a new comparison-dashboard visual style.
+
+Present the information using a clean government-portal table/comparison layout.
+
+---
+
+# 10. MASTER VALUE COMPARISON
+
+Compare common values against the verified Master Project Dossier.
+
+Example:
+
+### Production Capacity
+
+| Source                 |     Value | Result     |
+| ---------------------- | --------: | ---------- |
+| Master Project Dossier | 100 T/day | Verified   |
+| MPCB                   | 100 T/day | Consistent |
+| DISH                   | 100 T/day | Consistent |
+| Fire                   |  80 T/day | Review     |
+
+Do not use emoji or decorative checkmark/warning icons.
+
+Use the existing EKATMA text/status treatment for:
+
+* Consistent
+* Review
+* Conflict
+* Verified
+
+---
+
+# 11. CHECK THESE COMMON FACTS
+
+Compare where applicable:
+
+* Plot area
+* Investment
+* Employees
+* Building area
+* Water
+* Power
+* Production capacity
+* Project location
+* Legal entity identity
+
+Only compare fields that are relevant to the selected applications.
+
+Do not create meaningless comparisons for fields that do not apply.
+
+---
+
+# 12. SOURCE / VERIFICATION CONTEXT
+
+For conflicting values, clearly show:
+
+* Master Dossier value
+* Application value
+* Source
+* Verification state
+* Which application contains the difference
+
+The entrepreneur must be able to understand **where the conflicting value came from**.
+
+---
+
+# 13. CONFLICT EXAMPLE
+
+Example:
+
+**Plot Area**
+
+Master Project Dossier: 4,800 m²
+MPCB Application: 4,800 m²
+Fire Application: 4,500 m²
+
+Show:
+
+**Review required**
+
+Then explain:
+
+**The Fire application contains a different value from the Master Project Dossier.**
+
+Do not automatically decide which value is correct.
+
+---
+
+# 14. ACTIONS FOR CONFLICTS
+
+Provide appropriate actions:
+
+* **Use verified value**
+* **Review source**
+* **Keep justified exception**
+* **Correct source record where permitted**
+
+Never silently overwrite conflicting data.
+
+If the entrepreneur changes a Master Project Dossier value, preserve the existing EKATMA data-provenance/version behavior.
+
+---
+
+# 15. IMPORTANT DISTINCTION
+
+E16 should identify **data inconsistency**.
+
+It must NOT claim:
+
+* The application is legally invalid
+* The application will be rejected
+* A department will reject the application
+* Which value is legally correct unless that is explicitly established by the source/configuration
+
+Keep the language objective.
+
+---
+
+# 16. E16 FLOW
+
+After resolving/reviewing consistency issues:
+
+**E16**
+→ **E17 Payment / Submission**
+
+The entrepreneur should also be able to return to the relevant E14 section to correct the underlying information.
+
+---
+
+# E17 — PAYMENT / SUBMISSION
+
+E17 is the final application review and submission step.
+
+It should follow directly from:
+
+**E15 Pre-validation**
+→ **E16 Cross-form Consistency**
+→ **E17 Payment / Submission**
+
+Use the same EKATMA application-page structure.
+
+---
+
+# 17. APPLICATION SUMMARY
+
+Show a concise final summary containing:
+
+* Application summary
+* Department
+* Service
+* Forms / Annexures
+* Documents
+* Declarations
+* Validation state
+* Consistency state
+
+Example:
+
+**Department:** MPCB
+**Service:** Consent to Establish
+**Application:** New Application
+
+Do not create oversized summary cards.
+
+Use the existing EKATMA summary/table/form styling.
+
+---
+
+# 18. VALIDATION STATE
+
+Show the final E15 state.
+
+For example:
+
+**Validation: Passed**
+
+or
+
+**Validation: Action Required**
+
+If blocking issues remain, do not allow submission.
+
+Provide a clear link/action to return to the relevant validation issue.
+
+---
+
+# 19. CONSISTENCY STATE
+
+Show the E16 result separately.
+
+Examples:
+
+**Consistency: Reviewed**
+
+**Consistency: Action Required**
+
+Do not merge validation and consistency into one generic status.
+
+The entrepreneur should understand that:
+
+**Pre-validation = Is the application objectively complete and valid?**
+
+while:
+
+**Cross-form Consistency = Do common facts remain consistent across applications?**
+
+---
+
+# 20. FEE / E-CHALLAN
+
+Fees are **conditional by service**.
+
+Do NOT imply that every application requires payment.
+
+Support these states:
+
+* Not Applicable
+* Fee Due
+* Payment Pending
+* Paid / Confirmed
+* Failed / Retry
+
+Show the appropriate state based on the selected service configuration.
+
+For a service with no fee:
+
+**Fee: Not Applicable**
+
+Do not show a fake payment step.
+
+---
+
+# 21. PAYMENT FLOW
+
+If payment is required:
+
+**Fee Due**
+→ Payment / e-Challan
+→ **Payment Pending**
+→ **Paid / Confirmed**
+
+If payment fails:
+
+**Failed / Retry**
+
+After successful payment, return to the submission state.
+
+Do not allow submission until required payment is confirmed.
+
+If the service has no fee, bypass payment and proceed directly to submission.
+
+---
+
+# 22. FINAL SUBMISSION
+
+Primary CTA:
+
+**Submit Application**
+
+Before submission, provide a clear final confirmation state.
+
+The entrepreneur should understand:
+
+* What they are submitting
+* Which department receives it
+* Which service is being submitted
+* Whether validation passed
+* Whether consistency was reviewed
+* Whether payment was completed where applicable
+
+Do not use alarming or unnecessary language.
+
+---
+
+# 23. AFTER SUBMISSION
+
+After successful submission, create/show:
+
+* Application ID
+* Business ID
+* Project ID
+* Department
+* Service ID / Service
+* Submission timestamp
+* SLA start if applicable
+* Next expected step
+
+Example:
+
+**Application ID:** APP-XXXX
+
+**Department:** MPCB
+
+**Service:** Consent to Establish
+
+**Submitted:** 23 Sep 2026
+
+**SLA:** Started
+
+**Next expected step:** Document Scrutiny
+
+Use realistic placeholder IDs only for visual prototyping. Do not invent real regulatory identifiers.
+
+---
+
+# 24. SUCCESS STATE
+
+After submission, show a clear confirmation within the existing EKATMA visual system.
+
+Example:
+
+**Application Submitted Successfully**
+
+Then show the application identifiers and next step.
+
+Primary action:
+
+**View Application Tracker**
+
+→ **E18 Application Tracker**
+
+Also allow:
+
+**View Application Detail**
+
+→ **E19 Application Detail**
+
+---
+
+# 25. PROTOTYPE CONNECTIVITY
+
+The complete prototype flow must be:
+
+**E14 Application Workspace**
+→ **E15 Pre-validation**
+→ **E16 Cross-form Consistency**
+→ **E17 Payment / Submission**
+→ **E18 Application Tracker**
+→ **E19 Application Detail**
+
+Additional links:
+
+**E15 issue**
+→ Relevant E14 section
+
+**E16 conflict**
+→ Relevant E14 section / source record where permitted
+
+**E17 Documents**
+→ E11 Document Centre
+
+**E17 Requirement context**
+→ E10 Requirement Detail
+
+**E17 Dependency context**
+→ E09 Regulatory Journey / E13 Dependency Graph where relevant
+
+After successful submission:
+
+**E17**
+→ **E18 Application Tracker**
+
+---
+
+# 26. VISUAL CONSISTENCY — IMPORTANT
+
+All three screens must look like **direct continuations of E14 and the existing EKATMA portal**, not newly generated standalone pages.
+
+Reuse the established:
+
+* Government of Maharashtra header
+* EKATMA header/navigation
+* Breadcrumbs
+* Typography
+* Content width
+* Form controls
+* Tables
+* Buttons
+* Status badges
+* Alerts
+* Spacing
+* Borders
+* Colors
+* Page background
+* Footer/action patterns
+
+Do not introduce:
+
+* Emoji
+* Decorative icons
+* AI-generated illustrations
+* Robot/sparkle icons
+* Gradient cards
+* Glassmorphism
+* Excessive rounded cards
+* Generic SaaS dashboard layouts
+* New color palettes
+* New application-specific header designs
+
+**When an existing EKATMA component can be reused, reuse it instead of creating a new component.**
+
+The visual hierarchy should remain restrained, institutional, and consistent with the existing Government of Maharashtra portal.
+
+---
+
+# 27. FINAL CONSISTENCY TEST
+
+Before considering E15–E17 complete, verify this:
+
+**E14 → E15 → E16 → E17 → E18**
+
+should feel like **one continuous application journey**.
+
+A user should not feel that the interface changes design between these screens.
+
+The screens should look as though they were designed as part of the same EKATMA product from the beginning.

@@ -1,0 +1,684 @@
+Exactly. The prompt should be **self-contained** because the only thing you'll give Figma is the prompt. It should not say “attached screenshot,” “refer to the image,” or assume Figma has access to anything except what we explicitly describe.
+
+Here is the corrected, **paste-directly-into-Figma** version:
+
+---
+
+```text
+Build a complete authentication and account-registration flow for a Maharashtra Government industrial/entrepreneur portal.
+
+The design must be consistent with an existing Maharashtra Government / EKATMA government portal design system.
+
+IMPORTANT DESIGN DIRECTION
+
+The website is an official Maharashtra Government portal. Maintain a formal, clean, accessible, institutional government-portal appearance.
+
+Use the following existing visual language consistently throughout every page:
+
+- Government of Maharashtra branding
+- Maharashtra Government emblem
+- EKATMA branding
+- Official Maharashtra government navy-blue navigation/header
+- White content areas
+- Very light gray page backgrounds where appropriate
+- Dark navy typography
+- Blue primary buttons
+- Thin gray borders
+- Subtle border radius
+- Structured form layouts
+- Clear section headings
+- Compact and professional spacing
+- Accessible typography and contrast
+- Simple outline-style icons
+- Formal government-portal visual hierarchy
+
+Do NOT introduce:
+- Gradients
+- Glassmorphism
+- Excessive rounded cards
+- Large decorative illustrations
+- Marketing-style hero sections
+- Consumer-app styling
+- Neon colors
+- Excessive shadows
+- Unnecessary animations
+
+The result should look like a natural extension of an established Maharashtra Government / EKATMA portal.
+
+==================================================
+AUTHENTICATION FLOW
+==================================================
+
+Implement the following complete flow:
+
+Existing Portal
+        ↓
+Hover over Login/User entry
+        ↓
+Industrial Login OR Government Login
+        ↓
+Industrial Login
+        ↓
+New User? Sign up first
+        ↓
+Email + OTP Verification
+        ↓
+Verify OTP
+        ↓
+Complete Registration
+        ↓
+Account Created
+        ↓
+Industrial Login
+        ↓
+Successful Login
+        ↓
+Existing Phase 0 Dashboard / Portal Home
+
+For this task, fully design the Industrial/Entrepreneur authentication flow.
+
+Government Login should only appear as an option in the initial dropdown. Do not build the Government Login flow.
+
+==================================================
+1. LOGIN TYPE DROPDOWN
+==================================================
+
+On the existing portal's login/user access area, create a hover interaction.
+
+When the user hovers over the login/user area, display a dropdown containing exactly two options:
+
+Industrial Login
+Government Login
+
+The dropdown must match the existing Maharashtra Government navigation styling.
+
+Dropdown requirements:
+
+- White background
+- Thin gray border
+- Subtle shadow
+- Navy-blue text
+- Clear hover state
+- Adequate padding
+- Accessible click targets
+- Keyboard accessible
+- No unnecessary decorative elements
+
+When the user selects:
+
+Industrial Login
+
+navigate to the Industrial Login page.
+
+==================================================
+2. INDUSTRIAL LOGIN PAGE
+==================================================
+
+Create a dedicated Industrial Login page.
+
+Keep the official government header and footer structure consistent with the rest of the portal.
+
+Page heading:
+
+Industrial Login
+
+Supporting text:
+
+"Sign in to access your EKATMA account."
+
+The login form must contain ONLY TWO INPUTS:
+
+1. Email ID
+2. Password
+
+Email field:
+
+Label:
+Email ID *
+
+Placeholder:
+Enter your email ID
+
+Password field:
+
+Label:
+Password *
+
+Placeholder:
+Enter your password
+
+Include a small password visibility toggle inside the password field.
+
+Primary button:
+
+Login
+
+Below the login button, display:
+
+"New user? Sign up first"
+
+Make "Sign up first" a clearly clickable link.
+
+Do NOT include:
+- Mobile number
+- Aadhaar
+- OTP
+- Business name
+- PAN
+- Address
+- Date of birth
+- Any registration fields
+
+The login page should be visually simple and focused.
+
+Include appropriate validation states:
+
+- Empty email
+- Invalid email format
+- Empty password
+- Incorrect credentials
+
+Use the same formal error styling as the rest of the government portal.
+
+==================================================
+3. SIGN-UP / EMAIL OTP VERIFICATION PAGE
+==================================================
+
+When the user clicks:
+
+Sign up first
+
+navigate to a separate account-creation verification page.
+
+Page heading:
+
+Create Account
+
+Supporting text:
+
+"Verify your email address to create your account."
+
+This page should initially contain:
+
+Email ID *
+
+Placeholder:
+
+Enter your email ID
+
+Primary button:
+
+Send OTP
+
+After clicking Send OTP, change the interface to the OTP verification state.
+
+Display:
+
+Email ID
+
+OTP *
+
+Placeholder:
+
+Enter OTP
+
+Primary button:
+
+Verify OTP
+
+Also provide:
+
+Resend OTP
+
+Initially, the resend option may display a countdown:
+
+Resend OTP in 30s
+
+After the countdown expires:
+
+Resend OTP
+
+Display a small informational message after sending:
+
+"OTP has been sent to your email address."
+
+The user must verify the OTP before continuing.
+
+Do NOT place the complete registration form on this page.
+
+Do NOT ask for:
+- Password
+- Business information
+- Address
+- Aadhaar
+- Date of birth
+- Mobile number
+
+The purpose of this page is ONLY email verification.
+
+After successful OTP verification:
+
+Display a brief success state:
+
+"Email verified successfully."
+
+Then redirect the user to the Complete Registration page.
+
+==================================================
+4. COMPLETE REGISTRATION PAGE
+==================================================
+
+After successful email verification, show:
+
+Page heading:
+
+Complete Registration
+
+Supporting text:
+
+"Enter your details to create your EKATMA account."
+
+The email address used during OTP verification should automatically appear in the form.
+
+EMAIL
+
+Email ID *
+
+The verified email should be pre-filled.
+
+Make the email field read-only because it has already been verified.
+
+Show a small verification indicator:
+
+Verified
+
+==================================================
+PERSONAL DETAILS
+==================================================
+
+Create the following fields:
+
+1. Mobile No. *
+
+Placeholder:
+Enter your mobile number
+
+2. First Name *
+
+Placeholder:
+Enter your first name
+
+3. Middle Name
+
+Placeholder:
+Enter your middle name
+
+4. Last Name *
+
+Placeholder:
+Enter your last name
+
+5. Aadhaar No. / Virtual ID *
+
+Placeholder:
+Enter your Aadhaar No. / Virtual ID
+
+6. Date of Birth *
+
+Use a date picker.
+
+Placeholder:
+
+Pick a date
+
+==================================================
+ADDRESS DETAILS
+==================================================
+
+Create:
+
+7. Communication Address *
+
+Placeholder:
+
+Enter your communication address
+
+8. State *
+
+Dropdown
+
+Placeholder:
+
+Select a State
+
+9. District *
+
+Dropdown
+
+Placeholder:
+
+Select a District
+
+10. Taluka *
+
+Dropdown
+
+Placeholder:
+
+Select a Taluka
+
+11. Village *
+
+Dropdown
+
+Placeholder:
+
+Select a Village
+
+12. Pincode
+
+Placeholder:
+
+Enter your pincode
+
+Use a logical responsive grid so that related fields can appear in two or three columns on desktop while becoming a single column on smaller screens.
+
+==================================================
+IMPORTANT: REMOVE BUSINESS FIELDS
+==================================================
+
+The original industrial registration form contains business-related fields.
+
+DO NOT include:
+
+- Business Name
+- Business Entity PAN
+
+The new registration flow is specifically for creating the user's basic portal account.
+
+There should be NO business-name field and NO business-PAN field anywhere in this registration page.
+
+==================================================
+5. PASSWORD CREATION
+==================================================
+
+At the bottom of the registration form, create a dedicated section:
+
+Password Creation
+
+Fields:
+
+Password *
+
+Placeholder:
+
+Enter your password
+
+Password Confirmation *
+
+Placeholder:
+
+Enter your confirm password
+
+Both fields should have password visibility toggles.
+
+Below the password fields, show the password requirements in a compact information/error panel consistent with the existing government form styling.
+
+Password requirements:
+
+- Minimum 8 characters
+- At least one uppercase letter (A-Z)
+- At least one lowercase letter (a-z)
+- At least one digit (0-9)
+- At least one special character
+
+Show these requirements clearly so the user understands them before submitting.
+
+==================================================
+6. TERMS AND CONDITIONS
+==================================================
+
+Below the password requirements, include:
+
+☐ I agree to the terms and conditions
+
+"terms and conditions" should be a clickable text link.
+
+The Register button should remain disabled until the required fields are valid and the terms checkbox is selected.
+
+==================================================
+7. REGISTER BUTTON
+==================================================
+
+At the bottom of the registration form:
+
+Primary button:
+
+Register
+
+Secondary button:
+
+Cancel
+
+Use the existing government portal button styling.
+
+The Register button should be visually prominent but not oversized.
+
+When the user clicks Register:
+
+Validate all required fields.
+
+Show appropriate inline validation messages.
+
+If registration succeeds, show a success confirmation:
+
+"Registration successful."
+
+Supporting text:
+
+"Your account has been created successfully. You can now log in using your email ID and password."
+
+Provide a button:
+
+Go to Login
+
+Clicking it returns the user to the Industrial Login page.
+
+==================================================
+8. LOGIN AFTER REGISTRATION
+==================================================
+
+The newly created user should be able to return to the Industrial Login page and enter:
+
+Email ID
+Password
+
+After successful authentication:
+
+redirect the user to the existing Phase 0 EKATMA portal/dashboard.
+
+The authenticated user should see the existing portal shell rather than a new visual design.
+
+==================================================
+9. HEADER
+==================================================
+
+Every authentication page should retain the official Maharashtra Government header structure.
+
+Top government utility bar should include:
+
+Government of Maharashtra | महाराष्ट्र शासन
+
+Utility links such as:
+
+Skip to Main Content
+Screen Reader Access
+A-
+A+
+High Contrast
+English
+मराठी
+Sitemap
+
+Below that, maintain the government branding/header area with:
+
+- Government of Maharashtra emblem
+- Maharashtra Government branding
+- EKATMA logo/name
+- "Government of Maharashtra Portal"
+- Search
+- Help
+- Notifications
+- User/login area
+
+Keep the proportions and spacing formal and compact.
+
+==================================================
+10. FOOTER
+==================================================
+
+Use a consistent government footer across:
+
+- Industrial Login
+- Create Account
+- Complete Registration
+- Registration Success
+
+The footer should contain the official government copyright/legal treatment.
+
+Keep it minimal and consistent with the rest of the portal.
+
+==================================================
+11. RESPONSIVE DESIGN
+==================================================
+
+Design all pages responsively.
+
+Desktop:
+- Structured two-column/three-column form grid where appropriate
+- Comfortable but compact spacing
+- Form content centered within the government portal content area
+
+Tablet:
+- Reduce columns appropriately
+
+Mobile:
+- Single-column form
+- Full-width inputs
+- Full-width primary CTA where appropriate
+- Preserve government header usability
+- Do not allow fields to become cramped or horizontally scroll
+
+==================================================
+12. ACCESSIBILITY
+==================================================
+
+Follow government accessibility principles throughout.
+
+Ensure:
+
+- Clear labels for every input
+- Required fields marked consistently
+- Keyboard navigation
+- Visible focus states
+- Sufficient color contrast
+- Accessible error messages
+- Accessible dropdowns
+- Accessible OTP input
+- Buttons have clear action labels
+- Do not rely on color alone to communicate validation status
+- Screen-reader-friendly labels
+- Logical tab order
+
+==================================================
+13. STATES TO DESIGN
+==================================================
+
+Create realistic UI states for the major interactions.
+
+LOGIN:
+- Default
+- Validation error
+- Incorrect credentials
+- Loading
+- Successful login
+
+OTP:
+- Initial email state
+- OTP sent
+- OTP entry
+- Invalid OTP
+- Expired OTP
+- Resend OTP
+- Successful verification
+
+REGISTRATION:
+- Default
+- Validation errors
+- Password requirement validation
+- Terms unchecked
+- Loading
+- Registration success
+
+==================================================
+14. VISUAL CONSISTENCY
+==================================================
+
+The most important requirement is consistency.
+
+Every authentication page must look like it belongs to the same Maharashtra Government / EKATMA portal.
+
+Reuse the same:
+
+- Typography hierarchy
+- Navy-blue primary color
+- Button styles
+- Input styles
+- Borders
+- Border radius
+- Spacing system
+- Form label treatment
+- Alert styling
+- Dropdown styling
+- Header
+- Footer
+- Accessibility controls
+- Icons
+- Page width
+- Content alignment
+
+Do not create a separate "modern login design."
+
+This should feel like an existing government portal that has simply been extended with a properly designed authentication flow.
+
+==================================================
+FINAL FLOW TO IMPLEMENT
+==================================================
+
+1. Existing portal
+2. Hover login/user area
+3. Dropdown:
+   - Industrial Login
+   - Government Login
+4. Select Industrial Login
+5. Industrial Login page
+6. User clicks "New user? Sign up first"
+7. Create Account page
+8. Enter Email ID
+9. Send OTP
+10. Enter OTP
+11. Verify OTP
+12. Email verified
+13. Complete Registration page
+14. Enter basic personal details
+15. Enter address details
+16. Create password
+17. Accept terms and conditions
+18. Click Register
+19. Registration successful
+20. Go to Industrial Login
+21. Login using email + newly created password
+22. Redirect to the existing Phase 0 EKATMA portal/dashboard
+
+Build this as a coherent multi-page authentication experience rather than isolated screens.
+```

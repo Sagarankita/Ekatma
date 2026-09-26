@@ -62,6 +62,21 @@ export const ENTREPRENEUR_ROUTES = {
   incentive: (businessId: string, incentiveId: string) =>
     `${businessPath(businessId)}/incentives/${segment(incentiveId, 'incentive ID')}`,
   incentiveClaims: (businessId: string) => `${businessPath(businessId)}/incentive-claims`,
+
+  // New Incentive Workspace Routes
+  incentiveCentre: (businessId: string) => `${businessPath(businessId)}/incentives/centre`,
+  incentiveCalculator: (businessId: string) => `${businessPath(businessId)}/incentives/calculator`,
+  incentiveCalculatorQuestionnaire: (businessId: string) => `${businessPath(businessId)}/incentives/calculator/questionnaire`,
+  incentiveCalculatorReview: (businessId: string) => `${businessPath(businessId)}/incentives/calculator/review`,
+  incentivePortfolio: (businessId: string) => `${businessPath(businessId)}/incentives/portfolio`,
+  incentivePortfolioDetail: (businessId: string, incentiveId: string) => `${businessPath(businessId)}/incentives/portfolio/${segment(incentiveId, 'incentive ID')}`,
+  incentiveClaimReadiness: (businessId: string) => `${businessPath(businessId)}/incentives/claim-readiness`,
+  incentiveClaim: (businessId: string, claimId: string) => `${businessPath(businessId)}/incentives/claims/${segment(claimId, 'claim ID')}`,
+  incentiveRoi: (businessId: string) => `${businessPath(businessId)}/incentives/roi`,
+  incentiveRoiResults: (businessId: string) => `${businessPath(businessId)}/incentives/roi/results`,
+  incentiveScenarios: (businessId: string) => `${businessPath(businessId)}/incentives/scenarios`,
+  incentivePolicyUpdates: (businessId: string) => `${businessPath(businessId)}/incentives/policy-updates`,
+
   regulatoryChanges: (businessId: string) => `${businessPath(businessId)}/regulatory-changes`,
   changes: (businessId: string) => `${businessPath(businessId)}/changes`,
   amendments: (businessId: string) => `${businessPath(businessId)}/changes/amendments`,
