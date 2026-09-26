@@ -7,6 +7,7 @@ import { M10ReviewPlanPage, M10ReviewPlanPageProps } from '@/components/departme
 import { EmbeddedDocumentOcrViewer } from '@/components/department/EmbeddedDocumentOcrViewer';
 import { DocumentOcrInsightsPage } from '@/components/department/DocumentOcrInsightsPage';
 export { DocumentOcrInsightsPage } from '@/components/department/DocumentOcrInsightsPage';
+import { GovDependencyScreen } from '@/features/department/journey/GovDependencyScreen';
 
 
 import { createContext, useContext } from 'react';
@@ -8233,6 +8234,10 @@ const M17_BLOCKED        = M17_NODES.filter(n => n.status === 'blocked')
 const M17_UNLOCKS        = M17_NODES.filter(n => n.id === 'water' || n.id === 'construction' || n.id === 'fire')
 
 export function M17DependencyViewPage({ onBack, onBackToOverview }: { onBack: () => void; onBackToOverview: () => void }) {
+  return <GovDependencyScreen onBack={onBack} onBackToOverview={onBackToOverview} />;
+}
+
+function LegacyM17ViewPage({ onBack, onBackToOverview }: { onBack: () => void; onBackToOverview: () => void }) {
   const [selectedNode, setSelectedNode] = useState<DepNode | null>(null)
   const [selectedEdge, setSelectedEdge] = useState<DepEdge | null>(null)
   const [relationshipFilter, setRelationshipFilter] = useState<'all'|'prerequisites'|'parallel'|'conditional'|'downstream'|'blocked'>('all')

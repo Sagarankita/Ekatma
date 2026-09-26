@@ -1,317 +1,231 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import {
+  ReactFlow,
+  Controls,
+  MiniMap,
+  Background,
+  BackgroundVariant,
+} from '@xyflow/react';
+import '@xyflow/react/dist/style.css';
+
 import { ENTREPRENEUR_ROUTES } from '@/lib/routes/entrepreneur';
 import type { BusinessProject } from '../businesses/catalog';
-import {
-  listJourneyNodesForBusiness,
-  journeyStateCfg,
-  stageDisplayState,
-  STAGES,
-  type JourneyReq,
-  type DependencyType,
-} from './data';
+import { ApprovalNode } from './components/ApprovalNode';
+import { StageSwimlanes } from './components/StageSwimlanes';
+import { ApprovalSidebar } from './components/ApprovalSidebar';
+import { useDependencyGraph } from './hooks/useDependencyGraph';
+import { Target, ArrowRight } from 'lucide-react';
 
-function EdgeTooltip({
-  fromId,
-  toId,
-  allNodes,
-  onDismiss,
-}: {
-  fromId: string;
-  toId: string;
-  allNodes: JourneyReq[];
-  onDismiss: () => void;
-}) {
-  const from = allNodes.find(n => n.id === fromId);
-  const to = allNodes.find(n => n.id === toId);
-  const dep = to?.dependencies.find(d => d.reqId === fromId);
-  return (
-    <div
-      className="absolute z-20 bg-white border border-[#d1d9e0] rounded shadow-lg p-3 w-56 text-xs text-[#374151]"
-      style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
-    >
-      <p className="font-bold text-[#1a2533] mb-1">Dependency</p>
-      <p>
-        <span className="text-[#9aa5b4]">Prerequisite:</span> {from?.service}
-      </p>
-      <p>
-        <span className="text-[#9aa5b4]">Dependent:</span> {to?.service}
-      </p>
-      {dep?.type === 'conditional' && <p className="mt-1 italic text-[#78350f]">Conditional dependency</p>}
-      {dep?.reason && <p className="mt-1 text-[#6b7a8d]">{dep.reason}</p>}
-      <button
-        type="button"
-        onClick={onDismiss}
-        className="mt-2 text-[#1a56db] hover:underline"
-      >
-        Dismiss
-      </button>
-    </div>
-  );
-}
-
-function GraphNode({
-  req,
-  allNodes,
-  onSelectReq,
-}: {
-  req: JourneyReq;
-  allNodes: JourneyReq[];
-  onSelectReq: (id: string) => void;
-}) {
-  const cfg = journeyStateCfg(req.displayState);
-  const prereqs = req.dependencies.map(d => allNodes.find(n => n.id === d.reqId)).filter(Boolean) as JourneyReq[];
-  return (
-    <div className="relative">
-      <button
-        type="button"
-        onClick={() => onSelectReq(req.id)}
-        className={`w-full text-left p-3 rounded border-l-4 ${cfg.border} border border-[#e8edf2] ${cfg.bg} hover:shadow transition-shadow focus:outline-none focus:ring-2 focus:ring-[#1a56db]`}
-        aria-label={`${req.service} — ${cfg.label}`}
-      >
-        <p className="text-[9px] font-bold text-[#9aa5b4] uppercase tracking-wider">{req.department}</p>
-        <p className={`text-xs font-bold ${cfg.textCls} leading-snug`}>{req.service}</p>
-        <span className={`mt-1 inline-block text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border ${cfg.badgeCls}`}>
-          {cfg.icon} {cfg.label}
-        </span>
-        {req.displayState === 'waiting' && prereqs.length > 0 && (
-          <p className="text-[9px] text-[#9aa5b4] mt-1 leading-tight">
-            Waiting: {prereqs.map(p => p.service).join(', ')}
-          </p>
-        )}
-        {req.displayState === 'approved' && req.unlocks && req.unlocks.length > 0 && (
-          <p className="text-[9px] text-[#166534] mt-1">
-            Unlocks: {req.unlocks.map(uid => allNodes.find(n => n.id === uid)?.service ?? uid).join(', ')}
-          </p>
-        )}
-      </button>
-    </div>
-  );
-}
+const nodeTypes = {
+  approval: ApprovalNode,
+};
 
 export function DependencyScreen({ project }: { project: BusinessProject }) {
-  const router = useRouter();
-  const [activeEdge, setActiveEdge] = useState<string | null>(null);
-  const [cteApproved, setCteApproved] = useState(false);
-  const nodes = listJourneyNodesForBusiness(project.id, cteApproved);
-
-  const handleSelectReq = (reqId: string) => {
-    router.push(ENTREPRENEUR_ROUTES.requirement(project.id, reqId));
-  };
+  const {
+    nodes,
+    edges,
+    selectedNodeId,
+    selectedNode,
+    nextRecommendedNode,
+    allNodes,
+    onNodesChange,
+    onEdgesChange,
+    onNodeClick,
+    setSelectedNodeId,
+    completeSubFormStep,
+    metrics,
+  } = useDependencyGraph(project.id);
 
   return (
-    <main id="main-content" className="flex-1 bg-[#f8f9fb]" tabIndex={-1}>
-      <div className="max-w-[960px] mx-auto px-6 py-5">
-        {/* Breadcrumb */}
-        <div className="mb-4">
-          <nav className="text-xs text-[#6b7a8d] flex items-center gap-1.5" aria-label="Breadcrumb">
-            <Link href={ENTREPRENEUR_ROUTES.businesses()} className="hover:text-[#1a3a5c] hover:underline">
+    <main id="main-content" className="flex-1 bg-slate-50 min-h-screen pb-12 font-sans" tabIndex={-1}>
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-5">
+        {/* Breadcrumb Navigation */}
+        <div className="mb-3 flex items-center justify-between">
+          <nav className="text-xs text-slate-500 flex items-center gap-1.5" aria-label="Breadcrumb">
+            <Link href={ENTREPRENEUR_ROUTES.businesses()} className="hover:text-blue-700 hover:underline">
               My Businesses
             </Link>
             <span>›</span>
-            <Link href={ENTREPRENEUR_ROUTES.business(project.id)} className="hover:text-[#1a3a5c] hover:underline">
+            <Link href={ENTREPRENEUR_ROUTES.business(project.id)} className="hover:text-blue-700 hover:underline">
               {project.name}
             </Link>
             <span>›</span>
-            <Link href={ENTREPRENEUR_ROUTES.journey(project.id)} className="hover:text-[#1a3a5c] hover:underline">
+            <Link href={ENTREPRENEUR_ROUTES.journey(project.id)} className="hover:text-blue-700 hover:underline">
               Regulatory Journey
             </Link>
             <span>›</span>
-            <span className="text-[#1a3a5c] font-medium">Dependencies</span>
+            <span className="text-slate-900 font-semibold">Dependency Map (DAG)</span>
           </nav>
+
+          <Link
+            href={ENTREPRENEUR_ROUTES.journey(project.id)}
+            className="text-xs border border-slate-300 text-slate-700 px-3 py-1.5 rounded-lg hover:bg-slate-100 font-medium transition-colors"
+          >
+            ← Back to List View
+          </Link>
         </div>
 
-        {/* Header */}
-        <div className="mb-4 pb-4 border-b border-[#d1d9e0] flex items-start justify-between gap-4">
+        {/* Header Banner */}
+        <div className="mb-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <p className="text-[10px] font-bold text-[#9aa5b4] uppercase tracking-wider mb-1">E13 — Dependency Graph</p>
-            <h1 className="text-2xl font-bold text-[#1a3a5c]">Dependency Graph</h1>
-            <p className="text-sm text-[#6b7a8d] mt-1">
-              See which regulatory requirements depend on others and what will unlock next.
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xs text-slate-400 font-medium">E13 — Industrial Approval Journey</span>
+            </div>
+            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Regulatory Dependency Map</h1>
+            <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl">
+              Automatic hierarchical layout calculation. Locked approvals automatically unlock when prerequisite sub-forms are submitted.
             </p>
           </div>
-          <Link
-            href={ENTREPRENEUR_ROUTES.journey(project.id)}
-            className="text-xs border border-[#1a56db] text-[#1a56db] px-3 py-2 rounded hover:bg-[#ebf3ff] font-medium transition-colors shrink-0"
-          >
-            Journey View
-          </Link>
         </div>
 
-        {/* Demo toggle */}
-        <div className="mb-4 p-3 bg-[#fffbeb] border border-[#fde68a] rounded flex items-center gap-3">
-          <span className="text-[10px] font-bold text-[#78350f] uppercase tracking-wider">Prototype Demo</span>
-          <button
-            type="button"
-            onClick={() => setCteApproved(v => !v)}
-            className={`text-xs px-3 py-1 rounded font-medium transition-colors ${
-              cteApproved ? 'bg-[#22c55e] text-white' : 'bg-[#e0e7ff] text-[#3730a3]'
-            }`}
-          >
-            {cteApproved ? '✓ CTE Approved (click to reset)' : 'Simulate CTE Approval →'}
-          </button>
-          <span className="text-[10px] text-[#78350f]">Same state as E09</span>
-        </div>
-
-        {/* Context strip */}
-        <div className="mb-4 p-3 bg-white border border-[#d1d9e0] rounded shadow-sm flex flex-wrap gap-4">
-          {[
-            { label: 'Project', value: project.name },
-            { label: 'Business DNA', value: 'Version 1' },
-            { label: 'Journey', value: 'Version 1' },
-          ].map(f => (
-            <div key={f.label}>
-              <p className="text-[10px] font-semibold text-[#9aa5b4] uppercase tracking-wider">{f.label}</p>
-              <p className="text-sm font-semibold text-[#1a2533]">{f.value}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Legend */}
-        <div className="mb-4 flex flex-wrap gap-4 items-center p-3 bg-white border border-[#d1d9e0] rounded text-xs text-[#6b7a8d]">
-          <span className="font-bold text-[#1a2533]">Legend:</span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-6 border-t-2 border-[#374151]" />
-            <span>Required dependency</span>
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-6 border-t-2 border-dashed border-[#f59e0b]" />
-            <span>Conditional dependency</span>
-          </span>
-          {[
-            { l: 'Ready', c: 'bg-[#ebf3ff] text-[#1a3a5c] border-[#b8d0f5]' },
-            { l: 'In Progress / Under Review', c: 'bg-[#ede9fe] text-[#3730a3] border-[#c4b5fd]' },
-            { l: 'Blocked', c: 'bg-[#f8f9fb] text-[#6b7a8d] border-[#d1d9e0]' },
-            { l: 'Approved', c: 'bg-[#f0fdf4] text-[#166534] border-[#86efac]' },
-          ].map(s => (
-            <span
-              key={s.l}
-              className={`px-2 py-0.5 rounded border text-[10px] font-bold uppercase tracking-wider ${s.c}`}
-            >
-              {s.l}
-            </span>
-          ))}
-        </div>
-
-        {/* Stage lanes / DAG */}
-        <div className="space-y-0">
-          {STAGES.map((stage, si) => {
-            const stageNodes = nodes.filter(n => n.stage === stage.key);
-            const stageSt = stageDisplayState(nodes, stage.key);
-            const stCls: Record<string, string> = {
-              Complete: 'text-[#166534]',
-              'In Progress': 'text-[#3730a3]',
-              Waiting: 'text-[#6b7a8d]',
-              Ready: 'text-[#1a56db]',
-              Upcoming: 'text-[#9aa5b4]',
-              'Action Required': 'text-[#92400e]',
-            };
-
-            return (
-              <div key={stage.key}>
-                <div className="border border-[#d1d9e0] rounded-lg overflow-hidden bg-white shadow-sm">
-                  <div className="flex items-center gap-3 px-4 py-3 bg-[#f8f9fb] border-b border-[#e8edf2]">
-                    <span className="text-xs font-bold text-[#9aa5b4] w-6 shrink-0">{stage.num}</span>
-                    <h2 className="text-sm font-bold text-[#1a3a5c] uppercase tracking-wider flex-1">{stage.label}</h2>
-                    <span className={`text-xs font-semibold ${stCls[stageSt] ?? 'text-[#9aa5b4]'}`}>{stageSt}</span>
-                  </div>
-                  <div className="p-4">
-                    {stageNodes.length === 0 ? (
-                      <p className="text-xs text-[#9aa5b4] italic">
-                        {stage.key === 'compliance'
-                          ? 'Compliance obligations will appear after approvals.'
-                          : 'No requirements identified.'}
-                      </p>
-                    ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-                        {stageNodes.map(req => {
-                          const incomingEdges = req.dependencies;
-                          return (
-                            <div key={req.id} className="relative">
-                              {incomingEdges.map(dep => (
-                                <button
-                                  key={dep.reqId + '->' + req.id}
-                                  type="button"
-                                  onClick={() =>
-                                    setActiveEdge(
-                                      activeEdge === dep.reqId + '->' + req.id ? null : dep.reqId + '->' + req.id,
-                                    )
-                                  }
-                                  className={`mb-1.5 w-full flex items-center gap-1 text-[9px] px-2 py-0.5 rounded ${
-                                    dep.type === 'conditional'
-                                      ? 'border border-dashed border-[#f59e0b] text-[#78350f]'
-                                      : 'border border-[#e8edf2] text-[#9aa5b4]'
-                                  } hover:opacity-75`}
-                                  title="Click to see dependency detail"
-                                >
-                                  <span>{dep.type === 'conditional' ? '- -' : '↑'}</span>
-                                  <span className="truncate">
-                                    from: {nodes.find(n => n.id === dep.reqId)?.service ?? dep.reqId}
-                                  </span>
-                                </button>
-                              ))}
-                              {activeEdge && activeEdge.endsWith('->' + req.id) && (() => {
-                                const [fromId] = activeEdge.split('->');
-                                return (
-                                  <EdgeTooltip
-                                    fromId={fromId}
-                                    toId={req.id}
-                                    allNodes={nodes}
-                                    onDismiss={() => setActiveEdge(null)}
-                                  />
-                                );
-                              })()}
-                              <GraphNode req={req} allNodes={nodes} onSelectReq={handleSelectReq} />
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                </div>
-                {/* Connector arrow between stages */}
-                {si < STAGES.length - 1 && (
-                  <div className="flex justify-center py-1.5">
-                    <span className="text-[#d1d9e0] text-xl leading-none">↓</span>
-                  </div>
-                )}
+        {/* Sticky Next Recommended Action Bar */}
+        {nextRecommendedNode && (
+          <div className="mb-4 bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white p-3.5 rounded-xl shadow-md border border-blue-700/50 flex flex-col sm:flex-row items-center justify-between gap-3 sticky top-2 z-20">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-blue-500/20 border border-blue-400/40 flex items-center justify-center shrink-0">
+                <Target className="w-5 h-5 text-blue-300" />
               </div>
-            );
-          })}
-        </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-black uppercase tracking-wider bg-blue-500/30 text-blue-200 px-2 py-0.5 rounded border border-blue-400/30">
+                    Next Recommended Action
+                  </span>
+                  <span className="text-xs font-mono text-blue-300">{nextRecommendedNode.department}</span>
+                </div>
+                <p className="text-sm font-bold text-white mt-0.5">
+                  {nextRecommendedNode.title}
+                </p>
+              </div>
+            </div>
 
-        {/* Summary count note */}
-        <div className="mt-4 p-3 bg-white border border-[#d1d9e0] rounded shadow-sm">
-          <p className="text-xs font-bold text-[#1a2533] mb-2">Journey Summary</p>
-          <div className="flex flex-wrap gap-4">
-            {[
-              { l: 'Approved', v: nodes.filter(n => n.displayState === 'approved').length, c: 'text-[#166534]' },
-              { l: 'Ready', v: nodes.filter(n => n.displayState === 'ready').length, c: 'text-[#1a56db]' },
-              { l: 'Blocked', v: nodes.filter(n => n.displayState === 'waiting').length, c: 'text-[#6b7a8d]' },
-              { l: 'Conditional', v: nodes.filter(n => n.displayState === 'conditional').length, c: 'text-[#78350f]' },
-              {
-                l: 'Not Applicable',
-                v: nodes.filter(n => n.displayState === 'not-applicable').length,
-                c: 'text-[#9aa5b4]',
-              },
-            ].map(m => (
-              <span key={m.l} className={`text-xs font-semibold ${m.c}`}>
-                {m.v} {m.l}
+            <button
+              type="button"
+              onClick={() => setSelectedNodeId(nextRecommendedNode.id)}
+              className="w-full sm:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-lg transition-all shadow-sm flex items-center justify-center gap-1.5 shrink-0"
+            >
+              <span>Focus Requirement & Checklist</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {/* 6-Metric Top Summary Bar */}
+        <div className="mb-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between">
+            <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Total Requirements</span>
+            <div className="flex items-baseline justify-between mt-2">
+              <span className="text-2xl font-black text-slate-900">{metrics.total}</span>
+              <span className="text-xs font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">100%</span>
+            </div>
+          </div>
+
+          <div className="bg-white p-3.5 rounded-xl border border-emerald-200 shadow-xs flex flex-col justify-between">
+            <span className="text-[11px] font-semibold text-emerald-700 uppercase tracking-wider flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-emerald-500" /> Completed
+            </span>
+            <div className="flex items-baseline justify-between mt-2">
+              <span className="text-2xl font-black text-emerald-700">{metrics.completed}</span>
+              <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
+                {Math.round((metrics.completed / metrics.total) * 100)}%
               </span>
-            ))}
+            </div>
+          </div>
+
+          <div className="bg-white p-3.5 rounded-xl border border-blue-200 shadow-xs flex flex-col justify-between">
+            <span className="text-[11px] font-semibold text-blue-700 uppercase tracking-wider flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-blue-500" /> In Progress
+            </span>
+            <div className="flex items-baseline justify-between mt-2">
+              <span className="text-2xl font-black text-blue-700">{metrics.inProgress}</span>
+              <span className="text-xs font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded">Active</span>
+            </div>
+          </div>
+
+          <div className="bg-white p-3.5 rounded-xl border border-amber-200 shadow-xs flex flex-col justify-between">
+            <span className="text-[11px] font-semibold text-amber-800 uppercase tracking-wider flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-amber-500" /> Ready / Unlocked
+            </span>
+            <div className="flex items-baseline justify-between mt-2">
+              <span className="text-2xl font-black text-amber-900">{metrics.ready}</span>
+              <span className="text-xs font-bold text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded">Ready</span>
+            </div>
+          </div>
+
+          <div className="bg-white p-3.5 rounded-xl border border-slate-300 shadow-xs flex flex-col justify-between">
+            <span className="text-[11px] font-semibold text-slate-600 uppercase tracking-wider flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-slate-400" /> Blocked (Locked)
+            </span>
+            <div className="flex items-baseline justify-between mt-2">
+              <span className="text-2xl font-black text-slate-700">{metrics.blocked}</span>
+              <span className="text-xs font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">Locked</span>
+            </div>
+          </div>
+
+          <div className="bg-white p-3.5 rounded-xl border border-purple-200 shadow-xs flex flex-col justify-between">
+            <span className="text-[11px] font-semibold text-purple-700 uppercase tracking-wider flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-purple-500" /> Conditional / N/A
+            </span>
+            <div className="flex items-baseline justify-between mt-2">
+              <span className="text-2xl font-black text-purple-800">{metrics.conditional}</span>
+              <span className="text-xs font-bold text-purple-800 bg-purple-50 px-1.5 py-0.5 rounded">Evaluated</span>
+            </div>
           </div>
         </div>
 
-        <div className="mt-4">
-          <Link
-            href={ENTREPRENEUR_ROUTES.journey(project.id)}
-            className="inline-block border border-[#d1d9e0] text-[#374151] text-sm font-medium px-5 py-2.5 rounded hover:bg-[#f0f4f8] transition-colors"
-          >
-            ← Back to Journey
-          </Link>
+        {/* Swimlanes Header Banner */}
+        <StageSwimlanes />
+
+        {/* Split Screen Container: Left React Flow Canvas, Right Approval Sidebar */}
+        <div className="mt-4 flex flex-col lg:flex-row gap-5 items-start">
+          {/* React Flow Canvas */}
+          <div className="flex-1 w-full bg-white rounded-2xl border border-slate-200 shadow-sm h-[720px] relative overflow-hidden">
+            <ReactFlow
+              nodes={nodes}
+              edges={edges}
+              nodeTypes={nodeTypes}
+              onNodesChange={onNodesChange}
+              onEdgesChange={onEdgesChange}
+              onNodeClick={onNodeClick}
+              nodesDraggable={false}
+              nodesConnectable={false}
+              elementsSelectable={true}
+              fitView
+              minZoom={0.6}
+              maxZoom={1.2}
+              defaultEdgeOptions={{
+                type: 'smoothstep',
+              }}
+            >
+              <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="#cbd5e1" />
+              <Controls className="!bg-white !border-slate-200 !shadow-md !rounded-xl" />
+              <MiniMap
+                className="!bg-white !border-slate-200 !shadow-md !rounded-xl"
+                zoomable={false}
+                pannable={false}
+                nodeColor={n => {
+                  const status = (n.data as any)?.status;
+                  if (status === 'completed') return '#10b981';
+                  if (status === 'in-progress') return '#3b82f6';
+                  if (status === 'ready') return '#f59e0b';
+                  return '#cbd5e1';
+                }}
+              />
+            </ReactFlow>
+          </div>
+
+          {/* Right Sidebar Panel */}
+          {selectedNode && (
+            <ApprovalSidebar
+              selectedNode={selectedNode}
+              allNodes={allNodes}
+              onClose={() => setSelectedNodeId(null)}
+              onCompleteSubFormStep={completeSubFormStep}
+              projectId={project.id}
+            />
+          )}
         </div>
       </div>
     </main>
