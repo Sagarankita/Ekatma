@@ -4,23 +4,25 @@ import { useRouter } from 'next/navigation';
 import { ENTREPRENEUR_ROUTES } from '@/lib/routes/entrepreneur';
 import { useIncentiveWorkspace } from '../state';
 import { IncentiveWorkspaceHeader, SourceBadge } from './IncentiveWorkspaceHeader';
+import { findBusinessProjectById } from '@/features/entrepreneur/businesses/catalog';
 
 export function CalculatorStartScreen() {
   const router = useRouter();
   const { businessId } = useIncentiveWorkspace();
+  const business = findBusinessProjectById(businessId);
   
   const [step] = useState(1);
   const steps = ['Business', 'Location', 'Investment', 'Operations', 'Review'];
 
   const dnaFields = [
     { label: 'Business Activity', value: 'Manufacturing — Pharmaceutical', status: 'Department Verified', ok: true },
-    { label: 'Project Location', value: 'Ratnagiri, Maharashtra', status: 'Business DNA — Verified', ok: true },
+    { label: 'Project Location', value: business?.location || businessId, status: 'Business DNA — Verified', ok: true },
     { label: 'Project Type', value: 'New Unit', status: 'User Confirmed', ok: true },
     { label: 'Enterprise Category', value: 'MSME — Small Enterprise', status: 'Business DNA — Verified', ok: true },
     { label: 'Total Fixed Capital Investment', value: '₹10.0 Cr', status: 'User Confirmed', ok: true },
     { label: 'Plant & Machinery', value: '₹8.0 Cr', status: 'User Confirmed', ok: true },
     { label: 'Building & Civil Works', value: '₹1.5 Cr', status: 'User Confirmed', ok: true },
-    { label: 'MIDC Plot — Location', value: 'Ratnagiri MIDC Phase I', status: 'Business DNA — Verified', ok: true },
+    { label: 'MIDC Plot — Location', value: 'Registered industrial estate', status: 'Business DNA — Verified', ok: true },
     { label: 'MIDC Allotment Status', value: 'Allotted — Active', status: 'System Verified', ok: true },
     { label: 'Expected Employment', value: '150 persons', status: 'Self-declared', ok: true },
     { label: 'Expected Annual Turnover (Yr 3)', value: '₹18 Cr', status: 'Self-declared', ok: true },

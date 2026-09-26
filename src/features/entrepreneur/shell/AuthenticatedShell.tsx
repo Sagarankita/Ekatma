@@ -11,6 +11,7 @@ import { findTrackerAppForBusiness } from '../applications/data'
 import { listInspectionsForBusiness } from '../applications/data'
 import { listComplianceForBusiness } from '../compliance/data'
 import { listIncentivesForBusiness } from '../incentives/data'
+import { getIncentiveClaims, getIncentiveDetailSchemes } from '../incentives/workspace/data'
 import { listJourneyNodesForBusiness } from '../journey/data'
 import { listDocumentsForBusiness } from '../documents/data'
 import { useDisplayPreferences } from '../appearance/useDisplayPreferences'
@@ -74,14 +75,38 @@ function Sidebar({ pathname, business, onSelectBusiness, closeMobile, collapsed,
     const currentIncentives = ENTREPRENEUR_ROUTES.incentives(business.id)
     const currentClaims = ENTREPRENEUR_ROUTES.incentiveClaims(business.id)
     if (pathname === currentIncentives || pathname.startsWith(`${currentIncentives}/`) || pathname === currentClaims) {
-      if (pathname.startsWith(`${currentIncentives}/`)) {
-        const incentiveId = pathname.slice(currentIncentives.length + 1).split('/')[0]
-        if (findBusinessEntity('incentive', switchedTargetId, incentiveId)) {
-          return ENTREPRENEUR_ROUTES.incentive(switchedTargetId, incentiveId)
-        }
-      }
       if (pathname === currentClaims) {
-        return ENTREPRENEUR_ROUTES.incentiveClaims(switchedTargetId)
+        return ENTREPRENEUR_ROUTES.incentiveClaimList(switchedTargetId)
+      }
+      const suffix = pathname.slice(currentIncentives.length)
+      if (!suffix || suffix === '/centre') return ENTREPRENEUR_ROUTES.incentives(switchedTargetId)
+      if (suffix === '/calculator') return ENTREPRENEUR_ROUTES.incentiveCalculator(switchedTargetId)
+      if (suffix === '/calculator/questionnaire') return ENTREPRENEUR_ROUTES.incentiveCalculatorQuestionnaire(switchedTargetId)
+      if (suffix === '/calculator/review') return ENTREPRENEUR_ROUTES.incentiveCalculatorReview(switchedTargetId)
+      if (suffix === '/portfolio') return ENTREPRENEUR_ROUTES.incentivePortfolio(switchedTargetId)
+      if (suffix === '/claim-readiness') return ENTREPRENEUR_ROUTES.incentiveClaimReadiness(switchedTargetId)
+      if (suffix === '/claims') return ENTREPRENEUR_ROUTES.incentiveClaimList(switchedTargetId)
+      if (suffix === '/roi') return ENTREPRENEUR_ROUTES.incentiveRoi(switchedTargetId)
+      if (suffix === '/roi/results') return ENTREPRENEUR_ROUTES.incentiveRoiResults(switchedTargetId)
+      if (suffix === '/scenarios') return ENTREPRENEUR_ROUTES.incentiveScenarios(switchedTargetId)
+      if (suffix === '/policy-updates') return ENTREPRENEUR_ROUTES.incentivePolicyUpdates(switchedTargetId)
+      if (suffix.startsWith('/portfolio/')) {
+        const incentiveId = suffix.slice('/portfolio/'.length).split('/')[0]
+        if (getIncentiveDetailSchemes(switchedTargetId).some(scheme => scheme.id === incentiveId)) {
+          return ENTREPRENEUR_ROUTES.incentivePortfolioDetail(switchedTargetId, incentiveId)
+        }
+        return ENTREPRENEUR_ROUTES.incentivePortfolio(switchedTargetId)
+      }
+      if (suffix.startsWith('/claims/')) {
+        const claimId = suffix.slice('/claims/'.length).split('/')[0]
+        if (getIncentiveClaims(switchedTargetId).some(claim => claim.id === claimId)) {
+          return ENTREPRENEUR_ROUTES.incentiveClaim(switchedTargetId, claimId)
+        }
+        return ENTREPRENEUR_ROUTES.incentiveClaimList(switchedTargetId)
+      }
+      const legacyIncentiveId = suffix.slice(1).split('/')[0]
+      if (findBusinessEntity('incentive', switchedTargetId, legacyIncentiveId)) {
+        return ENTREPRENEUR_ROUTES.incentivePortfolioDetail(switchedTargetId, legacyIncentiveId)
       }
       return ENTREPRENEUR_ROUTES.incentives(switchedTargetId)
     }

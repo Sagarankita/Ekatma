@@ -24,9 +24,9 @@ export function CalculatorReviewScreen() {
     {
       title: 'Location',
       rows: [
-        { label: 'District', value: business?.location || 'Ratnagiri, Maharashtra', source: 'Business DNA — Verified', verified: true },
+        { label: 'District', value: business?.location || businessId, source: 'Business DNA — Verified', verified: true },
         { label: 'PSI Category', value: 'Category B', source: 'System — Policy Engine', verified: true },
-        { label: 'MIDC Estate', value: 'Ratnagiri MIDC Phase I', source: 'Business DNA — Verified', verified: true },
+        { label: 'MIDC Estate', value: 'Registered industrial estate', source: 'Business DNA — Verified', verified: true },
       ],
     },
     {

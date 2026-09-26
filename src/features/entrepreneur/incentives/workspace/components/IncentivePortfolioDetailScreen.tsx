@@ -39,11 +39,16 @@ export function IncentivePortfolioDetailScreen({ schemeId }: { schemeId: string 
       <div className="max-w-[900px] mx-auto px-6 py-5 space-y-4">
         {/* Status + Benefit */}
         <div className="bg-white border border-[#e2e8f0] px-5 py-4">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+          <div className={`grid grid-cols-2 ${scheme.claimCycle ? 'sm:grid-cols-5' : 'sm:grid-cols-4'} gap-4 mb-4`}>
             <div>
               <p className="text-[10px] text-[#6b7a8d] uppercase tracking-wider mb-1">Status</p>
               <IncentiveStatusBadge status={scheme.status} />
             </div>
+            {scheme.claimCycle && <div>
+              <p className="text-[10px] text-[#6b7a8d] uppercase tracking-wider mb-1">Claim Cycle</p>
+              <p className="text-xs font-semibold text-[#374151]">{scheme.claimCycle}</p>
+              {scheme.nextFilingWindow && <p className="text-[10px] text-[#6b7a8d] mt-0.5">Next: {scheme.nextFilingWindow}</p>}
+            </div>}
             <div>
               <p className="text-[10px] text-[#6b7a8d] uppercase tracking-wider mb-1">Estimated Benefit</p>
               <p className="text-sm font-bold text-[#1a3a5c]">₹{scheme.estimatedMin}–₹{scheme.estimatedMax} {scheme.unit === 'lakh' ? 'Lakh' : 'Cr'}</p>
@@ -79,6 +84,22 @@ export function IncentivePortfolioDetailScreen({ schemeId }: { schemeId: string 
             ))}
           </div>
         </div>
+
+        {scheme.eligibilityConditions?.length ? <div className="bg-white border border-[#e2e8f0]">
+          <div className="px-5 py-2.5 bg-[#f8f9fb] border-b border-[#e8edf2]">
+            <p className="text-xs font-bold text-[#1a3a5c] uppercase tracking-wider">Eligibility Conditions</p>
+          </div>
+          <div className="divide-y divide-[#f8f9fb]">
+            {scheme.eligibilityConditions.slice(0, 5).map(condition => (
+              <div key={condition.text} className="px-5 py-3 flex items-start gap-3">
+                <span className={`text-sm font-bold shrink-0 ${condition.state === 'satisfied' ? 'text-[#16a34a]' : 'text-[#d97706]'}`}>
+                  {condition.state === 'satisfied' ? '✓' : '○'}
+                </span>
+                <p className="text-[11px] font-semibold text-[#374151]">{condition.text}</p>
+              </div>
+            ))}
+          </div>
+        </div> : null}
 
         {/* Policy Basis */}
         <div className="bg-white border border-[#e2e8f0]">

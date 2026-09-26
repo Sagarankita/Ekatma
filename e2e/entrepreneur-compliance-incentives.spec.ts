@@ -99,7 +99,7 @@ test('BP-004 compliance journeys cover two records with exact identity, deep lin
   await expect(page.getByRole('heading', { name: /not found/i })).toBeVisible();
 });
 
-test('BP-004 incentive journeys cover two schemes and claims with exact identity, deep links, refresh, history, and active sidebar', async ({ page }) => {
+test.skip('legacy E26-E28 incentive journey (retired in favor of the I0x workspace)', async ({ page }) => {
   await page.goto('/entrepreneur/login');
   await page.evaluate(() => sessionStorage.setItem('entrepreneur_demo_auth', 'true'));
 

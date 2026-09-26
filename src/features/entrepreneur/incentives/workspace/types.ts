@@ -22,6 +22,9 @@ export interface IncentiveSchemeDetail {
   missingInfo?: string[]
   claimId?: string
   claimStatus?: ClaimStatus
+  claimCycle?: string
+  nextFilingWindow?: string
+  eligibilityConditions?: { text: string; state: 'satisfied' | 'needs-verification' | 'missing' }[]
 }
 
 export interface IncentiveClaimDetail {
@@ -32,6 +35,19 @@ export interface IncentiveClaimDetail {
   status: ClaimStatus
   updated: string
   nextAction: string
+  period?: string
+  submittedDate?: string
+  correctionReason?: string
+  correctionDueDate?: string
+  applicationReference?: { label: 'Eligibility Certificate' | 'Application Reference'; identifier: string; status?: string }
+  previousPeriods?: { period: string; status: string; submittedDate: string; amount?: string }[]
+}
+
+export interface IncentiveFilingWindow {
+  period: string
+  filingWindow: string
+  deadline?: string
+  readiness: string
 }
 
 export interface IncentiveRoiInput {

@@ -4,13 +4,15 @@ import { useRouter } from 'next/navigation';
 import { ENTREPRENEUR_ROUTES } from '@/lib/routes/entrepreneur';
 import { useIncentiveWorkspace } from '../state';
 import { IncentiveWorkspaceHeader } from './IncentiveWorkspaceHeader';
+import { getCurrentFilingWindow } from '../data';
 
 export function ClaimReadinessScreen() {
   const router = useRouter();
   const { businessId } = useIncentiveWorkspace();
+  const filingWindow = getCurrentFilingWindow(businessId);
 
   const handleBack = () => router.push(ENTREPRENEUR_ROUTES.incentives(businessId));
-  const handleGoToTracker = () => router.push(ENTREPRENEUR_ROUTES.incentiveClaims(businessId)); // E28 overview or specific claim
+  const handleGoToTracker = () => router.push(ENTREPRENEUR_ROUTES.incentiveClaimList(businessId));
   const handleGoToDocCentre = () => router.push(ENTREPRENEUR_ROUTES.documents(businessId));
 
   const evidence = [
@@ -53,6 +55,18 @@ export function ClaimReadinessScreen() {
             </div>
           </div>
         </div>
+
+        {filingWindow && <div className="bg-white border border-[#e2e8f0] px-5 py-4">
+          <p className="text-[10px] font-bold text-[#6b7a8d] uppercase tracking-wider mb-1">Current Filing Window</p>
+          <div className="flex items-end justify-between gap-4 flex-wrap">
+            <div>
+              <p className="text-sm font-bold text-[#1a3a5c]">{filingWindow.period}</p>
+              <p className="text-xs text-[#6b7a8d] mt-1">{filingWindow.filingWindow}</p>
+              {filingWindow.deadline && <p className="text-xs text-[#6b7a8d]">Deadline: {filingWindow.deadline}</p>}
+            </div>
+            <p className="text-xs font-semibold text-[#d97706]">{filingWindow.readiness}</p>
+          </div>
+        </div>}
 
         {/* Evidence list */}
         <div className="bg-white border border-[#e2e8f0]">

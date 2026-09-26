@@ -1,8 +1,7 @@
-import { notFound } from 'next/navigation';
-import { IncentiveRoute } from '@/features/entrepreneur/incentives/IncentiveRoute';
-import { findIncentiveForBusiness, listClaimsForBusiness } from '@/features/entrepreneur/incentives/data';
-import { findBusinessProjectById } from '@/features/entrepreneur/businesses/catalog';
+import { notFound, redirect } from 'next/navigation';
+import { ENTREPRENEUR_ROUTES } from '@/lib/routes/entrepreneur';
 import { requireBusinessRouteParam } from '@/features/entrepreneur/identity/route-params';
+import { findIncentiveForBusiness, listClaimsForBusiness } from '@/features/entrepreneur/incentives/data';
 
 export default async function IncentiveClaimsPage({ params, searchParams }: {
   params: Promise<{ businessId: string }>;
@@ -13,7 +12,6 @@ export default async function IncentiveClaimsPage({ params, searchParams }: {
   const business = requireBusinessRouteParam(businessId);
   const targetSchemeId = schemeId ?? 'PSI-2019';
   const scheme = findIncentiveForBusiness(business.id, targetSchemeId);
-  const project = findBusinessProjectById(business.id);
-  if (!scheme || !project || scheme.id !== 'PSI-2019' || listClaimsForBusiness(business.id, scheme.id).length === 0) notFound();
-  return <IncentiveRoute project={project} schemeId={scheme.id} claims />;
+  if (!scheme || listClaimsForBusiness(business.id, scheme.id).length === 0) notFound();
+  redirect(ENTREPRENEUR_ROUTES.incentiveClaimList(business.id));
 }

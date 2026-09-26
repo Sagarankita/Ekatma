@@ -14,4 +14,5 @@ test('incentive workspace route builders generate correct static paths', () => {
   expect(ENTREPRENEUR_ROUTES.incentiveCalculatorQuestionnaire(b)).toBe('/entrepreneur/businesses/BP-004/incentives/calculator/questionnaire');
   expect(ENTREPRENEUR_ROUTES.incentivePortfolio(b)).toBe('/entrepreneur/businesses/BP-004/incentives/portfolio');
   expect(ENTREPRENEUR_ROUTES.incentivePortfolioDetail(b, 'PSI-2019')).toBe('/entrepreneur/businesses/BP-004/incentives/portfolio/PSI-2019');
+  expect(ENTREPRENEUR_ROUTES.incentiveClaimList(b)).toBe('/entrepreneur/businesses/BP-004/incentives/claims');
 });

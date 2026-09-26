@@ -168,7 +168,7 @@ export function IncentiveCentreScreen() {
             <div className="bg-white border border-[#e2e8f0]">
               <div className="px-5 py-2.5 bg-[#f8f9fb] border-b border-[#e8edf2] flex items-center justify-between">
                 <p className="text-xs font-bold text-[#1a3a5c] uppercase tracking-wider">Claims</p>
-                <button onClick={() => handleGoToTracker('')} className="text-xs text-[#1a56db] hover:underline">All claims →</button>
+                <button onClick={() => router.push(ENTREPRENEUR_ROUTES.incentiveClaimList(businessId))} className="text-xs text-[#1a56db] hover:underline">All claims →</button>
               </div>
               {claims.length === 0 ? (
                 <div className="px-5 py-6 text-center text-sm text-[#6b7a8d]">No claims in progress. When you are ready to claim an eligible incentive, start here.</div>

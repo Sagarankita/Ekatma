@@ -60,7 +60,29 @@ export function ClaimTrackerScreen({ claimId }: { claimId: string }) {
               <p className="text-xl font-bold text-[#1a3a5c]">{claim.amount}</p>
             </div>
           </div>
+          <div className="mt-4 pt-3 border-t border-[#f0f4f8] grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <div>
+              <p className="text-[10px] text-[#6b7a8d] uppercase tracking-wider mb-0.5">Scheme</p>
+              <p className="text-xs font-semibold text-[#1a2533]">{claim.schemeName}</p>
+            </div>
+            <div>
+              <p className="text-[10px] text-[#6b7a8d] uppercase tracking-wider mb-0.5">Claim Period</p>
+              <p className="text-xs font-semibold text-[#1a2533]">{claim.period ?? 'Not recorded'}</p>
+            </div>
+            {claim.applicationReference && <div>
+              <p className="text-[10px] text-[#6b7a8d] uppercase tracking-wider mb-0.5">{claim.applicationReference.label}</p>
+              <p className="text-xs font-semibold text-[#1a2533]">{claim.applicationReference.identifier}</p>
+              {claim.applicationReference.status && <p className="text-[10px] text-[#6b7a8d]">{claim.applicationReference.status}</p>}
+            </div>}
+          </div>
         </div>
+
+        {claim.correctionReason && <div className="bg-[#fff7ed] border border-[#fdba74] px-5 py-4">
+          <p className="text-xs font-bold text-[#9a3412] uppercase tracking-wider">Correction Required</p>
+          <p className="text-xs text-[#7c2d12] mt-2">{claim.correctionReason}</p>
+          <p className="text-xs font-semibold text-[#9a3412] mt-2">Next action: {claim.nextAction}</p>
+          {claim.correctionDueDate && <p className="text-[11px] text-[#9a3412] mt-1">Due: {claim.correctionDueDate}</p>}
+        </div>}
 
         {/* Timeline */}
         <div className="bg-white border border-[#e2e8f0] px-5 py-4">
@@ -82,6 +104,27 @@ export function ClaimTrackerScreen({ claimId }: { claimId: string }) {
             ))}
           </div>
         </div>
+
+        {claim.previousPeriods?.length ? <div className="bg-white border border-[#e2e8f0]">
+          <div className="px-5 py-2.5 bg-[#f8f9fb] border-b border-[#e8edf2]">
+            <p className="text-xs font-bold text-[#1a3a5c] uppercase tracking-wider">Previous Claim Periods</p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead><tr className="border-b border-[#f0f4f8]">
+                {['Claim Period', 'Status', 'Submitted', 'Amount'].map(label => <th key={label} className="text-left px-4 py-2 text-[10px] font-semibold text-[#9aa5b4] uppercase tracking-wider">{label}</th>)}
+              </tr></thead>
+              <tbody className="divide-y divide-[#f8f9fb]">
+                {claim.previousPeriods.slice(0, 3).map(period => <tr key={`${period.period}-${period.submittedDate}`}>
+                  <td className="px-4 py-3 font-semibold text-[#1a2533]">{period.period}</td>
+                  <td className="px-4 py-3 text-[#475569]">{period.status}</td>
+                  <td className="px-4 py-3 text-[#6b7a8d]">{period.submittedDate}</td>
+                  <td className="px-4 py-3 font-semibold text-[#1a3a5c]">{period.amount ?? '—'}</td>
+                </tr>)}
+              </tbody>
+            </table>
+          </div>
+        </div> : null}
 
         {/* Tabs */}
         <div className="bg-white border border-[#e2e8f0]">

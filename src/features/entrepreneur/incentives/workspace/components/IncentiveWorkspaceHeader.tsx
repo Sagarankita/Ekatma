@@ -91,7 +91,7 @@ export function IncentiveWorkspaceHeader({
             <span className="text-[#d1d9e0]">·</span>
             <span>{business?.industry || 'Manufacturing'}</span>
             <span className="text-[#d1d9e0]">·</span>
-            <span>{business?.location || 'Ratnagiri'}, Maharashtra</span>
+            <span>{business?.location || 'Location unavailable'}</span>
             <span className="text-[#d1d9e0]">·</span>
             <span>New Unit</span>
             <span className="text-[#d1d9e0]">·</span>

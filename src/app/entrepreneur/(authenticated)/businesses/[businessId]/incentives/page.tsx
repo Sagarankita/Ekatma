@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { IncentiveRoute } from '@/features/entrepreneur/incentives/IncentiveRoute';
+import { IncentiveCentreScreen } from '@/features/entrepreneur/incentives/workspace/components/IncentiveCentreScreen';
 import { findBusinessProjectById } from '@/features/entrepreneur/businesses/catalog';
 import { requireBusinessRouteParam } from '@/features/entrepreneur/identity/route-params';
 
@@ -8,5 +8,5 @@ export default async function IncentivesPage({ params }: { params: Promise<{ bus
   const business = requireBusinessRouteParam(businessId);
   const project = findBusinessProjectById(business.id);
   if (!project) notFound();
-  return <IncentiveRoute project={project} />;
+  return <IncentiveCentreScreen />;
 }

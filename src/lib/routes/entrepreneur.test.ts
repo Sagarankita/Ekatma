@@ -36,6 +36,7 @@ describe('Entrepreneur route contract', () => {
     expect(ENTREPRENEUR_ROUTES.compliance('BP-001')).toBe('/entrepreneur/businesses/BP-001/compliance');
     expect(ENTREPRENEUR_ROUTES.incentives('BP-001')).toBe('/entrepreneur/businesses/BP-001/incentives');
     expect(ENTREPRENEUR_ROUTES.incentiveClaims('BP-001')).toBe('/entrepreneur/businesses/BP-001/incentive-claims');
+    expect(ENTREPRENEUR_ROUTES.incentiveClaimList('BP-001')).toBe('/entrepreneur/businesses/BP-001/incentives/claims');
     expect(ENTREPRENEUR_ROUTES.regulatoryChanges('BP-001')).toBe('/entrepreneur/businesses/BP-001/regulatory-changes');
     expect(ENTREPRENEUR_ROUTES.changes('BP-001')).toBe('/entrepreneur/businesses/BP-001/changes');
     expect(ENTREPRENEUR_ROUTES.amendments('BP-001')).toBe('/entrepreneur/businesses/BP-001/changes/amendments');

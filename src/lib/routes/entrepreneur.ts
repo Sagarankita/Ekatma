@@ -71,6 +71,7 @@ export const ENTREPRENEUR_ROUTES = {
   incentivePortfolio: (businessId: string) => `${businessPath(businessId)}/incentives/portfolio`,
   incentivePortfolioDetail: (businessId: string, incentiveId: string) => `${businessPath(businessId)}/incentives/portfolio/${segment(incentiveId, 'incentive ID')}`,
   incentiveClaimReadiness: (businessId: string) => `${businessPath(businessId)}/incentives/claim-readiness`,
+  incentiveClaimList: (businessId: string) => `${businessPath(businessId)}/incentives/claims`,
   incentiveClaim: (businessId: string, claimId: string) => `${businessPath(businessId)}/incentives/claims/${segment(claimId, 'claim ID')}`,
   incentiveRoi: (businessId: string) => `${businessPath(businessId)}/incentives/roi`,
   incentiveRoiResults: (businessId: string) => `${businessPath(businessId)}/incentives/roi/results`,

@@ -1,6 +1,9 @@
-import React from 'react';
-import { IncentiveCentreScreen } from '@/features/entrepreneur/incentives/workspace/components/IncentiveCentreScreen';
+import { redirect } from 'next/navigation';
+import { ENTREPRENEUR_ROUTES } from '@/lib/routes/entrepreneur';
+import { requireBusinessRouteParam } from '@/features/entrepreneur/identity/route-params';
 
-export default function Page() {
-  return <IncentiveCentreScreen />;
+export default async function Page({ params }: { params: Promise<{ businessId: string }> }) {
+  const { businessId } = await params;
+  const business = requireBusinessRouteParam(businessId);
+  redirect(ENTREPRENEUR_ROUTES.incentives(business.id));
 }
