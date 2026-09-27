@@ -1392,20 +1392,20 @@ export function DeptSidebar({ active, setActive }: { active: string; setActive: 
 
   return (
     <aside
-      className={`bg-white border-r border-[#d1d9e0] flex flex-col shrink-0 transition-all duration-200 select-none ${collapsed ? 'w-16' : 'w-64'}`}
+      className={`bg-white border-r border-slate-200 flex flex-col shrink-0 transition-all duration-200 select-none ${collapsed ? 'w-16' : 'w-64'}`}
       aria-label="Department navigation"
     >
       {/* Top Header */}
-      <div className="px-5 py-3.5 border-b border-[#e5eaf0] bg-white flex items-center justify-between shrink-0">
+      <div className="px-5 py-3.5 border-b border-slate-200 bg-white flex items-center justify-between shrink-0">
         {!collapsed && (
           <div>
-            <div className="text-sm font-bold text-[#1a3a5c] tracking-tight leading-none">EKATMA</div>
-            <div className="text-[11px] font-medium text-[#64748b] mt-1 leading-none">Department Portal</div>
+            <div className="text-sm font-bold text-[#17365D] tracking-tight leading-none">EKATMA</div>
+            <div className="text-[11px] font-medium text-[#5C6470] mt-1 leading-none">Department Portal</div>
           </div>
         )}
         <button
           onClick={() => setCollapsed(v => !v)}
-          className={`p-1.5 rounded text-[#64748b] hover:text-[#1a3a5c] hover:bg-[#f1f5f9] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a56db] ${collapsed ? 'mx-auto' : ''}`}
+          className={`p-1.5 rounded text-[#5C6470] hover:text-[#17365D] hover:bg-[#F0F5FA] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#17365D] ${collapsed ? 'mx-auto' : ''}`}
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           aria-expanded={!collapsed}
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
@@ -1417,18 +1417,18 @@ export function DeptSidebar({ active, setActive }: { active: string; setActive: 
       {/* Nav List */}
       <nav className="flex-1 py-2 overflow-y-auto overflow-x-hidden" aria-label="Department module navigation">
         {/* Home Item */}
-        <div className="pb-1 border-b border-[#f1f5f9] mb-1">
+        <div className="pb-1 border-b border-slate-100 mb-1">
           <button
             onClick={() => setActive('dept-home')}
-            className={`w-full flex items-center gap-3.5 px-5 py-2.5 text-sm transition-colors text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#1a56db]
+            className={`w-full flex items-center gap-3 px-4 py-2 text-[13px] transition-colors text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#17365D]
               ${active === 'dept-home'
-                ? 'bg-[#eff6ff] text-[#1a3a5c] font-bold border-l-4 border-[#1a56db]'
-                : 'text-[#334155] font-medium hover:bg-[#f8fafc] hover:text-[#0f172a] border-l-4 border-transparent'
+                ? 'bg-[#EBF3FA] text-[#17365D] font-bold border-l-[3px] border-[#E68A2E]'
+                : 'text-[#20242A] font-medium hover:bg-[#F0F5FA] hover:text-[#17365D] border-l-[3px] border-transparent'
               } ${collapsed ? 'justify-center px-0' : ''}`}
             aria-current={active === 'dept-home' ? 'page' : undefined}
             title={collapsed ? 'Home' : undefined}
           >
-            <span aria-hidden="true" className={`shrink-0 ${active === 'dept-home' ? 'text-[#1a56db]' : 'text-[#64748b]'}`}>
+            <span aria-hidden="true" className={`shrink-0 ${active === 'dept-home' ? 'text-[#245B8A]' : 'text-[#5C6470]'}`}>
               <SidebarIcons.Home />
             </span>
             {!collapsed && <span className="flex-1 truncate">Home</span>}
@@ -1439,7 +1439,7 @@ export function DeptSidebar({ active, setActive }: { active: string; setActive: 
         {deptSections.map((section, sIdx) => (
           <div key={section.title} className={sIdx === 0 ? 'pt-1 pb-1' : 'pt-3 pb-1'}>
             {!collapsed && (
-              <div className="px-5 pt-2 pb-1.5 text-[11px] font-bold text-[#8c9ba5] uppercase tracking-wider">
+              <div className="px-4 pt-2 pb-1 text-[10px] font-bold text-[#5C6470] uppercase tracking-wider">
                 {section.title}
               </div>
             )}
@@ -1450,15 +1450,15 @@ export function DeptSidebar({ active, setActive }: { active: string; setActive: 
                   <li key={item.id}>
                     <button
                       onClick={() => setActive(item.id)}
-                      className={`w-full flex items-center gap-3.5 px-5 py-2 text-sm transition-colors text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#1a56db]
+                      className={`w-full flex items-center gap-3 px-4 py-2 text-[13px] transition-colors text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#17365D]
                         ${isActive
-                          ? 'bg-[#eff6ff] text-[#1a3a5c] font-bold border-l-4 border-[#1a56db]'
-                          : 'text-[#334155] font-medium hover:bg-[#f8fafc] hover:text-[#0f172a] border-l-4 border-transparent'
+                          ? 'bg-[#EBF3FA] text-[#17365D] font-bold border-l-[3px] border-[#E68A2E]'
+                          : 'text-[#20242A] font-medium hover:bg-[#F0F5FA] hover:text-[#17365D] border-l-[3px] border-transparent'
                         } ${collapsed ? 'justify-center px-0' : ''}`}
                       aria-current={isActive ? 'page' : undefined}
                       title={collapsed ? item.label : undefined}
                     >
-                      <span aria-hidden="true" className={`shrink-0 ${isActive ? 'text-[#1a56db]' : 'text-[#64748b]'}`}>
+                      <span aria-hidden="true" className={`shrink-0 ${isActive ? 'text-[#245B8A]' : 'text-[#5C6470]'}`}>
                         <item.icon />
                       </span>
                       {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
@@ -1481,28 +1481,28 @@ export function DeptContextBar({ onLogout, onNotif, onRegAssistant, onSearch }: 
 }) {
   const [searchQuery, setSearchQuery] = useState('')
   return (
-    <div className="bg-[#1a3a5c] border-b border-[#0f2540]" role="navigation" aria-label="Department context and utilities">
+    <div className="bg-[#17365D] border-b border-[#0F233D]" role="navigation" aria-label="Department context and utilities">
       <div className="max-w-[1440px] mx-auto px-4 flex items-center gap-4 h-11">
         {/* Officer context - read-only */}
-        <div className="flex items-center gap-4 text-xs text-white/70 shrink-0">
+        <div className="flex items-center gap-4 text-xs text-white/80 shrink-0">
           <span className="flex items-center gap-1.5">
-            <span className="text-white/40 font-medium">Dept</span>
-            <span className="text-white font-semibold">MIDC</span>
+            <span className="text-[#B8D5E5] font-medium">Dept</span>
+            <span className="text-white font-bold">MIDC</span>
           </span>
-          <span className="text-white/25">|</span>
+          <span className="text-[#3A75A4]">|</span>
           <span className="flex items-center gap-1.5">
-            <span className="text-white/40">Region / Office</span>
-            <span className="text-white/90">Assigned MIDC Office</span>
+            <span className="text-[#B8D5E5]">Region / Office</span>
+            <span className="text-white/90 font-medium">Assigned MIDC Office</span>
           </span>
-          <span className="text-white/25">|</span>
+          <span className="text-[#3A75A4]">|</span>
           <span className="flex items-center gap-1.5">
-            <span className="text-white/40">Desk</span>
-            <span className="text-white/90">Land / Plot Scrutiny</span>
+            <span className="text-[#B8D5E5]">Desk</span>
+            <span className="text-white/90 font-medium">Land / Plot Scrutiny</span>
           </span>
-          <span className="text-white/25">|</span>
+          <span className="text-[#3A75A4]">|</span>
           <span className="flex items-center gap-1.5">
-            <span className="text-white/40">Role</span>
-            <span className="text-white/90">Scrutiny Officer</span>
+            <span className="text-[#B8D5E5]">Role</span>
+            <span className="text-white/90 font-medium">Scrutiny Officer</span>
           </span>
         </div>
 
@@ -1512,42 +1512,42 @@ export function DeptContextBar({ onLogout, onNotif, onRegAssistant, onSearch }: 
           <button
             aria-label="Notifications - 4 unread"
             onClick={onNotif}
-            className="relative p-2 rounded text-white/70 hover:text-white hover:bg-white/10 transition-colors focus-visible:ring-2 focus-visible:ring-white/60"
+            className="relative p-2 rounded text-white/80 hover:text-white hover:bg-white/10 transition-colors focus-visible:ring-2 focus-visible:ring-white/60"
           >
             <Icon.Bell />
-            <span className="absolute top-1.5 right-1.5 w-3.5 h-3.5 bg-red-500 text-white text-[8px] font-bold rounded-full flex items-center justify-center" aria-hidden="true">4</span>
+            <span className="absolute top-1.5 right-1.5 w-3.5 h-3.5 bg-[#9B2C2C] text-white text-[8px] font-bold rounded-full flex items-center justify-center" aria-hidden="true">4</span>
           </button>
 
           {/* Regulatory Assistant */}
           <button
             aria-label="Regulatory Assistant"
             onClick={onRegAssistant}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-white/70 hover:text-white hover:bg-white/10 transition-colors text-xs focus-visible:ring-2 focus-visible:ring-white/60"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-white/80 hover:text-white hover:bg-white/10 transition-colors text-xs font-semibold focus-visible:ring-2 focus-visible:ring-white/60"
           >
             <MIcon.Bot />
             <span className="hidden lg:inline">Regulatory Assistant</span>
           </button>
 
-          <div className="w-px h-5 bg-white/20 mx-1" aria-hidden="true" />
+          <div className="w-px h-5 bg-[#3A75A4] mx-1" aria-hidden="true" />
 
           {/* User profile */}
           <div
             aria-label="Officer profile - A. Deshmukh, Scrutiny Officer"
             className="flex items-center gap-2 px-2 py-1"
           >
-            <div className="w-7 h-7 rounded-full bg-[#f5c842] text-[#0f2540] flex items-center justify-center text-xs font-bold shrink-0" aria-hidden="true">AD</div>
+            <div className="w-7 h-7 rounded-full bg-[#E68A2E] text-white flex items-center justify-center text-xs font-bold shrink-0" aria-hidden="true">AD</div>
             <div className="hidden md:block text-left">
-              <div className="text-xs font-semibold text-white leading-none">A. Deshmukh</div>
-              <div className="text-[10px] text-white/50 leading-none mt-0.5">Scrutiny Officer</div>
+              <div className="text-xs font-bold text-white leading-none">A. Deshmukh</div>
+              <div className="text-[10px] text-[#B8D5E5] leading-none mt-0.5">Scrutiny Officer</div>
             </div>
           </div>
 
-          <div className="w-px h-5 bg-white/20 mx-1" aria-hidden="true" />
+          <div className="w-px h-5 bg-[#3A75A4] mx-1" aria-hidden="true" />
 
           <button
             onClick={onLogout}
             aria-label="Sign out"
-            className="p-2 rounded text-white/60 hover:text-white hover:bg-white/10 transition-colors focus-visible:ring-2 focus-visible:ring-white/60"
+            className="p-2 rounded text-white/70 hover:text-white hover:bg-white/10 transition-colors focus-visible:ring-2 focus-visible:ring-white/60"
           >
             <Icon.LogOut />
           </button>

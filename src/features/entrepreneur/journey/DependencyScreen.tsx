@@ -40,42 +40,42 @@ export function DependencyScreen({ project }: { project: BusinessProject }) {
   } = useDependencyGraph(project.id);
 
   return (
-    <main id="main-content" className="flex-1 bg-slate-50 min-h-screen pb-12 font-sans" tabIndex={-1}>
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-5">
+    <main id="main-content" className="flex-1 bg-[#F8F9FA] min-h-screen pb-12 font-sans" tabIndex={-1}>
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-6">
         {/* Breadcrumb Navigation */}
-        <div className="mb-3 flex items-center justify-between">
-          <nav className="text-xs text-slate-500 flex items-center gap-1.5" aria-label="Breadcrumb">
-            <Link href={ENTREPRENEUR_ROUTES.businesses()} className="hover:text-blue-700 hover:underline">
+        <div className="mb-4 flex items-center justify-between">
+          <nav className="text-xs text-[#5C6470] flex items-center gap-1.5" aria-label="Breadcrumb">
+            <Link href={ENTREPRENEUR_ROUTES.businesses()} className="hover:text-[#17365D] hover:underline">
               My Businesses
             </Link>
             <span>›</span>
-            <Link href={ENTREPRENEUR_ROUTES.business(project.id)} className="hover:text-blue-700 hover:underline">
+            <Link href={ENTREPRENEUR_ROUTES.business(project.id)} className="hover:text-[#17365D] hover:underline">
               {project.name}
             </Link>
             <span>›</span>
-            <Link href={ENTREPRENEUR_ROUTES.journey(project.id)} className="hover:text-blue-700 hover:underline">
+            <Link href={ENTREPRENEUR_ROUTES.journey(project.id)} className="hover:text-[#17365D] hover:underline">
               Regulatory Journey
             </Link>
             <span>›</span>
-            <span className="text-slate-900 font-semibold">Dependency Map (DAG)</span>
+            <span className="text-[#17365D] font-bold">Dependency Map (DAG)</span>
           </nav>
 
           <Link
             href={ENTREPRENEUR_ROUTES.journey(project.id)}
-            className="text-xs border border-slate-300 text-slate-700 px-3 py-1.5 rounded-lg hover:bg-slate-100 font-medium transition-colors"
+            className="text-xs border border-slate-200 bg-white text-[#20242A] px-3.5 py-1.5 rounded-lg hover:bg-[#F0F5FA] font-semibold transition-colors shadow-xs"
           >
             ← Back to List View
           </Link>
         </div>
 
         {/* Header Banner */}
-        <div className="mb-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="mb-5 bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs text-slate-400 font-medium">E13 — Industrial Approval Journey</span>
+              <span className="text-xs text-[#5C6470] font-semibold">E13 — Industrial Approval Journey</span>
             </div>
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Regulatory Dependency Map</h1>
-            <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl">
+            <h1 className="text-2xl font-bold text-[#17365D] tracking-tight">Regulatory Dependency Map</h1>
+            <p className="text-xs sm:text-sm text-[#5C6470] mt-1 max-w-2xl">
               Automatic hierarchical layout calculation. Locked approvals automatically unlock when prerequisite sub-forms are submitted.
             </p>
           </div>
@@ -83,17 +83,17 @@ export function DependencyScreen({ project }: { project: BusinessProject }) {
 
         {/* Sticky Next Recommended Action Bar */}
         {nextRecommendedNode && (
-          <div className="mb-4 bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white p-3.5 rounded-xl shadow-md border border-blue-700/50 flex flex-col sm:flex-row items-center justify-between gap-3 sticky top-2 z-20">
+          <div className="mb-5 bg-[#17365D] text-white p-4 rounded-xl shadow-md border border-[#245B8A] flex flex-col sm:flex-row items-center justify-between gap-3 sticky top-2 z-20">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-blue-500/20 border border-blue-400/40 flex items-center justify-center shrink-0">
-                <Target className="w-5 h-5 text-blue-300" />
+              <div className="w-9 h-9 rounded-lg bg-[#245B8A] border border-[#3A75A4] flex items-center justify-center shrink-0">
+                <Target className="w-5 h-5 text-[#B8D5E5]" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-black uppercase tracking-wider bg-blue-500/30 text-blue-200 px-2 py-0.5 rounded border border-blue-400/30">
+                  <span className="text-[10px] font-bold uppercase tracking-wider bg-[#E68A2E] text-white px-2 py-0.5 rounded">
                     Next Recommended Action
                   </span>
-                  <span className="text-xs font-mono text-blue-300">{nextRecommendedNode.department}</span>
+                  <span className="text-xs font-mono text-[#B8D5E5]">{nextRecommendedNode.department}</span>
                 </div>
                 <p className="text-sm font-bold text-white mt-0.5">
                   {nextRecommendedNode.title}
@@ -104,7 +104,7 @@ export function DependencyScreen({ project }: { project: BusinessProject }) {
             <button
               type="button"
               onClick={() => setSelectedNodeId(nextRecommendedNode.id)}
-              className="w-full sm:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-lg transition-all shadow-sm flex items-center justify-center gap-1.5 shrink-0"
+              className="w-full sm:w-auto px-4 py-2 bg-[#245B8A] hover:bg-[#1E4870] text-white text-xs font-bold rounded-lg transition-all shadow-xs flex items-center justify-center gap-1.5 shrink-0 border border-[#3A75A4]"
             >
               <span>Focus Requirement & Checklist</span>
               <ArrowRight className="w-4 h-4" />

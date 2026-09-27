@@ -43,20 +43,20 @@ export function GovDependencyScreen({
   } = useGovDependencyGraph();
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden bg-slate-50 font-sans min-h-screen">
+    <div className="flex-1 flex flex-col overflow-hidden bg-[#F8F9FA] font-sans min-h-screen">
       {/* Header Bar */}
-      <div className="bg-white border-b border-slate-200 px-5 py-3.5 shrink-0 shadow-2xs">
+      <div className="bg-white border-b border-slate-200 px-5 py-4 shrink-0 shadow-xs">
         <div className="flex items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="bg-slate-900 text-white text-[10px] font-black uppercase px-2 py-0.5 rounded tracking-wider flex items-center gap-1">
-                <Building2 className="w-3 h-3 text-blue-400" />
+              <span className="bg-[#17365D] text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded tracking-wider flex items-center gap-1">
+                <Building2 className="w-3 h-3 text-[#B8D5E5]" />
                 Government Scrutiny Console
               </span>
-              <span className="text-xs text-slate-500 font-mono">MIDC-APP-2026-00418</span>
+              <span className="text-xs text-[#5C6470] font-mono">MIDC-APP-2026-00418</span>
             </div>
-            <h1 className="text-xl font-bold text-slate-900 tracking-tight">Regulatory Dependency View</h1>
-            <p className="text-xs text-slate-600 mt-0.5">
+            <h1 className="text-2xl font-bold text-[#17365D] tracking-tight">Regulatory Dependency View</h1>
+            <p className="text-xs text-[#5C6470] mt-1">
               Configured regulatory journey and multi-department scrutiny flow for Aster Precision Components Pvt. Ltd.
             </p>
           </div>
@@ -64,7 +64,7 @@ export function GovDependencyScreen({
           <button
             type="button"
             onClick={onBack}
-            className="text-xs border border-slate-300 text-slate-700 px-3.5 py-2 rounded-lg hover:bg-slate-100 font-semibold transition-colors flex items-center gap-1.5 shrink-0"
+            className="text-xs border border-[#245B8A] bg-white text-[#245B8A] px-3.5 py-2 rounded-lg hover:bg-[#F0F5FA] font-semibold transition-colors flex items-center gap-1.5 shrink-0 shadow-xs"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Return to Scrutiny</span>
@@ -72,30 +72,30 @@ export function GovDependencyScreen({
         </div>
 
         {/* Governance Application Key-Value Strip */}
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-1.5 mt-3 pt-3 border-t border-slate-100 text-xs">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-1.5 mt-3.5 pt-3 border-t border-slate-100 text-xs">
           <div>
-            <span className="text-slate-500 font-medium">Applicant: </span>
-            <span className="font-bold text-slate-900">Aster Precision Components Pvt. Ltd.</span>
+            <span className="text-[#5C6470] font-medium">Applicant: </span>
+            <span className="font-bold text-[#20242A]">Aster Precision Components Pvt. Ltd.</span>
           </div>
           <div>
-            <span className="text-slate-500 font-medium">Current Service: </span>
-            <span className="font-bold text-slate-900">Building / Planning Approval</span>
+            <span className="text-[#5C6470] font-medium">Current Service: </span>
+            <span className="font-bold text-[#20242A]">Building / Planning Approval</span>
           </div>
           <div>
-            <span className="text-slate-500 font-medium">Workflow Stage: </span>
-            <span className="font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 text-[11px]">
+            <span className="text-[#5C6470] font-medium">Workflow Stage: </span>
+            <span className="font-bold text-[#17365D] bg-[#EBF3FA] px-2 py-0.5 rounded border border-[#B8D5E5] text-[11px]">
               TECHNICAL_SCRUTINY
             </span>
           </div>
           <div>
-            <span className="text-slate-500 font-medium">Fee Payment: </span>
-            <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 text-[11px]">
+            <span className="text-[#5C6470] font-medium">Fee Payment: </span>
+            <span className="font-bold text-[#2F7D4F] bg-[#EBF7F0] px-2 py-0.5 rounded border border-[#B8E3CA] text-[11px]">
               PAID (Verified)
             </span>
           </div>
           <div>
-            <span className="text-slate-500 font-medium">SLA Clock: </span>
-            <span className="font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 text-[11px]">
+            <span className="text-[#5C6470] font-medium">SLA Clock: </span>
+            <span className="font-bold text-[#C46A15] bg-[#FDF4EB] px-2 py-0.5 rounded border border-[#F8D4B0] text-[11px]">
               14 Days Remaining
             </span>
           </div>
@@ -103,32 +103,32 @@ export function GovDependencyScreen({
       </div>
 
       {/* 6-Metric Dependency Bar */}
-      <div className="bg-slate-900 px-5 py-2.5 flex items-center gap-6 shrink-0 text-xs text-white flex-wrap shadow-xs">
-        <span className="text-blue-300 font-bold uppercase tracking-wider text-[11px] flex items-center gap-1">
-          <ShieldCheck className="w-4 h-4 text-blue-400" />
+      <div className="bg-[#17365D] border-b border-[#0F233D] px-5 py-3 flex items-center gap-6 shrink-0 text-xs text-white flex-wrap shadow-xs">
+        <span className="text-[#B8D5E5] font-bold uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+          <ShieldCheck className="w-4 h-4 text-[#B8D5E5]" />
           Scrutiny Topology Summary
         </span>
         <div className="flex items-center gap-4 text-xs">
-          <span><span className="text-slate-400">Prerequisites:</span> <strong className="text-white">{metrics.prerequisites}</strong></span>
-          <span><span className="text-slate-400">Current Desk:</span> <strong className="text-blue-300">{metrics.current}</strong></span>
-          <span><span className="text-slate-400">Parallel Eligible:</span> <strong className="text-white">{metrics.parallel}</strong></span>
-          <span><span className="text-slate-400">Conditional:</span> <strong className="text-amber-300">{metrics.conditional}</strong></span>
-          <span><span className="text-slate-400">Downstream:</span> <strong className="text-emerald-300">{metrics.downstream}</strong></span>
-          <span><span className="text-slate-400">Blocked:</span> <strong className="text-slate-300">{metrics.blocked}</strong></span>
+          <span><span className="text-white/70">Prerequisites:</span> <strong className="text-white">{metrics.prerequisites}</strong></span>
+          <span><span className="text-white/70">Current Desk:</span> <strong className="text-[#B8D5E5]">{metrics.current}</strong></span>
+          <span><span className="text-white/70">Parallel Eligible:</span> <strong className="text-white">{metrics.parallel}</strong></span>
+          <span><span className="text-white/70">Conditional:</span> <strong className="text-[#F8D4B0]">{metrics.conditional}</strong></span>
+          <span><span className="text-white/70">Downstream:</span> <strong className="text-[#B8E3CA]">{metrics.downstream}</strong></span>
+          <span><span className="text-white/70">Blocked:</span> <strong className="text-white/80">{metrics.blocked}</strong></span>
         </div>
       </div>
 
       {/* Dependency Boundary Notice */}
-      <div className="bg-amber-50/90 border-b border-amber-200/80 px-5 py-2.5 shrink-0 flex items-center justify-between gap-4 text-xs text-amber-900">
+      <div className="bg-[#FDF4EB] border-b border-[#F8D4B0] px-5 py-2.5 shrink-0 flex items-center justify-between gap-4 text-xs text-[#C46A15]">
         <div className="flex items-center gap-2">
-          <span className="text-[10px] font-black uppercase tracking-wider bg-amber-200 text-amber-900 px-2 py-0.5 rounded border border-amber-300">
+          <span className="text-[10px] font-bold uppercase tracking-wider bg-[#E68A2E] text-white px-2 py-0.5 rounded">
             Dependency Boundary
           </span>
-          <p className="text-amber-800 leading-snug">
+          <p className="text-[#C46A15] leading-snug font-medium">
             MIDC tracks configured dependencies across departments. External department records (MPCB, Fire, DISH) are visible for context only.
           </p>
         </div>
-        <Info className="w-4 h-4 text-amber-700 shrink-0" />
+        <Info className="w-4 h-4 text-[#C46A15] shrink-0" />
       </div>
 
       {/* Main Body Layout */}

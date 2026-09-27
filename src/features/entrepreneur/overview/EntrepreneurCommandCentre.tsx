@@ -31,12 +31,12 @@ type ActivityItem = {
 }
 
 const stageVisuals: Record<string, { bg: string; text: string; border: string; dot: string }> = {
-  Complete: { bg: 'bg-[#f0fdf4]', text: 'text-[#166534]', border: 'border-[#86efac]', dot: 'bg-[#16a34a]' },
-  'In Progress': { bg: 'bg-[#ede9fe]', text: 'text-[#3730a3]', border: 'border-[#a5b4fc]', dot: 'bg-[#6366f1]' },
-  'Action Required': { bg: 'bg-[#fef3c7]', text: 'text-[#92400e]', border: 'border-[#fde68a]', dot: 'bg-[#d97706]' },
-  Ready: { bg: 'bg-[#ebf3ff]', text: 'text-[#1a3a5c]', border: 'border-[#93c5fd]', dot: 'bg-[#1a56db]' },
-  Waiting: { bg: 'bg-[#f8f9fb]', text: 'text-[#6b7a8d]', border: 'border-[#d1d9e0]', dot: 'bg-[#9aa5b4]' },
-  Upcoming: { bg: 'bg-[#f8f9fb]', text: 'text-[#9aa5b4]', border: 'border-[#e2e8f0]', dot: 'bg-[#d1d9e0]' },
+  Complete: { bg: 'bg-[#EBF7F0]', text: 'text-[#2F7D4F]', border: 'border-[#B8E3CA]', dot: 'bg-[#2F7D4F]' },
+  'In Progress': { bg: 'bg-[#EBF3FA]', text: 'text-[#17365D]', border: 'border-[#B8D5E5]', dot: 'bg-[#245B8A]' },
+  'Action Required': { bg: 'bg-[#FDF4EB]', text: 'text-[#C46A15]', border: 'border-[#F8D4B0]', dot: 'bg-[#E68A2E]' },
+  Ready: { bg: 'bg-[#EBF3FA]', text: 'text-[#17365D]', border: 'border-[#B8D5E5]', dot: 'bg-[#17365D]' },
+  Waiting: { bg: 'bg-[#F1F3F5]', text: 'text-[#5C6470]', border: 'border-[#D9DFE5]', dot: 'bg-[#5C6470]' },
+  Upcoming: { bg: 'bg-[#F1F3F5]', text: 'text-[#5C6470]', border: 'border-[#E2E8F0]', dot: 'bg-[#94A3B8]' },
 }
 
 function SectionHeader({ title, badge, href, actionLabel, actionAriaLabel }: {
@@ -47,13 +47,13 @@ function SectionHeader({ title, badge, href, actionLabel, actionAriaLabel }: {
   actionAriaLabel?: string
 }) {
   return (
-    <div className="flex items-center justify-between gap-3 border-b border-[#e8edf2] bg-[#f8f9fb] px-4 py-2.5">
+    <div className="flex items-center justify-between gap-3 border-b border-slate-200 bg-[#F8F9FA] px-4 py-3 rounded-t-xl">
       <div className="flex min-w-0 flex-wrap items-center gap-2">
-        <h2 className="text-xs font-bold uppercase tracking-wider text-[#1a3a5c]">{title}</h2>
+        <h2 className="text-[13px] font-bold uppercase tracking-wider text-[#17365D]">{title}</h2>
         {badge}
       </div>
       {href && actionLabel ? (
-        <Link href={href} aria-label={actionAriaLabel} className="shrink-0 border border-[#d1d9e0] px-2.5 py-1 text-xs text-[#475569] transition-colors hover:bg-[#f1f5f9]">
+        <Link href={href} aria-label={actionAriaLabel} className="shrink-0 rounded border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-[#245B8A] transition-colors hover:bg-[#F0F5FA] hover:text-[#17365D]">
           {actionLabel}
         </Link>
       ) : null}
@@ -63,53 +63,53 @@ function SectionHeader({ title, badge, href, actionLabel, actionAriaLabel }: {
 
 function CountBadge({ children, tone = 'neutral' }: { children: ReactNode; tone?: 'neutral' | 'danger' | 'success' }) {
   const toneClass = tone === 'danger'
-    ? 'border-[#fca5a5] bg-[#fee2e2] text-[#b91c1c]'
+    ? 'border-[#F8C4C4] bg-[#FDF2F2] text-[#9B2C2C]'
     : tone === 'success'
-      ? 'border-[#86efac] bg-[#f0fdf4] text-[#166534]'
-      : 'border-[#d1d9e0] bg-[#f0f4f8] text-[#6b7a8d]'
-  return <span className={`border px-1.5 py-0.5 text-[10px] font-semibold ${toneClass}`}>{children}</span>
+      ? 'border-[#B8E3CA] bg-[#EBF7F0] text-[#2F7D4F]'
+      : 'border-[#D9DFE5] bg-[#F1F3F5] text-[#5C6470]'
+  return <span className={`rounded border px-2 py-0.5 text-[11px] font-semibold ${toneClass}`}>{children}</span>
 }
 
 function EmptyState({ children }: { children: ReactNode }) {
-  return <p className="px-4 py-6 text-center text-xs text-[#6b7a8d]">{children}</p>
+  return <p className="px-4 py-6 text-center text-xs text-[#5C6470]">{children}</p>
 }
 
 function ApplicationStatus({ application }: { application: TrackerApp }) {
   const classes: Record<TrackerApp['statusType'], string> = {
-    active: 'border-[#a5b4fc] bg-[#ede9fe] text-[#3730a3]',
-    action: 'border-[#fde68a] bg-[#fef3c7] text-[#92400e]',
-    approved: 'border-[#86efac] bg-[#f0fdf4] text-[#166534]',
-    waiting: 'border-[#d1d9e0] bg-[#f8f9fb] text-[#6b7a8d]',
-    'over-sla': 'border-[#fca5a5] bg-[#fee2e2] text-[#b91c1c]',
+    active: 'border-[#B8D5E5] bg-[#EBF3FA] text-[#17365D]',
+    action: 'border-[#F8D4B0] bg-[#FDF4EB] text-[#C46A15]',
+    approved: 'border-[#B8E3CA] bg-[#EBF7F0] text-[#2F7D4F]',
+    waiting: 'border-[#D9DFE5] bg-[#F1F3F5] text-[#5C6470]',
+    'over-sla': 'border-[#F8C4C4] bg-[#FDF2F2] text-[#9B2C2C]',
   }
-  return <span className={`border px-1.5 py-0.5 text-[10px] font-semibold ${classes[application.statusType]}`}>{application.status}</span>
+  return <span className={`rounded border px-2 py-0.5 text-[11px] font-semibold ${classes[application.statusType]}`}>{application.status}</span>
 }
 
 function ComplianceStatusBadge({ status }: { status: ComplianceStatus }) {
   const classes: Record<ComplianceStatus, string> = {
-    Compliant: 'border-[#86efac] bg-[#f0fdf4] text-[#166534]',
-    'Due Soon': 'border-[#fde68a] bg-[#fef3c7] text-[#92400e]',
-    Overdue: 'border-[#fca5a5] bg-[#fee2e2] text-[#b91c1c]',
-    'Action Required': 'border-[#fca5a5] bg-[#fee2e2] text-[#b91c1c]',
-    'Under Verification': 'border-[#93c5fd] bg-[#dbeafe] text-[#1e40af]',
+    Compliant: 'border-[#B8E3CA] bg-[#EBF7F0] text-[#2F7D4F]',
+    'Due Soon': 'border-[#F8D4B0] bg-[#FDF4EB] text-[#C46A15]',
+    Overdue: 'border-[#F8C4C4] bg-[#FDF2F2] text-[#9B2C2C]',
+    'Action Required': 'border-[#F8C4C4] bg-[#FDF2F2] text-[#9B2C2C]',
+    'Under Verification': 'border-[#B8D5E5] bg-[#EBF3FA] text-[#17365D]',
   }
-  return <span className={`border px-1.5 py-0.5 text-[10px] font-semibold ${classes[status]}`}>{status}</span>
+  return <span className={`rounded border px-2 py-0.5 text-[11px] font-semibold ${classes[status]}`}>{status}</span>
 }
 
 function RegulatoryBadge({ value }: { value: RegulatoryChangeVerification | RegulatoryChangeImpact }) {
   const classes: Record<RegulatoryChangeVerification | RegulatoryChangeImpact, string> = {
-    Validated: 'border-[#86efac] bg-[#dcfce7] text-[#166534]',
-    'Needs Verification': 'border-[#fcd34d] bg-[#fef3c7] text-[#92400e]',
-    'Under Review': 'border-[#93c5fd] bg-[#dbeafe] text-[#1e40af]',
-    'No action': 'border-[#cbd5e1] bg-[#f1f5f9] text-[#64748b]',
-    'Review recommended': 'border-[#fcd34d] bg-[#fef3c7] text-[#92400e]',
-    'New document': 'border-[#fdba74] bg-[#fff7ed] text-[#9a3412]',
-    'Application affected': 'border-[#fca5a5] bg-[#fee2e2] text-[#b91c1c]',
-    'Renewal affected': 'border-[#fdba74] bg-[#fff7ed] text-[#9a3412]',
-    'Compliance affected': 'border-[#fca5a5] bg-[#fee2e2] text-[#b91c1c]',
-    'New requirement potentially triggered': 'border-[#c4b5fd] bg-[#ede9fe] text-[#5b21b6]',
+    Validated: 'border-[#B8E3CA] bg-[#EBF7F0] text-[#2F7D4F]',
+    'Needs Verification': 'border-[#F8D4B0] bg-[#FDF4EB] text-[#C46A15]',
+    'Under Review': 'border-[#B8D5E5] bg-[#EBF3FA] text-[#17365D]',
+    'No action': 'border-[#D9DFE5] bg-[#F1F3F5] text-[#5C6470]',
+    'Review recommended': 'border-[#F8D4B0] bg-[#FDF4EB] text-[#C46A15]',
+    'New document': 'border-[#F8D4B0] bg-[#FDF4EB] text-[#C46A15]',
+    'Application affected': 'border-[#F8C4C4] bg-[#FDF2F2] text-[#9B2C2C]',
+    'Renewal affected': 'border-[#F8D4B0] bg-[#FDF4EB] text-[#C46A15]',
+    'Compliance affected': 'border-[#F8C4C4] bg-[#FDF2F2] text-[#9B2C2C]',
+    'New requirement potentially triggered': 'border-[#B8D5E5] bg-[#EBF3FA] text-[#17365D]',
   }
-  return <span className={`border px-1.5 py-0.5 text-[9px] font-semibold ${classes[value]}`}>{value}</span>
+  return <span className={`rounded border px-1.5 py-0.5 text-[10px] font-semibold ${classes[value]}`}>{value}</span>
 }
 
 function businessNotifications(applicationIds: Set<string>, grievanceIds: Set<string>): AppNotification[] {
@@ -302,76 +302,76 @@ export function EntrepreneurCommandCentre({ project }: { project: BusinessProjec
   ]
 
   return (
-    <main id="main-content" data-testid="e00-command-centre" className="min-h-full flex-1 bg-[#f8f9fb]" tabIndex={-1}>
-      <div className="border-b border-[#0f2540] bg-[#1a3a5c]">
-        <div className="mx-auto max-w-[1320px] px-4 py-4 sm:px-6">
+    <main id="main-content" data-testid="e00-command-centre" className="min-h-full flex-1 bg-[#F8F9FA]" tabIndex={-1}>
+      <div className="border-b border-[#0F233D] bg-[#17365D]">
+        <div className="mx-auto max-w-[1320px] px-4 py-5 sm:px-6">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="flex min-w-0 items-start gap-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-[#2d5a8e] bg-[#0f2540] text-white">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-[#3A75A4] bg-[#245B8A] text-white shadow-xs">
                 <Icon.Building />
               </div>
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h1 className="text-base font-bold leading-tight text-white">{project.name}</h1>
-                  <span className="bg-[#6366f1] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">{project.stage}</span>
-                  {actions.length > 0 ? <span className="bg-[#ef4444] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">{actions.length} Actions Required</span> : null}
+                  <h1 className="text-lg font-bold leading-tight text-white">{project.name}</h1>
+                  <span className="rounded bg-[#245B8A] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white border border-[#3A75A4]">{project.stage}</span>
+                  {actions.length > 0 ? <span className="rounded bg-[#9B2C2C] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">{actions.length} Actions Required</span> : null}
                 </div>
-                <p className="mt-0.5 text-xs text-[#93c5fd]">{project.subtitle} · {project.location}</p>
+                <p className="mt-0.5 text-xs text-[#B8D5E5]">{project.subtitle} · {project.location}</p>
                 <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1">
-                  <span className="text-[10px] text-[#7dd3fc]">Business ID: {project.id}</span>
-                  <span className="text-[10px] text-[#7dd3fc]">Industry: {project.industry}</span>
-                  <span className="text-[10px] text-[#7dd3fc]">Journey: {project.journeyState}</span>
+                  <span className="text-[11px] text-[#D0E3F0]">Business ID: {project.id}</span>
+                  <span className="text-[11px] text-[#D0E3F0]">Industry: {project.industry}</span>
+                  <span className="text-[11px] text-[#D0E3F0]">Journey: {project.journeyState}</span>
                 </div>
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <Link href={ENTREPRENEUR_ROUTES.assistant()} className="flex items-center gap-1.5 border border-[#2d5a8e] bg-[#0f2540] px-3 py-1.5 text-xs text-[#93c5fd] transition-colors hover:bg-[#1e3a5c]">
+              <Link href={ENTREPRENEUR_ROUTES.assistant()} className="flex items-center gap-1.5 rounded border border-[#3A75A4] bg-[#245B8A] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#1E4870]">
                 <Icon.Help /> Regulatory Assistant
               </Link>
-              <Link href={ENTREPRENEUR_ROUTES.notifications()} className="flex items-center gap-1.5 border border-[#2d5a8e] bg-[#0f2540] px-3 py-1.5 text-xs text-[#93c5fd] transition-colors hover:bg-[#1e3a5c]">
+              <Link href={ENTREPRENEUR_ROUTES.notifications()} className="flex items-center gap-1.5 rounded border border-[#3A75A4] bg-[#245B8A] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#1E4870]">
                 <Icon.Bell /> Notifications
-                {actionNotificationCount > 0 ? <span className="rounded-full bg-[#ef4444] px-1.5 py-0.5 text-[10px] font-bold text-white">{actionNotificationCount}</span> : null}
+                {actionNotificationCount > 0 ? <span className="rounded-full bg-[#9B2C2C] px-1.5 py-0.5 text-[10px] font-bold text-white">{actionNotificationCount}</span> : null}
               </Link>
-              <Link href={ENTREPRENEUR_ROUTES.grievances(project.id)} className="flex items-center gap-1.5 border border-[#2d5a8e] bg-[#0f2540] px-3 py-1.5 text-xs text-[#93c5fd] transition-colors hover:bg-[#1e3a5c]">
+              <Link href={ENTREPRENEUR_ROUTES.grievances(project.id)} className="flex items-center gap-1.5 rounded border border-[#3A75A4] bg-[#245B8A] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#1E4870]">
                 Grievances
-                {grievances.length > 0 ? <span className="rounded-full bg-[#f59e0b] px-1.5 py-0.5 text-[10px] font-bold text-[#1a2533]">{grievances.length}</span> : null}
+                {grievances.length > 0 ? <span className="rounded-full bg-[#E68A2E] px-1.5 py-0.5 text-[10px] font-bold text-white">{grievances.length}</span> : null}
               </Link>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="mx-auto max-w-[1320px] space-y-5 px-4 py-5 sm:px-6">
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6" aria-label="Business overview metrics">
+      <div className="mx-auto max-w-[1320px] space-y-6 px-4 py-6 sm:px-6">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6" aria-label="Business overview metrics">
           {metrics.map(metric => metric.href ? (
-            <Link key={metric.label} href={metric.href} aria-label={metric.ariaLabel} className="group border border-[#e2e8f0] bg-white px-4 py-3 text-left transition-all hover:border-[#1a56db] hover:shadow-sm">
+            <Link key={metric.label} href={metric.href} aria-label={metric.ariaLabel} className="group rounded-xl border border-slate-200 bg-white p-4 text-left shadow-xs transition-all hover:border-[#245B8A] hover:shadow-md">
               <p className={`text-2xl font-bold ${metric.color}`}>{metric.value}</p>
-              <p className="mt-0.5 text-[11px] font-semibold leading-tight text-[#374151] group-hover:text-[#1a3a5c]">{metric.label}</p>
-              <p className="mt-0.5 text-[10px] leading-tight text-[#9aa5b4]">{metric.sub}</p>
+              <p className="mt-1 text-[12px] font-bold leading-tight text-[#20242A] group-hover:text-[#17365D]">{metric.label}</p>
+              <p className="mt-1 text-[11px] leading-tight text-[#5C6470]">{metric.sub}</p>
             </Link>
           ) : (
-            <div key={metric.label} className="border border-[#e2e8f0] bg-white px-4 py-3 text-left">
+            <div key={metric.label} className="rounded-xl border border-slate-200 bg-white p-4 text-left shadow-xs">
               <p className={`text-2xl font-bold ${metric.color}`}>{metric.value}</p>
-              <p className="mt-0.5 text-[11px] font-semibold leading-tight text-[#374151]">{metric.label}</p>
-              <p className="mt-0.5 text-[10px] leading-tight text-[#9aa5b4]">{metric.sub}</p>
+              <p className="mt-1 text-[12px] font-bold leading-tight text-[#20242A]">{metric.label}</p>
+              <p className="mt-1 text-[11px] leading-tight text-[#5C6470]">{metric.sub}</p>
             </div>
           ))}
         </div>
 
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
           <div className="min-w-0 space-y-5">
-            <section className="border border-[#e2e8f0] bg-white" aria-labelledby="e00-journey-heading">
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#e8edf2] bg-[#f8f9fb] px-4 py-2.5">
+            <section className="rounded-xl border border-slate-200 bg-white shadow-xs" aria-labelledby="e00-journey-heading">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-[#F8F9FA] px-4 py-3 rounded-t-xl">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h2 id="e00-journey-heading" className="text-xs font-bold uppercase tracking-wider text-[#1a3a5c]">Regulatory Journey</h2>
+                  <h2 id="e00-journey-heading" className="text-[13px] font-bold uppercase tracking-wider text-[#17365D]">Regulatory Journey</h2>
                   <CountBadge>{applicableNodes.length} requirements · {approvedRequirements} approved</CountBadge>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Link href={ENTREPRENEUR_ROUTES.dependencies(project.id)} className="text-xs text-[#1a56db] hover:underline">Dependency graph →</Link>
-                  <Link href={ENTREPRENEUR_ROUTES.journey(project.id)} className="border border-[#d1d9e0] px-2.5 py-1 text-xs text-[#475569] hover:bg-[#f1f5f9]">Full Journey</Link>
+                  <Link href={ENTREPRENEUR_ROUTES.dependencies(project.id)} className="text-xs font-semibold text-[#245B8A] hover:underline">Dependency graph →</Link>
+                  <Link href={ENTREPRENEUR_ROUTES.journey(project.id)} className="rounded border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-[#245B8A] hover:bg-[#F0F5FA] hover:text-[#17365D]">Full Journey</Link>
                 </div>
               </div>
-              <div className="px-4 pb-3 pt-4">
+              <div className="px-4 pb-4 pt-4">
                 <div className="overflow-x-auto pb-1">
                   <div className="flex min-w-max items-stretch">
                     {stageStates.map((stage, index) => {
@@ -380,92 +380,92 @@ export function EntrepreneurCommandCentre({ project }: { project: BusinessProjec
                       const stageApproved = stageNodes.filter(node => node.displayState === 'approved').length
                       return (
                         <div key={stage.key} className="flex items-center">
-                          <Link href={ENTREPRENEUR_ROUTES.journey(project.id)} className={`flex min-w-[100px] flex-col items-center border-y border-l px-4 py-3 text-center last:border-r ${visual.border} ${visual.bg} ${index === currentStageIndex ? 'shadow-[inset_0_-3px_0_#1a56db]' : ''}`}>
+                          <Link href={ENTREPRENEUR_ROUTES.journey(project.id)} className={`flex min-w-[110px] flex-col items-center rounded-lg border px-4 py-3 text-center transition-all ${visual.border} ${visual.bg} ${index === currentStageIndex ? 'ring-2 ring-[#17365D]' : ''}`}>
                             <span className={`flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider ${visual.text}`}><span className={`h-1.5 w-1.5 rounded-full ${visual.dot}`} />Stage {stage.num}</span>
-                            <span className={`mt-1 text-[12px] font-semibold ${visual.text}`}>{stage.label}</span>
-                            <span className={`mt-1 text-[9px] font-medium opacity-80 ${visual.text}`}>{stage.state}</span>
-                            {stageNodes.length > 0 ? <span className="mt-0.5 text-[9px] text-[#9aa5b4]">{stageApproved}/{stageNodes.length}</span> : null}
+                            <span className={`mt-1 text-[12px] font-bold ${visual.text}`}>{stage.label}</span>
+                            <span className={`mt-1 text-[10px] font-medium opacity-90 ${visual.text}`}>{stage.state}</span>
+                            {stageNodes.length > 0 ? <span className="mt-1 text-[10px] font-semibold text-[#5C6470]">{stageApproved}/{stageNodes.length}</span> : null}
                           </Link>
-                          {index < stageStates.length - 1 ? <div className="flex shrink-0 items-center px-0.5"><div className="h-px w-4 bg-[#d1d9e0]" /><span className="text-[8px] text-[#b0bcc9]">›</span></div> : null}
+                          {index < stageStates.length - 1 ? <div className="flex shrink-0 items-center px-1"><div className="h-px w-3 bg-slate-300" /><span className="text-[10px] text-slate-400">›</span></div> : null}
                         </div>
                       )
                     })}
                   </div>
                 </div>
-                <div className="mt-3 border-t border-[#f0f4f8] pt-3">
-                  <p className="mb-2.5 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-wider text-[#6b7a8d]">
+                <div className="mt-3 border-t border-slate-100 pt-3">
+                  <p className="mb-2.5 flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-[#5C6470]">
                     Active stage requirements
-                    {currentStage ? <span className="font-mono normal-case text-[#9aa5b4]">— {currentStage.label}</span> : null}
+                    {currentStage ? <span className="font-mono normal-case text-[#20242A]">— {currentStage.label}</span> : null}
                   </p>
                   {activeStageNodes.length > 0 ? (
-                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                    <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
                       {activeStageNodes.slice(0, 4).map(node => {
                         const visual = journeyStateCfg(node.displayState)
                         return (
-                          <Link key={node.id} href={ENTREPRENEUR_ROUTES.requirement(project.id, node.id)} className={`border px-2.5 py-2.5 text-left transition-opacity hover:opacity-80 ${visual.border} ${visual.bg}`}>
-                            <p className={`truncate text-[10px] font-semibold ${visual.textCls}`}>{node.department}</p>
-                            <p className="mt-0.5 text-[11px] font-medium leading-tight text-[#374151]">{node.service}</p>
-                            {node.slaRemaining ? <p className="mt-0.5 text-[9px] text-[#6b7a8d]">{node.slaRemaining}</p> : null}
-                            <span className={`mt-1 inline-flex items-center gap-1 border px-1.5 py-0.5 text-[9px] font-semibold ${visual.badgeCls}`}>{visual.icon} {visual.label}</span>
+                          <Link key={node.id} href={ENTREPRENEUR_ROUTES.requirement(project.id, node.id)} className={`rounded-lg border p-3 text-left transition-opacity hover:opacity-90 ${visual.border} ${visual.bg}`}>
+                            <p className={`truncate text-[10px] font-bold uppercase ${visual.textCls}`}>{node.department}</p>
+                            <p className="mt-1 text-[12px] font-bold leading-snug text-[#20242A]">{node.service}</p>
+                            {node.slaRemaining ? <p className="mt-1 text-[10px] text-[#5C6470]">{node.slaRemaining}</p> : null}
+                            <span className={`mt-2 inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] font-semibold ${visual.badgeCls}`}>{visual.icon} {visual.label}</span>
                           </Link>
                         )
                       })}
                     </div>
-                  ) : <p className="text-xs text-[#6b7a8d]">No business-scoped requirements are available for the active stage.</p>}
+                  ) : <p className="text-xs text-[#5C6470]">No business-scoped requirements are available for the active stage.</p>}
                 </div>
               </div>
             </section>
 
-            <section id="action-required" className="border border-l-4 border-[#fde68a] border-l-[#d97706] bg-white" aria-labelledby="e00-actions-heading">
-              <div className="flex items-center justify-between gap-3 border-b border-[#fde68a] bg-[#fffbeb] px-4 py-2.5">
+            <section id="action-required" className="rounded-xl border border-l-4 border-slate-200 border-l-[#E68A2E] bg-white shadow-xs" aria-labelledby="e00-actions-heading">
+              <div className="flex items-center justify-between gap-3 border-b border-slate-200 bg-[#FDF4EB] px-4 py-3 rounded-t-xl">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-[#d97706]" />
-                  <h2 id="e00-actions-heading" className="text-xs font-bold uppercase tracking-wider text-[#92400e]">Action Required</h2>
-                  <span className="rounded-full bg-[#d97706] px-2 py-0.5 text-[10px] font-bold text-white">{actions.length}</span>
-                  <span className="text-[10px] text-[#b45309]">· {actions.filter(action => action.urgent).length} urgent</span>
+                  <span className="h-2 w-2 rounded-full bg-[#E68A2E]" />
+                  <h2 id="e00-actions-heading" className="text-[13px] font-bold uppercase tracking-wider text-[#C46A15]">Action Required</h2>
+                  <span className="rounded-full bg-[#E68A2E] px-2 py-0.5 text-[10px] font-bold text-white">{actions.length}</span>
+                  <span className="text-[11px] font-semibold text-[#C46A15]">· {actions.filter(action => action.urgent).length} urgent</span>
                 </div>
-                <Link href={ENTREPRENEUR_ROUTES.notifications()} className="text-[11px] text-[#92400e] hover:underline">All notifications →</Link>
+                <Link href={ENTREPRENEUR_ROUTES.notifications()} className="text-xs font-semibold text-[#C46A15] hover:underline">All notifications →</Link>
               </div>
               {actions.length > 0 ? (
-                <div className="divide-y divide-[#fef9e7]">
+                <div className="divide-y divide-slate-100">
                   {actions.slice(0, 5).map(action => (
-                    <div key={action.id} className={`flex items-center justify-between gap-4 px-4 py-3 ${action.urgent ? 'bg-[#fffbf0]' : 'bg-white'}`}>
+                    <div key={action.id} className={`flex items-center justify-between gap-4 px-4 py-3 ${action.urgent ? 'bg-[#FDF4EB]/40' : 'bg-white'}`}>
                       <div className="flex min-w-0 flex-1 items-start gap-3">
-                        <span className={`mt-0.5 shrink-0 ${action.urgent ? 'text-[#d97706]' : 'text-[#6b7a8d]'}`}>{action.icon}</span>
+                        <span className={`mt-0.5 shrink-0 ${action.urgent ? 'text-[#E68A2E]' : 'text-[#5C6470]'}`}>{action.icon}</span>
                         <div className="min-w-0 flex-1">
-                          <p className="text-sm font-semibold leading-tight text-[#1a2533]">{action.title}</p>
-                          <p className="mt-0.5 text-[11px] text-[#6b7a8d]">{action.detail}</p>
+                          <p className="text-[13px] font-bold leading-snug text-[#20242A]">{action.title}</p>
+                          <p className="mt-0.5 text-xs text-[#5C6470]">{action.detail}</p>
                         </div>
                       </div>
-                      <Link href={action.href} className={`shrink-0 border px-3 py-1.5 text-xs font-medium transition-colors ${action.urgent ? 'border-[#d97706] text-[#92400e] hover:bg-[#fef3c7]' : 'border-[#1a56db] text-[#1a56db] hover:bg-[#ebf3ff]'}`}>{action.cta}</Link>
+                      <Link href={action.href} className={`shrink-0 rounded border px-3 py-1.5 text-xs font-semibold transition-colors ${action.urgent ? 'border-[#E68A2E] bg-[#FDF4EB] text-[#C46A15] hover:bg-[#F8D4B0]' : 'border-[#245B8A] bg-white text-[#245B8A] hover:bg-[#F0F5FA]'}`}>{action.cta}</Link>
                     </div>
                   ))}
-                  {actions.length > 5 ? <p className="px-4 py-2 text-[10px] text-[#6b7a8d]">+{actions.length - 5} more actions are available in their linked sections.</p> : null}
+                  {actions.length > 5 ? <p className="px-4 py-2 text-[11px] text-[#5C6470]">+{actions.length - 5} more actions are available in their linked sections.</p> : null}
                 </div>
               ) : <EmptyState>No action-required records are bound to this business.</EmptyState>}
             </section>
 
-            <section className="border border-[#e2e8f0] bg-white" aria-label="Applications Across Departments">
+            <section className="rounded-xl border border-slate-200 bg-white shadow-xs" aria-label="Applications Across Departments">
               <SectionHeader title="Applications Across Departments" badge={<CountBadge>{applications.length} active</CountBadge>} href={ENTREPRENEUR_ROUTES.applications(project.id)} actionLabel="Application Tracker" actionAriaLabel="Open Applications" />
               {applications.length > 0 ? (
                 <div className="overflow-x-auto">
-                  <table className="w-full text-xs">
-                    <thead><tr className="border-b border-[#e8edf2] bg-[#f8f9fb]">
-                      {['Department', 'Service / Application', 'Current Desk', 'Status', 'SLA', 'Action'].map(heading => <th key={heading} className="px-3.5 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-[#9aa5b4]">{heading}</th>)}
+                  <table className="w-full text-[13px]">
+                    <thead><tr className="border-b border-slate-200 bg-[#F8F9FA]">
+                      {['Department', 'Service / Application', 'Current Desk', 'Status', 'SLA', 'Action'].map(heading => <th key={heading} className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-[#17365D]">{heading}</th>)}
                     </tr></thead>
-                    <tbody className="divide-y divide-[#f1f5f9]">
+                    <tbody className="divide-y divide-slate-100">
                       {applications.map(application => (
-                        <tr key={application.appId} className="transition-colors hover:bg-[#f8f9fb]">
-                          <td className="whitespace-nowrap px-3.5 py-3 font-bold text-[#1a3a5c]">{application.dept}</td>
-                          <td className="px-3.5 py-3">
-                            <Link href={ENTREPRENEUR_ROUTES.application(project.id, application.appId)} className="font-semibold text-[#1a2533] hover:text-[#1a56db] hover:underline">
-                              {application.service}<span className="mt-0.5 block font-mono text-[10px] font-normal text-[#9aa5b4]">{application.appId}</span>
+                        <tr key={application.appId} className="transition-colors hover:bg-[#F0F5FA]">
+                          <td className="whitespace-nowrap px-4 py-3.5 font-bold text-[#17365D]">{application.dept}</td>
+                          <td className="px-4 py-3.5">
+                            <Link href={ENTREPRENEUR_ROUTES.application(project.id, application.appId)} className="font-semibold text-[#20242A] hover:text-[#17365D] hover:underline">
+                              {application.service}<span className="mt-0.5 block font-mono text-[11px] font-normal text-[#5C6470]">{application.appId}</span>
                             </Link>
                           </td>
-                          <td className="max-w-[180px] px-3.5 py-3 text-[#6b7a8d]"><span className="line-clamp-2">{application.currentDesk}</span></td>
-                          <td className="whitespace-nowrap px-3.5 py-3"><ApplicationStatus application={application} /></td>
-                          <td className={`whitespace-nowrap px-3.5 py-3 font-semibold ${application.slaType === 'over' ? 'text-[#b91c1c]' : 'text-[#6b7a8d]'}`}>{application.sla}</td>
-                          <td className="whitespace-nowrap px-3.5 py-3"><Link href={ENTREPRENEUR_ROUTES.application(project.id, application.appId)} className="border border-[#d1d9e0] px-2.5 py-1 font-medium text-[#475569] hover:bg-[#f1f5f9]">{application.statusType === 'action' ? 'Respond' : application.statusType === 'approved' ? 'View' : 'Track'}</Link></td>
+                          <td className="max-w-[180px] px-4 py-3.5 text-[#5C6470]"><span className="line-clamp-2">{application.currentDesk}</span></td>
+                          <td className="whitespace-nowrap px-4 py-3.5"><ApplicationStatus application={application} /></td>
+                          <td className={`whitespace-nowrap px-4 py-3.5 font-semibold ${application.slaType === 'over' ? 'text-[#9B2C2C]' : 'text-[#5C6470]'}`}>{application.sla}</td>
+                          <td className="whitespace-nowrap px-4 py-3.5"><Link href={ENTREPRENEUR_ROUTES.application(project.id, application.appId)} className="rounded border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-[#245B8A] hover:bg-[#F0F5FA]">{application.statusType === 'action' ? 'Respond' : application.statusType === 'approved' ? 'View' : 'Track'}</Link></td>
                         </tr>
                       ))}
                     </tbody>
@@ -475,86 +475,86 @@ export function EntrepreneurCommandCentre({ project }: { project: BusinessProjec
             </section>
 
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-              <section className="border border-[#e2e8f0] bg-white" aria-label="Regulatory Changes">
+              <section className="rounded-xl border border-slate-200 bg-white shadow-xs" aria-label="Regulatory Changes">
                 <SectionHeader title="Regulatory Changes" badge={<CountBadge>{regulatoryChanges.filter(change => change.impactCategory !== 'No action').length} relevant</CountBadge>} href={ENTREPRENEUR_ROUTES.regulatoryChanges(project.id)} actionLabel="Full view →" actionAriaLabel="Open Regulatory Changes" />
-                {regulatoryChanges.length > 0 ? <div className="divide-y divide-[#f8f9fb]">{regulatoryChanges.map(change => (
+                {regulatoryChanges.length > 0 ? <div className="divide-y divide-slate-100">{regulatoryChanges.map(change => (
                   <div key={change.id} className={`px-4 py-3 ${change.impactCategory === 'No action' ? 'opacity-60' : ''}`}>
-                    <p className="mb-1.5 text-[11px] font-semibold leading-tight text-[#1a2533]">{change.title}</p>
-                    <div className="mb-1.5 flex flex-wrap gap-1"><RegulatoryBadge value={change.verification} /><RegulatoryBadge value={change.impactCategory} /></div>
-                    <p className="text-[10px] text-[#6b7a8d]">Effective {change.effectiveDate} · {change.department}</p>
-                    {change.impactCategory !== 'No action' ? <Link href={ENTREPRENEUR_ROUTES.regulatoryChanges(project.id)} className="mt-1.5 inline-block text-[10px] font-medium text-[#1a56db] hover:underline">Review impact →</Link> : null}
+                    <p className="mb-1.5 text-xs font-bold leading-snug text-[#20242A]">{change.title}</p>
+                    <div className="mb-1.5 flex flex-wrap gap-1.5"><RegulatoryBadge value={change.verification} /><RegulatoryBadge value={change.impactCategory} /></div>
+                    <p className="text-[11px] text-[#5C6470]">Effective {change.effectiveDate} · {change.department}</p>
+                    {change.impactCategory !== 'No action' ? <Link href={ENTREPRENEUR_ROUTES.regulatoryChanges(project.id)} className="mt-1.5 inline-block text-[11px] font-semibold text-[#245B8A] hover:underline">Review impact →</Link> : null}
                   </div>
                 ))}</div> : <EmptyState>No business-scoped regulatory change records are available.</EmptyState>}
               </section>
 
-              <section className="border border-[#e2e8f0] bg-white" aria-label="Incentives">
+              <section className="rounded-xl border border-slate-200 bg-white shadow-xs" aria-label="Incentives">
                 <SectionHeader title="Incentives" badge={<CountBadge tone="success">{eligibleIncentives.length} eligible</CountBadge>} href={ENTREPRENEUR_ROUTES.incentives(project.id)} actionLabel="Full view →" actionAriaLabel="Open Incentives" />
-                <div className="grid grid-cols-3 divide-x divide-[#f0f4f8] border-b border-[#f0f4f8]">
-                  {[['Identified', incentives.length, 'text-[#1a3a5c]'], ['Eligible', eligibleIncentives.length, 'text-[#166534]'], ['Verify', incentivesToVerify.length, 'text-[#92400e]']].map(([label, value, color]) => (
-                    <div key={String(label)} className="px-3 py-2 text-center"><p className={`text-base font-bold ${color}`}>{value}</p><p className="text-[10px] text-[#6b7a8d]">{label}</p></div>
+                <div className="grid grid-cols-3 divide-x divide-slate-100 border-b border-slate-100">
+                  {[['Identified', incentives.length, 'text-[#17365D]'], ['Eligible', eligibleIncentives.length, 'text-[#2F7D4F]'], ['Verify', incentivesToVerify.length, 'text-[#C46A15]']].map(([label, value, color]) => (
+                    <div key={String(label)} className="px-3 py-2.5 text-center"><p className={`text-lg font-bold ${color}`}>{value}</p><p className="text-[11px] font-medium text-[#5C6470]">{label}</p></div>
                   ))}
                 </div>
-                {incentives.length > 0 ? <div className="divide-y divide-[#f8f9fb]">{incentives.map(scheme => (
-                  <Link key={scheme.id} href={ENTREPRENEUR_ROUTES.incentive(project.id, scheme.id)} className="group block px-4 py-2.5 text-left transition-colors hover:bg-[#f8fbff]">
+                {incentives.length > 0 ? <div className="divide-y divide-slate-100">{incentives.map(scheme => (
+                  <Link key={scheme.id} href={ENTREPRENEUR_ROUTES.incentive(project.id, scheme.id)} className="group block px-4 py-3 text-left transition-colors hover:bg-[#F0F5FA]">
                     <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0 flex-1"><p className="text-[11px] font-semibold leading-tight text-[#1a2533] transition-colors group-hover:text-[#1a56db]">{scheme.name}</p><p className="mt-0.5 text-[10px] text-[#6b7a8d]">{scheme.authority}</p></div>
-                      <span className={`mt-0.5 shrink-0 border px-1.5 py-0.5 text-[9px] font-bold ${scheme.eligState === 'Appears eligible from available data' ? 'border-[#86efac] bg-[#f0fdf4] text-[#166534]' : scheme.eligState === 'Needs Verification' ? 'border-[#fde68a] bg-[#fef3c7] text-[#92400e]' : 'border-[#d1d9e0] bg-[#f8f9fb] text-[#6b7a8d]'}`}>{scheme.eligState === 'Appears eligible from available data' ? 'Eligible' : scheme.eligState === 'Needs Verification' ? 'Verify' : 'N/A'}</span>
+                      <div className="min-w-0 flex-1"><p className="text-xs font-bold leading-snug text-[#20242A] transition-colors group-hover:text-[#17365D]">{scheme.name}</p><p className="mt-0.5 text-[11px] text-[#5C6470]">{scheme.authority}</p></div>
+                      <span className={`mt-0.5 shrink-0 rounded border px-2 py-0.5 text-[10px] font-bold ${scheme.eligState === 'Appears eligible from available data' ? 'border-[#B8E3CA] bg-[#EBF7F0] text-[#2F7D4F]' : scheme.eligState === 'Needs Verification' ? 'border-[#F8D4B0] bg-[#FDF4EB] text-[#C46A15]' : 'border-[#D9DFE5] bg-[#F1F3F5] text-[#5C6470]'}`}>{scheme.eligState === 'Appears eligible from available data' ? 'Eligible' : scheme.eligState === 'Needs Verification' ? 'Verify' : 'N/A'}</span>
                     </div>
                   </Link>
                 ))}</div> : <EmptyState>No incentive records are bound to this business.</EmptyState>}
               </section>
             </div>
 
-            <section className="border border-[#e2e8f0] bg-white" aria-label="Compliance">
+            <section className="rounded-xl border border-slate-200 bg-white shadow-xs" aria-label="Compliance">
               <SectionHeader title="Compliance" badge={compliance.filter(obligation => obligation.status === 'Action Required').length ? <CountBadge tone="danger">{compliance.filter(obligation => obligation.status === 'Action Required').length} action required</CountBadge> : undefined} href={ENTREPRENEUR_ROUTES.compliance(project.id)} actionLabel="Compliance Dashboard" actionAriaLabel="Open Compliance" />
-              <div className="grid grid-cols-5 divide-x divide-[#f0f4f8] border-b border-[#f0f4f8]">
+              <div className="grid grid-cols-5 divide-x divide-slate-100 border-b border-slate-100">
                 {[
-                  ['Action Required', compliance.filter(obligation => obligation.status === 'Action Required').length, 'text-[#b91c1c]'],
-                  ['Due Soon', compliance.filter(obligation => obligation.status === 'Due Soon').length, 'text-[#d97706]'],
-                  ['Overdue', compliance.filter(obligation => obligation.status === 'Overdue').length, 'text-[#b91c1c]'],
-                  ['Under Verification', compliance.filter(obligation => obligation.status === 'Under Verification').length, 'text-[#1a56db]'],
-                  ['Total', compliance.length, 'text-[#1a3a5c]'],
-                ].map(([label, value, color]) => <div key={String(label)} className="px-2 py-2.5 text-center sm:px-3"><p className={`text-xl font-bold ${color}`}>{value}</p><p className="text-[9px] leading-tight text-[#6b7a8d] sm:text-[10px]">{label}</p></div>)}
+                  ['Action Required', compliance.filter(obligation => obligation.status === 'Action Required').length, 'text-[#9B2C2C]'],
+                  ['Due Soon', compliance.filter(obligation => obligation.status === 'Due Soon').length, 'text-[#C46A15]'],
+                  ['Overdue', compliance.filter(obligation => obligation.status === 'Overdue').length, 'text-[#9B2C2C]'],
+                  ['Under Verification', compliance.filter(obligation => obligation.status === 'Under Verification').length, 'text-[#17365D]'],
+                  ['Total', compliance.length, 'text-[#20242A]'],
+                ].map(([label, value, color]) => <div key={String(label)} className="px-2 py-2.5 text-center sm:px-3"><p className={`text-xl font-bold ${color}`}>{value}</p><p className="text-[10px] leading-tight text-[#5C6470] font-medium sm:text-[11px]">{label}</p></div>)}
               </div>
               {compliance.length > 0 ? <div className="overflow-x-auto">
-                <table className="w-full text-xs"><thead><tr className="border-b border-[#f0f4f8] bg-[#f8f9fb]">{['Obligation', 'Department', 'Category', 'Due Date', 'Status', ''].map(heading => <th key={heading} className="px-3.5 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-[#9aa5b4]">{heading}</th>)}</tr></thead>
-                  <tbody className="divide-y divide-[#f8f9fb]">{compliance.slice(0, 5).map(obligation => <tr key={obligation.id} className="transition-colors hover:bg-[#f8f9fb]">
-                    <td className="px-3.5 py-2.5"><p className="max-w-[220px] truncate font-semibold text-[#1a2533]">{obligation.name}</p><p className="mt-0.5 font-mono text-[10px] text-[#9aa5b4]">{obligation.id}</p></td>
-                    <td className="whitespace-nowrap px-3.5 py-2.5 text-[#6b7a8d]">{obligation.dept}</td><td className="whitespace-nowrap px-3.5 py-2.5 text-[#6b7a8d]">{obligation.category}</td>
-                    <td className={`whitespace-nowrap px-3.5 py-2.5 font-medium ${obligation.status === 'Action Required' || obligation.status === 'Overdue' ? 'text-[#b91c1c]' : 'text-[#374151]'}`}>{obligation.dueDate}</td>
-                    <td className="whitespace-nowrap px-3.5 py-2.5"><ComplianceStatusBadge status={obligation.status} /></td>
-                    <td className="whitespace-nowrap px-3.5 py-2.5"><Link href={ENTREPRENEUR_ROUTES.complianceDetail(project.id, obligation.id)} className="text-[10px] font-medium text-[#1a56db] hover:underline">Detail →</Link></td>
+                <table className="w-full text-[13px]"><thead><tr className="border-b border-slate-200 bg-[#F8F9FA]">{['Obligation', 'Department', 'Category', 'Due Date', 'Status', ''].map(heading => <th key={heading} className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-[#17365D]">{heading}</th>)}</tr></thead>
+                  <tbody className="divide-y divide-slate-100">{compliance.slice(0, 5).map(obligation => <tr key={obligation.id} className="transition-colors hover:bg-[#F0F5FA]">
+                    <td className="px-4 py-3"><p className="max-w-[220px] truncate font-bold text-[#20242A]">{obligation.name}</p><p className="mt-0.5 font-mono text-[10px] text-[#5C6470]">{obligation.id}</p></td>
+                    <td className="whitespace-nowrap px-4 py-3 text-[#5C6470]">{obligation.dept}</td><td className="whitespace-nowrap px-4 py-3 text-[#5C6470]">{obligation.category}</td>
+                    <td className={`whitespace-nowrap px-4 py-3 font-semibold ${obligation.status === 'Action Required' || obligation.status === 'Overdue' ? 'text-[#9B2C2C]' : 'text-[#20242A]'}`}>{obligation.dueDate}</td>
+                    <td className="whitespace-nowrap px-4 py-3"><ComplianceStatusBadge status={obligation.status} /></td>
+                    <td className="whitespace-nowrap px-4 py-3"><Link href={ENTREPRENEUR_ROUTES.complianceDetail(project.id, obligation.id)} className="text-xs font-semibold text-[#245B8A] hover:underline">Detail →</Link></td>
                   </tr>)}</tbody>
                 </table>
-                {compliance.length > 5 ? <div className="border-t border-[#f0f4f8] px-4 py-2"><Link href={ENTREPRENEUR_ROUTES.compliance(project.id)} className="text-xs text-[#1a56db] hover:underline">+{compliance.length - 5} more obligations →</Link></div> : null}
+                {compliance.length > 5 ? <div className="border-t border-slate-100 px-4 py-2.5"><Link href={ENTREPRENEUR_ROUTES.compliance(project.id)} className="text-xs font-semibold text-[#245B8A] hover:underline">+{compliance.length - 5} more obligations →</Link></div> : null}
               </div> : <EmptyState>No compliance obligations are bound to this business.</EmptyState>}
             </section>
           </div>
 
           <aside className="min-w-0 space-y-5" aria-label="Command centre updates">
-            <section className="border border-[#e2e8f0] bg-white" aria-label="Upcoming">
+            <section className="rounded-xl border border-slate-200 bg-white shadow-xs" aria-label="Upcoming">
               <SectionHeader title="Upcoming" href={ENTREPRENEUR_ROUTES.inspections(project.id)} actionLabel="All →" actionAriaLabel="Open Inspections" />
-              {upcoming.length > 0 ? <div className="divide-y divide-[#f8f9fb]">{upcoming.map(item => (
-                <Link key={item.id} href={item.href} className="flex w-full items-start gap-3 px-4 py-2.5 text-left transition-colors hover:bg-[#f8fbff]">
+              {upcoming.length > 0 ? <div className="divide-y divide-slate-100">{upcoming.map(item => (
+                <Link key={item.id} href={item.href} className="flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-[#F0F5FA]">
                   <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${item.dot}`} />
-                  <div className="min-w-0 flex-1"><p className="text-[11px] font-semibold leading-tight text-[#1a2533]">{item.title}</p><div className="mt-0.5 flex flex-wrap items-center gap-2"><span className={`text-[10px] font-medium ${item.text}`}>{item.date}</span><span className="border border-[#e2e8f0] bg-[#f8f9fb] px-1 py-0.5 text-[9px] font-semibold text-[#6b7a8d]">{item.type}</span></div></div>
+                  <div className="min-w-0 flex-1"><p className="text-xs font-bold leading-snug text-[#20242A]">{item.title}</p><div className="mt-1 flex flex-wrap items-center gap-2"><span className={`text-[11px] font-semibold ${item.text}`}>{item.date}</span><span className="rounded border border-slate-200 bg-[#F8F9FA] px-1.5 py-0.5 text-[10px] font-bold text-[#5C6470]">{item.type}</span></div></div>
                 </Link>
               ))}</div> : <EmptyState>No upcoming inspections, renewals, or compliance dates are recorded.</EmptyState>}
             </section>
 
-            <section className="border border-[#e2e8f0] bg-white" aria-label="Notifications">
-              <SectionHeader title="Notifications" badge={actionNotificationCount ? <span className="rounded-full bg-[#b91c1c] px-1.5 py-0.5 text-[10px] font-bold text-white">{actionNotificationCount}</span> : undefined} href={ENTREPRENEUR_ROUTES.notifications()} actionLabel="All →" />
-              {notifications.length > 0 ? <div className="divide-y divide-[#f8f9fb]">{notifications.slice(0, 5).map(notification => {
+            <section className="rounded-xl border border-slate-200 bg-white shadow-xs" aria-label="Notifications">
+              <SectionHeader title="Notifications" badge={actionNotificationCount ? <span className="rounded-full bg-[#9B2C2C] px-2 py-0.5 text-[10px] font-bold text-white">{actionNotificationCount}</span> : undefined} href={ENTREPRENEUR_ROUTES.notifications()} actionLabel="All →" />
+              {notifications.length > 0 ? <div className="divide-y divide-slate-100">{notifications.slice(0, 5).map(notification => {
                 const actionRequired = notification.group === 'Action Required'
-                return <div key={notification.id} className={`px-4 py-3 ${actionRequired ? 'bg-[#fffbf0]' : ''}`}><div className="flex items-start gap-2.5"><span className={`mt-0.5 shrink-0 ${actionRequired ? 'text-[#d97706]' : notification.group === 'Upcoming' ? 'text-[#6366f1]' : 'text-[#6b7a8d]'}`}>{actionRequired ? <Icon.AlertCircle /> : <Icon.Info />}</span><div className="min-w-0 flex-1"><div className="flex items-start justify-between gap-1"><p className="flex-1 text-[11px] font-semibold leading-tight text-[#1a2533]">{notification.title}</p>{!notification.isRead ? <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#1a56db]" /> : null}</div><p className="mt-0.5 text-[10px] text-[#6b7a8d]">{notification.due}</p><Link href={notificationHref(notification, project.id)} className="mt-1.5 inline-block text-[10px] font-medium text-[#1a56db] hover:underline">{notification.ctaLabel} →</Link></div></div></div>
+                return <div key={notification.id} className={`px-4 py-3 ${actionRequired ? 'bg-[#FDF4EB]/50' : ''}`}><div className="flex items-start gap-2.5"><span className={`mt-0.5 shrink-0 ${actionRequired ? 'text-[#E68A2E]' : notification.group === 'Upcoming' ? 'text-[#245B8A]' : 'text-[#5C6470]'}`}>{actionRequired ? <Icon.AlertCircle /> : <Icon.Info />}</span><div className="min-w-0 flex-1"><div className="flex items-start justify-between gap-1"><p className="flex-1 text-xs font-bold leading-snug text-[#20242A]">{notification.title}</p>{!notification.isRead ? <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#245B8A]" /> : null}</div><p className="mt-0.5 text-[11px] text-[#5C6470]">{notification.due}</p><Link href={notificationHref(notification, project.id)} className="mt-1.5 inline-block text-xs font-semibold text-[#245B8A] hover:underline">{notification.ctaLabel} →</Link></div></div></div>
               })}</div> : <EmptyState>No business-scoped notifications are available.</EmptyState>}
-              <div className="border-t border-[#f0f4f8] px-4 py-2.5"><Link href={ENTREPRENEUR_ROUTES.notifications()} className="text-xs font-medium text-[#1a56db] hover:underline">View Notification Centre →</Link></div>
+              <div className="border-t border-slate-100 px-4 py-3"><Link href={ENTREPRENEUR_ROUTES.notifications()} className="text-xs font-semibold text-[#245B8A] hover:underline">View Notification Centre →</Link></div>
             </section>
 
-            <section className="border border-[#e2e8f0] bg-white" aria-label="Recent Activity">
+            <section className="rounded-xl border border-slate-200 bg-white shadow-xs" aria-label="Recent Activity">
               <SectionHeader title="Recent Activity" />
-              {activity.length > 0 ? <div className="divide-y divide-[#f8f9fb]">{activity.map(item => (
-                <Link key={item.id} href={item.href} className="flex items-start gap-2.5 px-4 py-2.5 transition-colors hover:bg-[#f8fbff]"><span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${item.dot}`} /><div className="min-w-0 flex-1"><p className="text-[11px] leading-snug text-[#374151]">{item.text}</p><p className="mt-0.5 text-[10px] text-[#9aa5b4]">{item.meta}</p></div></Link>
+              {activity.length > 0 ? <div className="divide-y divide-slate-100">{activity.map(item => (
+                <Link key={item.id} href={item.href} className="flex items-start gap-2.5 px-4 py-3 transition-colors hover:bg-[#F0F5FA]"><span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${item.dot}`} /><div className="min-w-0 flex-1"><p className="text-xs leading-snug text-[#20242A]">{item.text}</p><p className="mt-0.5 text-[11px] text-[#5C6470]">{item.meta}</p></div></Link>
               ))}</div> : <EmptyState>No recent business-scoped activity is available.</EmptyState>}
             </section>
           </aside>

@@ -16,9 +16,9 @@ import {
 
 function SectionCard({ title, children, id }: { title: string; children: React.ReactNode; id?: string }) {
   return (
-    <div id={id} className="bg-white border border-[#d1d9e0] rounded shadow-sm overflow-hidden">
-      <div className="px-5 py-3 bg-[#f8f9fb] border-b border-[#e8edf2]">
-        <h2 className="text-xs font-bold text-[#1a3a5c] uppercase tracking-wider">{title}</h2>
+    <div id={id} className="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
+      <div className="px-5 py-3.5 bg-[#F8F9FA] border-b border-slate-200">
+        <h2 className="text-[13px] font-bold text-[#17365D] uppercase tracking-wider">{title}</h2>
       </div>
       <div className="px-5 py-4">{children}</div>
     </div>
@@ -87,61 +87,61 @@ export function RequirementDetailScreen({
   }
 
   return (
-    <main id="main-content" className="flex-1 bg-[#f8f9fb]" tabIndex={-1}>
-      <div className="max-w-[960px] mx-auto px-6 py-5">
+    <main id="main-content" className="flex-1 bg-[#F8F9FA]" tabIndex={-1}>
+      <div className="max-w-[960px] mx-auto px-6 py-6">
         {/* Breadcrumb */}
         <div className="mb-4">
-          <nav className="text-xs text-[#6b7a8d] flex items-center gap-1.5" aria-label="Breadcrumb">
-            <Link href={ENTREPRENEUR_ROUTES.businesses()} className="hover:text-[#1a3a5c] hover:underline">
+          <nav className="text-xs text-[#5C6470] flex items-center gap-1.5" aria-label="Breadcrumb">
+            <Link href={ENTREPRENEUR_ROUTES.businesses()} className="hover:text-[#17365D] hover:underline">
               My Businesses
             </Link>
             <span>›</span>
-            <Link href={ENTREPRENEUR_ROUTES.business(project.id)} className="hover:text-[#1a3a5c] hover:underline">
+            <Link href={ENTREPRENEUR_ROUTES.business(project.id)} className="hover:text-[#17365D] hover:underline">
               {project.name}
             </Link>
             <span>›</span>
-            <Link href={ENTREPRENEUR_ROUTES.journey(project.id)} className="hover:text-[#1a3a5c] hover:underline">
+            <Link href={ENTREPRENEUR_ROUTES.journey(project.id)} className="hover:text-[#17365D] hover:underline">
               Regulatory Journey
             </Link>
             <span>›</span>
-            <span className="text-[#1a3a5c] font-medium">{req.service}</span>
+            <span className="text-[#17365D] font-bold">{req.service}</span>
           </nav>
         </div>
 
         {/* Demo toggle banner */}
-        <div className="mb-4 p-3 bg-[#fffbeb] border border-[#fde68a] rounded flex items-center justify-between gap-3 text-xs">
+        <div className="mb-5 p-3.5 bg-[#FDF4EB] border border-[#F8D4B0] rounded-xl flex items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold text-[#78350f] uppercase tracking-wider">Prototype Demo</span>
-            <span className="text-[#78350f]">Simulate requirement approval to inspect unlocked states</span>
+            <span className="text-[10px] font-bold text-[#C46A15] uppercase tracking-wider">Prototype Demo</span>
+            <span className="text-[#C46A15]">Simulate requirement approval to inspect unlocked states</span>
           </div>
           <button
             type="button"
             onClick={() => setCteApproved(v => !v)}
-            className={`px-3 py-1 rounded font-medium transition-colors ${cteApproved ? 'bg-[#22c55e] text-white' : 'bg-[#e0e7ff] text-[#3730a3]'}`}
+            className={`px-3 py-1.5 rounded-lg font-semibold transition-colors ${cteApproved ? 'bg-[#2F7D4F] text-white' : 'bg-[#17365D] text-white'}`}
           >
             {cteApproved ? '✓ CTE Approved (reset)' : 'Simulate CTE Approval →'}
           </button>
         </div>
 
         {/* ── Page Header ── */}
-        <div className="mb-5 bg-white border border-[#d1d9e0] rounded shadow-sm overflow-hidden">
-          <div className="px-5 py-4 border-b border-[#e8edf2]">
+        <div className="mb-6 bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
+          <div className="px-5 py-4 border-b border-slate-200">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
-                <p className="text-[10px] font-bold text-[#9aa5b4] uppercase tracking-wider mb-1">
+                <p className="text-[10px] font-bold text-[#5C6470] uppercase tracking-wider mb-1">
                   {enrich.serviceId} · {STAGES.find(s => s.key === req.stage)?.label ?? req.stage} Stage
                 </p>
-                <h1 className="text-xl font-bold text-[#1a3a5c] leading-tight">{req.service}</h1>
-                <p className="text-sm text-[#6b7a8d] mt-0.5">{req.department}</p>
+                <h1 className="text-xl font-bold text-[#17365D] leading-tight">{req.service}</h1>
+                <p className="text-xs text-[#5C6470] mt-0.5">{req.department}</p>
               </div>
               <div className="flex items-center gap-3">
-                <span className={`text-xs font-bold px-3 py-1.5 rounded border ${cfg.badgeCls}`}>
+                <span className={`text-xs font-semibold px-3 py-1.5 rounded border ${cfg.badgeCls}`}>
                   {cfg.icon} {cfg.label}
                 </span>
                 <button
                   type="button"
                   onClick={openRequirementAssistant}
-                  className="text-xs bg-[#1a56db] text-white px-3 py-1.5 rounded hover:bg-[#1a3a5c] font-medium flex items-center gap-1.5"
+                  className="text-xs bg-[#17365D] text-white px-3.5 py-1.5 rounded-lg hover:bg-[#245B8A] font-semibold flex items-center gap-1.5 shadow-xs"
                 >
                   Ask Assistant
                 </button>
@@ -150,7 +150,7 @@ export function RequirementDetailScreen({
           </div>
 
           {/* At-a-glance strip */}
-          <div className="px-5 py-3 grid grid-cols-2 sm:grid-cols-4 gap-4 bg-[#fafbfc]">
+          <div className="px-5 py-3.5 grid grid-cols-2 sm:grid-cols-4 gap-4 bg-[#F8F9FA]">
             {[
               {
                 label: 'Applicability',
@@ -176,8 +176,8 @@ export function RequirementDetailScreen({
               { label: 'Configured SLA', value: enrich.slaConfigured },
             ].map(f => (
               <div key={f.label}>
-                <p className="text-[10px] font-semibold text-[#9aa5b4] uppercase tracking-wider">{f.label}</p>
-                <p className="text-xs font-semibold text-[#374151] mt-0.5">{f.value}</p>
+                <p className="text-[10px] font-bold text-[#5C6470] uppercase tracking-wider">{f.label}</p>
+                <p className="text-xs font-bold text-[#20242A] mt-0.5">{f.value}</p>
               </div>
             ))}
           </div>

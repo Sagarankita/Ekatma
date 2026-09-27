@@ -37,24 +37,24 @@ export default function DepartmentShell({ children, requireAuth = false }: { chi
   const fontCls = fontSize === 'sm' ? 'text-[13px]' : fontSize === 'lg' ? 'text-[16px]' : 'text-[14px]';
 
   return (
-    <div className={`min-h-screen flex flex-col ${fontCls} ${highContrast ? 'bg-black text-white' : 'bg-[#f8f9fb] text-[#1a2533]'}`}>
+    <div className={`min-h-screen flex flex-col ${fontCls} ${highContrast ? 'bg-black text-white' : 'bg-[#F8F9FA] text-[#20242A]'}`}>
       <AccessibilityStrip 
         lang={lang} setLang={setLang} 
         fontSize={fontSize} setFontSize={setFontSize} 
         highContrast={highContrast} setHighContrast={setHighContrast} 
       />
-      <header className="border-b border-[#d1d9e0] bg-white" role="banner">
+      <header className="border-b border-slate-200 bg-white" role="banner">
         <div className="mx-auto flex max-w-[1440px] items-center gap-4 px-6 py-2.5">
           <img src="/assets/india-emblem.png" alt="National Emblem of India" className="h-10 w-auto object-contain" />
-          <div className="h-9 w-px bg-[#d1d9e0]" />
+          <div className="h-9 w-px bg-slate-200" />
           <img src="/assets/ekatma-logo.png" alt="EKATMA" className="h-8 w-auto object-contain" />
-          <div><p className="text-sm font-bold text-[#1a3a5c]">EKATMA</p><p className="text-[10px] text-[#4a5568]">Government of Maharashtra Portal</p></div>
+          <div><p className="text-sm font-bold text-[#17365D]">EKATMA</p><p className="text-[10px] font-medium text-[#5C6470]">Government of Maharashtra Portal</p></div>
         </div>
       </header>
       <main className="flex-1 flex flex-col">
         {children}
       </main>
-      <footer className="bg-[#0f2540] px-6 py-4 text-center text-xs text-white/70">
+      <footer className="bg-[#17365D] border-t border-[#0F233D] px-6 py-4 text-center text-xs text-white/80">
         © 2026 Government of Maharashtra. All rights reserved.
       </footer>
     </div>
