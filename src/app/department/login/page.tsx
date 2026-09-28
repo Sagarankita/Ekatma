@@ -9,6 +9,7 @@ export default function LoginPage() {
   return (
     <M01LoginPage 
       onSuccess={() => { localStorage.setItem('dept_auth', 'true'); router.push('/department'); }} 
+      onBack={() => router.push('/')}
       lang="en"
       fontSize="md"
       highContrast={false}

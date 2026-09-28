@@ -432,7 +432,7 @@ export function AuthShell({ children, lang, setLang, fontSize, setFontSize, high
   return (
     <div className="flex flex-col min-h-screen bg-[#f8f9fb]">
       <AccessibilityStrip lang={lang} setLang={setLang} fontSize={fontSize} setFontSize={setFontSize} highContrast={highContrast} setHighContrast={setHighContrast} />
-      <PortalHeader isLoggedIn={false} setIsLoggedIn={setIsLoggedIn} onGoToLogin={onGoToLogin} />
+      <PortalHeader isLoggedIn={false} setIsLoggedIn={setIsLoggedIn} onGoToLogin={onGoToLogin} showSearchAndHelp={false} />
       <DemoNotice />
       <main id="main-content" className="flex-1" tabIndex={-1}>
         {children}

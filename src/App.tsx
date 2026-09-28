@@ -125,8 +125,8 @@ export function PortalHeader({ isLoggedIn, setIsLoggedIn }: { isLoggedIn: boolea
             <img src="/assets/ekatma-logo.png" alt="Ekatma portal logo" className="h-10 w-auto object-contain" />
             <div>
               <div className="text-[#1a3a5c] font-bold text-base leading-tight">EKATMA</div>
-              <div className="text-[#4a5568] text-[11px] leading-tight">Government of Maharashtra Portal</div>
-              <div className="text-[#4a5568] text-[10px] leading-tight" style={{ fontFamily: 'Noto Sans Devanagari, sans-serif' }}>महाराष्ट्र शासन पोर्टल</div>
+              <div className="text-[#4a5568] text-[11px] leading-tight">Maharashtra Industrial Approval & Compliance Portal</div>
+              <div className="text-[#4a5568] text-[10px] leading-tight" style={{ fontFamily: 'Noto Sans Devanagari, sans-serif' }}>महाराष्ट्र औद्योगिक अनुमोदन एवं अनुपालन पोर्टल</div>
             </div>
           </div>
         </div>
@@ -1076,7 +1076,7 @@ function CaptchaDisplay({ code }: { code: string }) {
   )
 }
 
-export function M01LoginPage({ onSuccess, lang, fontSize, highContrast, setLang, setFontSize, setHighContrast }: {
+export function M01LoginPage({ onSuccess, lang, fontSize, highContrast, setLang, setFontSize, setHighContrast, onBack }: {
   onSuccess: () => void
   lang: 'en' | 'mr'
   fontSize: 'sm' | 'md' | 'lg'
@@ -1084,6 +1084,7 @@ export function M01LoginPage({ onSuccess, lang, fontSize, highContrast, setLang,
   setLang?: (lang: 'en' | 'mr') => void
   setFontSize?: (size: 'sm' | 'md' | 'lg') => void
   setHighContrast?: (hc: boolean | ((prev: boolean) => boolean)) => void
+  onBack?: () => void
 }) {
   const [loginState, setLoginState] = useState<LoginState>('default')
   const [userId, setUserId] = useState('')
@@ -1122,7 +1123,14 @@ export function M01LoginPage({ onSuccess, lang, fontSize, highContrast, setLang,
   }
 
   const busy = loginState === 'authenticating'
-  const inp = `w-full px-3 py-2.5 text-sm border rounded focus:outline-none focus:ring-2 focus:ring-[#1a56db] transition-colors placeholder:text-[#9aa5b4]`
+
+  const handleBack = () => {
+    if (onBack) {
+      onBack()
+    } else if (typeof window !== 'undefined') {
+      window.location.href = '/'
+    }
+  }
 
   return (
     <div className={`min-h-screen flex flex-col ${fontCls} ${contrastCls}`} style={{ fontFamily: 'Noto Sans, Noto Sans Devanagari, system-ui, sans-serif' }}>
@@ -1148,8 +1156,8 @@ export function M01LoginPage({ onSuccess, lang, fontSize, highContrast, setLang,
               <img src="/assets/ekatma-logo.png" alt="Ekatma portal logo" className="h-10 w-auto object-contain" />
               <div>
                 <div className="text-[#1a3a5c] font-bold text-base leading-tight">EKATMA</div>
-                <div className="text-[#4a5568] text-[11px] leading-tight">Government of Maharashtra Portal</div>
-                <div className="text-[#4a5568] text-[10px] leading-tight" style={{ fontFamily: 'Noto Sans Devanagari, sans-serif' }}>महाराष्ट्र शासन पोर्टल</div>
+                <div className="text-[#4a5568] text-[11px] leading-tight">Maharashtra Industrial Approval & Compliance Portal</div>
+                <div className="text-[#4a5568] text-[10px] leading-tight" style={{ fontFamily: 'Noto Sans Devanagari, sans-serif' }}>महाराष्ट्र औद्योगिक अनुमोदन एवं अनुपालन पोर्टल</div>
               </div>
             </div>
           </div>
@@ -1160,122 +1168,130 @@ export function M01LoginPage({ onSuccess, lang, fontSize, highContrast, setLang,
         </div>
       </header>
 
-      <main id="main-content" className="flex-1 bg-[#f8f9fb] flex flex-col items-center justify-center py-12 px-4" tabIndex={-1}>
-        <div className="w-full max-w-[408px]">
-          <div className="text-center mb-7">
-            <h1 className="text-xl font-bold text-[#1a3a5c]">MIDC Department Login</h1>
-            <p className="text-sm text-[#1a2533] mt-1.5">Sign in to access your assigned departmental workspace.</p>
-          </div>
-
-          <div className="bg-white border border-[#d1d9e0] rounded shadow-sm p-6 space-y-5">
-
-            {loginState === 'invalid-creds' && (
-              <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded p-3 text-sm text-red-700" role="alert" aria-live="assertive">
-                <span className="shrink-0 mt-0.5"><Icon.AlertCircle /></span>
-                <span>Invalid User ID or password. Please check your credentials and try again.</span>
-              </div>
-            )}
-
-            <div>
-              <label htmlFor="m01-uid" className="block text-sm font-medium text-[#1a2533] mb-1.5">
-                Officer / Department User ID <span className="text-red-600" aria-hidden="true">*</span>
-              </label>
-              <input
-                id="m01-uid"
-                type="text"
-                placeholder="Enter your User ID"
-                value={userId}
-                onChange={e => { setUserId(e.target.value); if (loginState === 'invalid-creds') setLoginState('default') }}
-                disabled={busy}
-                autoComplete="username"
-                aria-required="true"
-                className={`${inp} ${loginState === 'invalid-creds' ? 'border-red-400 bg-red-50 focus:ring-red-500' : 'border-[#d1d9e0] bg-white'} ${busy ? 'opacity-60 cursor-not-allowed' : ''}`}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="m01-pw" className="block text-sm font-medium text-[#1a2533] mb-1.5">
-                Password <span className="text-red-600" aria-hidden="true">*</span>
-              </label>
-              <div className="relative">
-                <input
-                  id="m01-pw"
-                  type={showPw ? 'text' : 'password'}
-                  placeholder="Enter Password"
-                  value={password}
-                  onChange={e => { setPassword(e.target.value); if (loginState === 'invalid-creds') setLoginState('default') }}
-                  disabled={busy}
-                  autoComplete="current-password"
-                  aria-required="true"
-                  className={`${inp} pr-10 ${loginState === 'invalid-creds' ? 'border-red-400 bg-red-50 focus:ring-red-500' : 'border-[#d1d9e0] bg-white'} ${busy ? 'opacity-60 cursor-not-allowed' : ''}`}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPw(v => !v)}
-                  disabled={busy}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#1a2533] hover:text-[#1a3a5c] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a56db] rounded"
-                  aria-label={showPw ? 'Hide password' : 'Show password'}
-                >
-                  {showPw ? <MIcon.EyeOff /> : <MIcon.Eye />}
-                </button>
+      <main id="main-content" className="flex-1 bg-[#f8f9fb]" tabIndex={-1}>
+        <div className="max-w-[520px] mx-auto px-4 py-10">
+          <div className="bg-white border border-[#d1d9e0] rounded shadow-sm">
+            <div className="px-8 py-5 border-b border-[#d1d9e0] bg-[#f8f9fb] flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handleBack}
+                className="text-[#6b7a8d] hover:text-[#1a3a5c] transition-colors"
+                aria-label="Back to portal"
+              >
+                <Icon.ChevronLeft />
+              </button>
+              <div>
+                <h1 className="text-xl font-bold text-[#1a3a5c]">MIDC Department Login</h1>
+                <p className="text-sm text-[#6b7a8d] mt-0.5">Sign in to access your assigned departmental workspace.</p>
               </div>
             </div>
 
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-sm font-medium text-[#1a2533]">CAPTCHA <span className="text-red-600" aria-hidden="true">*</span></span>
-                <button
-                  type="button"
-                  onClick={refreshCaptcha}
-                  disabled={busy}
-                  className="flex items-center gap-1 text-xs text-[#1a56db] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a56db] rounded px-1"
-                  aria-label="Refresh CAPTCHA - generate a new CAPTCHA image"
-                >
-                  <MIcon.Refresh /> Refresh CAPTCHA
-                </button>
-              </div>
-              <CaptchaDisplay code={captchaCode} />
-              {showRefreshedMsg && loginState === 'captcha-refreshed' && (
-                <p className="flex items-center gap-1 text-xs text-green-700 mt-1" aria-live="polite" role="status">
-                  <Icon.Check /> CAPTCHA refreshed
-                </p>
+            <form onSubmit={e => { e.preventDefault(); handleLogin() }} className="px-8 py-6 space-y-4" noValidate>
+              {loginState === 'invalid-creds' && (
+                <div role="alert" className="flex items-start gap-3 p-3 rounded border-l-4 bg-red-50 border-red-400">
+                  <span className="text-red-600 shrink-0 mt-0.5"><Icon.AlertCircle /></span>
+                  <p className="text-sm text-red-800">Invalid User ID or password. Please check your credentials and try again.</p>
+                </div>
               )}
-              <div className="mt-2">
-                <label htmlFor="m01-captcha" className="sr-only">Enter CAPTCHA code shown in the image</label>
+
+              <div>
+                <label htmlFor="m01-uid" className="block text-sm font-medium text-[#374151] mb-1">
+                  Officer / Department User ID <span className="text-red-600 ml-0.5" aria-hidden="true">*</span>
+                </label>
                 <input
-                  id="m01-captcha"
+                  id="m01-uid"
                   type="text"
-                  placeholder="Enter CAPTCHA"
-                  value={captchaInput}
-                  onChange={e => { setCaptchaInput(e.target.value); if (loginState === 'incorrect-captcha') setLoginState('default') }}
+                  placeholder="Enter your User ID"
+                  value={userId}
+                  onChange={e => { setUserId(e.target.value); if (loginState === 'invalid-creds') setLoginState('default') }}
                   disabled={busy}
-                  autoComplete="off"
+                  autoComplete="username"
                   aria-required="true"
-                  aria-describedby={loginState === 'incorrect-captcha' ? 'm01-captcha-err' : undefined}
-                  aria-invalid={loginState === 'incorrect-captcha'}
-                  className={`${inp} tracking-[0.2em] uppercase ${loginState === 'incorrect-captcha' ? 'border-red-400 bg-red-50 focus:ring-red-500' : 'border-[#d1d9e0] bg-white'} ${busy ? 'opacity-60 cursor-not-allowed' : ''}`}
+                  className={`w-full px-3 py-2 text-sm border rounded bg-white focus:outline-none focus:ring-2 focus:ring-[#1a56db] focus:border-[#1a56db] transition-colors placeholder:text-[#9aa5b4] ${loginState === 'invalid-creds' ? 'border-red-500 bg-red-50 focus:ring-red-400' : 'border-[#d1d9e0]'} ${busy ? 'opacity-60 cursor-not-allowed' : ''}`}
                 />
-                {loginState === 'incorrect-captcha' && (
-                  <p id="m01-captcha-err" className="flex items-center gap-1 text-xs text-red-600 mt-1" role="alert">
-                    <Icon.AlertCircle /> Incorrect CAPTCHA. Please try again.
+              </div>
+
+              <div>
+                <label htmlFor="m01-pw" className="block text-sm font-medium text-[#374151] mb-1">
+                  Password <span className="text-red-600 ml-0.5" aria-hidden="true">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    id="m01-pw"
+                    type={showPw ? 'text' : 'password'}
+                    placeholder="Enter Password"
+                    value={password}
+                    onChange={e => { setPassword(e.target.value); if (loginState === 'invalid-creds') setLoginState('default') }}
+                    disabled={busy}
+                    autoComplete="current-password"
+                    aria-required="true"
+                    className={`w-full px-3 py-2 text-sm border rounded bg-white focus:outline-none focus:ring-2 focus:ring-[#1a56db] focus:border-[#1a56db] transition-colors placeholder:text-[#9aa5b4] pr-10 ${loginState === 'invalid-creds' ? 'border-red-500 bg-red-50 focus:ring-red-400' : 'border-[#d1d9e0]'} ${busy ? 'opacity-60 cursor-not-allowed' : ''}`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPw(v => !v)}
+                    disabled={busy}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9aa5b4] hover:text-[#4a5568] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a56db] rounded"
+                    aria-label={showPw ? 'Hide password' : 'Show password'}
+                  >
+                    {showPw ? <MIcon.EyeOff /> : <MIcon.Eye />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="block text-sm font-medium text-[#374151]">CAPTCHA <span className="text-red-600 ml-0.5" aria-hidden="true">*</span></span>
+                  <button
+                    type="button"
+                    onClick={refreshCaptcha}
+                    disabled={busy}
+                    className="flex items-center gap-1 text-xs text-[#1a56db] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a56db] rounded px-1 font-medium"
+                    aria-label="Refresh CAPTCHA - generate a new CAPTCHA image"
+                  >
+                    <MIcon.Refresh /> Refresh CAPTCHA
+                  </button>
+                </div>
+                <CaptchaDisplay code={captchaCode} />
+                {showRefreshedMsg && loginState === 'captcha-refreshed' && (
+                  <p className="flex items-center gap-1 text-xs text-green-700 mt-1" aria-live="polite" role="status">
+                    <Icon.Check /> CAPTCHA refreshed
                   </p>
                 )}
+                <div className="mt-2">
+                  <label htmlFor="m01-captcha" className="sr-only">Enter CAPTCHA code shown in the image</label>
+                  <input
+                    id="m01-captcha"
+                    type="text"
+                    placeholder="Enter CAPTCHA"
+                    value={captchaInput}
+                    onChange={e => { setCaptchaInput(e.target.value); if (loginState === 'incorrect-captcha') setLoginState('default') }}
+                    disabled={busy}
+                    autoComplete="off"
+                    aria-required="true"
+                    aria-describedby={loginState === 'incorrect-captcha' ? 'm01-captcha-err' : undefined}
+                    aria-invalid={loginState === 'incorrect-captcha'}
+                    className={`w-full px-3 py-2 text-sm border rounded bg-white focus:outline-none focus:ring-2 focus:ring-[#1a56db] focus:border-[#1a56db] transition-colors placeholder:text-[#9aa5b4] tracking-[0.2em] uppercase ${loginState === 'incorrect-captcha' ? 'border-red-500 bg-red-50 focus:ring-red-400' : 'border-[#d1d9e0]'} ${busy ? 'opacity-60 cursor-not-allowed' : ''}`}
+                  />
+                  {loginState === 'incorrect-captcha' && (
+                    <p id="m01-captcha-err" className="mt-1 text-xs text-red-600 flex items-center gap-1" role="alert">
+                      <Icon.AlertCircle /> Incorrect CAPTCHA. Please try again.
+                    </p>
+                  )}
+                </div>
               </div>
-            </div>
 
-            <button
-              type="button"
-              onClick={handleLogin}
-              disabled={busy || !userId || !password || !captchaInput}
-              aria-busy={busy}
-              className={`w-full flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-semibold rounded transition-colors focus:outline-none focus:ring-2 focus:ring-[#1a56db] focus:ring-offset-2
-                ${busy || !userId || !password || !captchaInput
-                  ? 'bg-[#1a3a5c]/60 text-white cursor-not-allowed'
-                  : 'bg-[#1a3a5c] text-white hover:bg-[#0f2540]'}`}
-            >
-              {busy ? <><MIcon.Spinner /> Authenticating…</> : 'Login'}
-            </button>
-
+              <div className="pt-1">
+                <button
+                  type="submit"
+                  disabled={busy || !userId || !password || !captchaInput}
+                  aria-busy={busy}
+                  className="w-full flex items-center justify-center gap-2 bg-[#1a3a5c] text-white text-sm font-medium px-4 py-2.5 rounded hover:bg-[#0f2540] focus:ring-2 focus:ring-[#1a56db] focus:ring-offset-2 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {busy ? <><MIcon.Spinner /> Authenticating…</> : 'Login'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       </main>
@@ -14936,8 +14952,8 @@ function M01Shell({ onLogout, lang, fontSize, highContrast, setLang, setFontSize
               <img src="/assets/ekatma-logo.png" alt="Ekatma portal logo" className="h-10 w-auto object-contain" />
               <div>
                 <div className="text-[#1a3a5c] font-bold text-base leading-tight">EKATMA</div>
-                <div className="text-[#4a5568] text-[11px] leading-tight">Government of Maharashtra Portal</div>
-                <div className="text-[#4a5568] text-[10px] leading-tight" style={{ fontFamily: 'Noto Sans Devanagari, sans-serif' }}>महाराष्ट्र शासन पोर्टल</div>
+                <div className="text-[#4a5568] text-[11px] leading-tight">Maharashtra Industrial Approval & Compliance Portal</div>
+                <div className="text-[#4a5568] text-[10px] leading-tight" style={{ fontFamily: 'Noto Sans Devanagari, sans-serif' }}>महाराष्ट्र औद्योगिक अनुमोदन एवं अनुपालन पोर्टल</div>
               </div>
             </div>
           </div>
