@@ -6,6 +6,7 @@ import { Icon } from '@/features/entrepreneur/public-auth/PublicChrome';
 import { useRegulatoryAssistant } from './Provider';
 import type { AssistantContext } from './types';
 import { getAssistantPrompts } from './prompts';
+import { useSpeechToText, useTextToSpeech } from './useSpeech';
 
 export function GlobalAssistantDrawer() {
   const { isOpen, closeAssistant, activeContext, messages, draft, setDraft, sendMessage, loading, newConversation } = useRegulatoryAssistant();
@@ -13,6 +14,15 @@ export function GlobalAssistantDrawer() {
   const endRef = useRef<HTMLDivElement>(null);
   const priorFocus = useRef<HTMLElement | null>(null);
   const fullPageHref = activeContext.portal === 'department' ? '/department/regasst' : '/entrepreneur/assistant';
+
+  const currentLang = (typeof window !== 'undefined' && sessionStorage.getItem('entrepreneur_demo_language') === 'mr') ? 'mr' : 'en';
+
+  const { isListening, supported: micSupported, toggleListening } = useSpeechToText(
+    (text) => setDraft(text),
+    currentLang
+  );
+
+  const { speakingId, speak } = useTextToSpeech(currentLang);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -72,6 +82,20 @@ export function GlobalAssistantDrawer() {
                 {message.citations?.length ? <div className="mt-2 space-y-1 border-t border-[#e8edf2] pt-2">
                   {message.citations.map((citation, index) => <p key={`${citation.source}-${index}`} className="text-[10px] text-[#6b7a8d]"><strong>Source:</strong> {citation.source}{citation.clause ? ` · ${citation.clause}` : ''}{citation.version ? ` · ${citation.version}` : ''}</p>)}
                 </div> : null}
+                {message.role === 'assistant' && (
+                  <button
+                    type="button"
+                    onClick={() => speak(message.content, message.id)}
+                    className={`mt-2 flex items-center gap-1.5 text-[10px] font-medium transition-colors ${
+                      speakingId === message.id ? 'text-[#1a56db] font-bold' : 'text-[#6b7a8d] hover:text-[#1a3a5c]'
+                    }`}
+                    title={speakingId === message.id ? 'Stop reading' : 'Read response aloud'}
+                    aria-label={speakingId === message.id ? 'Stop reading' : 'Read response aloud'}
+                  >
+                    {speakingId === message.id ? <Icon.VolumeX /> : <Icon.Volume2 />}
+                    <span>{speakingId === message.id ? 'Stop Audio' : 'Listen Response'}</span>
+                  </button>
+                )}
               </div>
             </div>)}
         {loading && <div className="flex items-center gap-2 text-xs text-[#6b7a8d]"><Icon.Loader /> Consulting configured references…</div>}
@@ -80,7 +104,23 @@ export function GlobalAssistantDrawer() {
 
       <div className="shrink-0 border-t border-[#d1d9e0] bg-white p-3">
         <div className="flex gap-2">
-          <input ref={inputRef} value={draft} onChange={event => setDraft(event.target.value)} onKeyDown={event => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); void sendMessage(draft); } }} disabled={loading} aria-label="Ask a regulatory question" placeholder="Ask a regulatory question…" className="min-w-0 flex-1 border border-[#d1d9e0] px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#1a56db]" />
+          <input ref={inputRef} value={draft} onChange={event => setDraft(event.target.value)} onKeyDown={event => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); void sendMessage(draft); } }} disabled={loading} aria-label="Ask a regulatory question" placeholder={isListening ? "Listening to your voice..." : "Ask a regulatory question…"} className={`min-w-0 flex-1 border px-3 py-2 text-xs focus:outline-none focus:ring-2 ${isListening ? 'border-red-400 bg-red-50 focus:ring-red-400 placeholder:text-red-600' : 'border-[#d1d9e0] focus:ring-[#1a56db]'}`} />
+          {micSupported && (
+            <button
+              type="button"
+              onClick={toggleListening}
+              disabled={loading}
+              className={`px-3 py-2 border text-xs font-semibold rounded flex items-center gap-1 transition-colors ${
+                isListening
+                  ? 'bg-red-600 text-white border-red-700 animate-pulse'
+                  : 'bg-white text-[#4a5568] border-[#d1d9e0] hover:bg-[#f0f4f8] hover:text-[#1a3a5c]'
+              }`}
+              title={isListening ? 'Stop listening' : 'Voice Input (Speech to Text)'}
+              aria-label={isListening ? 'Stop listening' : 'Start voice input'}
+            >
+              {isListening ? <Icon.MicOff /> : <Icon.Mic />}
+            </button>
+          )}
           <button type="button" onClick={() => void sendMessage(draft)} disabled={!draft.trim() || loading} className="bg-[#1a3a5c] px-4 py-2 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40">Send</button>
         </div>
       </div>

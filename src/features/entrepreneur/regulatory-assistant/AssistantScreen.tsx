@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Icon } from '../public-auth/PublicChrome';
 import { useRegulatoryAssistant } from '@/features/regulatory-assistant/Provider';
 import { inlineContext } from '@/features/regulatory-assistant/context';
+import { useSpeechToText, useTextToSpeech } from '@/features/regulatory-assistant/useSpeech';
 
 const inputDefault = 'w-full px-3 py-2 text-sm border rounded bg-white focus:outline-none focus:ring-2 focus:ring-[#1a56db] focus:border-[#1a56db] transition-colors placeholder:text-[#9aa5b4] border-[#d1d9e0]';
 
@@ -253,6 +254,13 @@ export function E34RegAssistantDrawer({
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
+  const { isListening, supported: micSupported, toggleListening } = useSpeechToText(
+    (text) => setInput(text),
+    lang === 'mr' ? 'mr' : 'en'
+  );
+
+  const { speakingId, speak } = useTextToSpeech(lang === 'mr' ? 'mr' : 'en');
+
   // Auto-inject initial question when drawer opens with a context
   useEffect(() => {
     if (isOpen && context?.initialQuestion && messages.length === 0) {
@@ -485,6 +493,21 @@ export function E34RegAssistantDrawer({
                       ))}
                     </div>
                   )}
+
+                  {msg.role === 'assistant' && (
+                    <button
+                      type="button"
+                      onClick={() => speak(msg.text, `msg-${i}`)}
+                      className={`mt-2 flex items-center gap-1.5 text-[10px] font-medium transition-colors ${
+                        speakingId === `msg-${i}` ? 'text-[#1a56db] font-bold' : 'text-[#6b7a8d] hover:text-[#1a3a5c]'
+                      }`}
+                      title={speakingId === `msg-${i}` ? 'Stop reading' : 'Read response aloud'}
+                      aria-label={speakingId === `msg-${i}` ? 'Stop reading' : 'Read response aloud'}
+                    >
+                      {speakingId === `msg-${i}` ? <Icon.VolumeX /> : <Icon.Volume2 />}
+                      <span>{speakingId === `msg-${i}` ? (lang === 'mr' ? 'अॉडिओ थांबवा' : 'Stop Audio') : (lang === 'mr' ? 'उत्तर ऐका' : 'Listen Response')}</span>
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -518,11 +541,27 @@ export function E34RegAssistantDrawer({
                   sendMessage(input)
                 }
               }}
-              placeholder={t.placeholder}
-              className={`${inputDefault} flex-1 text-xs`}
+              placeholder={isListening ? (lang === 'mr' ? 'तुमचा आवाज ऐकत आहे...' : 'Listening to your voice...') : t.placeholder}
+              className={`${inputDefault} flex-1 text-xs ${isListening ? 'border-red-400 bg-red-50 focus:ring-red-400 placeholder:text-red-600' : ''}`}
               aria-label={t.placeholder}
               disabled={loading}
             />
+            {micSupported && (
+              <button
+                type="button"
+                onClick={toggleListening}
+                disabled={loading}
+                className={`px-3 py-2 border text-xs font-semibold rounded flex items-center gap-1 transition-colors shrink-0 ${
+                  isListening
+                    ? 'bg-red-600 text-white border-red-700 animate-pulse'
+                    : 'bg-white text-[#4a5568] border-[#d1d9e0] hover:bg-[#f0f4f8] hover:text-[#1a3a5c]'
+                }`}
+                title={isListening ? 'Stop listening' : 'Voice Input (Speech to Text)'}
+                aria-label={isListening ? 'Stop listening' : 'Start voice input'}
+              >
+                {isListening ? <Icon.MicOff /> : <Icon.Mic />}
+              </button>
+            )}
             <button
               onClick={() => sendMessage(input)}
               disabled={!input.trim() || loading}
