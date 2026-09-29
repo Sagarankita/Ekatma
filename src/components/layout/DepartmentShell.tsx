@@ -83,9 +83,7 @@ export default function DepartmentShell({ children, requireAuth = false }: { chi
         {children}
       </main>
 
-      <footer className="bg-[#355E3B] border-t border-[#0F233D] px-6 py-4 text-center text-xs text-white/80">
-        © 2026 Government of Maharashtra. All rights reserved.
-      </footer>
+      <Footer />
     </div>
   );
 }
