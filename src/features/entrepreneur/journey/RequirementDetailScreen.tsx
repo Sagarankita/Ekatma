@@ -10,6 +10,7 @@ import {
   listJourneyNodesForBusiness,
   journeyStateCfg,
   getEnrichment,
+  getJourneySimulationStep,
   STAGES,
   type JourneyReq,
 } from './data';
@@ -50,14 +51,14 @@ function SectionCard({
       <div className="px-5 py-3.5 bg-slate-50/80 border-b border-slate-200 flex items-center justify-between gap-3">
         <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
           {questionNumber && (
-            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#17365D] text-white text-[10px] font-bold">
+            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#355E3B] text-white text-[10px] font-bold">
               {questionNumber}
             </span>
           )}
           <span>{title}</span>
         </h2>
         {questionLabel && (
-          <span className="text-[10px] font-semibold text-[#17365D] bg-[#17365D]/8 px-2 py-0.5 rounded border border-[#17365D]/15">
+          <span className="text-[10px] font-semibold text-[#355E3B] bg-[#355E3B]/8 px-2 py-0.5 rounded border border-[#355E3B]/15">
             {questionLabel}
           </span>
         )}
@@ -74,15 +75,27 @@ export function RequirementDetailScreen({
   project: BusinessProject;
   requirementId: string;
 }) {
-  const [cteApproved, setCteApproved] = useState(false);
+  const [simulatedApprovedIds, setSimulatedApprovedIds] = useState<string[]>([]);
   const { openAssistant, pageContext } = useRegulatoryAssistant();
 
-  const nodes = listJourneyNodesForBusiness(project.id, cteApproved);
+  const nodes = listJourneyNodesForBusiness(project.id, simulatedApprovedIds);
+  const simStep = getJourneySimulationStep(nodes, simulatedApprovedIds);
+
+  const handleSimulateNext = () => {
+    if (simStep.nextReq) {
+      setSimulatedApprovedIds(prev => [...prev, simStep.nextReq!.id]);
+    }
+  };
+
+  const handleResetSimulation = () => {
+    setSimulatedApprovedIds([]);
+  };
+
   const req = nodes.find(n => n.id === requirementId);
 
   if (!req) {
     return (
-      <main id="main-content" className="flex-1 bg-[#F8F9FA] flex items-center justify-center min-h-[60vh]" tabIndex={-1}>
+      <main id="main-content" className="flex-1 bg-[#F9FAF2] flex items-center justify-center min-h-[60vh]" tabIndex={-1}>
         <div className="max-w-[900px] mx-auto px-6 py-12 text-center">
           <h1 className="text-xl font-bold text-slate-800">Requirement Not Found</h1>
           <p className="text-sm text-slate-500 mt-2">
@@ -90,7 +103,7 @@ export function RequirementDetailScreen({
           </p>
           <Link
             href={ENTREPRENEUR_ROUTES.journey(project.id)}
-            className="mt-5 inline-block text-sm font-semibold text-[#1a56db] hover:underline"
+            className="mt-5 inline-block text-sm font-semibold text-[#6DAE7C] hover:underline"
           >
             ← Return to Regulatory Journey
           </Link>
@@ -263,40 +276,63 @@ export function RequirementDetailScreen({
   }[primaryAction.theme];
 
   return (
-    <main id="main-content" className="flex-1 bg-[#F8F9FA] pb-16" tabIndex={-1}>
+    <main id="main-content" className="flex-1 bg-[#F9FAF2] pb-16" tabIndex={-1}>
       <div className="max-w-[960px] mx-auto px-4 sm:px-6 py-6">
         {/* ── Breadcrumb Navigation ── */}
         <nav className="mb-4 text-xs text-slate-500 flex items-center gap-1.5 flex-wrap" aria-label="Breadcrumb">
-          <Link href={ENTREPRENEUR_ROUTES.businesses()} className="hover:text-[#17365D] hover:underline">
+          <Link href={ENTREPRENEUR_ROUTES.businesses()} className="hover:text-[#355E3B] hover:underline">
             My Businesses
           </Link>
           <span>›</span>
-          <Link href={ENTREPRENEUR_ROUTES.business(project.id)} className="hover:text-[#17365D] hover:underline">
+          <Link href={ENTREPRENEUR_ROUTES.business(project.id)} className="hover:text-[#355E3B] hover:underline">
             {project.name}
           </Link>
           <span>›</span>
-          <Link href={ENTREPRENEUR_ROUTES.journey(project.id)} className="hover:text-[#17365D] hover:underline">
+          <Link href={ENTREPRENEUR_ROUTES.journey(project.id)} className="hover:text-[#355E3B] hover:underline">
             Regulatory Journey
           </Link>
           <span>›</span>
-          <span className="text-[#17365D] font-bold truncate max-w-[280px]">{req.service}</span>
+          <span className="text-[#355E3B] font-bold truncate max-w-[280px]">{req.service}</span>
         </nav>
 
         {/* ── Demo Toggle Banner (Prototype Verification) ── */}
-        <div className="mb-5 p-3.5 bg-[#FDF4EB] border border-[#F8D4B0] rounded-xl flex items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold text-[#C46A15] uppercase tracking-wider">Prototype Demo</span>
-            <span className="text-[#C46A15] hidden sm:inline">Simulate requirement approval to inspect unlocked states</span>
+        <div className="mb-5 p-3.5 bg-[#FDF4EB] border border-[#F8D4B0] rounded-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold text-[#C46A15] uppercase tracking-wider">Prototype Demo</span>
+              {simulatedApprovedIds.length > 0 && (
+                <span className="rounded-full bg-[#D4A017] px-2 py-0.5 text-[10px] font-bold text-white">
+                  Step {simulatedApprovedIds.length} of {simStep.totalSteps}
+                </span>
+              )}
+            </div>
+            <p className="mt-0.5 text-[#8A4A12] text-[11px]">{simStep.description}</p>
           </div>
-          <button
-            type="button"
-            onClick={() => setCteApproved(v => !v)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors shrink-0 ${
-              cteApproved ? 'bg-[#2F7D4F] text-white' : 'bg-[#17365D] text-white'
-            }`}
-          >
-            {cteApproved ? '✓ CTE Approved (Reset Simulation)' : 'Simulate CTE Approval →'}
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={handleSimulateNext}
+              disabled={simStep.isComplete}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors shadow-2xs ${
+                simStep.isComplete
+                  ? 'bg-[#2F7D4F] text-white opacity-90 cursor-default'
+                  : simulatedApprovedIds.length > 0
+                    ? 'bg-[#D4A017] text-white hover:bg-[#C46A15]'
+                    : 'bg-[#355E3B] text-white hover:bg-[#27472c]'
+              }`}
+            >
+              {simStep.buttonLabel}
+            </button>
+            {simulatedApprovedIds.length > 0 && (
+              <button
+                type="button"
+                onClick={handleResetSimulation}
+                className="rounded-lg border border-[#C46A15] bg-white px-2.5 py-1.5 text-xs font-semibold text-[#8A4A12] hover:bg-[#FDF2E6] transition-colors"
+              >
+                Reset
+              </button>
+            )}
+          </div>
         </div>
 
         {/* ── 1. WHAT IS THIS? (Header & Requirement Name) ── */}
@@ -308,14 +344,14 @@ export function RequirementDetailScreen({
                   <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded">
                     {enrich.serviceId}
                   </span>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#17365D] bg-[#17365D]/8 border border-[#17365D]/15 px-2 py-0.5 rounded">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#355E3B] bg-[#355E3B]/8 border border-[#355E3B]/15 px-2 py-0.5 rounded">
                     Stage {stageInfo?.num ?? '00'} · {stageInfo?.label ?? req.stage}
                   </span>
                   <span className="text-[10px] font-semibold text-slate-500">
                     {req.department}
                   </span>
                 </div>
-                <h1 className="text-xl sm:text-2xl font-bold text-slate-900 leading-tight">
+                <h1 className="text-xl font-bold text-[#355E3B]">
                   {req.service}
                 </h1>
                 <p className="text-sm text-slate-600 mt-2 leading-relaxed">
@@ -331,7 +367,7 @@ export function RequirementDetailScreen({
                 <button
                   type="button"
                   onClick={openRequirementAssistant}
-                  className="text-xs bg-[#17365D] text-white px-3.5 py-1.5 rounded-lg hover:bg-[#245B8A] font-semibold flex items-center gap-1.5 shadow-xs transition-colors"
+                  className="text-xs bg-[#355E3B] text-white px-3.5 py-1.5 rounded-lg hover:bg-[#3d7a4d] font-semibold flex items-center gap-1.5 shadow-xs transition-colors"
                 >
                   <span className="w-3.5 h-3.5 rounded-full bg-white/20 flex items-center justify-center text-[10px]">?</span>
                   Ask Assistant
@@ -411,7 +447,7 @@ export function RequirementDetailScreen({
               <details className="group border border-slate-200 rounded-lg p-3.5 bg-slate-50/60 transition-colors">
                 <summary className="cursor-pointer text-xs font-semibold text-slate-700 flex items-center justify-between list-none select-none">
                   <span className="flex items-center gap-2">
-                    <span className="text-[#17365D]">ℹ</span>
+                    <span className="text-[#355E3B]">ℹ</span>
                     <span>Detailed Rule & Evaluation Logic</span>
                   </span>
                   <span className="text-xs text-slate-400 group-open:rotate-180 transition-transform">▼</span>
@@ -421,7 +457,7 @@ export function RequirementDetailScreen({
                   <ul className="space-y-1.5 pl-2">
                     {enrich.applicabilityBasis.map(item => (
                       <li key={item} className="flex items-start gap-2">
-                        <span className="text-[#1a56db] font-bold">✓</span>
+                        <span className="text-[#6DAE7C] font-bold">✓</span>
                         <span>{item}</span>
                       </li>
                     ))}
@@ -489,12 +525,12 @@ export function RequirementDetailScreen({
               <div>
                 <div className="flex items-center justify-between mb-2.5">
                   <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-                    <span>📄 Documents</span>
+                    <span>Documents</span>
                     <span className="text-slate-400 font-normal">({enrich.docs.length})</span>
                   </h3>
                   <Link
                     href={ENTREPRENEUR_ROUTES.documents(project.id)}
-                    className="text-xs text-[#1a56db] hover:underline font-semibold"
+                    className="text-xs text-[#6DAE7C] hover:underline font-semibold"
                   >
                     Open Document Centre →
                   </Link>
@@ -548,7 +584,7 @@ export function RequirementDetailScreen({
               {/* 4B. Information & Forms */}
               <div>
                 <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2.5">
-                  📝 Information & Declarations
+                  Information & Declarations
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {/* Statutory Application Forms */}
@@ -584,14 +620,14 @@ export function RequirementDetailScreen({
                   </div>
                 </div>
                 <p className="text-[11px] text-slate-500 mt-2 italic">
-                  ⚡ EKATMA automatically pre-populates enterprise details and plot credentials from your verified Business DNA.
+                  EKATMA automatically pre-populates enterprise details and plot credentials from your verified Business DNA.
                 </p>
               </div>
 
               {/* 4C. Prerequisites */}
               <div>
                 <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2.5">
-                  🔗 Prerequisites
+                  Prerequisites
                 </h3>
                 {prereqs.length === 0 ? (
                   <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-600">
@@ -625,7 +661,7 @@ export function RequirementDetailScreen({
                           </div>
                           <Link
                             href={ENTREPRENEUR_ROUTES.requirement(project.id, p.id)}
-                            className="text-xs text-[#1a56db] hover:underline font-semibold shrink-0"
+                            className="text-xs text-[#6DAE7C] hover:underline font-semibold shrink-0"
                           >
                             View →
                           </Link>
@@ -651,7 +687,7 @@ export function RequirementDetailScreen({
                   </span>
                 </div>
                 {req.slaRemaining && (
-                  <p className="text-[11px] text-[#1a56db] font-semibold mt-1.5">{req.slaRemaining}</p>
+                  <p className="text-[11px] text-[#6DAE7C] font-semibold mt-1.5">{req.slaRemaining}</p>
                 )}
               </div>
 
@@ -702,7 +738,7 @@ export function RequirementDetailScreen({
             <div className="space-y-4">
               {/* Next Immediate Milestone */}
               <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-lg text-xs">
-                <p className="text-[10px] font-bold text-[#17365D] uppercase tracking-wider mb-1">
+                <p className="text-[10px] font-bold text-[#355E3B] uppercase tracking-wider mb-1">
                   Immediate Next Milestone
                 </p>
                 <p className="font-semibold text-slate-900">
@@ -812,7 +848,6 @@ export function RequirementDetailScreen({
               <details className="group border border-slate-200 rounded-lg p-3.5 bg-slate-50/60 transition-colors">
                 <summary className="cursor-pointer text-xs font-semibold text-slate-700 flex items-center justify-between list-none select-none">
                   <span className="flex items-center gap-2">
-                    <span className="text-[#17365D]">🔍</span>
                     <span>Full Dependency Explanation & Statutory Sequencing</span>
                   </span>
                   <span className="text-xs text-slate-400 group-open:rotate-180 transition-transform">▼</span>
@@ -827,7 +862,7 @@ export function RequirementDetailScreen({
                   <div className="pt-2">
                     <Link
                       href={ENTREPRENEUR_ROUTES.dependencies(project.id)}
-                      className="text-xs text-[#1a56db] hover:underline font-semibold"
+                      className="text-xs text-[#6DAE7C] hover:underline font-semibold"
                     >
                       View full interactive Dependency Graph →
                     </Link>

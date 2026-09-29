@@ -20,7 +20,7 @@ export function ROIResultsScreen() {
   const handleOpenRegAssistant = () => openAssistant({ origin: 'inline', mode: 'entity', context: inlineContext(pageContext, { pageType: 'roi-results', pageTitle: 'Investment Outlook', label: 'Investment Outlook', entities: { businessId } }) });
 
   return (
-    <main id="main-content" className="flex-1 bg-[#f8f9fb]" tabIndex={-1}>
+    <main id="main-content" className="flex-1 bg-[#F9FAF2]" tabIndex={-1}>
       <IncentiveWorkspaceHeader
         businessId={businessId}
         title="Investment Outlook"
@@ -30,12 +30,12 @@ export function ROIResultsScreen() {
       />
 
       <div className="max-w-[1000px] mx-auto px-6 py-5 space-y-5">
-        <div className="bg-[#fef3c7] border border-[#fde68a] px-4 py-2 text-xs text-[#92400e] font-semibold text-center uppercase tracking-wider">
+        <div className="bg-[#fdf8e6] border border-[#fae69e] px-4 py-2 text-xs text-[#7a5807] font-semibold text-center uppercase tracking-wider">
           Projected — Not Guaranteed
         </div>
 
         {/* Summary tiles */}
-        <div className="bg-white border border-[#e2e8f0] px-5 py-4">
+        <div className="bg-white border border-[#e3ebe1] px-5 py-4">
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
             {[
               { label: 'Initial Investment', value: '₹10.0 Cr', sub: 'Fixed capital' },
@@ -45,17 +45,17 @@ export function ROIResultsScreen() {
               { label: 'Payback Period', value: '4.2 years', sub: 'Without incentives' },
             ].map(m => (
               <div key={m.label} className="text-center">
-                <p className="text-xl font-bold text-[#1a3a5c]">{m.value}</p>
-                <p className="text-[11px] font-semibold text-[#374151] mt-0.5">{m.label}</p>
-                <p className="text-[10px] text-[#9aa5b4]">{m.sub}</p>
+                <p className="text-xl font-bold text-[#355E3B]">{m.value}</p>
+                <p className="text-[11px] font-semibold text-[#4A4A4A] mt-0.5">{m.label}</p>
+                <p className="text-[10px] text-[#8c9f8a]">{m.sub}</p>
               </div>
             ))}
           </div>
         </div>
 
         {/* Cash flow visualization */}
-        <div className="bg-white border border-[#e2e8f0] px-5 py-4">
-          <p className="text-xs font-bold text-[#1a3a5c] uppercase tracking-wider mb-4">Projected Annual Cash Flow (₹ Lakh)</p>
+        <div className="bg-white border border-[#e3ebe1] px-5 py-4">
+          <p className="text-xs font-bold text-[#355E3B] uppercase tracking-wider mb-4">Projected Annual Cash Flow (₹ Lakh)</p>
           <div className="flex items-end gap-3 h-28">
             {cashflows.map((v, i) => {
               const max = Math.max(...cashflows.map(Math.abs));
@@ -68,20 +68,20 @@ export function ROIResultsScreen() {
                       style={{ height: `${pct}%`, minHeight: 4 }}
                     />
                   </div>
-                  <p className="text-[9px] font-semibold text-[#6b7a8d]">Yr {i}</p>
-                  <p className="text-[9px] text-[#374151]">{v >= 0 ? '+' : ''}{v}</p>
+                  <p className="text-[9px] font-semibold text-[#555C56]">Yr {i}</p>
+                  <p className="text-[9px] text-[#4A4A4A]">{v >= 0 ? '+' : ''}{v}</p>
                 </div>
               );
             })}
           </div>
-          <p className="text-[10px] text-[#9aa5b4] mt-2">Illustrative projection · values are indicative</p>
+          <p className="text-[10px] text-[#8c9f8a] mt-2">Illustrative projection · values are indicative</p>
         </div>
 
         {/* With/Without Incentives comparison */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <div className="bg-white border border-[#e2e8f0]">
-            <div className="px-5 py-2.5 bg-[#f8f9fb] border-b border-[#e8edf2]">
-              <p className="text-xs font-bold text-[#6b7a8d] uppercase tracking-wider">Without Estimated Incentives</p>
+          <div className="bg-white border border-[#e3ebe1]">
+            <div className="px-5 py-2.5 bg-[#F9FAF2] border-b border-[#e3ebe1]">
+              <p className="text-xs font-bold text-[#555C56] uppercase tracking-wider">Without Estimated Incentives</p>
             </div>
             <div className="px-5 py-4 space-y-3">
               {[
@@ -90,9 +90,9 @@ export function ROIResultsScreen() {
                 { label: 'Payback Period', value: '4.2 years' },
                 { label: 'IRR', value: '18%' },
               ].map(r => (
-                <div key={r.label} className="flex items-center justify-between border-b border-[#f8f9fb] pb-2 last:border-0">
-                  <p className="text-xs text-[#6b7a8d]">{r.label}</p>
-                  <p className="text-xs font-bold text-[#374151]">{r.value}</p>
+                <div key={r.label} className="flex items-center justify-between border-b border-[#F9FAF2] pb-2 last:border-0">
+                  <p className="text-xs text-[#555C56]">{r.label}</p>
+                  <p className="text-xs font-bold text-[#4A4A4A]">{r.value}</p>
                 </div>
               ))}
             </div>
@@ -110,8 +110,8 @@ export function ROIResultsScreen() {
                 { label: 'Payback Period', value: '3.4 years', hi: true },
               ].map(r => (
                 <div key={r.label} className="flex items-center justify-between border-b border-[#f0fdf4] pb-2 last:border-0">
-                  <p className="text-xs text-[#6b7a8d]">{r.label}</p>
-                  <p className={`text-xs font-bold ${r.hi ? 'text-[#166534]' : 'text-[#374151]'}`}>{r.value}</p>
+                  <p className="text-xs text-[#555C56]">{r.label}</p>
+                  <p className={`text-xs font-bold ${r.hi ? 'text-[#166534]' : 'text-[#4A4A4A]'}`}>{r.value}</p>
                 </div>
               ))}
             </div>
@@ -123,27 +123,27 @@ export function ROIResultsScreen() {
           <div>
             <p className="text-xs font-bold text-[#166534] uppercase tracking-wider mb-1">Estimated Impact of Incentives</p>
             <p className="text-[11px] text-[#166534]">Potential Payback Improvement: <strong>~0.8 years</strong></p>
-            <p className="text-[10px] text-[#6b7a8d] mt-0.5">Subject to actual incentive amounts and verification outcome.</p>
+            <p className="text-[10px] text-[#555C56] mt-0.5">Subject to actual incentive amounts and verification outcome.</p>
           </div>
           <button onClick={handleGoToScenarios} className="text-xs border border-[#16a34a] text-[#166534] px-4 py-2 hover:bg-[#dcfce7] transition-colors font-medium">Compare Scenarios →</button>
         </div>
 
         {/* Explain */}
-        <div className="bg-white border border-[#e2e8f0]">
-          <button onClick={() => setShowExplain(!showExplain)} className="w-full px-5 py-3 flex items-center justify-between hover:bg-[#f8f9fb] transition-colors">
-            <p className="text-xs font-bold text-[#1a3a5c]">Explain This Projection</p>
+        <div className="bg-white border border-[#e3ebe1]">
+          <button onClick={() => setShowExplain(!showExplain)} className="w-full px-5 py-3 flex items-center justify-between hover:bg-[#F9FAF2] transition-colors">
+            <p className="text-xs font-bold text-[#355E3B]">Explain This Projection</p>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className={`transition-transform ${showExplain ? 'rotate-180' : ''}`}><path d="M3 5l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
           </button>
           {showExplain && (
-            <div className="border-t border-[#f0f4f8] px-5 py-4 space-y-3">
-              <div className="bg-[#f0f9ff] border border-[#93c5fd] px-4 py-3 text-[11px] text-[#1e3a5c] leading-relaxed">
+            <div className="border-t border-[#F9FAF2] px-5 py-4 space-y-3">
+              <div className="bg-[#f0f9ff] border border-[#a1cba9] px-4 py-3 text-[11px] text-[#1e3a5c] leading-relaxed">
                 <p className="font-semibold mb-1">AI Explanation</p>
                 "Your projected result is primarily influenced by capacity utilisation (assumed 60% in Year 1, 80% from Year 3), gross margin on pharmaceutical products, and operating cost assumptions. The identified government incentives — principally the PSI 2019 capital subsidy and electricity duty exemption — reduce the effective capital outlay, which improves the projected payback period by an estimated 0.8 years."
-                <p className="mt-2 text-[10px] text-[#6b7a8d]">AI provides explanation only. The financial calculation is performed by the deterministic projection engine, not by AI.</p>
+                <p className="mt-2 text-[10px] text-[#555C56]">AI provides explanation only. The financial calculation is performed by the deterministic projection engine, not by AI.</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 {['What is driving my ROI?', 'Which assumption affects the result most?', 'Explain this in Marathi'].map(q => (
-                  <button key={q} onClick={handleOpenRegAssistant} className="text-[11px] border border-[#d1d9e0] text-[#475569] px-2.5 py-1 hover:bg-[#f1f5f9] transition-colors">{q}</button>
+                  <button key={q} onClick={handleOpenRegAssistant} className="text-[11px] border border-[#d6dfd5] text-[#4A4A4A] px-2.5 py-1 hover:bg-[#F9FAF2] transition-colors">{q}</button>
                 ))}
               </div>
             </div>
@@ -151,8 +151,8 @@ export function ROIResultsScreen() {
         </div>
 
         <div className="flex items-center justify-between pt-2">
-          <button onClick={handleBack} className="text-xs border border-[#d1d9e0] text-[#475569] px-4 py-2 hover:bg-[#f1f5f9] transition-colors">Back</button>
-          <button onClick={handleGoToScenarios} className="bg-[#1a3a5c] text-white text-sm font-semibold px-6 py-2.5 hover:bg-[#0f2540] transition-colors">Compare Scenarios →</button>
+          <button onClick={handleBack} className="text-xs border border-[#d6dfd5] text-[#4A4A4A] px-4 py-2 hover:bg-[#F9FAF2] transition-colors">Back</button>
+          <button onClick={handleGoToScenarios} className="bg-[#355E3B] text-white text-sm font-semibold px-6 py-2.5 hover:bg-[#27472c] transition-colors">Compare Scenarios →</button>
         </div>
       </div>
     </main>

@@ -63,30 +63,30 @@ function SvgCheck() {
 // ── Status and Metadata Helpers ──────────────────────────────────────────────
 export const INSP_STATUS_MAP: Record<InspStatus, { label: string; bg: string; text: string; border: string }> = {
   PENDING:                { label: 'Pending',                 bg: 'bg-[#fff7ed]', text: 'text-[#9a3412]',  border: 'border-[#fdba74]' },
-  SCHEDULED:              { label: 'Scheduled',               bg: 'bg-[#eff6ff]', text: 'text-[#1e40af]',  border: 'border-[#93c5fd]' },
+  SCHEDULED:              { label: 'Scheduled',               bg: 'bg-[#edf5ef]', text: 'text-[#539160]',  border: 'border-[#a1cba9]' },
   IN_PROGRESS:            { label: 'In Progress',             bg: 'bg-[#fefce8]', text: 'text-[#854d0e]',  border: 'border-[#fde047]' },
   COMPLETED:              { label: 'Completed',               bg: 'bg-[#ecfdf5]', text: 'text-[#065f46]',  border: 'border-[#6ee7b7]' },
-  CANCELLED:              { label: 'Cancelled',               bg: 'bg-[#f3f4f6]', text: 'text-[#374151]',  border: 'border-[#d1d5db]' },
+  CANCELLED:              { label: 'Cancelled',               bg: 'bg-[#f3f4f6]', text: 'text-[#4A4A4A]',  border: 'border-[#d1d5db]' },
   RE_INSPECTION_REQUIRED: { label: 'Re-inspection Required',  bg: 'bg-[#fef2f2]', text: 'text-[#991b1b]',  border: 'border-[#fca5a5]' },
   AWAITING_COORDINATION:  { label: 'Awaiting Coordination',   bg: 'bg-[#f5f3ff]', text: 'text-[#5b21b6]',  border: 'border-[#c4b5fd]' },
-  NEEDS_VERIFICATION:     { label: 'Needs Verification',      bg: 'bg-[#eff6ff]', text: 'text-[#1e40af]',  border: 'border-[#93c5fd]' },
+  NEEDS_VERIFICATION:     { label: 'Needs Verification',      bg: 'bg-[#edf5ef]', text: 'text-[#539160]',  border: 'border-[#a1cba9]' },
 };
 
 export const OUTCOME_META: Record<InspOutcome, { label: string; bg: string; text: string; border: string; desc: string }> = {
   PASS:                   { label: 'PASS',                   bg: 'bg-[#ecfdf5]', text: 'text-[#065f46]', border: 'border-[#6ee7b7]', desc: 'No further inspection action identified.' },
-  OBSERVATION:            { label: 'OBSERVATION',            bg: 'bg-[#fffbeb]', text: 'text-[#92400e]', border: 'border-[#fcd34d]', desc: 'Observation recorded; follow-up action required.' },
+  OBSERVATION:            { label: 'OBSERVATION',            bg: 'bg-[#fdf8e6]', text: 'text-[#7a5807]', border: 'border-[#fae69e]', desc: 'Observation recorded; follow-up action required.' },
   NON_COMPLIANT:          { label: 'NON-COMPLIANT',          bg: 'bg-[#fef2f2]', text: 'text-[#991b1b]', border: 'border-[#fca5a5]', desc: 'Recorded findings indicate statutory non-compliance.' },
   CORRECTION_REQUIRED:    { label: 'CORRECTION REQUIRED',    bg: 'bg-[#fff7ed]', text: 'text-[#9a3412]', border: 'border-[#fdba74]', desc: 'Entrepreneur correction required before workflow continues.' },
   RE_INSPECTION_REQUIRED: { label: 'RE-INSPECTION REQUIRED', bg: 'bg-[#f5f3ff]', text: 'text-[#5b21b6]', border: 'border-[#c4b5fd]', desc: 'Follow-up on-site re-inspection required.' },
 };
 
 export const EVENT_TYPE_STYLE: Record<string, { bg: string; text: string; dot: string }> = {
-  INSPECTION:            { bg: 'bg-[#eff6ff]', text: 'text-[#1e40af]', dot: 'bg-[#1e40af]' },
+  INSPECTION:            { bg: 'bg-[#edf5ef]', text: 'text-[#539160]', dot: 'bg-[#539160]' },
   OBSERVATION:           { bg: 'bg-[#fff7ed]', text: 'text-[#9a3412]', dot: 'bg-[#9a3412]' },
   CORRECTION_REQUESTED:  { bg: 'bg-[#fef2f2]', text: 'text-[#991b1b]', dot: 'bg-[#dc2626]' },
   ENTREPRENEUR_RESPONSE: { bg: 'bg-[#ecfdf5]', text: 'text-[#065f46]', dot: 'bg-[#059669]' },
   NEW_EVIDENCE:          { bg: 'bg-[#ecfdf5]', text: 'text-[#065f46]', dot: 'bg-[#059669]' },
-  OFFICER_REVIEW:        { bg: 'bg-[#fffbeb]', text: 'text-[#92400e]', dot: 'bg-[#d97706]' },
+  OFFICER_REVIEW:        { bg: 'bg-[#fdf8e6]', text: 'text-[#7a5807]', dot: 'bg-[#D4A017]' },
   RE_INSPECTION:         { bg: 'bg-[#f5f3ff]', text: 'text-[#5b21b6]', dot: 'bg-[#7c3aed]' },
   RESOLVED:              { bg: 'bg-[#ecfdf5]', text: 'text-[#065f46]', dot: 'bg-[#059669]' },
 };
@@ -220,53 +220,53 @@ export function InspectionRecordsPage({
     const isObservationResolved = true; // Timeline demonstrates observation resolution
 
     return (
-      <div className="flex-1 flex flex-col bg-[#f8f9fb] min-h-0">
+      <div className="flex-1 flex flex-col bg-[#F9FAF2] min-h-0">
         {/* Top Breadcrumb & Back */}
-        <div className="bg-white border-b border-[#e5eaf0] px-6 py-2.5 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs text-[#374151]">
-            <button onClick={() => { setSelectedRecord(null); onBack?.(); }} className="hover:text-[#1a3a5c] font-semibold text-[#1a56db]">
+        <div className="bg-white border-b border-[#e3ebe1] px-6 py-2.5 flex items-center justify-between">
+          <div className="flex items-center gap-2 text-xs text-[#4A4A4A]">
+            <button onClick={() => { setSelectedRecord(null); onBack?.(); }} className="hover:text-[#355E3B] font-semibold text-[#6DAE7C]">
               Inspection Records
             </button>
             <span>/</span>
-            <span className="font-mono text-[#1a2533] font-bold">{selectedRecord.inspId}</span>
+            <span className="font-mono text-[#2B2B2B] font-bold">{selectedRecord.inspId}</span>
             <span>/</span>
             <span>Record Detail & Timeline</span>
           </div>
           <button
             onClick={() => setSelectedRecord(null)}
-            className="text-xs font-semibold text-[#1a3a5c] hover:underline flex items-center gap-1"
+            className="text-xs font-semibold text-[#355E3B] hover:underline flex items-center gap-1"
           >
             ← Back to All Inspection Records
           </button>
         </div>
 
         {/* Inspection Record Detail Header */}
-        <div className="bg-white border-b border-[#e5eaf0] px-6 py-4 flex flex-wrap items-center justify-between gap-4">
+        <div className="bg-white border-b border-[#e3ebe1] px-6 py-4 flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-wrap gap-x-8 gap-y-2 items-start">
             <div>
-              <div className="text-[10px] text-[#374151] uppercase font-bold">Inspection ID</div>
-              <div className="font-mono text-sm font-bold text-[#1a3a5c]">{selectedRecord.inspId}</div>
+              <div className="text-[10px] text-[#4A4A4A] uppercase font-bold">Inspection ID</div>
+              <div className="font-mono text-sm font-bold text-[#355E3B]">{selectedRecord.inspId}</div>
             </div>
             <div>
-              <div className="text-[10px] text-[#374151] uppercase font-bold">Application ID</div>
-              <div className="font-mono text-sm font-semibold text-[#1a2533]">{selectedRecord.appId}</div>
+              <div className="text-[10px] text-[#4A4A4A] uppercase font-bold">Application ID</div>
+              <div className="font-mono text-sm font-semibold text-[#2B2B2B]">{selectedRecord.appId}</div>
             </div>
             <div>
-              <div className="text-[10px] text-[#374151] uppercase font-bold">Business</div>
-              <div className="text-sm font-semibold text-[#1a2533]">{selectedRecord.business}</div>
+              <div className="text-[10px] text-[#4A4A4A] uppercase font-bold">Business</div>
+              <div className="text-sm font-semibold text-[#2B2B2B]">{selectedRecord.business}</div>
             </div>
             <div>
-              <div className="text-[10px] text-[#374151] uppercase font-bold">Original Inspection Date</div>
-              <div className="text-xs font-semibold text-[#1a2533]">{selectedRecord.targetDate || '25 Sep 2026'}</div>
+              <div className="text-[10px] text-[#4A4A4A] uppercase font-bold">Original Inspection Date</div>
+              <div className="text-xs font-semibold text-[#2B2B2B]">{selectedRecord.targetDate || '25 Sep 2026'}</div>
             </div>
             <div>
-              <div className="text-[10px] text-[#374151] uppercase font-bold">Original Outcome</div>
+              <div className="text-[10px] text-[#4A4A4A] uppercase font-bold">Original Outcome</div>
               <span className="text-[10px] font-bold bg-[#fff7ed] text-[#9a3412] border border-[#fdba74] px-2 py-0.5 rounded">
                 CORRECTION REQUIRED
               </span>
             </div>
             <div>
-              <div className="text-[10px] text-[#374151] uppercase font-bold">Resolution State</div>
+              <div className="text-[10px] text-[#4A4A4A] uppercase font-bold">Resolution State</div>
               <span className="text-[10px] font-bold bg-[#ecfdf5] text-[#065f46] border border-[#6ee7b7] px-2 py-0.5 rounded">
                 RESOLVED
               </span>
@@ -277,7 +277,7 @@ export function InspectionRecordsPage({
           <div className="flex items-center gap-2">
             <button
               onClick={() => onOpenWorkspace?.(selectedRecord.appId, selectedRecord.inspId)}
-              className="px-4 py-2 text-xs font-bold text-white bg-[#1a3a5c] hover:bg-[#0f2540] rounded shadow-sm transition-colors cursor-pointer"
+              className="px-4 py-2 text-xs font-bold text-white bg-[#355E3B] hover:bg-[#27472c] rounded shadow-sm transition-colors cursor-pointer"
             >
               {isCompletedOrResolved ? 'View Inspection Workspace' : 'Open Inspection Workspace'}
             </button>
@@ -295,19 +295,19 @@ export function InspectionRecordsPage({
         {/* Timeline & Detail Area */}
         <div className="flex flex-1 overflow-hidden min-h-0 p-6 gap-6">
           {/* Left: Authoritative Chronological Timeline */}
-          <div className="flex-1 bg-white border border-[#e5eaf0] rounded-lg flex flex-col overflow-hidden">
-            <div className="px-5 py-3 border-b border-[#e5eaf0] flex items-center justify-between bg-[#f8f9fb]">
-              <div className="text-xs font-bold text-[#1a2533]">Authoritative Inspection Timeline</div>
-              <span className="text-[10px] text-[#374151] font-medium">9 Chronological Events · Immutable Audit Trail</span>
+          <div className="flex-1 bg-white border border-[#e3ebe1] rounded-lg flex flex-col overflow-hidden">
+            <div className="px-5 py-3 border-b border-[#e3ebe1] flex items-center justify-between bg-[#F9FAF2]">
+              <div className="text-xs font-bold text-[#2B2B2B]">Authoritative Inspection Timeline</div>
+              <span className="text-[10px] text-[#4A4A4A] font-medium">9 Chronological Events · Immutable Audit Trail</span>
             </div>
 
             <div className="overflow-y-auto flex-1 p-6">
               <div className="relative">
                 {/* Vertical timeline line */}
-                <div className="absolute left-4 top-2 bottom-4 w-0.5 bg-[#e5eaf0]" />
+                <div className="absolute left-4 top-2 bottom-4 w-0.5 bg-[#e3ebe1]" />
                 <div className="space-y-4 pl-10">
                   {AUTHORITATIVE_INSPECTION_TIMELINE.map((ev, i) => {
-                    const s = EVENT_TYPE_STYLE[ev.type] ?? { bg: 'bg-[#f3f4f6]', text: 'text-[#374151]', dot: 'bg-[#9aa5b4]' };
+                    const s = EVENT_TYPE_STYLE[ev.type] ?? { bg: 'bg-[#f3f4f6]', text: 'text-[#4A4A4A]', dot: 'bg-[#8c9f8a]' };
                     const isSelected = selectedEvent?.id === ev.id && selectedEvent?.title === ev.title;
                     return (
                       <div key={i} className="relative">
@@ -317,8 +317,8 @@ export function InspectionRecordsPage({
                           onClick={() => setSelectedEvent(ev)}
                           className={`w-full text-left rounded-lg border p-3.5 transition-all cursor-pointer ${
                             isSelected
-                              ? 'border-[#1a56db] bg-[#eff6ff] shadow-xs'
-                              : 'border-[#e5eaf0] bg-white hover:border-[#93c5fd] hover:bg-[#fbfcfe]'
+                              ? 'border-[#6DAE7C] bg-[#edf5ef] shadow-xs'
+                              : 'border-[#e3ebe1] bg-white hover:border-[#a1cba9] hover:bg-[#fbfcfe]'
                           }`}
                         >
                           <div className="flex items-start justify-between gap-3">
@@ -327,13 +327,13 @@ export function InspectionRecordsPage({
                                 <span className={`text-[9px] font-bold uppercase px-1.5 py-0.2 rounded ${s.bg} ${s.text}`}>
                                   {ev.type.replace(/_/g, ' ')}
                                 </span>
-                                <span className="font-mono text-[10px] text-[#374151] font-semibold">{ev.id}</span>
+                                <span className="font-mono text-[10px] text-[#4A4A4A] font-semibold">{ev.id}</span>
                               </div>
-                              <div className="text-xs font-bold text-[#1a2533]">{ev.title}</div>
-                              <div className="text-xs text-[#374151] mt-0.5">{ev.detail}</div>
+                              <div className="text-xs font-bold text-[#2B2B2B]">{ev.title}</div>
+                              <div className="text-xs text-[#4A4A4A] mt-0.5">{ev.detail}</div>
                               {ev.evidence && (
-                                <div className="text-[10px] text-[#1a2533] mt-1 font-medium">
-                                  Evidence: <span className="font-semibold text-[#1a56db]">{ev.evidence}</span>
+                                <div className="text-[10px] text-[#2B2B2B] mt-1 font-medium">
+                                  Evidence: <span className="font-semibold text-[#6DAE7C]">{ev.evidence}</span>
                                 </div>
                               )}
                               {ev.status && (
@@ -347,8 +347,8 @@ export function InspectionRecordsPage({
                               )}
                             </div>
                             <div className="shrink-0 text-right">
-                              <div className="text-[11px] font-semibold text-[#1a2533]">{ev.date}</div>
-                              <div className="text-[10px] text-[#374151] mt-0.5">{ev.actor}</div>
+                              <div className="text-[11px] font-semibold text-[#2B2B2B]">{ev.date}</div>
+                              <div className="text-[10px] text-[#4A4A4A] mt-0.5">{ev.actor}</div>
                             </div>
                           </div>
                         </button>
@@ -361,55 +361,55 @@ export function InspectionRecordsPage({
           </div>
 
           {/* Right: Event Detail Drawer */}
-          <div className="w-80 shrink-0 bg-white border border-[#e5eaf0] rounded-lg p-5 flex flex-col gap-4 overflow-y-auto">
-            <div className="flex items-center justify-between pb-2 border-b border-[#e5eaf0]">
-              <div className="text-[10px] font-bold text-[#374151] uppercase tracking-wider">Event Detail</div>
-              <span className="text-[10px] font-mono text-[#1a56db] bg-[#eff6ff] px-2 py-0.5 rounded">Audit Record</span>
+          <div className="w-80 shrink-0 bg-white border border-[#e3ebe1] rounded-lg p-5 flex flex-col gap-4 overflow-y-auto">
+            <div className="flex items-center justify-between pb-2 border-b border-[#e3ebe1]">
+              <div className="text-[10px] font-bold text-[#4A4A4A] uppercase tracking-wider">Event Detail</div>
+              <span className="text-[10px] font-mono text-[#6DAE7C] bg-[#edf5ef] px-2 py-0.5 rounded">Audit Record</span>
             </div>
 
             {selectedEvent ? (
               <>
-                <div className="rounded-lg p-3 bg-[#f8f9fb] border border-[#e5eaf0]">
-                  <div className="text-[9px] font-bold uppercase text-[#374151]">{selectedEvent.type.replace(/_/g, ' ')}</div>
-                  <div className="text-xs font-bold text-[#1a2533] mt-0.5">{selectedEvent.title}</div>
+                <div className="rounded-lg p-3 bg-[#F9FAF2] border border-[#e3ebe1]">
+                  <div className="text-[9px] font-bold uppercase text-[#4A4A4A]">{selectedEvent.type.replace(/_/g, ' ')}</div>
+                  <div className="text-xs font-bold text-[#2B2B2B] mt-0.5">{selectedEvent.title}</div>
                 </div>
 
                 <div className="space-y-2 text-xs">
                   <div className="flex justify-between">
-                    <span className="text-[#374151] text-[10px] uppercase font-bold">Identifier</span>
-                    <span className="font-mono font-semibold text-[#1a2533]">{selectedEvent.id}</span>
+                    <span className="text-[#4A4A4A] text-[10px] uppercase font-bold">Identifier</span>
+                    <span className="font-mono font-semibold text-[#2B2B2B]">{selectedEvent.id}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-[#374151] text-[10px] uppercase font-bold">Date</span>
-                    <span className="font-medium text-[#1a2533]">{selectedEvent.date}</span>
+                    <span className="text-[#4A4A4A] text-[10px] uppercase font-bold">Date</span>
+                    <span className="font-medium text-[#2B2B2B]">{selectedEvent.date}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-[#374151] text-[10px] uppercase font-bold">Actor</span>
-                    <span className="font-medium text-[#1a2533]">{selectedEvent.actor}</span>
+                    <span className="text-[#4A4A4A] text-[10px] uppercase font-bold">Actor</span>
+                    <span className="font-medium text-[#2B2B2B]">{selectedEvent.actor}</span>
                   </div>
                   {selectedEvent.evidence && (
                     <div className="flex justify-between">
-                      <span className="text-[#374151] text-[10px] uppercase font-bold">Evidence</span>
-                      <span className="font-semibold text-[#1a56db]">{selectedEvent.evidence}</span>
+                      <span className="text-[#4A4A4A] text-[10px] uppercase font-bold">Evidence</span>
+                      <span className="font-semibold text-[#6DAE7C]">{selectedEvent.evidence}</span>
                     </div>
                   )}
                   {selectedEvent.status && (
                     <div className="flex justify-between">
-                      <span className="text-[#374151] text-[10px] uppercase font-bold">Status</span>
-                      <span className="font-semibold text-[#1a2533]">{selectedEvent.status}</span>
+                      <span className="text-[#4A4A4A] text-[10px] uppercase font-bold">Status</span>
+                      <span className="font-semibold text-[#2B2B2B]">{selectedEvent.status}</span>
                     </div>
                   )}
                 </div>
 
                 <div>
-                  <div className="text-[10px] font-bold text-[#374151] uppercase tracking-wider mb-1">Description</div>
-                  <div className="text-xs text-[#1a2533] bg-[#f8f9fb] border border-[#e5eaf0] rounded p-2.5 leading-relaxed">
+                  <div className="text-[10px] font-bold text-[#4A4A4A] uppercase tracking-wider mb-1">Description</div>
+                  <div className="text-xs text-[#2B2B2B] bg-[#F9FAF2] border border-[#e3ebe1] rounded p-2.5 leading-relaxed">
                     {selectedEvent.detail}
                   </div>
                 </div>
 
                 {/* Immutable Audit Trail Notice */}
-                <div className="bg-[#fffbeb] border border-[#fcd34d] rounded p-3 text-[11px] text-[#92400e]">
+                <div className="bg-[#fdf8e6] border border-[#fae69e] rounded p-3 text-[11px] text-[#7a5807]">
                   <div className="font-bold mb-0.5">Immutable Audit Trail</div>
                   <div>This record is cryptographically logged and permanent. Re-inspections create linked chronological entries rather than overwriting past findings.</div>
                 </div>
@@ -421,7 +421,7 @@ export function InspectionRecordsPage({
                 </div>
               </>
             ) : (
-              <div className="text-xs text-[#374151] text-center py-10">Select an event from the timeline to view details.</div>
+              <div className="text-xs text-[#4A4A4A] text-center py-10">Select an event from the timeline to view details.</div>
             )}
           </div>
         </div>
@@ -431,35 +431,35 @@ export function InspectionRecordsPage({
 
   // Otherwise, show the simple History / Records Table
   return (
-    <div className="flex-1 flex flex-col bg-[#f8f9fb] min-h-0">
+    <div className="flex-1 flex flex-col bg-[#F9FAF2] min-h-0">
       {/* Header */}
-      <div className="bg-white border-b border-[#e5eaf0] px-6 py-4 flex items-center justify-between">
+      <div className="bg-white border-b border-[#e3ebe1] px-6 py-4 flex items-center justify-between">
         <div>
-          <h1 className="text-base font-bold text-[#1a2533]">Inspection Records</h1>
-          <p className="text-xs text-[#374151] mt-0.5">Authoritative history and resolution tracking across MIDC industrial units.</p>
+          <h1 className="text-base font-bold text-[#2B2B2B]">Inspection Records</h1>
+          <p className="text-xs text-[#4A4A4A] mt-0.5">Authoritative history and resolution tracking across MIDC industrial units.</p>
         </div>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white border-b border-[#e5eaf0] px-6 py-2.5 flex items-center gap-3 flex-wrap">
+      <div className="bg-white border-b border-[#e3ebe1] px-6 py-2.5 flex items-center gap-3 flex-wrap">
         <div className="relative">
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search Application, Inspection ID, Business..."
-            className="pl-7 pr-3 py-1.5 text-xs border border-[#d1d9e0] rounded bg-white focus:outline-none focus:ring-1 focus:ring-[#1a56db] w-80"
+            className="pl-7 pr-3 py-1.5 text-xs border border-[#d6dfd5] rounded bg-white focus:outline-none focus:ring-1 focus:ring-[#6DAE7C] w-80"
           />
-          <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[#374151] pointer-events-none">
+          <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[#4A4A4A] pointer-events-none">
             <SvgSearch />
           </span>
         </div>
 
         <div className="flex items-center gap-1.5">
-          <span className="text-[10px] text-[#374151] font-bold uppercase">Status</span>
+          <span className="text-[10px] text-[#4A4A4A] font-bold uppercase">Status</span>
           <select
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value)}
-            className="text-xs border border-[#d1d9e0] rounded px-2.5 py-1 bg-white focus:outline-none"
+            className="text-xs border border-[#d6dfd5] rounded px-2.5 py-1 bg-white focus:outline-none"
           >
             <option value="All">All Statuses</option>
             <option value="Pending">Pending</option>
@@ -471,11 +471,11 @@ export function InspectionRecordsPage({
         </div>
 
         <div className="flex items-center gap-1.5">
-          <span className="text-[10px] text-[#374151] font-bold uppercase">Service</span>
+          <span className="text-[10px] text-[#4A4A4A] font-bold uppercase">Service</span>
           <select
             value={serviceFilter}
             onChange={e => setServiceFilter(e.target.value)}
-            className="text-xs border border-[#d1d9e0] rounded px-2.5 py-1 bg-white focus:outline-none"
+            className="text-xs border border-[#d6dfd5] rounded px-2.5 py-1 bg-white focus:outline-none"
           >
             <option value="All">All Services</option>
             <option value="Building / Planning">Building / Planning</option>
@@ -486,27 +486,27 @@ export function InspectionRecordsPage({
 
       {/* Primary Records Table */}
       <div className="flex-1 overflow-y-auto p-6">
-        <div className="bg-white border border-[#e5eaf0] rounded-lg overflow-x-auto shadow-xs">
+        <div className="bg-white border border-[#e3ebe1] rounded-lg overflow-x-auto shadow-xs">
           <table className="w-full text-xs text-left border-collapse min-w-[900px]">
-            <thead className="bg-[#f8f9fb] border-b border-[#e5eaf0] text-[#374151]">
+            <thead className="bg-[#F9FAF2] border-b border-[#e3ebe1] text-[#4A4A4A]">
               <tr>
                 {['Application ID', 'Inspection ID', 'Business', 'Service', 'Inspection Type', 'Inspection Date', 'Inspector / Team', 'Outcome', 'Current Resolution State', 'SLA', 'Action'].map(h => (
                   <th key={h} className="px-3.5 py-3 font-bold uppercase text-[10px] tracking-wider whitespace-nowrap">{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#f0f4f8]">
+            <tbody className="divide-y divide-[#F9FAF2]">
               {filteredRows.map(row => {
                 const sMeta = INSP_STATUS_MAP[row.status];
                 return (
                   <tr key={row.inspId} className="hover:bg-[#fbfcfe] transition-colors">
-                    <td className="px-3.5 py-3 font-mono font-bold text-[#1a56db]">{row.appId}</td>
-                    <td className="px-3.5 py-3 font-mono text-[#374151]">{row.inspId}</td>
-                    <td className="px-3.5 py-3 font-semibold text-[#1a2533]">{row.business}</td>
-                    <td className="px-3.5 py-3 text-[#1a2533]">{row.service}</td>
-                    <td className="px-3.5 py-3 text-[#374151]">{row.inspType}</td>
-                    <td className="px-3.5 py-3 text-[#1a2533] whitespace-nowrap">{row.targetDate}</td>
-                    <td className="px-3.5 py-3 text-[#374151]">{row.assigned}</td>
+                    <td className="px-3.5 py-3 font-mono font-bold text-[#6DAE7C]">{row.appId}</td>
+                    <td className="px-3.5 py-3 font-mono text-[#4A4A4A]">{row.inspId}</td>
+                    <td className="px-3.5 py-3 font-semibold text-[#2B2B2B]">{row.business}</td>
+                    <td className="px-3.5 py-3 text-[#2B2B2B]">{row.service}</td>
+                    <td className="px-3.5 py-3 text-[#4A4A4A]">{row.inspType}</td>
+                    <td className="px-3.5 py-3 text-[#2B2B2B] whitespace-nowrap">{row.targetDate}</td>
+                    <td className="px-3.5 py-3 text-[#4A4A4A]">{row.assigned}</td>
                     <td className="px-3.5 py-3">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border ${sMeta?.bg} ${sMeta?.text} ${sMeta?.border}`}>
                         {sMeta?.label}
@@ -519,11 +519,11 @@ export function InspectionRecordsPage({
                         {row.slaImpact}
                       </span>
                     </td>
-                    <td className="px-3.5 py-3 text-[#374151] whitespace-nowrap">{row.requiredBy}</td>
+                    <td className="px-3.5 py-3 text-[#4A4A4A] whitespace-nowrap">{row.requiredBy}</td>
                     <td className="px-3.5 py-3">
                       <button
                         onClick={() => setSelectedRecord(row)}
-                        className="px-3 py-1.5 text-xs font-bold text-white bg-[#1a3a5c] hover:bg-[#0f2540] rounded transition-colors cursor-pointer"
+                        className="px-3 py-1.5 text-xs font-bold text-white bg-[#355E3B] hover:bg-[#27472c] rounded transition-colors cursor-pointer"
                       >
                         OPEN
                       </button>
@@ -533,7 +533,7 @@ export function InspectionRecordsPage({
               })}
               {filteredRows.length === 0 && (
                 <tr>
-                  <td colSpan={11} className="px-6 py-12 text-center text-xs text-[#374151]">
+                  <td colSpan={11} className="px-6 py-12 text-center text-xs text-[#4A4A4A]">
                     No inspection records found matching your filters.
                   </td>
                 </tr>
@@ -577,48 +577,48 @@ export function ScheduleReinspectionSubpage({
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-[#f8f9fb] min-h-0">
+    <div className="flex-1 flex flex-col bg-[#F9FAF2] min-h-0">
       {/* Breadcrumb */}
-      <div className="bg-white border-b border-[#e5eaf0] px-6 py-2.5 flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xs text-[#374151]">
-          <span className="text-[#1a56db] font-semibold cursor-pointer" onClick={onBackToWorkspace}>Inspection Records</span>
+      <div className="bg-white border-b border-[#e3ebe1] px-6 py-2.5 flex items-center justify-between">
+        <div className="flex items-center gap-2 text-xs text-[#4A4A4A]">
+          <span className="text-[#6DAE7C] font-semibold cursor-pointer" onClick={onBackToWorkspace}>Inspection Records</span>
           <span>/</span>
-          <span className="text-[#1a56db] font-semibold cursor-pointer" onClick={onBackToWorkspace}>Inspection Workspace</span>
+          <span className="text-[#6DAE7C] font-semibold cursor-pointer" onClick={onBackToWorkspace}>Inspection Workspace</span>
           <span>/</span>
-          <span className="font-bold text-[#1a2533]">Schedule Re-inspection</span>
+          <span className="font-bold text-[#2B2B2B]">Schedule Re-inspection</span>
         </div>
         <button
           onClick={onBackToWorkspace}
-          className="text-xs font-semibold text-[#1a3a5c] hover:underline"
+          className="text-xs font-semibold text-[#355E3B] hover:underline"
         >
           ← Back to Inspection Workspace
         </button>
       </div>
 
       {/* Top Application Header */}
-      <div className="bg-white border-b border-[#e5eaf0] px-6 py-3.5 flex flex-wrap gap-x-8 gap-y-2 items-start">
+      <div className="bg-white border-b border-[#e3ebe1] px-6 py-3.5 flex flex-wrap gap-x-8 gap-y-2 items-start">
         <div>
-          <div className="text-[10px] text-[#374151] uppercase font-bold">Action</div>
-          <div className="text-sm font-bold text-[#1a3a5c]">Schedule Re-inspection</div>
+          <div className="text-[10px] text-[#4A4A4A] uppercase font-bold">Action</div>
+          <div className="text-sm font-bold text-[#355E3B]">Schedule Re-inspection</div>
         </div>
         <div>
-          <div className="text-[10px] text-[#374151] uppercase font-bold">Application ID</div>
-          <div className="font-mono text-sm font-semibold text-[#1a2533]">{applicationId}</div>
+          <div className="text-[10px] text-[#4A4A4A] uppercase font-bold">Application ID</div>
+          <div className="font-mono text-sm font-semibold text-[#2B2B2B]">{applicationId}</div>
         </div>
         <div>
-          <div className="text-[10px] text-[#374151] uppercase font-bold">Inspection ID</div>
-          <div className="font-mono text-sm font-semibold text-[#1a2533]">{inspectionId}</div>
+          <div className="text-[10px] text-[#4A4A4A] uppercase font-bold">Inspection ID</div>
+          <div className="font-mono text-sm font-semibold text-[#2B2B2B]">{inspectionId}</div>
         </div>
         <div>
-          <div className="text-[10px] text-[#374151] uppercase font-bold">Business</div>
-          <div className="text-sm font-semibold text-[#1a2533]">{business}</div>
+          <div className="text-[10px] text-[#4A4A4A] uppercase font-bold">Business</div>
+          <div className="text-sm font-semibold text-[#2B2B2B]">{business}</div>
         </div>
         <div>
-          <div className="text-[10px] text-[#374151] uppercase font-bold">Original Inspection Date</div>
-          <div className="text-xs font-semibold text-[#1a2533]">25 Sep 2026</div>
+          <div className="text-[10px] text-[#4A4A4A] uppercase font-bold">Original Inspection Date</div>
+          <div className="text-xs font-semibold text-[#2B2B2B]">25 Sep 2026</div>
         </div>
         <div>
-          <div className="text-[10px] text-[#374151] uppercase font-bold">Original Outcome</div>
+          <div className="text-[10px] text-[#4A4A4A] uppercase font-bold">Original Outcome</div>
           <span className="text-[10px] font-bold bg-[#fff7ed] text-[#9a3412] border border-[#fdba74] px-2 py-0.5 rounded">
             CORRECTION REQUIRED
           </span>
@@ -645,11 +645,11 @@ export function ScheduleReinspectionSubpage({
           </div>
 
           {/* Interactive Scheduling Calendar */}
-          <div className="bg-white border border-[#e5eaf0] rounded-lg p-5">
+          <div className="bg-white border border-[#e3ebe1] rounded-lg p-5">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-xs font-bold text-[#1a2533]">Inspection Calendar Slots</h3>
-                <p className="text-[11px] text-[#374151]">Select date and time window for follow-up on-site inspection.</p>
+                <h3 className="text-xs font-bold text-[#2B2B2B]">Inspection Calendar Slots</h3>
+                <p className="text-[11px] text-[#4A4A4A]">Select date and time window for follow-up on-site inspection.</p>
               </div>
               <div className="flex items-center gap-3 text-[10px]">
                 <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-[#059669]" />Available</span>
@@ -670,7 +670,7 @@ export function ScheduleReinspectionSubpage({
                     onClick={() => setSelectedSlot(slot)}
                     className={`text-left p-3.5 rounded-lg border transition-all cursor-pointer ${
                       isSelected
-                        ? 'border-[#1a3a5c] bg-[#eff6ff] ring-2 ring-[#1a3a5c]'
+                        ? 'border-[#355E3B] bg-[#edf5ef] ring-2 ring-[#355E3B]'
                         : isAvail
                         ? 'border-[#6ee7b7] bg-[#ecfdf5] hover:bg-[#d1fae5]'
                         : isCoord
@@ -679,15 +679,15 @@ export function ScheduleReinspectionSubpage({
                     }`}
                   >
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-bold text-[#1a2533]">{slot.date}</span>
+                      <span className="text-xs font-bold text-[#2B2B2B]">{slot.date}</span>
                       <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
                         isAvail ? 'bg-[#d1fae5] text-[#065f46]' : isCoord ? 'bg-[#ede9fe] text-[#5b21b6]' : 'bg-[#fee2e2] text-[#991b1b]'
                       }`}>
                         {slot.state}
                       </span>
                     </div>
-                    <div className="text-xs font-semibold text-[#1a3a5c]">{slot.time}</div>
-                    <div className="text-[10px] text-[#374151] mt-1 space-y-0.5">
+                    <div className="text-xs font-semibold text-[#355E3B]">{slot.time}</div>
+                    <div className="text-[10px] text-[#4A4A4A] mt-1 space-y-0.5">
                       <div>MIDC: <span className="font-medium">{slot.midc}</span></div>
                       <div>Fire: <span className="font-medium">{slot.fire}</span></div>
                     </div>
@@ -697,13 +697,13 @@ export function ScheduleReinspectionSubpage({
             </div>
 
             {/* Inspector and Participating Departments */}
-            <div className="mt-5 pt-4 border-t border-[#e5eaf0] grid grid-cols-2 gap-4">
+            <div className="mt-5 pt-4 border-t border-[#e3ebe1] grid grid-cols-2 gap-4">
               <div>
-                <label className="text-[10px] font-bold text-[#374151] uppercase block mb-1">Inspection Team / Inspector</label>
+                <label className="text-[10px] font-bold text-[#4A4A4A] uppercase block mb-1">Inspection Team / Inspector</label>
                 <select
                   value={team}
                   onChange={e => setTeam(e.target.value)}
-                  className="w-full text-xs border border-[#d1d9e0] rounded px-3 py-2 bg-white"
+                  className="w-full text-xs border border-[#d6dfd5] rounded px-3 py-2 bg-white"
                 >
                   <option value="Building / Planning Inspection Team">Building / Planning Inspection Team (Lead)</option>
                   <option value="Senior Executive Engineer Team">Senior Executive Engineer Team</option>
@@ -712,20 +712,20 @@ export function ScheduleReinspectionSubpage({
               </div>
 
               <div>
-                <label className="text-[10px] font-bold text-[#374151] uppercase block mb-1">Joint Inspection Authorities</label>
+                <label className="text-[10px] font-bold text-[#4A4A4A] uppercase block mb-1">Joint Inspection Authorities</label>
                 <div className="space-y-1 text-xs">
                   <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" checked={jointDepts.midc} disabled className="rounded text-[#1a3a5c]" />
-                    <span className="text-[#1a2533] font-medium">MIDC Building Planning (Mandatory Lead)</span>
+                    <input type="checkbox" checked={jointDepts.midc} disabled className="rounded text-[#355E3B]" />
+                    <span className="text-[#2B2B2B] font-medium">MIDC Building Planning (Mandatory Lead)</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={jointDepts.fire}
                       onChange={e => setJointDepts(prev => ({ ...prev, fire: e.target.checked }))}
-                      className="rounded text-[#1a3a5c]"
+                      className="rounded text-[#355E3B]"
                     />
-                    <span className="text-[#1a2533]">Fire Safety Department (Joint on-site check)</span>
+                    <span className="text-[#2B2B2B]">Fire Safety Department (Joint on-site check)</span>
                   </label>
                 </div>
               </div>
@@ -734,33 +734,33 @@ export function ScheduleReinspectionSubpage({
         </div>
 
         {/* Right: Notice Preview & Dispatch */}
-        <div className="w-88 shrink-0 bg-white border border-[#e5eaf0] rounded-lg p-5 flex flex-col justify-between overflow-y-auto">
+        <div className="w-88 shrink-0 bg-white border border-[#e3ebe1] rounded-lg p-5 flex flex-col justify-between overflow-y-auto">
           <div className="space-y-4">
-            <div className="pb-2 border-b border-[#e5eaf0] flex items-center justify-between">
-              <span className="text-[10px] font-bold text-[#374151] uppercase tracking-wider">Re-inspection Notice Preview</span>
+            <div className="pb-2 border-b border-[#e3ebe1] flex items-center justify-between">
+              <span className="text-[10px] font-bold text-[#4A4A4A] uppercase tracking-wider">Re-inspection Notice Preview</span>
               <span className="text-[10px] font-bold text-[#065f46] bg-[#ecfdf5] px-2 py-0.5 rounded">Form INSP-N1</span>
             </div>
 
-            <div className="bg-[#f8f9fb] border border-[#e5eaf0] rounded-lg p-4 space-y-2 text-xs">
+            <div className="bg-[#F9FAF2] border border-[#e3ebe1] rounded-lg p-4 space-y-2 text-xs">
               <div>
-                <span className="text-[10px] font-bold text-[#374151] uppercase block">Scheduled Date & Time</span>
-                <span className="font-bold text-[#1a3a5c] text-sm">{selectedSlot?.date} at {selectedSlot?.time}</span>
+                <span className="text-[10px] font-bold text-[#4A4A4A] uppercase block">Scheduled Date & Time</span>
+                <span className="font-bold text-[#355E3B] text-sm">{selectedSlot?.date} at {selectedSlot?.time}</span>
               </div>
               <div>
-                <span className="text-[10px] font-bold text-[#374151] uppercase block">Location</span>
-                <span className="font-medium text-[#1a2533]">Example MIDC Estate, Plot A-18</span>
+                <span className="text-[10px] font-bold text-[#4A4A4A] uppercase block">Location</span>
+                <span className="font-medium text-[#2B2B2B]">Example MIDC Estate, Plot A-18</span>
               </div>
               <div>
-                <span className="text-[10px] font-bold text-[#374151] uppercase block">Inspection Purpose</span>
-                <span className="text-[#1a2533]">Verify on-site compliance of revised Building Plan v3 parameters.</span>
+                <span className="text-[10px] font-bold text-[#4A4A4A] uppercase block">Inspection Purpose</span>
+                <span className="text-[#2B2B2B]">Verify on-site compliance of revised Building Plan v3 parameters.</span>
               </div>
               <div>
-                <span className="text-[10px] font-bold text-[#374151] uppercase block">Required Documents on Site</span>
-                <span className="text-[#1a2533]">Corrected Building Plan v3, Plot lease deed copy, architectural certificate.</span>
+                <span className="text-[10px] font-bold text-[#4A4A4A] uppercase block">Required Documents on Site</span>
+                <span className="text-[#2B2B2B]">Corrected Building Plan v3, Plot lease deed copy, architectural certificate.</span>
               </div>
               <div>
-                <span className="text-[10px] font-bold text-[#374151] uppercase block">Required Representative</span>
-                <span className="text-[#1a2533]">Authorised Architect / Technical Representative</span>
+                <span className="text-[10px] font-bold text-[#4A4A4A] uppercase block">Required Representative</span>
+                <span className="text-[#2B2B2B]">Authorised Architect / Technical Representative</span>
               </div>
             </div>
 
@@ -780,11 +780,11 @@ export function ScheduleReinspectionSubpage({
             )}
           </div>
 
-          <div className="pt-4 border-t border-[#e5eaf0] space-y-2">
+          <div className="pt-4 border-t border-[#e3ebe1] space-y-2">
             {!noticeSent ? (
               <button
                 onClick={handleSendNotice}
-                className="w-full py-2.5 px-4 text-xs font-bold text-white bg-[#1a3a5c] hover:bg-[#0f2540] rounded shadow-sm transition-colors cursor-pointer"
+                className="w-full py-2.5 px-4 text-xs font-bold text-white bg-[#355E3B] hover:bg-[#27472c] rounded shadow-sm transition-colors cursor-pointer"
               >
                 Send Re-inspection Notice
               </button>
@@ -907,60 +907,60 @@ export function InspectionWorkspacePage({
   ];
 
   return (
-    <div className="flex-1 flex flex-col bg-[#f8f9fb] min-h-0">
+    <div className="flex-1 flex flex-col bg-[#F9FAF2] min-h-0">
       {/* Top Breadcrumb & Return Action */}
-      <div className="bg-white border-b border-[#e5eaf0] px-6 py-2.5 flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xs text-[#374151]">
-          <button onClick={onOpenRecords || onBack} className="hover:text-[#1a3a5c] font-semibold text-[#1a56db]">
+      <div className="bg-white border-b border-[#e3ebe1] px-6 py-2.5 flex items-center justify-between">
+        <div className="flex items-center gap-2 text-xs text-[#4A4A4A]">
+          <button onClick={onOpenRecords || onBack} className="hover:text-[#355E3B] font-semibold text-[#6DAE7C]">
             Inspection Records
           </button>
           <span>/</span>
-          <span className="font-bold text-[#1a2533]">Inspection Workspace</span>
+          <span className="font-bold text-[#2B2B2B]">Inspection Workspace</span>
           <span>/</span>
-          <span className="font-mono text-[#374151]">{inspectionId}</span>
+          <span className="font-mono text-[#4A4A4A]">{inspectionId}</span>
         </div>
         <button
           onClick={onOpenRecords || onBack}
-          className="text-xs font-semibold text-[#1a3a5c] hover:underline"
+          className="text-xs font-semibold text-[#355E3B] hover:underline"
         >
           ← Back to Inspection Records
         </button>
       </div>
 
       {/* A. Top Application Context Header (Essential fields only) */}
-      <div className="bg-white border-b border-[#e5eaf0] px-6 py-3 flex flex-wrap gap-x-8 gap-y-2 items-start">
+      <div className="bg-white border-b border-[#e3ebe1] px-6 py-3 flex flex-wrap gap-x-8 gap-y-2 items-start">
         <div>
-          <div className="text-[10px] text-[#374151] uppercase font-bold">Application ID</div>
-          <div className="font-mono text-sm font-bold text-[#1a3a5c]">{applicationId}</div>
+          <div className="text-[10px] text-[#4A4A4A] uppercase font-bold">Application ID</div>
+          <div className="font-mono text-sm font-bold text-[#355E3B]">{applicationId}</div>
         </div>
         <div>
-          <div className="text-[10px] text-[#374151] uppercase font-bold">Inspection ID</div>
-          <div className="font-mono text-sm font-bold text-[#1a2533]">{inspectionId}</div>
+          <div className="text-[10px] text-[#4A4A4A] uppercase font-bold">Inspection ID</div>
+          <div className="font-mono text-sm font-bold text-[#2B2B2B]">{inspectionId}</div>
         </div>
         <div>
-          <div className="text-[10px] text-[#374151] uppercase font-bold">Business</div>
-          <div className="text-sm font-semibold text-[#1a2533]">{business}</div>
+          <div className="text-[10px] text-[#4A4A4A] uppercase font-bold">Business</div>
+          <div className="text-sm font-semibold text-[#2B2B2B]">{business}</div>
         </div>
         <div>
-          <div className="text-[10px] text-[#374151] uppercase font-bold">Service</div>
-          <div className="text-xs font-medium text-[#1a2533]">{service}</div>
+          <div className="text-[10px] text-[#4A4A4A] uppercase font-bold">Service</div>
+          <div className="text-xs font-medium text-[#2B2B2B]">{service}</div>
         </div>
         <div>
-          <div className="text-[10px] text-[#374151] uppercase font-bold">Inspection Date</div>
-          <div className="text-xs font-semibold text-[#1a2533]">{inspectionDate}</div>
+          <div className="text-[10px] text-[#4A4A4A] uppercase font-bold">Inspection Date</div>
+          <div className="text-xs font-semibold text-[#2B2B2B]">{inspectionDate}</div>
         </div>
         <div>
-          <div className="text-[10px] text-[#374151] uppercase font-bold">Inspector / Team</div>
-          <div className="text-xs text-[#1a2533]">{inspector}</div>
+          <div className="text-[10px] text-[#4A4A4A] uppercase font-bold">Inspector / Team</div>
+          <div className="text-xs text-[#2B2B2B]">{inspector}</div>
         </div>
         <div>
-          <div className="text-[10px] text-[#374151] uppercase font-bold">Application State</div>
-          <span className="text-[10px] font-bold bg-[#eff6ff] text-[#1e40af] border border-[#93c5fd] px-2 py-0.5 rounded">
+          <div className="text-[10px] text-[#4A4A4A] uppercase font-bold">Application State</div>
+          <span className="text-[10px] font-bold bg-[#edf5ef] text-[#539160] border border-[#a1cba9] px-2 py-0.5 rounded">
             INSPECTION_SCHEDULED
           </span>
         </div>
         <div>
-          <div className="text-[10px] text-[#374151] uppercase font-bold">Inspection Status</div>
+          <div className="text-[10px] text-[#4A4A4A] uppercase font-bold">Inspection Status</div>
           <span className="text-[10px] font-bold bg-[#fff7ed] text-[#9a3412] border border-[#fdba74] px-2 py-0.5 rounded">
             Correction Required
           </span>
@@ -972,44 +972,44 @@ export function InspectionWorkspacePage({
         {/* B. LEFT: Inspection Context (Factual context & Documents with [View]) */}
         <div className="w-64 shrink-0 flex flex-col gap-4 overflow-y-auto">
           {/* Factual Context */}
-          <div className="bg-white border border-[#e5eaf0] rounded-lg p-4">
-            <div className="text-[10px] font-bold text-[#374151] uppercase tracking-wider mb-2.5 pb-1 border-b border-[#f0f4f8]">
+          <div className="bg-white border border-[#e3ebe1] rounded-lg p-4">
+            <div className="text-[10px] font-bold text-[#4A4A4A] uppercase tracking-wider mb-2.5 pb-1 border-b border-[#F9FAF2]">
               Inspection Context
             </div>
             <div className="space-y-2 text-xs">
               <div className="flex justify-between">
-                <span className="text-[#374151] text-[10px] uppercase font-bold">Business DNA</span>
-                <span className="font-mono font-semibold text-[#1a2533]">v4</span>
+                <span className="text-[#4A4A4A] text-[10px] uppercase font-bold">Business DNA</span>
+                <span className="font-mono font-semibold text-[#2B2B2B]">v4</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#374151] text-[10px] uppercase font-bold">MIDC Estate</span>
-                <span className="font-medium text-[#1a2533]">Example Estate</span>
+                <span className="text-[#4A4A4A] text-[10px] uppercase font-bold">MIDC Estate</span>
+                <span className="font-medium text-[#2B2B2B]">Example Estate</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#374151] text-[10px] uppercase font-bold">Plot</span>
-                <span className="font-semibold text-[#1a3a5c]">Plot A-18</span>
+                <span className="text-[#4A4A4A] text-[10px] uppercase font-bold">Plot</span>
+                <span className="font-semibold text-[#355E3B]">Plot A-18</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#374151] text-[10px] uppercase font-bold">Plot Area</span>
-                <span className="font-medium text-[#1a2533]">5,200 m²</span>
+                <span className="text-[#4A4A4A] text-[10px] uppercase font-bold">Plot Area</span>
+                <span className="font-medium text-[#2B2B2B]">5,200 m²</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#374151] text-[10px] uppercase font-bold">Building Area</span>
+                <span className="text-[#4A4A4A] text-[10px] uppercase font-bold">Building Area</span>
                 <span className="font-semibold text-[#9a3412]">2,300 m²</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#374151] text-[10px] uppercase font-bold">Project Stage</span>
-                <span className="font-medium text-[#1a2533]">Construction</span>
+                <span className="text-[#4A4A4A] text-[10px] uppercase font-bold">Project Stage</span>
+                <span className="font-medium text-[#2B2B2B]">Construction</span>
               </div>
-              <div className="pt-2 border-t border-[#f0f4f8]">
-                <span className="text-[10px] font-bold text-[#374151] uppercase block mb-1">Dependencies</span>
+              <div className="pt-2 border-t border-[#F9FAF2]">
+                <span className="text-[10px] font-bold text-[#4A4A4A] uppercase block mb-1">Dependencies</span>
                 <div className="space-y-1 text-[11px]">
                   <div className="flex justify-between">
-                    <span className="text-[#374151]">MPCB CTE</span>
+                    <span className="text-[#4A4A4A]">MPCB CTE</span>
                     <span className="font-semibold text-[#065f46]">Complete</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-[#374151]">Fire NOC</span>
+                    <span className="text-[#4A4A4A]">Fire NOC</span>
                     <span className="font-semibold text-[#9a3412]">Conditional</span>
                   </div>
                 </div>
@@ -1018,8 +1018,8 @@ export function InspectionWorkspacePage({
           </div>
 
           {/* Statutory Documents with [View] action */}
-          <div className="bg-white border border-[#e5eaf0] rounded-lg p-4">
-            <div className="text-[10px] font-bold text-[#374151] uppercase tracking-wider mb-2.5 pb-1 border-b border-[#f0f4f8]">
+          <div className="bg-white border border-[#e3ebe1] rounded-lg p-4">
+            <div className="text-[10px] font-bold text-[#4A4A4A] uppercase tracking-wider mb-2.5 pb-1 border-b border-[#F9FAF2]">
               Statutory Documents
             </div>
             <div className="space-y-2">
@@ -1029,11 +1029,11 @@ export function InspectionWorkspacePage({
                 { name: 'MIDC Application', id: 'MIDC-APP-FORM-2026' },
                 { name: 'Site Photographs', id: 'PHOTO-SET-SITE-01' },
               ].map(doc => (
-                <div key={doc.name} className="flex items-center justify-between py-1 border-b border-[#f0f4f8] last:border-0">
-                  <span className="text-xs font-medium text-[#1a2533]">{doc.name}</span>
+                <div key={doc.name} className="flex items-center justify-between py-1 border-b border-[#F9FAF2] last:border-0">
+                  <span className="text-xs font-medium text-[#2B2B2B]">{doc.name}</span>
                   <button
                     onClick={() => onOpenDocReview ? onOpenDocReview(doc.id) : alert(`Opening ${doc.name}`)}
-                    className="text-[11px] font-bold text-[#1a56db] hover:underline px-2 py-0.5 rounded hover:bg-[#eff6ff] transition-colors cursor-pointer"
+                    className="text-[11px] font-bold text-[#6DAE7C] hover:underline px-2 py-0.5 rounded hover:bg-[#edf5ef] transition-colors cursor-pointer"
                   >
                     View
                   </button>
@@ -1046,13 +1046,13 @@ export function InspectionWorkspacePage({
         {/* C. CENTER: Common Inspection Checklist + Supporting Evidence */}
         <div className="flex-1 flex flex-col gap-4 overflow-y-auto">
           {/* Checklist Sections */}
-          <div className="bg-white border border-[#e5eaf0] rounded-lg p-5">
-            <div className="flex items-center justify-between mb-4 pb-2 border-b border-[#e5eaf0]">
+          <div className="bg-white border border-[#e3ebe1] rounded-lg p-5">
+            <div className="flex items-center justify-between mb-4 pb-2 border-b border-[#e3ebe1]">
               <div>
-                <h2 className="text-xs font-bold text-[#1a2533]">Common Inspection Checklist</h2>
-                <p className="text-[11px] text-[#374151]">Primary officer working surface organized across 6 verification sections.</p>
+                <h2 className="text-xs font-bold text-[#2B2B2B]">Common Inspection Checklist</h2>
+                <p className="text-[11px] text-[#4A4A4A]">Primary officer working surface organized across 6 verification sections.</p>
               </div>
-              <span className="text-[10px] font-mono text-[#374151] bg-[#f8f9fb] px-2 py-1 rounded border border-[#e5eaf0]">
+              <span className="text-[10px] font-mono text-[#4A4A4A] bg-[#F9FAF2] px-2 py-1 rounded border border-[#e3ebe1]">
                 {checklist.filter(c => c.status === 'Checked').length} / {checklist.length} Compliant
               </span>
             </div>
@@ -1062,7 +1062,7 @@ export function InspectionWorkspacePage({
                 const items = checklist.filter(c => c.section === section);
                 return (
                   <div key={section} className="space-y-2.5">
-                    <div className="text-[10px] font-bold text-[#1a3a5c] uppercase tracking-wider bg-[#f8f9fb] px-2.5 py-1 rounded">
+                    <div className="text-[10px] font-bold text-[#355E3B] uppercase tracking-wider bg-[#F9FAF2] px-2.5 py-1 rounded">
                       {section}
                     </div>
 
@@ -1073,9 +1073,9 @@ export function InspectionWorkspacePage({
                         const requiresObservationInput = isObs || isNonComp;
 
                         return (
-                          <div key={item.id} className="p-2.5 border border-[#e5eaf0] rounded-md bg-white">
+                          <div key={item.id} className="p-2.5 border border-[#e3ebe1] rounded-md bg-white">
                             <div className="flex items-center justify-between gap-3">
-                              <span className="text-xs font-semibold text-[#1a2533]">{item.item}</span>
+                              <span className="text-xs font-semibold text-[#2B2B2B]">{item.item}</span>
 
                               {/* Status Selector Buttons */}
                               <div className="flex items-center gap-1 shrink-0">
@@ -1093,8 +1093,8 @@ export function InspectionWorkspacePage({
                                             ? 'bg-[#fff7ed] text-[#9a3412] border-[#fdba74]'
                                             : s === 'Not Compliant'
                                             ? 'bg-[#fef2f2] text-[#991b1b] border-[#fca5a5]'
-                                            : 'bg-[#f3f4f6] text-[#374151] border-[#d1d5db]'
-                                          : 'bg-white text-[#374151] border-[#e5eaf0] hover:bg-[#f8f9fb]'
+                                            : 'bg-[#f3f4f6] text-[#4A4A4A] border-[#d1d5db]'
+                                          : 'bg-white text-[#4A4A4A] border-[#e3ebe1] hover:bg-[#F9FAF2]'
                                       }`}
                                     >
                                       {s}
@@ -1106,7 +1106,7 @@ export function InspectionWorkspacePage({
 
                             {/* Inline Observation Input if Observation or Not Compliant */}
                             {requiresObservationInput && (
-                              <div className="mt-2.5 pt-2 border-t border-[#f0f4f8] space-y-1.5 animate-fadeIn">
+                              <div className="mt-2.5 pt-2 border-t border-[#F9FAF2] space-y-1.5 animate-fadeIn">
                                 <div className="flex items-center justify-between text-[10px] font-bold text-[#9a3412]">
                                   <span>Observation / reason</span>
                                   <button
@@ -1114,7 +1114,7 @@ export function InspectionWorkspacePage({
                                       setUploadRelatedItem(item.item);
                                       setShowUploadModal(true);
                                     }}
-                                    className="text-[#1a56db] hover:underline cursor-pointer flex items-center gap-1"
+                                    className="text-[#6DAE7C] hover:underline cursor-pointer flex items-center gap-1"
                                   >
                                     <SvgUpload /> Add Evidence
                                   </button>
@@ -1139,15 +1139,15 @@ export function InspectionWorkspacePage({
           </div>
 
           {/* D. Supporting Evidence Section */}
-          <div className="bg-white border border-[#e5eaf0] rounded-lg p-5">
-            <div className="flex items-center justify-between mb-3 pb-2 border-b border-[#e5eaf0]">
+          <div className="bg-white border border-[#e3ebe1] rounded-lg p-5">
+            <div className="flex items-center justify-between mb-3 pb-2 border-b border-[#e3ebe1]">
               <div>
-                <h3 className="text-xs font-bold text-[#1a2533]">Supporting Evidence</h3>
-                <p className="text-[11px] text-[#374151]">Statutory site photographs, drawings, and verified compliance records.</p>
+                <h3 className="text-xs font-bold text-[#2B2B2B]">Supporting Evidence</h3>
+                <p className="text-[11px] text-[#4A4A4A]">Statutory site photographs, drawings, and verified compliance records.</p>
               </div>
               <button
                 onClick={() => setShowUploadModal(true)}
-                className="px-3 py-1.5 text-xs font-bold text-white bg-[#1a3a5c] hover:bg-[#0f2540] rounded flex items-center gap-1.5 cursor-pointer shadow-xs"
+                className="px-3 py-1.5 text-xs font-bold text-white bg-[#355E3B] hover:bg-[#27472c] rounded flex items-center gap-1.5 cursor-pointer shadow-xs"
               >
                 <SvgUpload /> + Upload Evidence
               </button>
@@ -1156,33 +1156,33 @@ export function InspectionWorkspacePage({
             {/* Evidence Table */}
             <div className="overflow-x-auto">
               <table className="w-full text-xs text-left border-collapse">
-                <thead className="bg-[#f8f9fb] border-b border-[#e5eaf0] text-[#374151]">
+                <thead className="bg-[#F9FAF2] border-b border-[#e3ebe1] text-[#4A4A4A]">
                   <tr>
                     {['Filename', 'Type', 'Uploaded by', 'Date', 'Related checklist item', 'Actions'].map(h => (
                       <th key={h} className="px-3 py-2 text-[10px] font-bold uppercase">{h}</th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#f0f4f8]">
+                <tbody className="divide-y divide-[#F9FAF2]">
                   {evidenceList.map(ev => (
                     <tr key={ev.id} className="hover:bg-[#fbfcfe]">
-                      <td className="px-3 py-2.5 font-semibold text-[#1a2533] flex items-center gap-1.5">
+                      <td className="px-3 py-2.5 font-semibold text-[#2B2B2B] flex items-center gap-1.5">
                         <SvgFile />
                         {ev.filename}
                       </td>
                       <td className="px-3 py-2.5">
-                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#f3f4f6] text-[#374151]">
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#f3f4f6] text-[#4A4A4A]">
                           {ev.type}
                         </span>
                       </td>
-                      <td className="px-3 py-2.5 text-[#374151]">{ev.uploadedBy}</td>
-                      <td className="px-3 py-2.5 text-[#374151] whitespace-nowrap">{ev.date}</td>
-                      <td className="px-3 py-2.5 text-[#1a2533] max-w-[180px] truncate">{ev.relatedChecklistItem}</td>
+                      <td className="px-3 py-2.5 text-[#4A4A4A]">{ev.uploadedBy}</td>
+                      <td className="px-3 py-2.5 text-[#4A4A4A] whitespace-nowrap">{ev.date}</td>
+                      <td className="px-3 py-2.5 text-[#2B2B2B] max-w-[180px] truncate">{ev.relatedChecklistItem}</td>
                       <td className="px-3 py-2.5 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => setPreviewEvidence(ev)}
-                            className="text-[#1a56db] hover:underline font-semibold text-[11px] cursor-pointer"
+                            className="text-[#6DAE7C] hover:underline font-semibold text-[11px] cursor-pointer"
                           >
                             View
                           </button>
@@ -1198,7 +1198,7 @@ export function InspectionWorkspacePage({
                   ))}
                   {evidenceList.length === 0 && (
                     <tr>
-                      <td colSpan={6} className="px-4 py-8 text-center text-xs text-[#374151]">
+                      <td colSpan={6} className="px-4 py-8 text-center text-xs text-[#4A4A4A]">
                         No evidence uploaded yet. Click + Upload Evidence to add site records.
                       </td>
                     </tr>
@@ -1212,8 +1212,8 @@ export function InspectionWorkspacePage({
         {/* RIGHT: Outcome + Actions + Simplified Officer Observation */}
         <div className="w-80 shrink-0 flex flex-col gap-4 overflow-y-auto">
           {/* E. Inspection Outcome Control */}
-          <div className="bg-white border border-[#e5eaf0] rounded-lg p-5">
-            <div className="text-[10px] font-bold text-[#374151] uppercase tracking-wider mb-2 pb-1 border-b border-[#f0f4f8]">
+          <div className="bg-white border border-[#e3ebe1] rounded-lg p-5">
+            <div className="text-[10px] font-bold text-[#4A4A4A] uppercase tracking-wider mb-2 pb-1 border-b border-[#F9FAF2]">
               Inspection Outcome
             </div>
 
@@ -1228,7 +1228,7 @@ export function InspectionWorkspacePage({
                     className={`flex items-start gap-2.5 p-2.5 rounded-lg border cursor-pointer transition-all ${
                       isSelected
                         ? `${meta.bg} ${meta.border} shadow-xs`
-                        : 'border-[#e5eaf0] bg-white hover:bg-[#f8f9fb]'
+                        : 'border-[#e3ebe1] bg-white hover:bg-[#F9FAF2]'
                     }`}
                   >
                     <input
@@ -1237,13 +1237,13 @@ export function InspectionWorkspacePage({
                       value={opt}
                       checked={isSelected}
                       onChange={() => setOutcome(opt)}
-                      className="mt-0.5 text-[#1a3a5c]"
+                      className="mt-0.5 text-[#355E3B]"
                     />
                     <div>
-                      <div className={`text-xs font-bold ${isSelected ? meta.text : 'text-[#1a2533]'}`}>
+                      <div className={`text-xs font-bold ${isSelected ? meta.text : 'text-[#2B2B2B]'}`}>
                         {meta.label}
                       </div>
-                      <div className="text-[10px] text-[#374151] leading-tight mt-0.5">{meta.desc}</div>
+                      <div className="text-[10px] text-[#4A4A4A] leading-tight mt-0.5">{meta.desc}</div>
                     </div>
                   </label>
                 );
@@ -1252,7 +1252,7 @@ export function InspectionWorkspacePage({
 
             {/* If Correction Required: Reason + Required Correction + Upload Evidence */}
             {outcome === 'CORRECTION_REQUIRED' && (
-              <div className="mt-4 pt-3 border-t border-[#e5eaf0] space-y-3 animate-fadeIn">
+              <div className="mt-4 pt-3 border-t border-[#e3ebe1] space-y-3 animate-fadeIn">
                 <div>
                   <label className="text-[10px] font-bold text-[#9a3412] uppercase block mb-1">Reason</label>
                   <textarea
@@ -1274,10 +1274,10 @@ export function InspectionWorkspacePage({
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-[#374151] uppercase block mb-1">Supporting Evidence</label>
+                  <label className="text-[10px] font-bold text-[#4A4A4A] uppercase block mb-1">Supporting Evidence</label>
                   <button
                     onClick={() => setShowUploadModal(true)}
-                    className="w-full py-1.5 px-3 text-xs font-semibold border border-[#d1d9e0] rounded bg-[#f8f9fb] hover:bg-[#f0f4f8] text-[#1a2533] flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="w-full py-1.5 px-3 text-xs font-semibold border border-[#d6dfd5] rounded bg-[#F9FAF2] hover:bg-[#F9FAF2] text-[#2B2B2B] flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <SvgUpload /> Upload Evidence
                   </button>
@@ -1287,7 +1287,7 @@ export function InspectionWorkspacePage({
 
             {/* If Re-inspection Required: Primary Action [Schedule Re-inspection ->] */}
             {outcome === 'RE_INSPECTION_REQUIRED' && (
-              <div className="mt-4 pt-3 border-t border-[#e5eaf0] space-y-2 animate-fadeIn">
+              <div className="mt-4 pt-3 border-t border-[#e3ebe1] space-y-2 animate-fadeIn">
                 <div className="text-xs text-[#5b21b6] font-medium bg-[#f5f3ff] border border-[#c4b5fd] p-2.5 rounded">
                   Re-inspection required to confirm site conformity after corrective plan resubmission.
                 </div>
@@ -1302,47 +1302,47 @@ export function InspectionWorkspacePage({
           </div>
 
           {/* F. Officer Observation Section */}
-          <div className="bg-white border border-[#e5eaf0] rounded-lg p-5 space-y-3">
-            <div className="text-[10px] font-bold text-[#374151] uppercase tracking-wider pb-1 border-b border-[#f0f4f8]">
+          <div className="bg-white border border-[#e3ebe1] rounded-lg p-5 space-y-3">
+            <div className="text-[10px] font-bold text-[#4A4A4A] uppercase tracking-wider pb-1 border-b border-[#F9FAF2]">
               Officer Observation
             </div>
 
             <div>
-              <label className="text-[10px] font-bold text-[#374151] uppercase block mb-1">Observation</label>
+              <label className="text-[10px] font-bold text-[#4A4A4A] uppercase block mb-1">Observation</label>
               <textarea
                 rows={3}
                 value={observationText}
                 onChange={e => setObservationText(e.target.value)}
                 placeholder="What did you find on site?"
-                className="w-full text-xs border border-[#d1d9e0] rounded p-2 focus:outline-none focus:ring-1 focus:ring-[#1a56db]"
+                className="w-full text-xs border border-[#d6dfd5] rounded p-2 focus:outline-none focus:ring-1 focus:ring-[#6DAE7C]"
               />
             </div>
 
             <div>
-              <label className="text-[10px] font-bold text-[#374151] uppercase block mb-1">Evidence</label>
+              <label className="text-[10px] font-bold text-[#4A4A4A] uppercase block mb-1">Evidence</label>
               <button
                 onClick={() => setShowUploadModal(true)}
-                className="w-full py-1.5 px-3 text-xs font-semibold border border-[#d1d9e0] rounded bg-[#f8f9fb] hover:bg-[#f0f4f8] text-[#1a2533] flex items-center justify-center gap-1.5 cursor-pointer"
+                className="w-full py-1.5 px-3 text-xs font-semibold border border-[#d6dfd5] rounded bg-[#F9FAF2] hover:bg-[#F9FAF2] text-[#2B2B2B] flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <SvgUpload /> Upload Evidence
               </button>
             </div>
 
             <div>
-              <label className="text-[10px] font-bold text-[#374151] uppercase block mb-1">Recommendation (Optional)</label>
+              <label className="text-[10px] font-bold text-[#4A4A4A] uppercase block mb-1">Recommendation (Optional)</label>
               <textarea
                 rows={2}
                 value={recommendationText}
                 onChange={e => setRecommendationText(e.target.value)}
                 placeholder="Recommendation..."
-                className="w-full text-xs border border-[#d1d9e0] rounded p-2 focus:outline-none focus:ring-1 focus:ring-[#1a56db]"
+                className="w-full text-xs border border-[#d6dfd5] rounded p-2 focus:outline-none focus:ring-1 focus:ring-[#6DAE7C]"
               />
             </div>
 
             <div className="pt-2">
               <button
                 onClick={handleSaveFindings}
-                className="w-full py-2.5 px-4 text-xs font-bold text-white bg-[#1a3a5c] hover:bg-[#0f2540] rounded shadow-sm transition-colors cursor-pointer"
+                className="w-full py-2.5 px-4 text-xs font-bold text-white bg-[#355E3B] hover:bg-[#27472c] rounded shadow-sm transition-colors cursor-pointer"
               >
                 Save Inspection Findings
               </button>
@@ -1360,34 +1360,34 @@ export function InspectionWorkspacePage({
       {/* Upload Evidence Modal Dialog */}
       {showUploadModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-lg border border-[#e5eaf0] shadow-xl w-full max-w-md p-6 space-y-4 animate-scaleIn">
-            <div className="flex items-center justify-between pb-2 border-b border-[#e5eaf0]">
-              <h3 className="text-sm font-bold text-[#1a2533] flex items-center gap-2">
+          <div className="bg-white rounded-lg border border-[#e3ebe1] shadow-xl w-full max-w-md p-6 space-y-4 animate-scaleIn">
+            <div className="flex items-center justify-between pb-2 border-b border-[#e3ebe1]">
+              <h3 className="text-sm font-bold text-[#2B2B2B] flex items-center gap-2">
                 <SvgUpload /> Upload Supporting Evidence
               </h3>
-              <button onClick={() => setShowUploadModal(false)} className="text-[#374151] hover:text-[#1a2533]">
+              <button onClick={() => setShowUploadModal(false)} className="text-[#4A4A4A] hover:text-[#2B2B2B]">
                 <SvgClose />
               </button>
             </div>
 
             <div className="space-y-3 text-xs">
               <div>
-                <label className="text-[10px] font-bold text-[#374151] uppercase block mb-1">Evidence File Name / Title</label>
+                <label className="text-[10px] font-bold text-[#4A4A4A] uppercase block mb-1">Evidence File Name / Title</label>
                 <input
                   type="text"
                   value={uploadFileName}
                   onChange={e => setUploadFileName(e.target.value)}
                   placeholder="e.g. Revised_Building_Plan_v3.pdf"
-                  className="w-full text-xs border border-[#d1d9e0] rounded px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#1a56db]"
+                  className="w-full text-xs border border-[#d6dfd5] rounded px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#6DAE7C]"
                 />
               </div>
 
               <div>
-                <label className="text-[10px] font-bold text-[#374151] uppercase block mb-1">Evidence Type</label>
+                <label className="text-[10px] font-bold text-[#4A4A4A] uppercase block mb-1">Evidence Type</label>
                 <select
                   value={uploadType}
                   onChange={e => setUploadType(e.target.value as UploadedEvidenceItem['type'])}
-                  className="w-full text-xs border border-[#d1d9e0] rounded px-3 py-2 bg-white focus:outline-none"
+                  className="w-full text-xs border border-[#d6dfd5] rounded px-3 py-2 bg-white focus:outline-none"
                 >
                   <option value="Photo">Photo</option>
                   <option value="Document">Document</option>
@@ -1397,11 +1397,11 @@ export function InspectionWorkspacePage({
               </div>
 
               <div>
-                <label className="text-[10px] font-bold text-[#374151] uppercase block mb-1">Related Checklist Item</label>
+                <label className="text-[10px] font-bold text-[#4A4A4A] uppercase block mb-1">Related Checklist Item</label>
                 <select
                   value={uploadRelatedItem}
                   onChange={e => setUploadRelatedItem(e.target.value)}
-                  className="w-full text-xs border border-[#d1d9e0] rounded px-3 py-2 bg-white focus:outline-none"
+                  className="w-full text-xs border border-[#d6dfd5] rounded px-3 py-2 bg-white focus:outline-none"
                 >
                   {checklist.map(c => (
                     <option key={c.id} value={c.item}>{c.section}: {c.item}</option>
@@ -1409,22 +1409,22 @@ export function InspectionWorkspacePage({
                 </select>
               </div>
 
-              <div className="p-3 bg-[#f8f9fb] border border-[#e5eaf0] rounded text-[11px] text-[#374151]">
+              <div className="p-3 bg-[#F9FAF2] border border-[#e3ebe1] rounded text-[11px] text-[#4A4A4A]">
                 Uploaded items are immutably timestamped and linked to Application {applicationId} and Inspection {inspectionId}.
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-[#e5eaf0]">
+            <div className="flex justify-end gap-2 pt-2 border-t border-[#e3ebe1]">
               <button
                 onClick={() => setShowUploadModal(false)}
-                className="px-4 py-2 text-xs font-semibold text-[#374151] hover:bg-[#f3f4f6] rounded"
+                className="px-4 py-2 text-xs font-semibold text-[#4A4A4A] hover:bg-[#f3f4f6] rounded"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmUpload}
                 disabled={!uploadFileName.trim()}
-                className="px-4 py-2 text-xs font-bold text-white bg-[#1a3a5c] hover:bg-[#0f2540] rounded disabled:opacity-50"
+                className="px-4 py-2 text-xs font-bold text-white bg-[#355E3B] hover:bg-[#27472c] rounded disabled:opacity-50"
               >
                 Upload File
               </button>
@@ -1436,23 +1436,23 @@ export function InspectionWorkspacePage({
       {/* Preview Evidence Modal */}
       {previewEvidence && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-lg border border-[#e5eaf0] shadow-xl w-full max-w-lg p-6 space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-[#e5eaf0]">
-              <div className="text-sm font-bold text-[#1a2533]">{previewEvidence.filename}</div>
-              <button onClick={() => setPreviewEvidence(null)} className="text-[#374151] hover:text-[#1a2533]">
+          <div className="bg-white rounded-lg border border-[#e3ebe1] shadow-xl w-full max-w-lg p-6 space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-[#e3ebe1]">
+              <div className="text-sm font-bold text-[#2B2B2B]">{previewEvidence.filename}</div>
+              <button onClick={() => setPreviewEvidence(null)} className="text-[#4A4A4A] hover:text-[#2B2B2B]">
                 <SvgClose />
               </button>
             </div>
 
-            <div className="bg-[#f8f9fb] border border-[#e5eaf0] rounded p-6 text-center space-y-3">
-              <div className="mx-auto w-12 h-12 rounded-full bg-[#eff6ff] text-[#1a56db] flex items-center justify-center">
+            <div className="bg-[#F9FAF2] border border-[#e3ebe1] rounded p-6 text-center space-y-3">
+              <div className="mx-auto w-12 h-12 rounded-full bg-[#edf5ef] text-[#6DAE7C] flex items-center justify-center">
                 <SvgFile />
               </div>
-              <div className="text-xs font-semibold text-[#1a2533]">{previewEvidence.filename}</div>
-              <div className="text-[11px] text-[#374151]">
+              <div className="text-xs font-semibold text-[#2B2B2B]">{previewEvidence.filename}</div>
+              <div className="text-[11px] text-[#4A4A4A]">
                 Type: {previewEvidence.type} · Uploaded by {previewEvidence.uploadedBy} on {previewEvidence.date}
               </div>
-              <div className="text-[10px] text-[#1a56db] font-medium">
+              <div className="text-[10px] text-[#6DAE7C] font-medium">
                 Related to: {previewEvidence.relatedChecklistItem}
               </div>
             </div>
@@ -1460,7 +1460,7 @@ export function InspectionWorkspacePage({
             <div className="flex justify-end pt-2">
               <button
                 onClick={() => setPreviewEvidence(null)}
-                className="px-4 py-2 text-xs font-semibold text-[#1a3a5c] bg-[#eff6ff] rounded hover:bg-[#dbeafe]"
+                className="px-4 py-2 text-xs font-semibold text-[#355E3B] bg-[#edf5ef] rounded hover:bg-[#edf5ef]"
               >
                 Close Preview
               </button>

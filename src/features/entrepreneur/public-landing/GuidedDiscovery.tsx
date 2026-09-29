@@ -63,13 +63,13 @@ export function GuidedDiscovery() {
   };
 
   return (
-    <section id="guided-discovery" className="py-16 bg-[#F8F9FA] border-b border-slate-200 scroll-mt-12">
+    <section id="guided-discovery" className="py-16 bg-[#F9FAF2] border-b border-slate-200 scroll-mt-12">
       <div className="max-w-7xl mx-auto px-6 sm:px-8">
         <div className="text-center max-w-3xl mx-auto mb-10">
-          <span className="text-[#E68A2E] text-xs font-bold uppercase tracking-wider bg-[#E68A2E]/10 px-3 py-1 rounded-full border border-[#E68A2E]/20">
+          <span className="text-[#D4A017] text-xs font-bold uppercase tracking-wider bg-[#D4A017]/10 px-3 py-1 rounded-full border border-[#D4A017]/20">
             PUBLIC GUIDED DISCOVERY
           </span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#17365D] mt-3 mb-3">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#355E3B] mt-3 mb-3">
             What do you need help with?
           </h2>
           <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
@@ -84,14 +84,14 @@ export function GuidedDiscovery() {
               
               {/* Intent */}
               <div>
-                <label htmlFor="discovery-intent" className="block text-xs font-bold text-[#17365D] uppercase tracking-wider mb-2">
+                <label htmlFor="discovery-intent" className="block text-xs font-bold text-[#355E3B] uppercase tracking-wider mb-2">
                   I am planning to
                 </label>
                 <select
                   id="discovery-intent"
                   value={selectedIntent}
                   onChange={(e) => setSelectedIntent(e.target.value)}
-                  className="w-full bg-[#F8F9FA] border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-[#20242A] focus:ring-2 focus:ring-[#245B8A] focus:border-[#245B8A] outline-none"
+                  className="w-full bg-[#F9FAF2] border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-[#2B2B2B] focus:ring-2 focus:ring-[#3d7a4d] focus:border-[#3d7a4d] outline-none"
                 >
                   {INTENTS.map((item) => (
                     <option key={item} value={item}>
@@ -103,14 +103,14 @@ export function GuidedDiscovery() {
 
               {/* Sector */}
               <div>
-                <label htmlFor="discovery-sector" className="block text-xs font-bold text-[#17365D] uppercase tracking-wider mb-2">
+                <label htmlFor="discovery-sector" className="block text-xs font-bold text-[#355E3B] uppercase tracking-wider mb-2">
                   My sector is
                 </label>
                 <select
                   id="discovery-sector"
                   value={selectedSector}
                   onChange={(e) => setSelectedSector(e.target.value)}
-                  className="w-full bg-[#F8F9FA] border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-[#20242A] focus:ring-2 focus:ring-[#245B8A] focus:border-[#245B8A] outline-none"
+                  className="w-full bg-[#F9FAF2] border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-[#2B2B2B] focus:ring-2 focus:ring-[#3d7a4d] focus:border-[#3d7a4d] outline-none"
                 >
                   {SECTORS.map((item) => (
                     <option key={item} value={item}>
@@ -122,14 +122,14 @@ export function GuidedDiscovery() {
 
               {/* Location */}
               <div>
-                <label htmlFor="discovery-location" className="block text-xs font-bold text-[#17365D] uppercase tracking-wider mb-2">
+                <label htmlFor="discovery-location" className="block text-xs font-bold text-[#355E3B] uppercase tracking-wider mb-2">
                   My location is
                 </label>
                 <select
                   id="discovery-location"
                   value={selectedLocation}
                   onChange={(e) => setSelectedLocation(e.target.value)}
-                  className="w-full bg-[#F8F9FA] border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-[#20242A] focus:ring-2 focus:ring-[#245B8A] focus:border-[#245B8A] outline-none"
+                  className="w-full bg-[#F9FAF2] border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-[#2B2B2B] focus:ring-2 focus:ring-[#3d7a4d] focus:border-[#3d7a4d] outline-none"
                 >
                   {LOCATIONS.map((item) => (
                     <option key={item} value={item}>
@@ -146,7 +146,7 @@ export function GuidedDiscovery() {
               </p>
               <button
                 type="submit"
-                className="w-full sm:w-auto bg-[#17365D] text-white font-semibold text-sm px-6 py-2.5 rounded-lg hover:bg-[#0f2540] focus:ring-2 focus:ring-[#245B8A] focus:ring-offset-2 transition-colors shadow-sm"
+                className="w-full sm:w-auto bg-[#355E3B] text-white font-semibold text-sm px-6 py-2.5 rounded-lg hover:bg-[#27472c] focus:ring-2 focus:ring-[#3d7a4d] focus:ring-offset-2 transition-colors shadow-sm"
               >
                 Discover My Journey
               </button>
@@ -157,27 +157,27 @@ export function GuidedDiscovery() {
           {result && (
             <div className="mt-8 pt-6 border-t border-slate-200 space-y-6">
               <div className="flex items-center justify-between">
-                <h3 className="text-base font-bold text-[#17365D] flex items-center gap-2">
+                <h3 className="text-base font-bold text-[#355E3B] flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#2F7D4F]" />
                   Estimated Regulatory Requirements ({selectedSector})
                 </h3>
-                <span className="text-xs font-semibold text-[#245B8A] bg-[#245B8A]/10 px-2.5 py-1 rounded">
+                <span className="text-xs font-semibold text-[#3d7a4d] bg-[#3d7a4d]/10 px-2.5 py-1 rounded">
                   {selectedLocation}
                 </span>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Approvals List */}
-                <div className="bg-[#F8F9FA] p-4 rounded-lg border border-slate-200">
+                <div className="bg-[#F9FAF2] p-4 rounded-lg border border-slate-200">
                   <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
                     Applicable Clearances ({result.approvalsNeeded.length})
                   </h4>
                   <ul className="space-y-2 text-xs">
                     {result.approvalsNeeded.map((app, i) => (
                       <li key={i} className="flex items-start justify-between gap-2 bg-white p-2.5 rounded border border-slate-100 shadow-2xs">
-                        <span className="font-medium text-[#20242A]">{app.title}</span>
+                        <span className="font-medium text-[#2B2B2B]">{app.title}</span>
                         <div className="flex items-center gap-1.5 shrink-0">
-                          <span className="text-[10px] font-semibold text-[#17365D] bg-[#17365D]/10 px-1.5 py-0.5 rounded">
+                          <span className="text-[10px] font-semibold text-[#355E3B] bg-[#355E3B]/10 px-1.5 py-0.5 rounded">
                             {app.dept}
                           </span>
                           <span className="text-[10px] font-medium text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
@@ -209,13 +209,13 @@ export function GuidedDiscovery() {
               </div>
 
               {/* Callout note */}
-              <div className="bg-[#17365D]/5 border border-[#17365D]/15 rounded-lg p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="text-xs text-[#17365D]">
+              <div className="bg-[#355E3B]/5 border border-[#355E3B]/15 rounded-lg p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="text-xs text-[#355E3B]">
                   <span className="font-bold">Want precise, statutory determination?</span> Logged-in entrepreneurs can generate a personalized regulatory journey using their verified Business DNA.
                 </div>
                 <button
                   onClick={() => router.push(ENTREPRENEUR_ROUTES.login())}
-                  className="bg-[#245B8A] text-white font-medium text-xs px-4 py-2 rounded hover:bg-[#1c486e] shrink-0 transition-colors"
+                  className="bg-[#3d7a4d] text-white font-medium text-xs px-4 py-2 rounded hover:bg-[#1c486e] shrink-0 transition-colors"
                 >
                   Log In & Use Business DNA
                 </button>

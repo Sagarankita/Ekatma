@@ -57,7 +57,7 @@ export function CertificatePreviewModal({
     >
       <div className="relative w-full max-w-3xl bg-white rounded-2xl shadow-2xl border border-slate-300 overflow-hidden flex flex-col my-auto max-h-[92vh]">
         {/* Modal Top Bar */}
-        <div className="bg-[#17365D] text-white px-5 py-3 flex items-center justify-between gap-3 shrink-0">
+        <div className="bg-[#355E3B] text-white px-5 py-3 flex items-center justify-between gap-3 shrink-0">
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-5 h-5 text-emerald-400" />
             <span className="text-xs font-bold uppercase tracking-wider">
@@ -87,11 +87,11 @@ export function CertificatePreviewModal({
         {/* Certificate Sheet (Printable / High-Fidelity Official Document) */}
         <div className="p-6 sm:p-8 overflow-y-auto bg-amber-50/20 font-serif relative">
           {/* Ornamental Outer Security Border */}
-          <div className="relative border-4 border-double border-[#17365D] p-6 sm:p-8 bg-white shadow-inner rounded-sm">
+          <div className="relative border-4 border-double border-[#355E3B] p-6 sm:p-8 bg-white shadow-inner rounded-sm">
             {/* Watermark Motif */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.035] select-none">
-              <div className="w-96 h-96 rounded-full border-16 border-[#17365D] flex items-center justify-center">
-                <span className="text-4xl font-black text-center text-[#17365D] font-sans uppercase tracking-widest">
+              <div className="w-96 h-96 rounded-full border-16 border-[#355E3B] flex items-center justify-center">
+                <span className="text-4xl font-black text-center text-[#355E3B] font-sans uppercase tracking-widest">
                   Government of Maharashtra
                 </span>
               </div>
@@ -100,14 +100,14 @@ export function CertificatePreviewModal({
             {/* Header: State of Maharashtra Emblem Motif */}
             <div className="text-center pb-4 border-b-2 border-slate-200 relative">
               {/* Emblem icon graphic */}
-              <div className="mx-auto w-14 h-14 mb-2 flex items-center justify-center rounded-full bg-[#17365D]/5 border border-[#17365D]/20">
+              <div className="mx-auto w-14 h-14 mb-2 flex items-center justify-center rounded-full bg-[#355E3B]/5 border border-[#355E3B]/20">
                 <div className="text-center">
-                  <div className="text-[10px] font-black text-[#17365D] tracking-tighter">शासन</div>
-                  <div className="text-[9px] font-bold text-[#17365D] leading-none">MAHA</div>
+                  <div className="text-[10px] font-black text-[#355E3B] tracking-tighter">शासन</div>
+                  <div className="text-[9px] font-bold text-[#355E3B] leading-none">MAHA</div>
                 </div>
               </div>
 
-              <h3 className="text-xs font-bold text-[#17365D] uppercase tracking-widest font-sans">
+              <h3 className="text-xs font-bold text-[#355E3B] uppercase tracking-widest font-sans">
                 Government of Maharashtra
               </h3>
               <h2 className="text-base sm:text-lg font-bold text-slate-900 uppercase tracking-wide font-sans mt-0.5">
@@ -120,7 +120,7 @@ export function CertificatePreviewModal({
 
             {/* Certificate Title */}
             <div className="text-center my-5">
-              <span className="inline-block text-[10px] font-bold text-[#17365D] uppercase tracking-widest border-y border-[#17365D] py-0.5 px-4 font-sans">
+              <span className="inline-block text-[10px] font-bold text-[#355E3B] uppercase tracking-widest border-y border-[#355E3B] py-0.5 px-4 font-sans">
                 Statutory Order & Certificate
               </span>
               <h1 className="text-xl sm:text-2xl font-bold text-slate-900 mt-2 font-sans tracking-tight">
@@ -172,7 +172,7 @@ export function CertificatePreviewModal({
                 </span>
                 {cert.conditions.map((cond, idx) => (
                   <div key={idx} className="flex items-start gap-2">
-                    <span className="text-[#17365D] font-bold shrink-0">{idx + 1}.</span>
+                    <span className="text-[#355E3B] font-bold shrink-0">{idx + 1}.</span>
                     <span className="text-slate-700">{cond}</span>
                   </div>
                 ))}
@@ -279,7 +279,7 @@ export function CertificatePreviewModal({
             </button>
             <Link
               href={ENTREPRENEUR_ROUTES.document(projectId, doc.id)}
-              className="text-xs text-[#1a56db] hover:underline font-semibold flex items-center gap-1 ml-2"
+              className="text-xs text-[#6DAE7C] hover:underline font-semibold flex items-center gap-1 ml-2"
             >
               <span>Document Details ({doc.id})</span>
               <ExternalLink className="w-3 h-3" />

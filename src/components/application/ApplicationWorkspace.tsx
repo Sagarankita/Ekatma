@@ -47,9 +47,9 @@ export function ApplicationWorkspaceProvider({ applicationId, children, showShel
     return (
       <section className="m-6 rounded border border-amber-300 bg-amber-50 p-6" role="alert">
         <p className="text-xs font-bold uppercase tracking-wide text-amber-800">Application unavailable</p>
-        <h1 className="mt-1 text-lg font-bold text-[#1a3a5c]">No application record was found for {applicationId}</h1>
-        <p className="mt-2 text-sm text-[#374151]">No substitute record has been loaded. Return to Applications and select an available record.</p>
-        <Link className="mt-4 inline-flex rounded bg-[#1a3a5c] px-4 py-2 text-sm font-semibold text-white" href={ROUTES.department.search}>Return to Applications</Link>
+        <h1 className="mt-1 text-lg font-bold text-[#355E3B]">No application record was found for {applicationId}</h1>
+        <p className="mt-2 text-sm text-[#4A4A4A]">No substitute record has been loaded. Return to Applications and select an available record.</p>
+        <Link className="mt-4 inline-flex rounded bg-[#355E3B] px-4 py-2 text-sm font-semibold text-white" href={ROUTES.department.search}>Return to Applications</Link>
       </section>
     );
   }
@@ -76,23 +76,23 @@ export function ApplicationWorkspaceProvider({ applicationId, children, showShel
 
   return (
     <WorkspaceContext.Provider value={application}>
-      <div className="border-b border-[#d1d9e0] bg-[#f8f9fb] px-5 pt-4">
-        <nav aria-label="Breadcrumb" className="mb-3 flex items-center gap-2 text-xs text-[#4b5563]">
+      <div className="border-b border-[#d6dfd5] bg-[#F9FAF2] px-5 pt-4">
+        <nav aria-label="Breadcrumb" className="mb-3 flex items-center gap-2 text-xs text-[#4A4A4A]">
           <Link className="hover:underline" href={returnHref}>{returnLabel}</Link><span aria-hidden="true">›</span>
-          <span className="font-mono font-semibold text-[#1a3a5c]">{application.id}</span>
+          <span className="font-mono font-semibold text-[#355E3B]">{application.id}</span>
         </nav>
-        <div className="mb-4 flex flex-wrap items-start justify-between gap-4 rounded border border-[#d1d9e0] bg-white p-4">
+        <div className="mb-4 flex flex-wrap items-start justify-between gap-4 rounded border border-[#d6dfd5] bg-white p-4">
           <div>
-            <div className="flex flex-wrap items-center gap-2"><h1 className="font-mono text-base font-bold text-[#1a56db]">{application.id}</h1><span className="rounded bg-[#edf4ff] px-2 py-0.5 text-[11px] font-bold text-[#1a3a5c]">{applicationStateLabel(application.state)}</span></div>
-            <p className="mt-1 text-base font-bold text-[#1a2533]">{application.business}</p><p className="text-xs text-[#4b5563]">{application.project}</p>
+            <div className="flex flex-wrap items-center gap-2"><h1 className="font-mono text-base font-bold text-[#6DAE7C]">{application.id}</h1><span className="rounded bg-[#edf4ff] px-2 py-0.5 text-[11px] font-bold text-[#355E3B]">{applicationStateLabel(application.state)}</span></div>
+            <p className="mt-1 text-base font-bold text-[#2B2B2B]">{application.business}</p><p className="text-xs text-[#4A4A4A]">{application.project}</p>
           </div>
           <dl className="grid grid-cols-2 gap-x-6 gap-y-1 text-xs md:grid-cols-3">
-            <div><dt className="text-[#6b7280]">Service</dt><dd className="font-semibold">{application.service}</dd></div><div><dt className="text-[#6b7280]">DNA version</dt><dd className="font-semibold">{application.dnaVersion}</dd></div><div><dt className="text-[#6b7280]">Current desk</dt><dd className="font-semibold">{application.desk}</dd></div>
-            <div><dt className="text-[#6b7280]">SLA</dt><dd className="font-semibold">{application.sla}</dd></div><div><dt className="text-[#6b7280]">Query version</dt><dd className="font-semibold">{application.queryVersion ?? 'None'}</dd></div><div><dt className="text-[#6b7280]">Inspection</dt><dd className="font-semibold">{application.inspectionId ?? 'Not initiated'}</dd></div>
-            <div><dt className="text-[#6b7280]">Dependencies</dt><dd className="font-semibold">{application.dependencyState}</dd></div><div><dt className="text-[#6b7280]">Decision</dt><dd className="font-semibold">{application.decisionState}</dd></div>
+            <div><dt className="text-[#555C56]">Service</dt><dd className="font-semibold">{application.service}</dd></div><div><dt className="text-[#555C56]">DNA version</dt><dd className="font-semibold">{application.dnaVersion}</dd></div><div><dt className="text-[#555C56]">Current desk</dt><dd className="font-semibold">{application.desk}</dd></div>
+            <div><dt className="text-[#555C56]">SLA</dt><dd className="font-semibold">{application.sla}</dd></div><div><dt className="text-[#555C56]">Query version</dt><dd className="font-semibold">{application.queryVersion ?? 'None'}</dd></div><div><dt className="text-[#555C56]">Inspection</dt><dd className="font-semibold">{application.inspectionId ?? 'Not initiated'}</dd></div>
+            <div><dt className="text-[#555C56]">Dependencies</dt><dd className="font-semibold">{application.dependencyState}</dd></div><div><dt className="text-[#555C56]">Decision</dt><dd className="font-semibold">{application.decisionState}</dd></div>
           </dl>
         </div>
-        <nav aria-label="Application workspace" className="overflow-x-auto"><ul className="flex min-w-max gap-1">{tabs.map(([id, label]) => <li key={id}><Link aria-current={activeTab === id ? 'page' : undefined} href={tabHref(application.id, id, from)} className={`block border-b-2 px-3 py-2 text-xs font-semibold ${activeTab === id ? 'border-[#1a56db] text-[#1a56db]' : 'border-transparent text-[#4b5563] hover:text-[#1a3a5c]'}`}>{label}</Link></li>)}</ul></nav>
+        <nav aria-label="Application workspace" className="overflow-x-auto"><ul className="flex min-w-max gap-1">{tabs.map(([id, label]) => <li key={id}><Link aria-current={activeTab === id ? 'page' : undefined} href={tabHref(application.id, id, from)} className={`block border-b-2 px-3 py-2 text-xs font-semibold ${activeTab === id ? 'border-[#6DAE7C] text-[#6DAE7C]' : 'border-transparent text-[#4A4A4A] hover:text-[#355E3B]'}`}>{label}</Link></li>)}</ul></nav>
       </div>
       {guardedChildren}
     </WorkspaceContext.Provider>
@@ -123,7 +123,7 @@ export function ApplicationWorkspaceHome({ tab }: { tab: string }) {
     audit: { title: 'Application audit', description: 'Application-specific state changes, access events and workflow transitions are separate from the department-wide audit log.', rows: [['Record created', a.received], ['Last updated', a.lastUpdated], ['Current desk', a.desk], ['Current state', applicationStateLabel(a.state)]] },
   };
   const card = cards[tab] ?? cards.overview;
-  return <section className="bg-[#f8f9fb] p-6"><div className="max-w-5xl rounded border border-[#d1d9e0] bg-white p-5"><h2 className="text-lg font-bold text-[#1a3a5c]">{card.title}</h2><p className="mt-1 text-sm text-[#4b5563]">{card.description}</p>{card.rows && <dl className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{card.rows.map(([label, value]) => <div key={label} className="rounded bg-[#f8f9fb] p-3"><dt className="text-[11px] uppercase tracking-wide text-[#6b7280]">{label}</dt><dd className="mt-1 break-words text-sm font-semibold text-[#1a2533]">{value}</dd></div>)}</dl>}{card.links && <div className="mt-5 flex flex-wrap gap-2">{card.links.map(([label, href]) => <Link key={label} href={scoped(href)} className="rounded border border-[#1a56db] px-3 py-2 text-xs font-semibold text-[#1a56db] hover:bg-[#eff6ff]">{label}</Link>)}</div>}</div></section>;
+  return <section className="bg-[#F9FAF2] p-6"><div className="max-w-5xl rounded border border-[#d6dfd5] bg-white p-5"><h2 className="text-lg font-bold text-[#355E3B]">{card.title}</h2><p className="mt-1 text-sm text-[#4A4A4A]">{card.description}</p>{card.rows && <dl className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{card.rows.map(([label, value]) => <div key={label} className="rounded bg-[#F9FAF2] p-3"><dt className="text-[11px] uppercase tracking-wide text-[#555C56]">{label}</dt><dd className="mt-1 break-words text-sm font-semibold text-[#2B2B2B]">{value}</dd></div>)}</dl>}{card.links && <div className="mt-5 flex flex-wrap gap-2">{card.links.map(([label, href]) => <Link key={label} href={scoped(href)} className="rounded border border-[#6DAE7C] px-3 py-2 text-xs font-semibold text-[#6DAE7C] hover:bg-[#edf5ef]">{label}</Link>)}</div>}</div></section>;
 }
 
 type ChildKind = 'document' | 'decision' | 'dependency' | 'compliance' | 'inspection';
@@ -183,7 +183,7 @@ export function ApplicationChildGuard({ kind, childId, children }: { kind: Child
     childId === records.documentId;
 
   if (!isValid) {
-    return <section className="m-6 rounded border border-red-200 bg-red-50 p-5" role="alert"><p className="text-xs font-bold uppercase tracking-wide text-red-700">Record unavailable</p><h2 className="mt-1 text-lg font-bold text-[#1a3a5c]">{childId} does not belong to {application.id}</h2><p className="mt-2 text-sm text-[#4b5563]">No record from another application has been loaded.</p><Link href={ROUTES.department.application(application.id)} className="mt-4 inline-flex text-sm font-semibold text-[#1a56db] hover:underline">Return to application workspace</Link></section>;
+    return <section className="m-6 rounded border border-red-200 bg-red-50 p-5" role="alert"><p className="text-xs font-bold uppercase tracking-wide text-red-700">Record unavailable</p><h2 className="mt-1 text-lg font-bold text-[#355E3B]">{childId} does not belong to {application.id}</h2><p className="mt-2 text-sm text-[#4A4A4A]">No record from another application has been loaded.</p><Link href={ROUTES.department.application(application.id)} className="mt-4 inline-flex text-sm font-semibold text-[#6DAE7C] hover:underline">Return to application workspace</Link></section>;
   }
   return children;
 }

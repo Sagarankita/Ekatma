@@ -138,7 +138,7 @@ export function HeroCarousel() {
 
   return (
     <section
-      className="relative bg-[#17365D] text-white overflow-hidden"
+      className="relative bg-[#355E3B] text-white overflow-hidden"
       aria-label="EKATMA Portal Highlights"
       ref={containerRef}
       onKeyDown={handleKeyDown}
@@ -157,23 +157,23 @@ export function HeroCarousel() {
               aria-hidden={!isActive}
             >
               {/* Slide Image Background with Lightened Blue Gradient Overlay */}
-              <div className="absolute inset-0 bg-[#17365D]">
+              <div className="absolute inset-0 bg-[#355E3B]">
                 <img
                   src={slide.imagePath}
                   alt={slide.alt}
                   className="w-full h-full object-cover object-center opacity-70"
                   loading={idx === 0 ? 'eager' : 'lazy'}
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-[#17365D]/90 via-[#17365D]/65 to-[#17365D]/25" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#17365D]/80 via-transparent to-black/20" />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#355E3B]/90 via-[#355E3B]/65 to-[#355E3B]/25" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#355E3B]/80 via-transparent to-black/20" />
               </div>
 
               {/* Slide Content */}
               <div className="relative z-20 max-w-7xl mx-auto px-6 sm:px-8 py-14 md:py-20 h-full flex flex-col justify-center">
                 <div className="max-w-2xl">
                   {/* Eyebrow */}
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E68A2E]/20 text-[#E68A2E] text-xs font-semibold uppercase tracking-wider mb-4 border border-[#E68A2E]/30">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#E68A2E]" />
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#D4A017]/20 text-[#D4A017] text-xs font-semibold uppercase tracking-wider mb-4 border border-[#D4A017]/30">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#D4A017]" />
                     {slide.eyebrow}
                   </div>
 
@@ -191,7 +191,7 @@ export function HeroCarousel() {
                   <div className="flex flex-wrap items-center gap-4">
                     <button
                       onClick={() => slide.primaryAction.onClick(router)}
-                      className="bg-[#E68A2E] text-white font-semibold text-sm px-6 py-3 rounded-md hover:bg-[#d47b22] focus:outline-none focus:ring-2 focus:ring-[#E68A2E] focus:ring-offset-2 focus:ring-offset-[#17365D] transition-colors shadow-md flex items-center gap-2"
+                      className="bg-[#D4A017] text-white font-semibold text-sm px-6 py-3 rounded-md hover:bg-[#d47b22] focus:outline-none focus:ring-2 focus:ring-[#D4A017] focus:ring-offset-2 focus:ring-offset-[#355E3B] transition-colors shadow-md flex items-center gap-2"
                     >
                       {slide.primaryAction.label}
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -202,7 +202,7 @@ export function HeroCarousel() {
                     {slide.secondaryAction && (
                       <button
                         onClick={() => slide.secondaryAction?.onClick(router)}
-                        className="bg-white/10 text-white hover:bg-white/20 font-medium text-sm px-6 py-3 rounded-md border border-white/25 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#17365D] transition-colors backdrop-blur-sm"
+                        className="bg-white/10 text-white hover:bg-white/20 font-medium text-sm px-6 py-3 rounded-md border border-white/25 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#355E3B] transition-colors backdrop-blur-sm"
                       >
                         {slide.secondaryAction.label}
                       </button>
@@ -216,7 +216,7 @@ export function HeroCarousel() {
       </div>
 
       {/* Carousel Controls & Navigation */}
-      <div className="relative z-30 bg-[#17365D]/95 border-t border-white/10 py-3 px-6 sm:px-8">
+      <div className="relative z-30 bg-[#355E3B]/95 border-t border-white/10 py-3 px-6 sm:px-8">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-300">
           
           {/* Slide Indicators */}
@@ -234,7 +234,7 @@ export function HeroCarousel() {
                   aria-selected={idx === currentIndex}
                   aria-label={`Go to slide ${idx + 1}: ${slide.headline}`}
                   className={`h-2 rounded-full transition-all duration-300 ${
-                    idx === currentIndex ? 'w-8 bg-[#E68A2E]' : 'w-2 bg-white/30 hover:bg-white/50'
+                    idx === currentIndex ? 'w-8 bg-[#D4A017]' : 'w-2 bg-white/30 hover:bg-white/50'
                   }`}
                 />
               ))}
@@ -260,14 +260,14 @@ export function HeroCarousel() {
             >
               {isPlaying ? (
                 <>
-                  <svg className="w-3.5 h-3.5 text-[#E68A2E]" fill="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3.5 h-3.5 text-[#D4A017]" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
                   </svg>
                   <span>Pause</span>
                 </>
               ) : (
                 <>
-                  <svg className="w-3.5 h-3.5 text-[#E68A2E]" fill="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3.5 h-3.5 text-[#D4A017]" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z" />
                   </svg>
                   <span>Play</span>

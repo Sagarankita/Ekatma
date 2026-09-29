@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { ENTREPRENEUR_ROUTES } from '@/lib/routes/entrepreneur'
-import { ENTREPRENEUR_BUSINESSES, findBusinessById, findBusinessEntity, DEEP_SCREEN_BUSINESS_IDENTITY, type EntrepreneurBusinessIdentity } from '../identity/catalog'
+import { ENTREPRENEUR_BUSINESSES, findBusinessById, findBusinessEntity, DEEP_SCREEN_BUSINESS_IDENTITY, SAHYADRI_DEMO_BUSINESS_ID, type EntrepreneurBusinessIdentity } from '../identity/catalog'
 import { businessFromEntrepreneurPathname, readRememberedBusiness, rememberBusiness } from '../identity/selected-business'
 import { listGrievancesForBusiness } from '../grievances/data'
 import { findQueryByAppId, findTrackerAppForBusiness, listInspectionsForBusiness, listTrackerAppsForBusiness } from '../applications/data'
@@ -84,6 +84,11 @@ function routeBreadcrumbs(pathname: string, business?: EntrepreneurBusinessIdent
       crumbs.push({ label: 'Master Project Dossier', href: ENTREPRENEUR_ROUTES.dossier(business.id) })
       crumbs.push({ label: 'Data Provenance' })
     } else crumbs.push({ label: 'Master Project Dossier' })
+    return crumbs
+  }
+
+  if (section === 'approvals' || section === 'know-your-approvals') {
+    crumbs.push({ label: 'Know Your Approvals' })
     return crumbs
   }
 
@@ -318,7 +323,6 @@ function businessAttention(business?: EntrepreneurBusinessIdentity): { count: nu
 
 function EntrepreneurContextBar({ pathname, business }: { pathname: string; business?: EntrepreneurBusinessIdentity }) {
   const isCreatingBusiness = pathname.startsWith(ENTREPRENEUR_ROUTES.newBusiness())
-  const project = business ? findBusinessProjectById(business.id) : undefined
   const attention = businessAttention(isCreatingBusiness ? undefined : business)
   const breadcrumbs = routeBreadcrumbs(pathname, business)
 
@@ -326,63 +330,67 @@ function EntrepreneurContextBar({ pathname, business }: { pathname: string; busi
   const contextLine = isCreatingBusiness
     ? 'Business DNA setup'
     : business
-      ? `${business.industry} — ${business.location}`
+      ? `${business.industry} · ${business.location}`
       : 'Choose a business to establish a working context.'
-  const projectLine = isCreatingBusiness
-    ? 'Draft business profile'
-    : project?.subtitle ?? business?.subtitle ?? 'No project selected'
   const nextAction: ShellNextAction = isCreatingBusiness
     ? { label: 'Complete this Business DNA step', detail: 'Use the primary action in the page below.' }
     : attention.next
 
   return (
     <section className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur" aria-label="Current business and project context">
-      <div className="mx-auto max-w-[1600px] px-4 py-2.5 sm:px-6">
-        <nav aria-label="Breadcrumb" className="mb-2 flex flex-wrap items-center gap-1.5 text-[12px] text-[#5C6470]">
+      <div className="mx-auto max-w-[1600px] px-4 py-2 sm:px-6">
+        <nav aria-label="Breadcrumb" className="mb-1 flex flex-wrap items-center gap-1.5 text-[11px] text-[#555C56]">
           {breadcrumbs.map((crumb, index) => (
             <React.Fragment key={`${crumb.label}-${index}`}>
               {index > 0 ? <span aria-hidden="true" className="text-slate-300">›</span> : null}
               {crumb.href ? (
-                <Link href={crumb.href} className="rounded px-1 py-0.5 font-medium text-[#245B8A] hover:bg-[#F0F5FA] hover:text-[#17365D] hover:underline">
+                <Link href={crumb.href} className="rounded px-1 py-0.5 font-medium text-[#3d7a4d] hover:bg-[#edf5ef] hover:text-[#355E3B] hover:underline">
                   {crumb.label}
                 </Link>
               ) : (
-                <span className="px-1 py-0.5 font-semibold text-[#20242A]" aria-current="page">{crumb.label}</span>
+                <span className="px-1 py-0.5 font-semibold text-[#2B2B2B]" aria-current="page">{crumb.label}</span>
               )}
             </React.Fragment>
           ))}
         </nav>
 
-        <div className="grid gap-3 md:grid-cols-[minmax(0,1.35fr)_minmax(190px,0.75fr)_minmax(250px,0.95fr)] md:items-center">
+        <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#5C6470]">Current Business / Project Context</p>
-            <p className="mt-0.5 truncate text-sm font-bold text-[#17365D]">{contextName}</p>
-            <p className="truncate text-[12px] text-[#5C6470]">{contextLine}</p>
-            <p className="truncate text-[12px] font-medium text-[#20242A]"><span className="text-[#5C6470]">Project:</span> {projectLine}</p>
+            <h2 className="truncate text-sm font-bold text-[#355E3B]">{contextName}</h2>
+            <p className="truncate text-xs text-[#555C56]">{contextLine}</p>
           </div>
 
-          <div className="min-w-0 border-t border-slate-100 pt-2 md:border-l md:border-t-0 md:pl-4 md:pt-0">
-            <div className="flex items-center gap-2">
-              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#5C6470]">Attention</p>
-              {attention.count > 0 ? <span className="rounded-full bg-[#9B2C2C] px-2 py-0.5 text-[10px] font-bold text-white">{attention.count}</span> : null}
-            </div>
-            <p className={`mt-1 text-[12px] font-semibold ${attention.count > 0 ? 'text-[#9B2C2C]' : 'text-[#20242A]'}`}>{isCreatingBusiness ? 'Business DNA setup is in progress.' : attention.summary}</p>
-          </div>
+          <div className="flex flex-wrap items-center gap-3 sm:shrink-0">
+            <div className="flex flex-wrap items-center gap-1.5 text-xs">
+              {attention.count > 0 ? (
+                <span className="inline-flex items-center gap-1.5 rounded-md bg-rose-50 px-2 py-0.5 font-semibold text-[#9B2C2C] border border-rose-200">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#9B2C2C]" />
+                  {attention.count} items need attention
+                </span>
+              ) : isCreatingBusiness ? (
+                <span className="inline-flex items-center gap-1.5 rounded-md bg-amber-50 px-2 py-0.5 font-semibold text-amber-800 border border-amber-200">
+                  Business DNA setup
+                </span>
+              ) : null}
 
-          <div className="flex min-w-0 items-center justify-between gap-3 border-t border-slate-100 pt-2 md:border-l md:border-t-0 md:pl-4 md:pt-0">
-            <div className="min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#5C6470]">Next action</p>
-              <p className="mt-0.5 truncate text-[11px] text-[#5C6470]">{nextAction.detail}</p>
+              {nextAction.detail ? (
+                <span className="text-[#555C56]">
+                  <span className="text-slate-300 mr-1.5">·</span>
+                  <span className="font-medium text-[#2B2B2B]">Next:</span> {nextAction.detail}
+                </span>
+              ) : null}
             </div>
-            <div className="flex shrink-0 items-center gap-2">
-              {nextAction.href ? (
-                <Link href={nextAction.href} className="rounded-md bg-[#17365D] px-3.5 py-2 text-[12px] font-bold text-white hover:bg-[#1E4870] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E68A2E] focus-visible:ring-offset-2">
-                  {nextAction.label}
-                </Link>
-              ) : (
-                <span className="max-w-[190px] text-right text-[12px] font-bold text-[#17365D]">{nextAction.label}</span>
-              )}
-            </div>
+
+            {nextAction.href ? (
+              <Link
+                href={nextAction.href}
+                className="inline-flex items-center rounded-md bg-[#355E3B] px-3.5 py-1.5 text-xs font-bold text-white shadow-xs transition hover:bg-[#2d5132] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4A017] focus-visible:ring-offset-2"
+              >
+                {nextAction.label}
+              </Link>
+            ) : nextAction.label ? (
+              <span className="text-xs font-bold text-[#355E3B]">{nextAction.label}</span>
+            ) : null}
           </div>
         </div>
       </div>
@@ -400,10 +408,13 @@ function Sidebar({ pathname, business, onSelectBusiness, closeMobile, collapsed,
 }) {
   const router = useRouter()
   const [switcherOpen, setSwitcherOpen] = useState(false)
-  const targetBusinessId = business?.id || ENTREPRENEUR_BUSINESSES[0]?.id || 'BP-004';
+  const defaultBusiness = findBusinessById(SAHYADRI_DEMO_BUSINESS_ID) ?? ENTREPRENEUR_BUSINESSES[0]
+  const targetBusinessId = business?.id || defaultBusiness?.id || 'BP-004'
 
   const onPortfolio = pathname === ENTREPRENEUR_ROUTES.businesses()
   const onOverview = pathname === ENTREPRENEUR_ROUTES.business(targetBusinessId)
+  const onApprovals = pathname === ENTREPRENEUR_ROUTES.knowYourApprovals(targetBusinessId) ||
+    pathname.startsWith(ENTREPRENEUR_ROUTES.knowYourApprovals(targetBusinessId) + '/')
   const onJourney = pathname === ENTREPRENEUR_ROUTES.journey(targetBusinessId) ||
     pathname.startsWith(ENTREPRENEUR_ROUTES.journey(targetBusinessId) + '/') ||
     pathname.includes('/requirements/') ||
@@ -506,6 +517,11 @@ function Sidebar({ pathname, business, onSelectBusiness, closeMobile, collapsed,
       return ENTREPRENEUR_ROUTES.inspections(switchedTargetId)
     }
 
+    const currentApprovals = ENTREPRENEUR_ROUTES.knowYourApprovals(business.id)
+    if (pathname === currentApprovals || pathname.startsWith(`${currentApprovals}/`)) {
+      return ENTREPRENEUR_ROUTES.knowYourApprovals(switchedTargetId)
+    }
+
     const currentJourney = ENTREPRENEUR_ROUTES.journey(business.id)
     const currentDeps = ENTREPRENEUR_ROUTES.dependencies(business.id)
     const onJourneySection = pathname === currentJourney ||
@@ -554,14 +570,14 @@ function Sidebar({ pathname, business, onSelectBusiness, closeMobile, collapsed,
     <div className="flex flex-col h-full bg-white">
       <div className="px-3.5 py-3 border-b border-slate-200">
         <div className="flex items-center gap-2.5 mb-2.5">
-          <div className="w-8 h-8 rounded-lg bg-[#17365D] flex items-center justify-center shrink-0 text-white shadow-xs">
+          <div className="w-8 h-8 rounded-lg bg-[#355E3B] flex items-center justify-center shrink-0 text-white shadow-xs">
             <Icon.Building />
           </div>
           {!collapsed && (
             <div className="flex-1 min-w-0">
-              <p className="text-[9px] font-bold uppercase tracking-wider text-[#5C6470]">Business / Project</p>
-              <p className="text-[13px] font-bold text-[#17365D] leading-snug truncate">{business?.name ?? 'All Businesses'}</p>
-              <p className="text-[11px] text-[#5C6470] leading-tight truncate">{business?.subtitle ?? 'Choose a business to set context'}</p>
+              <p className="text-[9px] font-bold uppercase tracking-wider text-[#555C56]">Business / Project</p>
+              <p className="text-[13px] font-bold text-[#355E3B] leading-snug truncate">{business?.name ?? 'All Businesses'}</p>
+              <p className="text-[11px] text-[#555C56] leading-tight truncate">{business?.subtitle ?? 'Choose a business to set context'}</p>
             </div>
           )}
         </div>
@@ -571,7 +587,7 @@ function Sidebar({ pathname, business, onSelectBusiness, closeMobile, collapsed,
               type="button"
               onClick={() => setSwitcherOpen(open => !open)}
               aria-expanded={switcherOpen}
-              className="w-full text-left flex items-center justify-between text-[11px] border border-slate-200 text-[#20242A] px-2.5 py-1.5 rounded-md hover:bg-[#F0F5FA] transition-colors shadow-2xs font-medium"
+              className="w-full text-left flex items-center justify-between text-[11px] border border-slate-200 text-[#2B2B2B] px-2.5 py-1.5 rounded-md hover:bg-[#edf5ef] transition-colors shadow-2xs font-medium"
             >
               <span>Switch Business</span>
               <Icon.ChevronDown />
@@ -588,26 +604,26 @@ function Sidebar({ pathname, business, onSelectBusiness, closeMobile, collapsed,
                       closeMobile()
                       router.push(switchedDestination(option.id))
                     }}
-                    className={`w-full text-left px-3 py-2 text-[12px] hover:bg-[#F0F5FA] transition-colors ${
-                      option.id === business?.id ? 'font-bold text-[#17365D] bg-[#EBF3FA]' : 'text-[#20242A]'
+                    className={`w-full text-left px-3 py-2 text-[12px] hover:bg-[#edf5ef] transition-colors ${
+                      option.id === business?.id ? 'font-bold text-[#355E3B] bg-[#edf5ef]' : 'text-[#2B2B2B]'
                     }`}
                   >
                     <p className="font-semibold">{option.name}</p>
-                    <p className="text-[10px] text-[#5C6470]">{option.industry} · {option.location}</p>
+                    <p className="text-[10px] text-[#555C56]">{option.industry} · {option.location}</p>
                   </button>
                 ))}
                 <div className="border-t border-slate-100 bg-slate-50/50">
                   <Link
                     href={ENTREPRENEUR_ROUTES.businesses()}
                     onClick={() => { setSwitcherOpen(false); closeMobile() }}
-                    className="block text-left px-3 py-2 text-[11px] text-[#245B8A] hover:bg-[#EBF3FA] font-medium"
+                    className="block text-left px-3 py-2 text-[11px] text-[#3d7a4d] hover:bg-[#edf5ef] font-medium"
                   >
                     View All Businesses →
                   </Link>
                   <Link
                     href={ENTREPRENEUR_ROUTES.newBusiness()}
                     onClick={() => { setSwitcherOpen(false); closeMobile() }}
-                    className="block text-left px-3 py-2 text-[11px] text-[#17365D] hover:bg-[#EBF3FA] font-bold"
+                    className="block text-left px-3 py-2 text-[11px] text-[#355E3B] hover:bg-[#edf5ef] font-bold"
                   >
                     + Create New Business
                   </Link>
@@ -621,7 +637,7 @@ function Sidebar({ pathname, business, onSelectBusiness, closeMobile, collapsed,
       <nav className="flex-1 overflow-y-auto py-2.5 space-y-3" aria-label="Main navigation">
         <div>
           {!collapsed && (
-            <p className="px-3.5 pt-1 pb-1 text-[10px] font-bold text-[#5C6470] uppercase tracking-widest">Business</p>
+            <p className="px-3.5 pt-1 pb-1 text-[10px] font-bold text-[#555C56] uppercase tracking-widest">Business</p>
           )}
           <Link
             href={ENTREPRENEUR_ROUTES.business(targetBusinessId)}
@@ -629,11 +645,11 @@ function Sidebar({ pathname, business, onSelectBusiness, closeMobile, collapsed,
             aria-current={onOverview ? 'page' : undefined}
             className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 text-left border-l-[3px] text-[13px] transition-colors ${
               onOverview
-                ? 'bg-[#EBF3FA] text-[#17365D] font-bold border-[#E68A2E]'
-                : 'text-[#20242A] hover:bg-[#F0F5FA] hover:text-[#17365D] border-transparent font-medium'
+                ? 'bg-[#edf5ef] text-[#355E3B] font-bold border-[#D4A017]'
+                : 'text-[#2B2B2B] hover:bg-[#edf5ef] hover:text-[#355E3B] border-transparent font-medium'
             }`}
           >
-            <span className={onOverview ? 'text-[#245B8A]' : 'text-[#5C6470]'}><Icon.Grid /></span>
+            <span className={onOverview ? 'text-[#3d7a4d]' : 'text-[#555C56]'}><Icon.Grid /></span>
             {!collapsed && 'Overview'}
           </Link>
           <Link
@@ -642,30 +658,43 @@ function Sidebar({ pathname, business, onSelectBusiness, closeMobile, collapsed,
             aria-current={onPortfolio ? 'page' : undefined}
             className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 text-left border-l-[3px] text-[13px] transition-colors ${
               onPortfolio
-                ? 'bg-[#EBF3FA] text-[#17365D] font-bold border-[#E68A2E]'
-                : 'text-[#20242A] hover:bg-[#F0F5FA] hover:text-[#17365D] border-transparent font-medium'
+                ? 'bg-[#edf5ef] text-[#355E3B] font-bold border-[#D4A017]'
+                : 'text-[#2B2B2B] hover:bg-[#edf5ef] hover:text-[#355E3B] border-transparent font-medium'
             }`}
           >
-            <span className={onPortfolio ? 'text-[#245B8A]' : 'text-[#5C6470]'}><Icon.Home /></span>
+            <span className={onPortfolio ? 'text-[#3d7a4d]' : 'text-[#555C56]'}><Icon.Home /></span>
             {!collapsed && 'My Businesses'}
           </Link>
         </div>
 
         <div>
           {!collapsed && (
-            <p className="px-3.5 pt-1 pb-1 text-[10px] font-bold text-[#5C6470] uppercase tracking-widest">Approval Journey</p>
+            <p className="px-3.5 pt-1 pb-1 text-[10px] font-bold text-[#555C56] uppercase tracking-widest">Approval Journey</p>
           )}
+          <Link
+            href={ENTREPRENEUR_ROUTES.knowYourApprovals(targetBusinessId)}
+            onClick={closeMobile}
+            aria-current={onApprovals ? 'page' : undefined}
+            className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 text-left border-l-[3px] text-[13px] transition-colors ${
+              onApprovals
+                ? 'bg-[#edf5ef] text-[#355E3B] font-bold border-[#D4A017]'
+                : 'text-[#2B2B2B] hover:bg-[#edf5ef] hover:text-[#355E3B] border-transparent font-medium'
+            }`}
+          >
+            <span className={onApprovals ? 'text-[#3d7a4d]' : 'text-[#555C56]'}><Icon.CheckCircle /></span>
+            {!collapsed && 'Know Your Approvals'}
+          </Link>
           <Link
             href={ENTREPRENEUR_ROUTES.journey(targetBusinessId)}
             onClick={closeMobile}
             aria-current={onJourney ? 'page' : undefined}
             className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 text-left border-l-[3px] text-[13px] transition-colors ${
               onJourney
-                ? 'bg-[#EBF3FA] text-[#17365D] font-bold border-[#E68A2E]'
-                : 'text-[#20242A] hover:bg-[#F0F5FA] hover:text-[#17365D] border-transparent font-medium'
+                ? 'bg-[#edf5ef] text-[#355E3B] font-bold border-[#D4A017]'
+                : 'text-[#2B2B2B] hover:bg-[#edf5ef] hover:text-[#355E3B] border-transparent font-medium'
             }`}
           >
-            <span className={onJourney ? 'text-[#245B8A]' : 'text-[#5C6470]'}><Icon.List /></span>
+            <span className={onJourney ? 'text-[#3d7a4d]' : 'text-[#555C56]'}><Icon.List /></span>
             {!collapsed && 'Regulatory Journey'}
           </Link>
           <Link
@@ -674,11 +703,11 @@ function Sidebar({ pathname, business, onSelectBusiness, closeMobile, collapsed,
             aria-current={onApplications ? 'page' : undefined}
             className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 text-left border-l-[3px] text-[13px] transition-colors ${
               onApplications
-                ? 'bg-[#EBF3FA] text-[#17365D] font-bold border-[#E68A2E]'
-                : 'text-[#20242A] hover:bg-[#F0F5FA] hover:text-[#17365D] border-transparent font-medium'
+                ? 'bg-[#edf5ef] text-[#355E3B] font-bold border-[#D4A017]'
+                : 'text-[#2B2B2B] hover:bg-[#edf5ef] hover:text-[#355E3B] border-transparent font-medium'
             }`}
           >
-            <span className={onApplications ? 'text-[#245B8A]' : 'text-[#5C6470]'}><Icon.List /></span>
+            <span className={onApplications ? 'text-[#3d7a4d]' : 'text-[#555C56]'}><Icon.List /></span>
             {!collapsed && 'Applications'}
           </Link>
           <Link
@@ -687,11 +716,11 @@ function Sidebar({ pathname, business, onSelectBusiness, closeMobile, collapsed,
             aria-current={onDocuments ? 'page' : undefined}
             className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 text-left border-l-[3px] text-[13px] transition-colors ${
               onDocuments
-                ? 'bg-[#EBF3FA] text-[#17365D] font-bold border-[#E68A2E]'
-                : 'text-[#20242A] hover:bg-[#F0F5FA] hover:text-[#17365D] border-transparent font-medium'
+                ? 'bg-[#edf5ef] text-[#355E3B] font-bold border-[#D4A017]'
+                : 'text-[#2B2B2B] hover:bg-[#edf5ef] hover:text-[#355E3B] border-transparent font-medium'
             }`}
           >
-            <span className={onDocuments ? 'text-[#245B8A]' : 'text-[#5C6470]'}><Icon.List /></span>
+            <span className={onDocuments ? 'text-[#3d7a4d]' : 'text-[#555C56]'}><Icon.List /></span>
             {!collapsed && 'Documents'}
           </Link>
         </div>
@@ -699,7 +728,7 @@ function Sidebar({ pathname, business, onSelectBusiness, closeMobile, collapsed,
         {navGroups.map(group => (
           <div key={group.title}>
             {!collapsed && (
-              <p className="px-3.5 pt-1 pb-1 text-[10px] font-bold text-[#5C6470] uppercase tracking-widest">{group.title}</p>
+              <p className="px-3.5 pt-1 pb-1 text-[10px] font-bold text-[#555C56] uppercase tracking-widest">{group.title}</p>
             )}
             {group.items.map(item => {
               const isChangesActive = item.label === 'Changes & Expansion' && (
@@ -719,11 +748,11 @@ function Sidebar({ pathname, business, onSelectBusiness, closeMobile, collapsed,
                   aria-current={isActive ? 'page' : undefined}
                   className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 text-left border-l-[3px] text-[13px] transition-colors ${
                     isActive
-                      ? 'bg-[#EBF3FA] text-[#17365D] font-bold border-[#E68A2E]'
-                      : 'text-[#20242A] hover:bg-[#F0F5FA] hover:text-[#17365D] border-transparent font-medium'
+                      ? 'bg-[#edf5ef] text-[#355E3B] font-bold border-[#D4A017]'
+                      : 'text-[#2B2B2B] hover:bg-[#edf5ef] hover:text-[#355E3B] border-transparent font-medium'
                   }`}
                 >
-                  <span className={isActive ? 'text-[#245B8A]' : 'text-[#5C6470]'}><Icon.List /></span>
+                  <span className={isActive ? 'text-[#3d7a4d]' : 'text-[#555C56]'}><Icon.List /></span>
                   {!collapsed && item.label}
                 </Link>
               )
@@ -733,7 +762,7 @@ function Sidebar({ pathname, business, onSelectBusiness, closeMobile, collapsed,
 
         <div>
           {!collapsed && (
-            <p className="px-3.5 pt-1 pb-1 text-[10px] font-bold text-[#5C6470] uppercase tracking-widest">Support</p>
+            <p className="px-3.5 pt-1 pb-1 text-[10px] font-bold text-[#555C56] uppercase tracking-widest">Support</p>
           )}
           <Link
             href={ENTREPRENEUR_ROUTES.grievances(targetBusinessId)}
@@ -741,25 +770,12 @@ function Sidebar({ pathname, business, onSelectBusiness, closeMobile, collapsed,
             aria-current={pathname === ENTREPRENEUR_ROUTES.grievances(targetBusinessId) ? 'page' : undefined}
             className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 text-left border-l-[3px] text-[13px] transition-colors ${
               pathname === ENTREPRENEUR_ROUTES.grievances(targetBusinessId)
-                ? 'bg-[#EBF3FA] text-[#17365D] font-bold border-[#E68A2E]'
-                : 'text-[#20242A] hover:bg-[#F0F5FA] hover:text-[#17365D] border-transparent font-medium'
+                ? 'bg-[#edf5ef] text-[#355E3B] font-bold border-[#D4A017]'
+                : 'text-[#2B2B2B] hover:bg-[#edf5ef] hover:text-[#355E3B] border-transparent font-medium'
             }`}
           >
-            <span className={pathname === ENTREPRENEUR_ROUTES.grievances(targetBusinessId) ? 'text-[#245B8A]' : 'text-[#5C6470]'}><Icon.List /></span>
+            <span className={pathname === ENTREPRENEUR_ROUTES.grievances(targetBusinessId) ? 'text-[#3d7a4d]' : 'text-[#555C56]'}><Icon.List /></span>
             {!collapsed && 'Grievances'}
-          </Link>
-          <Link
-            href={ENTREPRENEUR_ROUTES.assistant()}
-            onClick={closeMobile}
-            aria-current={pathname === ENTREPRENEUR_ROUTES.assistant() ? 'page' : undefined}
-            className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 text-left border-l-[3px] text-[13px] transition-colors ${
-              pathname === ENTREPRENEUR_ROUTES.assistant()
-                ? 'bg-[#EBF3FA] text-[#17365D] font-bold border-[#E68A2E]'
-                : 'text-[#20242A] hover:bg-[#F0F5FA] hover:text-[#17365D] border-transparent font-medium'
-            }`}
-          >
-            <span className={pathname === ENTREPRENEUR_ROUTES.assistant() ? 'text-[#245B8A]' : 'text-[#5C6470]'}><Icon.List /></span>
-            {!collapsed && 'Regulatory Assistant'}
           </Link>
           <Link
             href={ENTREPRENEUR_ROUTES.notifications()}
@@ -767,11 +783,11 @@ function Sidebar({ pathname, business, onSelectBusiness, closeMobile, collapsed,
             aria-current={pathname === ENTREPRENEUR_ROUTES.notifications() ? 'page' : undefined}
             className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 text-left border-l-[3px] text-[13px] transition-colors ${
               pathname === ENTREPRENEUR_ROUTES.notifications()
-                ? 'bg-[#EBF3FA] text-[#17365D] font-bold border-[#E68A2E]'
-                : 'text-[#20242A] hover:bg-[#F0F5FA] hover:text-[#17365D] border-transparent font-medium'
+                ? 'bg-[#edf5ef] text-[#355E3B] font-bold border-[#D4A017]'
+                : 'text-[#2B2B2B] hover:bg-[#edf5ef] hover:text-[#355E3B] border-transparent font-medium'
             }`}
           >
-            <span className={pathname === ENTREPRENEUR_ROUTES.notifications() ? 'text-[#245B8A]' : 'text-[#5C6470]'}><Icon.List /></span>
+            <span className={pathname === ENTREPRENEUR_ROUTES.notifications() ? 'text-[#3d7a4d]' : 'text-[#555C56]'}><Icon.List /></span>
             {!collapsed && 'Notifications'}
           </Link>
         </div>
@@ -781,7 +797,7 @@ function Sidebar({ pathname, business, onSelectBusiness, closeMobile, collapsed,
         <button
           type="button"
           onClick={() => setCollapsed(!collapsed)}
-          className="w-full flex items-center gap-2 text-[12px] text-[#5C6470] hover:text-[#17365D] hover:bg-[#F0F5FA] px-2.5 py-1.5 rounded-md transition-colors font-medium"
+          className="w-full flex items-center gap-2 text-[12px] text-[#555C56] hover:text-[#355E3B] hover:bg-[#edf5ef] px-2.5 py-1.5 rounded-md transition-colors font-medium"
         >
           <Icon.ChevronLeft />
           {!collapsed && 'Collapse'}
@@ -801,7 +817,7 @@ export function AuthenticatedShell({ children }: { children: React.ReactNode }) 
   const { fontSizeClass, contrastClass, ...display } = useDisplayPreferences()
   const routeBusiness = businessFromEntrepreneurPathname(pathname)
   const rememberedBusiness = rememberedBusinessId ? findBusinessById(rememberedBusinessId) : undefined
-  const currentBusiness = routeBusiness ?? rememberedBusiness
+  const currentBusiness = routeBusiness ?? rememberedBusiness ?? findBusinessById(SAHYADRI_DEMO_BUSINESS_ID)
   const currentProject = currentBusiness ? findBusinessProjectById(currentBusiness.id) : undefined
   const { openAssistant } = useRegulatoryAssistant()
   const assistantPageContext = React.useMemo(() => {
@@ -862,12 +878,12 @@ export function AuthenticatedShell({ children }: { children: React.ReactNode }) 
     <AccessibilityStrip {...display} />
     <PortalHeader isLoggedIn={true} setIsLoggedIn={value => { if (!value) logout() }} onGoToLogin={() => router.push(ENTREPRENEUR_ROUTES.login())} onGoToNotifications={() => router.push(ENTREPRENEUR_ROUTES.notifications())} onOpenRegAssistant={() => openAssistant({ origin: 'header', mode: 'global', context: globalAssistantContext(assistantPageContext) })} />
     <DemoNotice />
-    <div className="lg:hidden flex items-center gap-3 px-4 py-2 bg-white border-b border-[#d1d9e0]">
-      <button type="button" onClick={() => setMobileOpen(true)} className="flex items-center gap-2 text-xs text-[#1a3a5c] font-semibold hover:text-[#1a56db]" aria-label="Open navigation menu"><Icon.Menu />Menu</button>
+    <div className="lg:hidden flex items-center gap-3 px-4 py-2 bg-white border-b border-[#d6dfd5]">
+      <button type="button" onClick={() => setMobileOpen(true)} className="flex items-center gap-2 text-xs text-[#355E3B] font-semibold hover:text-[#6DAE7C]" aria-label="Open navigation menu"><Icon.Menu />Menu</button>
     </div>
     <div className="flex flex-1 min-h-0 overflow-hidden">
       {mobileOpen && <button type="button" className="fixed inset-0 z-40 bg-black/40 lg:hidden" onClick={() => setMobileOpen(false)} aria-label="Close navigation menu" />}
-      <aside className={`fixed top-0 left-0 h-full z-50 bg-white border-r border-[#d1d9e0] w-64 transition-transform duration-200 lg:static lg:z-auto lg:translate-x-0 lg:h-auto lg:shrink-0 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'} ${collapsed ? 'lg:w-12' : 'lg:w-60'}`} aria-label="Entrepreneur navigation">
+      <aside className={`fixed top-0 left-0 h-full z-50 bg-white border-r border-[#d6dfd5] w-64 transition-transform duration-200 lg:static lg:z-auto lg:translate-x-0 lg:h-auto lg:shrink-0 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'} ${collapsed ? 'lg:w-12' : 'lg:w-60'}`} aria-label="Entrepreneur navigation">
         <Sidebar pathname={pathname} business={currentBusiness} onSelectBusiness={selectBusiness} closeMobile={() => setMobileOpen(false)} collapsed={collapsed} setCollapsed={setCollapsed} />
       </aside>
       <div className="flex-1 min-w-0 overflow-auto">

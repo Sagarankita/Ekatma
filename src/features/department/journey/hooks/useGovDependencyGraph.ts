@@ -208,8 +208,8 @@ export function useGovDependencyGraph() {
         animated: isConnected && (isSourceCompleted && edge.target === 'bldg'),
         style: {
           stroke: isConnected
-            ? isSourceCompleted ? '#10b981' : isConditional ? '#f59e0b' : '#2563eb'
-            : '#cbd5e1',
+            ? isSourceCompleted ? '#10b981' : isConditional ? '#D4A017' : '#6DAE7C'
+            : '#c8d4c7',
           strokeWidth: isConnected ? 2.5 : 1,
           opacity: selectedNodeId ? (isConnected ? 1 : 0.25) : 1,
           strokeDasharray: isConditional ? '5 5' : undefined,
@@ -217,8 +217,8 @@ export function useGovDependencyGraph() {
         markerEnd: {
           type: MarkerType.ArrowClosed,
           color: isConnected
-            ? isSourceCompleted ? '#10b981' : isConditional ? '#f59e0b' : '#2563eb'
-            : '#cbd5e1',
+            ? isSourceCompleted ? '#10b981' : isConditional ? '#D4A017' : '#6DAE7C'
+            : '#c8d4c7',
         },
       };
     });

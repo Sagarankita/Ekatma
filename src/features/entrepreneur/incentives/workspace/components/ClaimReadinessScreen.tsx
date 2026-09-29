@@ -31,7 +31,7 @@ export function ClaimReadinessScreen() {
   const total = evidence.length;
 
   return (
-    <main id="main-content" className="flex-1 bg-[#f8f9fb]" tabIndex={-1}>
+    <main id="main-content" className="flex-1 bg-[#F9FAF2]" tabIndex={-1}>
       <IncentiveWorkspaceHeader
         businessId={businessId}
         title="Claim Readiness"
@@ -42,52 +42,52 @@ export function ClaimReadinessScreen() {
 
       <div className="max-w-[800px] mx-auto px-6 py-5 space-y-4">
         {/* Summary */}
-        <div className="bg-white border border-[#e2e8f0] px-5 py-4">
+        <div className="bg-white border border-[#e3ebe1] px-5 py-4">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
-              <p className="text-[10px] text-[#6b7a8d] uppercase tracking-wider mb-1">Claim Readiness — PSI 2019 Capital Subsidy</p>
-              <p className="text-2xl font-bold text-[#1a3a5c]">{available} of {total} evidence categories available</p>
-              <p className="text-xs text-[#6b7a8d] mt-1">{total - available} categories missing or pending</p>
+              <p className="text-[10px] text-[#555C56] uppercase tracking-wider mb-1">Claim Readiness — PSI 2019 Capital Subsidy</p>
+              <p className="text-2xl font-bold text-[#355E3B]">{available} of {total} evidence categories available</p>
+              <p className="text-xs text-[#555C56] mt-1">{total - available} categories missing or pending</p>
             </div>
             <div className="flex gap-2">
-              <button onClick={handleGoToDocCentre} className="text-xs border border-[#1a56db] text-[#1a56db] px-3 py-2 hover:bg-[#ebf3ff] transition-colors font-medium">Upload Missing Evidence</button>
-              <button onClick={handleGoToTracker} className="bg-[#1a3a5c] text-white text-xs font-semibold px-4 py-2 hover:bg-[#0f2540] transition-colors">Prepare Claim</button>
+              <button onClick={handleGoToDocCentre} className="text-xs border border-[#6DAE7C] text-[#6DAE7C] px-3 py-2 hover:bg-[#edf5ef] transition-colors font-medium">Upload Missing Evidence</button>
+              <button onClick={handleGoToTracker} className="bg-[#355E3B] text-white text-xs font-semibold px-4 py-2 hover:bg-[#27472c] transition-colors">Prepare Claim</button>
             </div>
           </div>
         </div>
 
-        {filingWindow && <div className="bg-white border border-[#e2e8f0] px-5 py-4">
-          <p className="text-[10px] font-bold text-[#6b7a8d] uppercase tracking-wider mb-1">Current Filing Window</p>
+        {filingWindow && <div className="bg-white border border-[#e3ebe1] px-5 py-4">
+          <p className="text-[10px] font-bold text-[#555C56] uppercase tracking-wider mb-1">Current Filing Window</p>
           <div className="flex items-end justify-between gap-4 flex-wrap">
             <div>
-              <p className="text-sm font-bold text-[#1a3a5c]">{filingWindow.period}</p>
-              <p className="text-xs text-[#6b7a8d] mt-1">{filingWindow.filingWindow}</p>
-              {filingWindow.deadline && <p className="text-xs text-[#6b7a8d]">Deadline: {filingWindow.deadline}</p>}
+              <p className="text-sm font-bold text-[#355E3B]">{filingWindow.period}</p>
+              <p className="text-xs text-[#555C56] mt-1">{filingWindow.filingWindow}</p>
+              {filingWindow.deadline && <p className="text-xs text-[#555C56]">Deadline: {filingWindow.deadline}</p>}
             </div>
-            <p className="text-xs font-semibold text-[#d97706]">{filingWindow.readiness}</p>
+            <p className="text-xs font-semibold text-[#D4A017]">{filingWindow.readiness}</p>
           </div>
         </div>}
 
         {/* Evidence list */}
-        <div className="bg-white border border-[#e2e8f0]">
-          <div className="px-5 py-2.5 bg-[#f8f9fb] border-b border-[#e8edf2]">
-            <p className="text-xs font-bold text-[#1a3a5c] uppercase tracking-wider">Required Evidence</p>
+        <div className="bg-white border border-[#e3ebe1]">
+          <div className="px-5 py-2.5 bg-[#F9FAF2] border-b border-[#e3ebe1]">
+            <p className="text-xs font-bold text-[#355E3B] uppercase tracking-wider">Required Evidence</p>
           </div>
-          <div className="divide-y divide-[#f8f9fb]">
+          <div className="divide-y divide-[#F9FAF2]">
             {evidence.map(e => {
               const cfg = e.status === 'verified'
                 ? { icon: '✓', cls: 'text-[#16a34a]', badge: 'bg-[#f0fdf4] text-[#166534] border-[#86efac]', badgeLabel: 'Verified' }
                 : e.status === 'available'
-                  ? { icon: '✓', cls: 'text-[#16a34a]', badge: 'bg-[#f0f4f8] text-[#475569] border-[#d1d9e0]', badgeLabel: 'Available' }
+                  ? { icon: '✓', cls: 'text-[#16a34a]', badge: 'bg-[#F9FAF2] text-[#4A4A4A] border-[#d6dfd5]', badgeLabel: 'Available' }
                   : e.status === 'pending'
-                    ? { icon: '○', cls: 'text-[#d97706]', badge: 'bg-[#fef3c7] text-[#92400e] border-[#fde68a]', badgeLabel: 'Pending' }
-                    : { icon: '○', cls: 'text-[#9aa5b4]', badge: 'bg-[#fee2e2] text-[#b91c1c] border-[#fca5a5]', badgeLabel: 'Missing' };
+                    ? { icon: '○', cls: 'text-[#D4A017]', badge: 'bg-[#fdf8e6] text-[#7a5807] border-[#fae69e]', badgeLabel: 'Pending' }
+                    : { icon: '○', cls: 'text-[#8c9f8a]', badge: 'bg-[#fee2e2] text-[#b91c1c] border-[#fca5a5]', badgeLabel: 'Missing' };
               return (
                 <div key={e.label} className="px-5 py-3 flex items-start gap-3">
                   <span className={`font-bold shrink-0 mt-0.5 ${cfg.cls}`}>{cfg.icon}</span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-semibold text-[#1a2533] leading-tight">{e.label}</p>
-                    <p className="text-[10px] text-[#6b7a8d] mt-0.5">{e.source}</p>
+                    <p className="text-[11px] font-semibold text-[#2B2B2B] leading-tight">{e.label}</p>
+                    <p className="text-[10px] text-[#555C56] mt-0.5">{e.source}</p>
                   </div>
                   <span className={`text-[10px] font-bold px-2 py-0.5 border shrink-0 ${cfg.badge}`}>{cfg.badgeLabel}</span>
                 </div>
@@ -96,7 +96,7 @@ export function ClaimReadinessScreen() {
           </div>
         </div>
 
-        <button onClick={handleBack} className="text-xs border border-[#d1d9e0] text-[#475569] px-4 py-2 hover:bg-[#f1f5f9] transition-colors">Back</button>
+        <button onClick={handleBack} className="text-xs border border-[#d6dfd5] text-[#4A4A4A] px-4 py-2 hover:bg-[#F9FAF2] transition-colors">Back</button>
       </div>
     </main>
   );

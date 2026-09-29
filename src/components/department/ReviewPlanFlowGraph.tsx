@@ -111,7 +111,7 @@ export function ReviewPlanFlowGraph({
         if (n.status === 'completed') statusBadge = '✓ COMPLETED';
         else if (n.status === 'current') statusBadge = '● ACTIVE IN SCRUTINY';
         else if (n.status === 'attention') statusBadge = '⚠ ACTION REQUIRED';
-        else if (n.status === 'pending') statusBadge = '⏳ PREREQUISITE PENDING';
+        else if (n.status === 'pending') statusBadge = ' PREREQUISITE PENDING';
         else if (n.status === 'na') statusBadge = 'N/A NOT REQUIRED';
         else statusBadge = '○ UPCOMING STAGE';
 
@@ -157,7 +157,7 @@ export function ReviewPlanFlowGraph({
             selector: 'node',
             style: {
               label: 'data(displayLabel)',
-              color: '#0f172a',
+              color: '#2B2B2B',
               shape: 'round-rectangle',
               width: 280,
               height: 92,
@@ -186,8 +186,8 @@ export function ReviewPlanFlowGraph({
           {
             selector: 'node.status-current',
             style: {
-              'background-color': '#0f2540',
-              'border-color': '#2563eb',
+              'background-color': '#27472c',
+              'border-color': '#6DAE7C',
               'border-width': 3,
               color: '#ffffff',
             },
@@ -195,10 +195,10 @@ export function ReviewPlanFlowGraph({
           {
             selector: 'node.status-attention',
             style: {
-              'background-color': '#fffbeb',
-              'border-color': '#d97706',
+              'background-color': '#fdf8e6',
+              'border-color': '#D4A017',
               'border-width': 2.5,
-              color: '#92400e',
+              color: '#7a5807',
             },
           },
           {
@@ -213,35 +213,35 @@ export function ReviewPlanFlowGraph({
           {
             selector: 'node.status-upcoming',
             style: {
-              'background-color': '#f8fafc',
-              'border-color': '#cbd5e1',
+              'background-color': '#F9FAF2',
+              'border-color': '#c8d4c7',
               'border-width': 1.5,
-              color: '#475569',
+              color: '#4A4A4A',
             },
           },
           {
             selector: 'node.status-na',
             style: {
-              'background-color': '#f1f5f9',
-              'border-color': '#e2e8f0',
+              'background-color': '#F9FAF2',
+              'border-color': '#e3ebe1',
               'border-style': 'dashed',
               'border-width': 1,
-              color: '#94a3b8',
+              color: '#9ab098',
             },
           },
           {
             selector: 'node.selected-node',
             style: {
               'border-width': 4,
-              'border-color': '#1a56db',
+              'border-color': '#6DAE7C',
             },
           },
           {
             selector: 'edge',
             style: {
               width: 2.5,
-              'line-color': '#94a3b8',
-              'target-arrow-color': '#94a3b8',
+              'line-color': '#9ab098',
+              'target-arrow-color': '#9ab098',
               'target-arrow-shape': 'triangle',
               'curve-style': 'bezier',
               'arrow-scale': 1.15,
@@ -253,12 +253,12 @@ export function ReviewPlanFlowGraph({
               label: 'data(label)',
               'font-size': 11,
               'font-weight': 700,
-              color: '#1e40af',
-              'text-background-color': '#eff6ff',
+              color: '#539160',
+              'text-background-color': '#edf5ef',
               'text-background-opacity': 0.98,
               'text-background-padding': '4px',
               'text-background-shape': 'roundrectangle',
-              'text-border-color': '#93c5fd',
+              'text-border-color': '#a1cba9',
               'text-border-width': 1.5,
               'text-border-opacity': 1,
             },
@@ -267,8 +267,8 @@ export function ReviewPlanFlowGraph({
             selector: 'edge.edge-parallel',
             style: {
               width: 3,
-              'line-color': '#2563eb',
-              'target-arrow-color': '#2563eb',
+              'line-color': '#6DAE7C',
+              'target-arrow-color': '#6DAE7C',
               'line-style': 'dashed',
             },
           },
@@ -338,21 +338,21 @@ export function ReviewPlanFlowGraph({
   };
 
   return (
-    <div className="bg-white border border-[#d1d9e0] rounded-xl overflow-hidden shadow-xs">
+    <div className="bg-white border border-[#d6dfd5] rounded-xl overflow-hidden shadow-xs">
       {/* Graph Toolbar */}
-      <div className="px-4 py-3 bg-[#f8fafc] border-b border-[#e2e8f0] flex flex-wrap items-center justify-between gap-3">
+      <div className="px-4 py-3 bg-[#F9FAF2] border-b border-[#e3ebe1] flex flex-wrap items-center justify-between gap-3">
         <div>
-          <span className="text-xs font-bold text-[#1a2533]">Interactive Review Flow</span>
-          <p className="text-[11px] text-[#64748b]">Click any node to inspect desk assignment, findings, and actions.</p>
+          <span className="text-xs font-bold text-[#2B2B2B]">Interactive Review Flow</span>
+          <p className="text-[11px] text-[#555C56]">Click any node to inspect desk assignment, findings, and actions.</p>
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="inline-flex rounded-md border border-[#cbd5e1] p-0.5 bg-white text-[11px]">
+          <div className="inline-flex rounded-md border border-[#c8d4c7] p-0.5 bg-white text-[11px]">
             <button
               type="button"
               onClick={() => setLayoutDir('TB')}
               className={`px-2.5 py-1 rounded font-semibold transition-colors ${
-                layoutDir === 'TB' ? 'bg-[#1a3a5c] text-white' : 'text-[#475569] hover:bg-slate-50'
+                layoutDir === 'TB' ? 'bg-[#355E3B] text-white' : 'text-[#4A4A4A] hover:bg-slate-50'
               }`}
             >
               Top-Down ↓
@@ -361,18 +361,18 @@ export function ReviewPlanFlowGraph({
               type="button"
               onClick={() => setLayoutDir('LR')}
               className={`px-2.5 py-1 rounded font-semibold transition-colors ${
-                layoutDir === 'LR' ? 'bg-[#1a3a5c] text-white' : 'text-[#475569] hover:bg-slate-50'
+                layoutDir === 'LR' ? 'bg-[#355E3B] text-white' : 'text-[#4A4A4A] hover:bg-slate-50'
               }`}
             >
               Left-Right →
             </button>
           </div>
 
-          <div className="inline-flex rounded-md border border-[#cbd5e1] p-0.5 bg-white text-[11px]">
+          <div className="inline-flex rounded-md border border-[#c8d4c7] p-0.5 bg-white text-[11px]">
             <button
               type="button"
               onClick={handleZoomIn}
-              className="px-2 py-0.5 text-xs font-bold text-[#1a3a5c] hover:bg-slate-50 rounded"
+              className="px-2 py-0.5 text-xs font-bold text-[#355E3B] hover:bg-slate-50 rounded"
               title="Zoom In"
             >
               +
@@ -380,7 +380,7 @@ export function ReviewPlanFlowGraph({
             <button
               type="button"
               onClick={handleZoomOut}
-              className="px-2 py-0.5 text-xs font-bold text-[#1a3a5c] hover:bg-slate-50 rounded"
+              className="px-2 py-0.5 text-xs font-bold text-[#355E3B] hover:bg-slate-50 rounded"
               title="Zoom Out"
             >
               -
@@ -390,7 +390,7 @@ export function ReviewPlanFlowGraph({
           <button
             type="button"
             onClick={fitGraph}
-            className="px-2.5 py-1 text-[11px] font-semibold text-[#1a3a5c] bg-white border border-[#cbd5e1] hover:bg-slate-50 rounded"
+            className="px-2.5 py-1 text-[11px] font-semibold text-[#355E3B] bg-white border border-[#c8d4c7] hover:bg-slate-50 rounded"
           >
             Fit Canvas
           </button>
@@ -399,8 +399,7 @@ export function ReviewPlanFlowGraph({
 
       {/* Parallel Processing Active Banner */}
       <div className="px-4 py-2.5 bg-blue-50/90 border-b border-blue-200 flex flex-wrap items-center justify-between gap-3 text-xs">
-        <div className="flex items-center gap-2 text-[#1a3a5c]">
-          <span className="text-sm">⚡</span>
+        <div className="flex items-center gap-2 text-[#355E3B]">
           <span className="font-bold">Parallel Review Processing Active:</span>
           <span className="text-slate-700">
             From the Review Plan stage, Land / Plot, Building / Planning, and Water / Utility workstreams process concurrently across separate officer desks.
@@ -412,10 +411,10 @@ export function ReviewPlanFlowGraph({
       </div>
 
       {/* Graph Legend */}
-      <div className="px-4 py-2 bg-slate-50/70 border-b border-[#e2e8f0] flex flex-wrap items-center gap-4 text-[10px] text-[#475569]">
+      <div className="px-4 py-2 bg-slate-50/70 border-b border-[#e3ebe1] flex flex-wrap items-center gap-4 text-[10px] text-[#4A4A4A]">
         <span className="font-semibold uppercase tracking-wider text-slate-500">Legend:</span>
         <span className="inline-flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-emerald-600 inline-block" /> Completed</span>
-        <span className="inline-flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-[#0f2540] inline-block" /> Current / Active</span>
+        <span className="inline-flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-[#27472c] inline-block" /> Current / Active</span>
         <span className="inline-flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block" /> Attention / Action</span>
         <span className="inline-flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-purple-600 inline-block" /> Pending Prerequisite</span>
         <span className="inline-flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-slate-400 inline-block" /> Upcoming</span>
@@ -434,11 +433,11 @@ export function ReviewPlanFlowGraph({
 
       {/* Selected Node Drawer / Inspector */}
       {activeNode && (
-        <div className="p-4 bg-[#f8fafc] border-t border-[#e2e8f0] animate-in fade-in duration-150">
+        <div className="p-4 bg-[#F9FAF2] border-t border-[#e3ebe1] animate-in fade-in duration-150">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-[#1a2533]">{activeNode.label}</span>
+                <span className="text-xs font-bold text-[#2B2B2B]">{activeNode.label}</span>
                 <span
                   className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
                     activeNode.status === 'completed'
@@ -466,7 +465,7 @@ export function ReviewPlanFlowGraph({
                 </span>
                 {activeNode.isParallel && (
                   <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 flex items-center gap-1">
-                    <span>⚡</span> Parallel Review Stream (Independent Desk)
+                    Parallel Review Stream (Independent Desk)
                   </span>
                 )}
               </div>
@@ -491,7 +490,7 @@ export function ReviewPlanFlowGraph({
                 <button
                   type="button"
                   onClick={activeNode.onAction}
-                  className="px-4 py-2 bg-[#1a3a5c] hover:bg-[#0f2540] text-white text-xs font-bold rounded transition-colors shadow-xs"
+                  className="px-4 py-2 bg-[#355E3B] hover:bg-[#27472c] text-white text-xs font-bold rounded transition-colors shadow-xs"
                 >
                   {activeNode.actionText || 'Open Review →'}
                 </button>

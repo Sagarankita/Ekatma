@@ -71,7 +71,7 @@ export function PrevalidationScreen({
   }
 
   return (
-    <main id="main-content" className="flex-1 bg-[#F8F9FA] pb-20 font-sans" tabIndex={-1}>
+    <main id="main-content" className="flex-1 bg-[#F9FAF2] pb-20 font-sans" tabIndex={-1}>
       {/* ── 6-STAGE PIPELINE STEPPER ── */}
       <ApplicationWorkflowStepper businessId={project.id} currentStep={3} />
 
@@ -79,30 +79,30 @@ export function PrevalidationScreen({
       <header className="bg-white border-b border-slate-200 px-4 sm:px-8 py-5">
         <div className="max-w-[1280px] mx-auto">
           <nav className="text-xs text-slate-500 mb-2.5 flex items-center gap-1.5" aria-label="Breadcrumb">
-            <Link href={ENTREPRENEUR_ROUTES.business(project.id)} className="hover:text-[#17365D] hover:underline">
+            <Link href={ENTREPRENEUR_ROUTES.business(project.id)} className="hover:text-[#355E3B] hover:underline">
               {project.name}
             </Link>
             <span>›</span>
-            <Link href={ENTREPRENEUR_ROUTES.applications(project.id)} className="hover:text-[#17365D] hover:underline">
+            <Link href={ENTREPRENEUR_ROUTES.applications(project.id)} className="hover:text-[#355E3B] hover:underline">
               Applications
             </Link>
             <span>›</span>
-            <Link href={ENTREPRENEUR_ROUTES.newApplication(project.id)} className="hover:text-[#17365D] hover:underline">
+            <Link href={ENTREPRENEUR_ROUTES.newApplication(project.id)} className="hover:text-[#355E3B] hover:underline">
               Application Workspace
             </Link>
             <span>›</span>
-            <span className="text-[#17365D] font-bold">Check for Issues (Pre-validation)</span>
+            <span className="text-[#355E3B] font-bold">Check for Issues (Pre-validation)</span>
           </nav>
 
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-[11px] font-bold uppercase tracking-wider bg-[#17365D]/8 text-[#17365D] border border-[#17365D]/15 px-2.5 py-0.5 rounded-md">
+                <span className="text-[11px] font-bold uppercase tracking-wider bg-[#355E3B]/8 text-[#355E3B] border border-[#355E3B]/15 px-2.5 py-0.5 rounded-md">
                   Stage 3 of 6 · Check for Issues
                 </span>
                 <span className="text-xs text-slate-500">· Automated Statutory Pre-Validation</span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-[#17365D] tracking-tight">
+              <h1 className="text-xl font-bold text-[#355E3B]">
                 Pre-Validation &amp; Integrity Check
               </h1>
               <p className="mt-1 text-sm text-slate-600">Check requirements and dossier information before submission.</p>
@@ -203,7 +203,7 @@ export function PrevalidationScreen({
           {attention.length > 0 && (
             <Link
               href={ENTREPRENEUR_ROUTES.applicationConsistency(project.id)}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#17365D] text-white hover:bg-[#122b49] text-xs font-bold transition-all shadow-2xs shrink-0 self-start sm:self-center"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#355E3B] text-white hover:bg-[#122b49] text-xs font-bold transition-all shadow-2xs shrink-0 self-start sm:self-center"
             >
               <span>Review Differences (Stage 4)</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -270,7 +270,7 @@ export function PrevalidationScreen({
                                 issue.state === 'attention'
                                   ? 'bg-amber-700 hover:bg-amber-800 text-white'
                                   : issue.state === 'info'
-                                  ? 'bg-[#1a56db] hover:bg-[#1542a8] text-white'
+                                  ? 'bg-[#6DAE7C] hover:bg-[#1542a8] text-white'
                                   : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200'
                               }`}
                             >
@@ -311,7 +311,7 @@ export function PrevalidationScreen({
 
             <Link
               href={ENTREPRENEUR_ROUTES.applicationConsistency(project.id)}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#17365D] hover:bg-[#122b49] text-white text-xs font-bold transition-all shadow-2xs"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#355E3B] hover:bg-[#122b49] text-white text-xs font-bold transition-all shadow-2xs"
             >
               <span>Resolve Issues in Cross-Form Consistency (Stage 4)</span>
               <ChevronRight className="w-4 h-4" />

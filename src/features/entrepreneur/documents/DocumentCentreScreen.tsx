@@ -141,25 +141,25 @@ export function DocumentCentreScreen({ project }: { project: BusinessProject }) 
   };
 
   return (
-    <main id="main-content" className="flex-1 bg-[#F8F9FA] pb-20 font-sans" tabIndex={-1}>
+    <main id="main-content" className="flex-1 bg-[#F9FAF2] pb-20 font-sans" tabIndex={-1}>
       {/* ── Breadcrumb & Page Header ── */}
       <header className="bg-white border-b border-slate-200 px-4 sm:px-8 py-5">
         <div className="max-w-[1440px] mx-auto">
           <nav className="text-xs text-slate-500 mb-2.5 flex items-center gap-1.5" aria-label="Breadcrumb">
-            <Link href={ENTREPRENEUR_ROUTES.businesses()} className="hover:text-[#17365D] hover:underline">
+            <Link href={ENTREPRENEUR_ROUTES.businesses()} className="hover:text-[#355E3B] hover:underline">
               My Businesses
             </Link>
             <span>›</span>
-            <Link href={ENTREPRENEUR_ROUTES.business(project.id)} className="hover:text-[#17365D] hover:underline">
+            <Link href={ENTREPRENEUR_ROUTES.business(project.id)} className="hover:text-[#355E3B] hover:underline">
               {project.name}
             </Link>
             <span>›</span>
-            <span className="text-[#17365D] font-bold">Document Centre</span>
+            <span className="text-[#355E3B] font-bold">Document Centre</span>
           </nav>
 
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-[#17365D] tracking-tight">
+              <h1 className="text-xl font-bold text-[#355E3B]">
                 Document Centre
               </h1>
               <p className="mt-1 text-sm text-slate-600">Upload once. Reuse across applications.</p>
@@ -296,7 +296,7 @@ export function DocumentCentreScreen({ project }: { project: BusinessProject }) 
         {/* ── SINGLE-DOSSIER REASSURANCE BANNER ── */}
         <div className="p-4 sm:p-5 bg-gradient-to-r from-blue-50/60 via-slate-50 to-indigo-50/60 border border-slate-200/80 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs">
           <div className="flex items-center gap-3.5">
-            <div className="w-9 h-9 rounded-lg bg-[#17365D] text-white flex items-center justify-center shrink-0 shadow-2xs">
+            <div className="w-9 h-9 rounded-lg bg-[#355E3B] text-white flex items-center justify-center shrink-0 shadow-2xs">
               <Layers className="w-5 h-5 text-blue-200" />
             </div>
             <div>
@@ -320,7 +320,7 @@ export function DocumentCentreScreen({ project }: { project: BusinessProject }) 
                 onClick={() => setActiveGroup('ALL')}
                 className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
                   activeGroup === 'ALL'
-                    ? 'bg-[#17365D] text-white shadow-2xs'
+                    ? 'bg-[#355E3B] text-white shadow-2xs'
                     : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
                 }`}
               >
@@ -388,14 +388,14 @@ export function DocumentCentreScreen({ project }: { project: BusinessProject }) 
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                   placeholder="Filter documents…"
-                  className="w-full pl-9 pr-3.5 py-2 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#17365D] focus:border-transparent transition-all shadow-2xs"
+                  className="w-full pl-9 pr-3.5 py-2 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#355E3B] focus:border-transparent transition-all shadow-2xs"
                 />
               </div>
 
               <select
                 value={catFilter}
                 onChange={e => setCatFilter(e.target.value)}
-                className="text-xs bg-white border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#17365D] shadow-2xs text-slate-700 font-medium"
+                className="text-xs bg-white border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#355E3B] shadow-2xs text-slate-700 font-medium"
               >
                 {E11_DOC_CATEGORIES.map(c => (
                   <option key={c}>{c}</option>
@@ -479,7 +479,7 @@ export function DocumentCentreScreen({ project }: { project: BusinessProject }) 
                                 <button
                                   type="button"
                                   onClick={() => handleViewDoc(doc.id)}
-                                  className="text-left font-bold text-slate-900 hover:text-[#17365D] transition-colors text-[13px] leading-snug group-hover:underline block"
+                                  className="text-left font-bold text-slate-900 hover:text-[#355E3B] transition-colors text-[13px] leading-snug group-hover:underline block"
                                 >
                                   {doc.name}
                                 </button>
@@ -589,7 +589,7 @@ export function DocumentCentreScreen({ project }: { project: BusinessProject }) 
                                   <button
                                     type="button"
                                     onClick={() => handleViewDoc(doc.id)}
-                                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold bg-[#1a56db] text-white hover:bg-[#1542a8] transition-colors shadow-2xs"
+                                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold bg-[#6DAE7C] text-white hover:bg-[#1542a8] transition-colors shadow-2xs"
                                   >
                                     <UploadCloud className="w-3.5 h-3.5" />
                                     <span>Upload</span>
@@ -636,7 +636,7 @@ export function DocumentCentreScreen({ project }: { project: BusinessProject }) 
                                       <button
                                         type="button"
                                         onClick={() => handleViewDoc(doc.id)}
-                                        className="text-[11px] font-semibold text-[#17365D] hover:underline flex items-center gap-1"
+                                        className="text-[11px] font-semibold text-[#355E3B] hover:underline flex items-center gap-1"
                                       >
                                         <span>Full Details</span>
                                         <ExternalLink className="w-3 h-3" />

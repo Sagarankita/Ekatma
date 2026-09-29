@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: 'Government of Maharashtra Single Window Portal - Department Interface',
     start_url: '/department/',
     display: 'standalone',
-    background_color: '#f8f9fb',
-    theme_color: '#1a3a5c',
+    background_color: '#F9FAF2',
+    theme_color: '#355E3B',
     icons: [
       {
         src: '/department/icons/icon-192x192.png',

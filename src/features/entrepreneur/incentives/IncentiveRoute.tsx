@@ -23,7 +23,7 @@ export function IncentiveRoute({ project, schemeId, claims = false }: {
   if (claims && schemeId) return <E28IncentiveClaimsPage
     schemeId={schemeId}
     claims={listClaimsForBusiness(project.id, schemeId)}
-    onBack={() => router.push(ENTREPRENEUR_ROUTES.business(project.id))}
+    onBack={scheme}
     onGoToE26={list}
     onGoToE27={scheme}
     onGoToE11={documents}

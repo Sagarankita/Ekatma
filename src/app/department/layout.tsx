@@ -1,7 +1,7 @@
 import { Metadata, Viewport } from 'next';
 
 export const viewport: Viewport = {
-  themeColor: '#1a3a5c',
+  themeColor: '#355E3B',
 };
 
 export const metadata: Metadata = {

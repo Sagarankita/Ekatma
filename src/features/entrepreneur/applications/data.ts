@@ -414,29 +414,29 @@ export function slaClass(t: TrackerApp['slaType']): string {
     case 'ok':
       return 'text-[#15803d]';
     case 'due-soon':
-      return 'text-[#d97706] font-semibold';
+      return 'text-[#D4A017] font-semibold';
     case 'over':
       return 'text-[#b91c1c] font-semibold';
     case 'na':
     default:
-      return 'text-[#94a3b8]';
+      return 'text-[#9ab098]';
   }
 }
 
 export function statusBadgeTrackerClass(statusType: TrackerApp['statusType']): string {
   switch (statusType) {
     case 'active':
-      return 'bg-[#dbeafe] text-[#1e40af] border-[#93c5fd]';
+      return 'bg-[#edf5ef] text-[#539160] border-[#a1cba9]';
     case 'action':
       return 'bg-[#fee2e2] text-[#b91c1c] border-[#fca5a5]';
     case 'approved':
       return 'bg-[#dcfce7] text-[#166534] border-[#86efac]';
     case 'waiting':
-      return 'bg-[#fef3c7] text-[#92400e] border-[#fcd34d]';
+      return 'bg-[#fdf8e6] text-[#7a5807] border-[#fae69e]';
     case 'over-sla':
       return 'bg-[#fee2e2] text-[#b91c1c] border-[#fca5a5]';
     default:
-      return 'bg-[#f1f5f9] text-[#475569] border-[#e2e8f0]';
+      return 'bg-[#F9FAF2] text-[#4A4A4A] border-[#e3ebe1]';
   }
 }
 
@@ -490,9 +490,9 @@ export function responsibilityBadgeClass(resp: ProcessingResponsibility): string
     case 'entrepreneur':
       return 'bg-[#fee2e2] text-[#b91c1c] border-[#fca5a5]';
     case 'government':
-      return 'bg-[#dbeafe] text-[#1e40af] border-[#93c5fd]';
+      return 'bg-[#edf5ef] text-[#539160] border-[#a1cba9]';
     case 'department-dependency':
-      return 'bg-[#fef3c7] text-[#92400e] border-[#fcd34d]';
+      return 'bg-[#fdf8e6] text-[#7a5807] border-[#fae69e]';
     case 'completed':
       return 'bg-[#dcfce7] text-[#166534] border-[#86efac]';
   }

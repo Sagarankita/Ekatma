@@ -95,30 +95,30 @@ export function DependencyScreen({ project }: { project: BusinessProject }) {
   } = useDependencyGraph(project.id);
 
   return (
-    <main id="main-content" className="flex-1 bg-[#F8F9FA] min-h-screen pb-16 font-sans" tabIndex={-1}>
+    <main id="main-content" className="flex-1 bg-[#F9FAF2] min-h-screen pb-16 font-sans" tabIndex={-1}>
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-6">
         {/* Breadcrumb Navigation */}
         <div className="mb-4 flex items-center justify-between flex-wrap gap-3">
-          <nav className="text-xs text-[#5C6470] flex items-center gap-1.5" aria-label="Breadcrumb">
-            <Link href={ENTREPRENEUR_ROUTES.businesses()} className="hover:text-[#17365D] hover:underline">
+          <nav className="text-xs text-[#555C56] flex items-center gap-1.5" aria-label="Breadcrumb">
+            <Link href={ENTREPRENEUR_ROUTES.businesses()} className="hover:text-[#355E3B] hover:underline">
               My Businesses
             </Link>
             <span>›</span>
-            <Link href={ENTREPRENEUR_ROUTES.business(project.id)} className="hover:text-[#17365D] hover:underline">
+            <Link href={ENTREPRENEUR_ROUTES.business(project.id)} className="hover:text-[#355E3B] hover:underline">
               {project.name}
             </Link>
             <span>›</span>
-            <Link href={ENTREPRENEUR_ROUTES.journey(project.id)} className="hover:text-[#17365D] hover:underline">
+            <Link href={ENTREPRENEUR_ROUTES.journey(project.id)} className="hover:text-[#355E3B] hover:underline">
               Regulatory Journey
             </Link>
             <span>›</span>
-            <span className="text-[#17365D] font-bold">Dependency Graph</span>
+            <span className="text-[#355E3B] font-bold">Dependency Graph</span>
           </nav>
 
           {/* Primary back link to the simpler journey */}
           <Link
             href={ENTREPRENEUR_ROUTES.journey(project.id)}
-            className="text-xs border border-slate-300 bg-white text-[#17365D] px-3.5 py-1.5 rounded-lg hover:bg-slate-50 font-bold transition-colors shadow-xs flex items-center gap-1.5"
+            className="text-xs border border-slate-300 bg-white text-[#355E3B] px-3.5 py-1.5 rounded-lg hover:bg-slate-50 font-bold transition-colors shadow-xs flex items-center gap-1.5"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Back to Step-by-Step Journey</span>
@@ -129,12 +129,12 @@ export function DependencyScreen({ project }: { project: BusinessProject }) {
         <div className="mb-5 bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#17365D] bg-[#17365D]/8 border border-[#17365D]/15 px-2 py-0.5 rounded">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#355E3B] bg-[#355E3B]/8 border border-[#355E3B]/15 px-2 py-0.5 rounded">
                 Power-User Relationship View
               </span>
             </div>
-            <h1 className="text-2xl font-bold text-[#17365D] tracking-tight">Regulatory Dependency Map</h1>
-            <p className="text-xs sm:text-sm text-[#5C6470] mt-1 max-w-2xl leading-relaxed">
+            <h1 className="text-xl font-bold text-[#355E3B]">Regulatory Dependency Map</h1>
+            <p className="text-xs sm:text-sm text-[#555C56] mt-1 max-w-2xl leading-relaxed">
               Detailed statutory relationship map showing sequential prerequisites, parallel approvals, and downstream unlocks.
               Click any requirement to highlight its direct dependencies and view its details.
             </p>
@@ -238,7 +238,7 @@ export function DependencyScreen({ project }: { project: BusinessProject }) {
               }}
             >
               {/* Background grid */}
-              <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="#cbd5e1" />
+              <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="#c8d4c7" />
 
               {/* Automatic initial fit-to-screen */}
               <AutoFitView />
@@ -254,10 +254,10 @@ export function DependencyScreen({ project }: { project: BusinessProject }) {
                 nodeColor={n => {
                   const status = (n.data as any)?.status;
                   if (status === 'completed') return '#10b981';
-                  if (status === 'in-progress') return '#3b82f6';
-                  if (status === 'ready') return '#f59e0b';
+                  if (status === 'in-progress') return '#6DAE7C';
+                  if (status === 'ready') return '#D4A017';
                   if (status === 'conditional') return '#8b5cf6';
-                  return '#94a3b8';
+                  return '#9ab098';
                 }}
               />
 

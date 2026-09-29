@@ -58,12 +58,12 @@ export const SERVICES = [
     stages: { Planning: 1, 'Pre-establishment': 1, Construction: 1, Installation: 0, Operational: 1 } },
 ]
 export const TIMING_BREAKDOWN = [
-  { label:'MIDC Processing', value:'12d 4h', color:'bg-[#1a3a5c]', pct:57 },
+  { label:'MIDC Processing', value:'12d 4h', color:'bg-[#355E3B]', pct:57 },
   { label:'Entrepreneur Response', value:'3d 8h', color:'bg-amber-500', pct:16 },
-  { label:'Current Desk', value:'2d 6h', color:'bg-[#1a56db]', pct:11 },
+  { label:'Current Desk', value:'2d 6h', color:'bg-[#6DAE7C]', pct:11 },
   { label:'Inspection Waiting', value:'—', color:'bg-orange-400', pct:0 },
   { label:'External Dependency', value:'2d 0h', color:'bg-purple-500', pct:9 },
-  { label:'Total Elapsed', value:'21d 11h', color:'bg-[#374151]', pct:100, total:true },
+  { label:'Total Elapsed', value:'21d 11h', color:'bg-[#4A4A4A]', pct:100, total:true },
 ]
 export const APP_SAMPLE = {
   id: 'MIDC-APP-2026-00482',

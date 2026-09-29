@@ -27,8 +27,8 @@ const notifTypeIcon: Record<NotificationType, React.FC> = {
 const notifGroupOrder: NotificationGroup[] = ['Action Required', 'Application Updates', 'Inspections', 'Compliance', 'Regulatory Changes']
 const notifGroupColors: Record<NotificationGroup, { header: string; dot: string }> = {
   'Action Required': { header: 'text-[#9B2C2C]', dot: 'bg-[#9B2C2C]' },
-  'Application Updates': { header: 'text-[#17365D]', dot: 'bg-[#245B8A]' },
-  'Inspections': { header: 'text-[#8A4A12]', dot: 'bg-[#E68A2E]' },
+  'Application Updates': { header: 'text-[#355E3B]', dot: 'bg-[#3d7a4d]' },
+  'Inspections': { header: 'text-[#8A4A12]', dot: 'bg-[#D4A017]' },
   'Compliance': { header: 'text-[#5B3A91]', dot: 'bg-[#7C5CBF]' },
   'Regulatory Changes': { header: 'text-[#2F6F67]', dot: 'bg-[#3B8C80]' },
 }
@@ -75,12 +75,12 @@ export function E33NotificationCentrePage({ onNavigate, lang }: { onNavigate: (n
   }, {} as Record<NotificationGroup, AppNotification[]>)
 
   return (
-    <main id="main-content" className="flex-1 bg-[#F8F9FA]" tabIndex={-1}>
+    <main id="main-content" className="flex-1 bg-[#F9FAF2]" tabIndex={-1}>
       <div className="max-w-[900px] mx-auto px-6 py-6">
         <div className="flex items-start justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-[#17365D]">{t.title}</h1>
-            <p className="text-xs text-[#5C6470] mt-1">{t.subtitle}</p>
+            <h1 className="text-xl font-bold text-[#355E3B]">{t.title}</h1>
+            <p className="text-xs text-[#555C56] mt-1">{t.subtitle}</p>
           </div>
           <div className="flex items-center gap-3">
             {unreadCount > 0 && (
@@ -88,7 +88,7 @@ export function E33NotificationCentrePage({ onNavigate, lang }: { onNavigate: (n
                 {unreadCount} {t.unread}
               </span>
             )}
-            <button onClick={markAllRead} className="text-xs text-[#245B8A] hover:underline font-semibold">{t.markAllRead}</button>
+            <button onClick={markAllRead} className="text-xs text-[#3d7a4d] hover:underline font-semibold">{t.markAllRead}</button>
           </div>
         </div>
 
@@ -101,10 +101,10 @@ export function E33NotificationCentrePage({ onNavigate, lang }: { onNavigate: (n
               <button key={g} role="tab" aria-selected={activeGroup === g}
                 onClick={() => setActiveGroup(g)}
                 className={`px-4 py-2.5 text-xs font-bold border-b-2 -mb-px transition-colors whitespace-nowrap flex items-center gap-1.5
-                  ${activeGroup === g ? 'border-[#17365D] text-[#17365D]' : 'border-transparent text-[#5C6470] hover:text-[#20242A] hover:border-slate-300'}`}
+                  ${activeGroup === g ? 'border-[#355E3B] text-[#355E3B]' : 'border-transparent text-[#555C56] hover:text-[#2B2B2B] hover:border-slate-300'}`}
               >
                 {g}
-                <span className="text-xs font-normal text-[#5C6470]">({count})</span>
+                <span className="text-xs font-normal text-[#555C56]">({count})</span>
                 {unread > 0 && <span className="w-2 h-2 bg-[#9B2C2C] rounded-full" aria-label={`${unread} unread`} />}
               </button>
             )
@@ -122,44 +122,44 @@ export function E33NotificationCentrePage({ onNavigate, lang }: { onNavigate: (n
                 <h2 id={`notif-group-${group}`} className={`text-[13px] font-bold uppercase tracking-wider mb-3 flex items-center gap-2 ${cfg.header}`}>
                   <span className={`w-2 h-2 rounded-full ${cfg.dot}`} aria-hidden="true" />
                   {group}
-                  <span className="font-normal text-[#5C6470]">({items.length})</span>
+                  <span className="font-normal text-[#555C56]">({items.length})</span>
                 </h2>
                 <div className="space-y-3">
                   {items.map(n => {
                     const TypeIcon = notifTypeIcon[n.type]
                     return (
-                      <article key={n.id} className={`cursor-pointer bg-white border rounded-xl p-5 shadow-xs transition-all hover:border-[#93B4D5] hover:shadow-sm ${n.isRead ? 'border-slate-200' : 'border-[#245B8A] bg-[#F0F5FA]/30'}`}
+                      <article key={n.id} className={`cursor-pointer bg-white border rounded-xl p-5 shadow-xs transition-all hover:border-[#93B4D5] hover:shadow-sm ${n.isRead ? 'border-slate-200' : 'border-[#3d7a4d] bg-[#edf5ef]/30'}`}
                         onClick={() => { markRead(n.id); onNavigate(n) }} onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); markRead(n.id); onNavigate(n) } }} role="article" tabIndex={0} aria-label={n.title}>
                         <div className="flex items-start gap-3.5">
-                          <div className={`shrink-0 w-9 h-9 rounded-lg flex items-center justify-center mt-0.5 ${n.isRead ? 'bg-[#F1F3F5] text-[#5C6470]' : 'bg-[#EBF3FA] text-[#17365D]'}`}>
+                          <div className={`shrink-0 w-9 h-9 rounded-lg flex items-center justify-center mt-0.5 ${n.isRead ? 'bg-[#F1F3F5] text-[#555C56]' : 'bg-[#edf5ef] text-[#355E3B]'}`}>
                             <TypeIcon />
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-3">
-                              <h3 className={`text-xs font-bold leading-snug ${n.isRead ? 'text-[#20242A]' : 'text-[#17365D]'}`}>{n.title}</h3>
+                              <h3 className={`text-xs font-bold leading-snug ${n.isRead ? 'text-[#2B2B2B]' : 'text-[#355E3B]'}`}>{n.title}</h3>
                               <div className="flex items-center gap-2 shrink-0">
-                                {!n.isRead && <span className="w-2 h-2 bg-[#17365D] rounded-full shrink-0" aria-label="Unread" />}
-                                <span className="text-xs text-[#5C6470]">{n.timestamp}</span>
+                                {!n.isRead && <span className="w-2 h-2 bg-[#355E3B] rounded-full shrink-0" aria-label="Unread" />}
+                                <span className="text-xs text-[#555C56]">{n.timestamp}</span>
                               </div>
                             </div>
                             <div className="mt-2.5 grid grid-cols-1 md:grid-cols-3 gap-2 text-xs">
                               <div>
-                                <p className="text-xs font-semibold text-[#5C6470]">{t.why}</p>
-                                <p className="text-[#20242A] mt-0.5">{n.why}</p>
+                                <p className="text-xs font-semibold text-[#555C56]">{t.why}</p>
+                                <p className="text-[#2B2B2B] mt-0.5">{n.why}</p>
                               </div>
                               <div>
-                                <p className="text-xs font-semibold text-[#5C6470]">{t.action}</p>
-                                <p className="text-[#20242A] mt-0.5">{n.action}</p>
+                                <p className="text-xs font-semibold text-[#555C56]">{t.action}</p>
+                                <p className="text-[#2B2B2B] mt-0.5">{n.action}</p>
                               </div>
                               <div>
-                                <p className="text-xs font-semibold text-[#5C6470]">{t.due}</p>
-                                <p className={`mt-0.5 font-semibold ${n.group === 'Action Required' ? 'text-[#9B2C2C]' : 'text-[#20242A]'}`}>{n.due}</p>
+                                <p className="text-xs font-semibold text-[#555C56]">{t.due}</p>
+                                <p className={`mt-0.5 font-semibold ${n.group === 'Action Required' ? 'text-[#9B2C2C]' : 'text-[#2B2B2B]'}`}>{n.due}</p>
                               </div>
                             </div>
                             <div className="mt-3">
                               <button
                                 onClick={(e) => { e.stopPropagation(); markRead(n.id); onNavigate(n) }}
-                                className="text-xs text-[#245B8A] hover:underline font-semibold focus:outline-none focus-visible:underline"
+                                className="text-xs text-[#3d7a4d] hover:underline font-semibold focus:outline-none focus-visible:underline"
                               >
                                 {n.ctaLabel} →
                               </button>

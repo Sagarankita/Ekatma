@@ -65,23 +65,23 @@ function ApprovalNodeComponent({ data, selected }: NodeProps & { data: ApprovalN
   let StatusIcon = Lock;
 
   if (isCompleted) {
-    containerStyle = 'bg-emerald-50/60 border-emerald-300';
+    containerStyle = 'bg-emerald-50/70 border-emerald-300';
     badgeStyle = 'bg-emerald-100 text-emerald-800 border-emerald-200';
     StatusIcon = CheckCircle2;
   } else if (isInProgress) {
-    containerStyle = 'bg-blue-50/60 border-blue-300';
+    containerStyle = 'bg-blue-50/70 border-blue-300';
     badgeStyle = 'bg-blue-100 text-blue-800 border-blue-200';
     StatusIcon = Clock;
   } else if (isReady) {
-    containerStyle = 'bg-amber-50/60 border-amber-300';
-    badgeStyle = 'bg-amber-100 text-amber-900 border-amber-200';
+    containerStyle = 'bg-amber-50/90 border-amber-400 ring-1 ring-amber-400/60 shadow-xs';
+    badgeStyle = 'bg-amber-500 text-white border-amber-600 font-bold';
     StatusIcon = Unlock;
   } else if (isBlocked) {
     containerStyle = 'bg-white border-slate-300';
     badgeStyle = 'bg-slate-100 text-slate-700 border-slate-200';
     StatusIcon = Lock;
   } else if (isConditional) {
-    containerStyle = 'bg-purple-50/60 border-purple-300';
+    containerStyle = 'bg-purple-50/70 border-purple-300';
     badgeStyle = 'bg-purple-100 text-purple-800 border-purple-200';
     StatusIcon = HelpCircle;
   }
@@ -89,19 +89,20 @@ function ApprovalNodeComponent({ data, selected }: NodeProps & { data: ApprovalN
   // Highlight and focus rings
   let relationshipBadge = null;
   if (isSelected) {
-    containerStyle += ' ring-3 ring-[#17365D] border-[#17365D] shadow-lg scale-[1.03] z-30';
+    containerStyle += ' ring-3 ring-[#355E3B] border-[#355E3B] shadow-lg scale-[1.03] z-30';
   } else if (isPrerequisite) {
     containerStyle += ' ring-2 ring-emerald-500 border-emerald-500 shadow-md z-20';
     relationshipBadge = (
-      <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-600 text-white px-1.5 py-0.5 rounded">
-        Prerequisite
+      <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-600 text-white px-1.5 py-0.5 rounded inline-flex items-center gap-1">
+        <span>Prerequisite</span>
       </span>
     );
   } else if (isDownstream) {
-    containerStyle += ' ring-2 ring-blue-500 border-blue-500 shadow-md z-20';
+    containerStyle += ' ring-2 ring-amber-500 border-amber-500 shadow-md z-20 bg-amber-50/80';
     relationshipBadge = (
-      <span className="text-[10px] font-bold uppercase tracking-wider bg-blue-600 text-white px-1.5 py-0.5 rounded">
-        Downstream
+      <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-600 text-white px-2 py-0.5 rounded inline-flex items-center gap-1 shadow-xs">
+        <Unlock className="w-3 h-3" />
+        <span>Next Unlocking Node</span>
       </span>
     );
   }

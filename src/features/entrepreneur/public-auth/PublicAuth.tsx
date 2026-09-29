@@ -78,7 +78,7 @@ function PublicFrame({ children, auth = false, isLanding = false }: { children: 
 export function PublicLanding() {
   return (
     <PublicFrame isLanding>
-      <main id="main-content" className="flex-1 bg-[#f8f9fb]" tabIndex={-1}>
+      <main id="main-content" className="flex-1 bg-[#F9FAF2]" tabIndex={-1}>
         <HeroCarousel />
         <AnnouncementStrip />
         <GuidedDiscovery />

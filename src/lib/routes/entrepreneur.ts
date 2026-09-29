@@ -32,6 +32,8 @@ export const ENTREPRENEUR_ROUTES = {
   dossier: (businessId: string) => `${businessPath(businessId)}/dossier`,
   provenance: (businessId: string) => `${businessPath(businessId)}/dossier/provenance`,
   journey: (businessId: string) => `${businessPath(businessId)}/journey`,
+  knowYourApprovals: (businessId: string) => `${businessPath(businessId)}/approvals`,
+  approvals: (businessId: string) => `${businessPath(businessId)}/approvals`,
   requirement: (businessId: string, requirementId: string) =>
     `${businessPath(businessId)}/requirements/${segment(requirementId, 'requirement ID')}`,
   documents: (businessId: string) => `${businessPath(businessId)}/documents`,

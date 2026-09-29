@@ -21,7 +21,7 @@ function AuditContent() {
 
 export default function Page() {
   return (
-    <Suspense fallback={<div className="p-6 text-sm text-[#4b5563]">Loading audit workspace...</div>}>
+    <Suspense fallback={<div className="p-6 text-sm text-[#4A4A4A]">Loading audit workspace...</div>}>
       <AuditContent />
     </Suspense>
   );

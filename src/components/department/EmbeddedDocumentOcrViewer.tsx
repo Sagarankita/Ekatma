@@ -447,24 +447,21 @@ export function EmbeddedDocumentOcrViewer({
 
   return (
     <div
-      className={`bg-white border border-[#cbd5e1] rounded-xl overflow-hidden shadow-xs flex flex-col ${className}`}
+      className={`bg-white border border-[#c8d4c7] rounded-xl overflow-hidden shadow-xs flex flex-col ${className}`}
     >
       {/* Top Header & OCR Controls */}
-      <div className="px-4 py-3 bg-[#f8fafc] border-b border-[#e2e8f0] flex flex-wrap items-center justify-between gap-3">
+      <div className="px-4 py-3 bg-[#F9FAF2] border-b border-[#e3ebe1] flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-700 font-bold text-sm shrink-0">
-            📄
-          </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-[#1a2533]">
+              <span className="text-xs font-bold text-[#2B2B2B]">
                 {title || config.docTitle}
               </span>
               <span className="text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded">
                 OCR Verified ({config.overallConfidence}%)
               </span>
             </div>
-            <p className="text-[11px] text-[#64748b]">
+            <p className="text-[11px] text-[#555C56]">
               {subtitle || `Doc Ref: ${config.docNumber} · Issuer: ${config.issuer}`}
             </p>
           </div>
@@ -476,13 +473,13 @@ export function EmbeddedDocumentOcrViewer({
             <button
               type="button"
               onClick={onOpenOcrInsights}
-              className="px-3 py-1 bg-[#1a56db] hover:bg-blue-700 text-white rounded text-xs font-bold transition-colors shadow-xs flex items-center gap-1.5"
+              className="px-3 py-1 bg-[#6DAE7C] hover:bg-blue-700 text-white rounded text-xs font-bold transition-colors shadow-xs flex items-center gap-1.5"
             >
-              <span>🔍 Open OCR Insights & Approvals →</span>
+              <span> Open OCR Insights & Approvals →</span>
             </button>
           )}
 
-          <div className="inline-flex rounded-md border border-[#cbd5e1] bg-white p-0.5 text-xs">
+          <div className="inline-flex rounded-md border border-[#c8d4c7] bg-white p-0.5 text-xs">
             <button
               type="button"
               onClick={handleZoomIn}
@@ -520,7 +517,7 @@ export function EmbeddedDocumentOcrViewer({
       </div>
 
       {/* Main Document Viewport */}
-      <div className="relative bg-[#0f172a]/5 p-4 overflow-hidden min-h-[380px] max-h-[500px] flex items-center justify-center">
+      <div className="relative bg-[#2B2B2B]/5 p-4 overflow-hidden min-h-[380px] max-h-[500px] flex items-center justify-center">
         {/* Document Canvas Mockup */}
         <div
           style={{
@@ -528,12 +525,11 @@ export function EmbeddedDocumentOcrViewer({
             transformOrigin: 'center center',
             transition: 'transform 0.15s ease-out',
           }}
-          className="relative w-full max-w-[540px] aspect-[1/1.28] bg-white rounded shadow-md border border-[#cbd5e1] p-6 text-slate-800 font-sans select-none overflow-hidden"
+          className="relative w-full max-w-[540px] aspect-[1/1.28] bg-white rounded shadow-md border border-[#c8d4c7] p-6 text-slate-800 font-sans select-none overflow-hidden"
         >
           {/* Official Document Letterhead Header */}
           <div className="border-b-2 border-slate-900 pb-3 mb-4 text-center">
             <div className="flex items-center justify-center gap-2 mb-1">
-              <span className="text-base">🏛</span>
               <span className="text-[11px] font-bold uppercase tracking-wider text-slate-900">
                 Maharashtra Industrial Development Corporation
               </span>
@@ -728,16 +724,15 @@ export function EmbeddedDocumentOcrViewer({
       </div>
 
       {/* Bottom Action Footer */}
-      <div className="p-3 bg-[#f8fafc] border-t border-[#e2e8f0] flex flex-wrap items-center justify-between gap-3 text-xs">
+      <div className="p-3 bg-[#F9FAF2] border-t border-[#e3ebe1] flex flex-wrap items-center justify-between gap-3 text-xs">
         <div className="flex items-center gap-2 text-slate-600">
-          <span>⚡</span>
           <span><strong>{config.tokens.length} statutory clauses</strong> extracted by OCR ({config.overallConfidence}% accuracy)</span>
         </div>
         {onOpenOcrInsights && (
           <button
             type="button"
             onClick={onOpenOcrInsights}
-            className="px-3.5 py-1.5 bg-[#1a56db] hover:bg-blue-700 text-white rounded-md font-bold transition-colors shadow-xs flex items-center gap-1.5"
+            className="px-3.5 py-1.5 bg-[#6DAE7C] hover:bg-blue-700 text-white rounded-md font-bold transition-colors shadow-xs flex items-center gap-1.5"
           >
             <span>Open Document OCR Insights & Approvals Page →</span>
           </button>

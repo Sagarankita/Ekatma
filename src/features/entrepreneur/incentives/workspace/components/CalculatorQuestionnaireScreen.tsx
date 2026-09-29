@@ -26,7 +26,7 @@ export function CalculatorQuestionnaireScreen() {
   const handleNext = () => router.push(ENTREPRENEUR_ROUTES.incentiveCalculatorReview(businessId));
 
   return (
-    <main id="main-content" className="flex-1 bg-[#f8f9fb]" tabIndex={-1}>
+    <main id="main-content" className="flex-1 bg-[#F9FAF2]" tabIndex={-1}>
       <IncentiveWorkspaceHeader
         businessId={businessId}
         title="Provide Missing Information"
@@ -41,15 +41,15 @@ export function CalculatorQuestionnaireScreen() {
         </div>
 
         {groups.map(group => (
-          <div key={group} className="bg-white border border-[#e2e8f0]">
-            <div className="px-5 py-2.5 bg-[#f8f9fb] border-b border-[#e8edf2]">
-              <p className="text-xs font-bold text-[#1a3a5c] uppercase tracking-wider">{group} Information</p>
+          <div key={group} className="bg-white border border-[#e3ebe1]">
+            <div className="px-5 py-2.5 bg-[#F9FAF2] border-b border-[#e3ebe1]">
+              <p className="text-xs font-bold text-[#355E3B] uppercase tracking-wider">{group} Information</p>
             </div>
-            <div className="divide-y divide-[#f8f9fb]">
+            <div className="divide-y divide-[#F9FAF2]">
               {questions.filter(q => q.group === group).map(q => (
                 <div key={q.id} className="px-5 py-4">
                   <div className="flex items-start justify-between gap-4 mb-2">
-                    <label className="text-sm font-semibold text-[#1a2533]">{q.label}</label>
+                    <label className="text-sm font-semibold text-[#2B2B2B]">{q.label}</label>
                     <button
                       onClick={() => setOpenHint(openHint === q.id ? null : q.id)}
                       className="text-[#6366f1] text-[11px] font-medium hover:underline shrink-0 flex items-center gap-1"
@@ -59,8 +59,8 @@ export function CalculatorQuestionnaireScreen() {
                     </button>
                   </div>
                   {openHint === q.id && (
-                    <div className="mb-3 bg-[#f0f9ff] border border-[#93c5fd] px-3 py-2.5 text-[11px] text-[#1e3a5c] leading-relaxed">
-                      <p className="font-semibold text-[#1a56db] mb-1 flex items-center gap-1">
+                    <div className="mb-3 bg-[#f0f9ff] border border-[#a1cba9] px-3 py-2.5 text-[11px] text-[#1e3a5c] leading-relaxed">
+                      <p className="font-semibold text-[#6DAE7C] mb-1 flex items-center gap-1">
                         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1.2"/><path d="M6 4A.75.75 0 017.5 4.75c0 .6-.75.9-.75 1.75M6 8.5v.3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>
                         Why is this required?
                       </p>
@@ -73,11 +73,11 @@ export function CalculatorQuestionnaireScreen() {
                       placeholder={`Enter ${q.unit}`}
                       value={calculatorDraft[q.id] || ''}
                       onChange={e => setCalculatorDraft(prev => ({ ...prev, [q.id]: e.target.value }))}
-                      className="flex-1 border border-[#d1d9e0] text-sm px-3 py-2 focus:outline-none focus:border-[#1a56db] focus:ring-1 focus:ring-[#1a56db] text-[#1a2533] placeholder:text-[#9aa5b4]"
+                      className="flex-1 border border-[#d6dfd5] text-sm px-3 py-2 focus:outline-none focus:border-[#6DAE7C] focus:ring-1 focus:ring-[#6DAE7C] text-[#2B2B2B] placeholder:text-[#8c9f8a]"
                     />
-                    <span className="text-xs text-[#6b7a8d] shrink-0">{q.unit}</span>
+                    <span className="text-xs text-[#555C56] shrink-0">{q.unit}</span>
                   </div>
-                  <p className="text-[10px] text-[#9aa5b4] mt-1">Optional — skip if not applicable to your project</p>
+                  <p className="text-[10px] text-[#8c9f8a] mt-1">Optional — skip if not applicable to your project</p>
                 </div>
               ))}
             </div>
@@ -85,8 +85,8 @@ export function CalculatorQuestionnaireScreen() {
         ))}
 
         <div className="flex items-center justify-between pt-2">
-          <button onClick={handleBack} className="text-xs border border-[#d1d9e0] text-[#475569] px-4 py-2 hover:bg-[#f1f5f9] transition-colors">Back</button>
-          <button onClick={handleNext} className="bg-[#1a3a5c] text-white text-sm font-semibold px-6 py-2.5 hover:bg-[#0f2540] transition-colors">
+          <button onClick={handleBack} className="text-xs border border-[#d6dfd5] text-[#4A4A4A] px-4 py-2 hover:bg-[#F9FAF2] transition-colors">Back</button>
+          <button onClick={handleNext} className="bg-[#355E3B] text-white text-sm font-semibold px-6 py-2.5 hover:bg-[#27472c] transition-colors">
             Review Before Calculation →
           </button>
         </div>

@@ -51,23 +51,23 @@ export function SubmissionScreen({
   // ── SUBMISSION SUCCESS SCREEN ──
   if (submitted) {
     return (
-      <main id="main-content" className="flex-1 bg-[#F8F9FA] pb-20 font-sans" tabIndex={-1}>
+      <main id="main-content" className="flex-1 bg-[#F9FAF2] pb-20 font-sans" tabIndex={-1}>
         <ApplicationWorkflowStepper businessId={project.id} currentStep={6} />
 
         <div className="bg-white border-b border-slate-200 px-4 sm:px-8 py-5">
           <div className="max-w-[1000px] mx-auto">
             <nav className="text-xs text-slate-500 mb-2.5 flex items-center gap-1.5" aria-label="Breadcrumb">
-              <Link href={ENTREPRENEUR_ROUTES.business(project.id)} className="hover:text-[#17365D] hover:underline">
+              <Link href={ENTREPRENEUR_ROUTES.business(project.id)} className="hover:text-[#355E3B] hover:underline">
                 {project.name}
               </Link>
               <span>›</span>
-              <Link href={ENTREPRENEUR_ROUTES.applications(project.id)} className="hover:text-[#17365D] hover:underline">
+              <Link href={ENTREPRENEUR_ROUTES.applications(project.id)} className="hover:text-[#355E3B] hover:underline">
                 Applications
               </Link>
               <span>›</span>
-              <span className="text-[#17365D] font-bold">Application Submitted</span>
+              <span className="text-[#355E3B] font-bold">Application Submitted</span>
             </nav>
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#17365D]">
+            <h1 className="text-xl font-bold text-[#355E3B]">
               Application Submitted Successfully
             </h1>
           </div>
@@ -113,7 +113,7 @@ export function SubmissionScreen({
               ].map(r => (
                 <div key={r.label} className="px-6 py-3.5 flex justify-between items-center gap-4">
                   <span className="text-slate-500 font-medium">{r.label}</span>
-                  <span className={`text-right font-semibold ${r.highlight ? 'font-mono text-sm text-[#17365D]' : 'text-slate-900'}`}>
+                  <span className={`text-right font-semibold ${r.highlight ? 'font-mono text-sm text-[#355E3B]' : 'text-slate-900'}`}>
                     {r.value}
                   </span>
                 </div>
@@ -125,7 +125,7 @@ export function SubmissionScreen({
           <div className="flex flex-wrap items-center gap-3">
             <Link
               href={ENTREPRENEUR_ROUTES.applications(project.id)}
-              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-[#17365D] hover:bg-[#122b49] text-white text-xs font-bold transition-all shadow-2xs"
+              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-[#355E3B] hover:bg-[#122b49] text-white text-xs font-bold transition-all shadow-2xs"
             >
               <span>View in Application Tracker</span>
               <ChevronRight className="w-4 h-4" />
@@ -153,7 +153,7 @@ export function SubmissionScreen({
   }
 
   return (
-    <main id="main-content" className="flex-1 bg-[#F8F9FA] pb-20 font-sans" tabIndex={-1}>
+    <main id="main-content" className="flex-1 bg-[#F9FAF2] pb-20 font-sans" tabIndex={-1}>
       {/* ── 6-STAGE PIPELINE STEPPER ── */}
       <ApplicationWorkflowStepper
         businessId={project.id}
@@ -164,30 +164,30 @@ export function SubmissionScreen({
       <header className="bg-white border-b border-slate-200 px-4 sm:px-8 py-5">
         <div className="max-w-[1100px] mx-auto">
           <nav className="text-xs text-slate-500 mb-2.5 flex items-center gap-1.5" aria-label="Breadcrumb">
-            <Link href={ENTREPRENEUR_ROUTES.business(project.id)} className="hover:text-[#17365D] hover:underline">
+            <Link href={ENTREPRENEUR_ROUTES.business(project.id)} className="hover:text-[#355E3B] hover:underline">
               {project.name}
             </Link>
             <span>›</span>
-            <Link href={ENTREPRENEUR_ROUTES.applications(project.id)} className="hover:text-[#17365D] hover:underline">
+            <Link href={ENTREPRENEUR_ROUTES.applications(project.id)} className="hover:text-[#355E3B] hover:underline">
               Applications
             </Link>
             <span>›</span>
-            <Link href={ENTREPRENEUR_ROUTES.applicationConsistency(project.id)} className="hover:text-[#17365D] hover:underline">
+            <Link href={ENTREPRENEUR_ROUTES.applicationConsistency(project.id)} className="hover:text-[#355E3B] hover:underline">
               Consistency Check
             </Link>
             <span>›</span>
-            <span className="text-[#17365D] font-bold">Pay &amp; Submit</span>
+            <span className="text-[#355E3B] font-bold">Pay &amp; Submit</span>
           </nav>
 
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-[11px] font-bold uppercase tracking-wider bg-[#17365D]/8 text-[#17365D] border border-[#17365D]/15 px-2.5 py-0.5 rounded-md">
+                <span className="text-[11px] font-bold uppercase tracking-wider bg-[#355E3B]/8 text-[#355E3B] border border-[#355E3B]/15 px-2.5 py-0.5 rounded-md">
                   Stage 5 &amp; 6 of 6 · Pay &amp; Submit
                 </span>
                 <span className="text-xs text-slate-500">· Statutory Fee Payment &amp; Submission</span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-[#17365D] tracking-tight">
+              <h1 className="text-xl font-bold text-[#355E3B]">
                 Payment &amp; Final Submission
               </h1>
               <p className="mt-1 text-sm text-slate-600">Pay, verify readiness, and sign the application.</p>
@@ -329,7 +329,7 @@ export function SubmissionScreen({
               </div>
               <div className="pt-2 border-t border-slate-200 flex justify-between items-center text-sm font-bold text-slate-900">
                 <span>Total Statutory Amount Payable:</span>
-                <span className="font-mono text-base text-[#17365D]">₹47,200.00</span>
+                <span className="font-mono text-base text-[#355E3B]">₹47,200.00</span>
               </div>
             </div>
 
@@ -342,7 +342,7 @@ export function SubmissionScreen({
                 <button
                   type="button"
                   onClick={() => setPaymentState('pending')}
-                  className="px-5 py-2.5 rounded-lg bg-[#1a56db] hover:bg-[#1542a8] text-white text-xs font-bold transition-all shadow-2xs flex items-center gap-2"
+                  className="px-5 py-2.5 rounded-lg bg-[#6DAE7C] hover:bg-[#1542a8] text-white text-xs font-bold transition-all shadow-2xs flex items-center gap-2"
                 >
                   <CreditCard className="w-4 h-4" />
                   <span>Proceed to e-Challan Payment (₹47,200)</span>
@@ -443,7 +443,7 @@ export function SubmissionScreen({
         >
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <Award className="w-5 h-5 text-[#17365D]" />
+              <Award className="w-5 h-5 text-[#355E3B]" />
               <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider">
                 Stage 6 · Authorised Signatory Digital Signature
               </h3>
@@ -459,7 +459,7 @@ export function SubmissionScreen({
                 checked={signatoryAgreed}
                 onChange={e => setSignatoryAgreed(e.target.checked)}
                 disabled={!isReadyToSubmit}
-                className="mt-0.5 accent-[#17365D] w-4 h-4 rounded"
+                className="mt-0.5 accent-[#355E3B] w-4 h-4 rounded"
               />
               <span className="text-xs text-slate-700 leading-relaxed font-medium">
                 I, as the registered authorised signatory of <strong>{project.name}</strong>, confirm that I have reviewed all application fields, verified cross-form consistency against the Master Dossier, and authorise statutory submission.
@@ -481,7 +481,7 @@ export function SubmissionScreen({
                     type="button"
                     disabled={!signatoryAgreed}
                     onClick={() => setSubmitted(true)}
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-bold bg-[#17365D] hover:bg-[#122b49] text-white transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-bold bg-[#355E3B] hover:bg-[#122b49] text-white transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Lock className="w-4 h-4" />
                     <span>Sign &amp; Submit Application</span>

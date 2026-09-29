@@ -63,12 +63,12 @@ export function ApplicationDetailScreen({
 
   if (!app) {
     return (
-      <main id="main-content" className="flex-1 bg-[#f8f9fb] flex items-center justify-center min-h-[60vh]" tabIndex={-1}>
+      <main id="main-content" className="flex-1 bg-[#F9FAF2] flex items-center justify-center min-h-[60vh]" tabIndex={-1}>
         <div className="max-w-[900px] mx-auto px-6 py-12 text-center">
-          <p className="text-[#6b7a8d]">Application not found.</p>
+          <p className="text-[#555C56]">Application not found.</p>
           <Link
             href={ENTREPRENEUR_ROUTES.applications(project.id)}
-            className="mt-4 inline-block text-sm text-[#1a56db] hover:underline"
+            className="mt-4 inline-block text-sm text-[#6DAE7C] hover:underline"
           >
             ← Back to Applications
           </Link>
@@ -121,40 +121,40 @@ export function ApplicationDetailScreen({
   const lifecycleStages = getApplicationLifecycle(app, query, appInspection, decision);
 
   return (
-    <main id="main-content" className="flex-1 bg-[#f8f9fb]" tabIndex={-1}>
+    <main id="main-content" className="flex-1 bg-[#F9FAF2]" tabIndex={-1}>
       {/* ─── Breadcrumb & Top Bar ────────────────────────────────────────── */}
-      <div className="bg-white border-b border-[#d1d9e0] px-6 py-4">
+      <div className="bg-white border-b border-[#d6dfd5] px-6 py-4">
         <div className="max-w-[1280px] mx-auto">
-          <nav className="text-xs text-[#6b7a8d] mb-2 flex items-center gap-1.5" aria-label="Breadcrumb">
-            <Link href={ENTREPRENEUR_ROUTES.business(project.id)} className="hover:text-[#1a3a5c] hover:underline">
+          <nav className="text-xs text-[#555C56] mb-2 flex items-center gap-1.5" aria-label="Breadcrumb">
+            <Link href={ENTREPRENEUR_ROUTES.business(project.id)} className="hover:text-[#355E3B] hover:underline">
               Dashboard
             </Link>
             <span>›</span>
-            <Link href={ENTREPRENEUR_ROUTES.applications(project.id)} className="hover:text-[#1a3a5c] hover:underline">
+            <Link href={ENTREPRENEUR_ROUTES.applications(project.id)} className="hover:text-[#355E3B] hover:underline">
               Applications Tracker
             </Link>
             <span>›</span>
-            <span className="text-[#1a3a5c] font-medium font-mono">{app.appId}</span>
+            <span className="text-[#355E3B] font-medium font-mono">{app.appId}</span>
           </nav>
 
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <div className="flex flex-wrap items-center gap-2.5">
-                <span className="text-xs font-bold px-2 py-0.5 rounded border border-[#cbd5e1] bg-[#f8f9fb] text-[#1e293b]">
+                <span className="text-xs font-bold px-2 py-0.5 rounded border border-[#c8d4c7] bg-[#F9FAF2] text-[#1e293b]">
                   {app.dept}
                 </span>
-                <h1 className="text-xl font-bold text-[#1a3a5c]">{app.service}</h1>
+                <h1 className="text-xl font-bold text-[#355E3B]">{app.service}</h1>
                 <span className={`text-[11px] font-semibold px-2 py-0.5 rounded border ${statusBadgeTrackerClass(app.statusType)}`}>
                   {app.status}
                 </span>
               </div>
-              <p className="mt-1 text-xs text-[#6b7a8d]">Application Detail</p>
+              <p className="mt-1 text-xs text-[#555C56]">Application Detail</p>
             </div>
 
             <div className="flex items-center gap-2">
               <Link
                 href={ENTREPRENEUR_ROUTES.applications(project.id)}
-                className="text-xs border border-[#cbd5e1] text-[#475569] hover:bg-[#f1f5f9] px-3 py-1.5 rounded transition-colors font-medium"
+                className="text-xs border border-[#c8d4c7] text-[#4A4A4A] hover:bg-[#F9FAF2] px-3 py-1.5 rounded transition-colors font-medium"
               >
                 ← Back to Tracker
               </Link>
@@ -186,8 +186,8 @@ export function ApplicationDetailScreen({
                     SLA Clock Paused
                   </span>
                 </div>
-                <p className="text-sm font-bold text-[#1a3a5c] mt-1">{app.actionRequired}</p>
-                <p className="text-xs text-[#64748b] mt-1">
+                <p className="text-sm font-bold text-[#355E3B] mt-1">{app.actionRequired}</p>
+                <p className="text-xs text-[#555C56] mt-1">
                   Response deadline:{' '}
                   <strong className="text-[#b91c1c]">{query?.responseDeadline ?? '09 Oct 2026'}</strong> ·{' '}
                   Submit clarification to resume statutory processing under the Maharashtra RTS Act.
@@ -225,23 +225,23 @@ export function ApplicationDetailScreen({
         )}
 
         {resp === 'government' && (
-          <div className="bg-[#eff6ff] border border-[#bfdbfe] border-l-4 border-l-[#1a56db] rounded-lg p-4.5 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="bg-[#edf5ef] border border-[#c5e2cb] border-l-4 border-l-[#6DAE7C] rounded-lg p-4.5 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-start gap-3">
-              <Clock className="w-5 h-5 text-[#1a56db] shrink-0 mt-0.5" />
+              <Clock className="w-5 h-5 text-[#6DAE7C] shrink-0 mt-0.5" />
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-[#1e40af] uppercase tracking-wider bg-[#dbeafe] px-2 py-0.5 rounded">
+                  <span className="text-xs font-bold text-[#539160] uppercase tracking-wider bg-[#edf5ef] px-2 py-0.5 rounded">
                     In Process — Government Action
                   </span>
-                  <span className="text-[10px] font-semibold bg-white text-[#1e40af] border border-[#bfdbfe] px-2 py-0.5 rounded">
+                  <span className="text-[10px] font-semibold bg-white text-[#539160] border border-[#c5e2cb] px-2 py-0.5 rounded">
                     SLA Clock Running ({app.daysElapsed}/{totalSlaDays} Days)
                   </span>
                 </div>
-                <p className="text-sm font-bold text-[#1a3a5c] mt-1">
+                <p className="text-sm font-bold text-[#355E3B] mt-1">
                   Current Stage: {app.stage} · Being scrutinized by {humanAuthority}
                 </p>
-                <p className="text-xs text-[#64748b] mt-1">
-                  Last updated: <strong className="text-[#334155]">{app.lastUpdated}</strong>. No action required from applicant at this time. Department is conducting statutory verification.
+                <p className="text-xs text-[#555C56] mt-1">
+                  Last updated: <strong className="text-[#3A3E39]">{app.lastUpdated}</strong>. No action required from applicant at this time. Department is conducting statutory verification.
                 </p>
               </div>
             </div>
@@ -250,7 +250,7 @@ export function ApplicationDetailScreen({
               <button
                 type="button"
                 onClick={() => setActiveTab('timeline')}
-                className="text-xs bg-[#1a56db] text-white hover:bg-[#1e40af] px-4 py-2 rounded-md font-semibold transition-colors shadow-xs"
+                className="text-xs bg-[#6DAE7C] text-white hover:bg-[#539160] px-4 py-2 rounded-md font-semibold transition-colors shadow-xs"
               >
                 Track Lifecycle Stages ↓
               </button>
@@ -259,22 +259,22 @@ export function ApplicationDetailScreen({
         )}
 
         {resp === 'department-dependency' && (
-          <div className="bg-[#fffbeb] border border-[#fde68a] border-l-4 border-l-[#d97706] rounded-lg p-4.5 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="bg-[#fdf8e6] border border-[#fae69e] border-l-4 border-l-[#D4A017] rounded-lg p-4.5 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-start gap-3">
-              <Layers className="w-5 h-5 text-[#d97706] shrink-0 mt-0.5" />
+              <Layers className="w-5 h-5 text-[#D4A017] shrink-0 mt-0.5" />
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-[#92400e] uppercase tracking-wider bg-[#fef3c7] px-2 py-0.5 rounded">
+                  <span className="text-xs font-bold text-[#7a5807] uppercase tracking-wider bg-[#fdf8e6] px-2 py-0.5 rounded">
                     Waiting for Another Department
                   </span>
-                  <span className="text-[10px] font-semibold bg-white text-[#92400e] border border-[#fde68a] px-2 py-0.5 rounded">
+                  <span className="text-[10px] font-semibold bg-white text-[#7a5807] border border-[#fae69e] px-2 py-0.5 rounded">
                     Prerequisite Dependency
                   </span>
                 </div>
-                <p className="text-sm font-bold text-[#1a3a5c] mt-1">
+                <p className="text-sm font-bold text-[#355E3B] mt-1">
                   Awaiting Prior Environmental Clearance (MPCB CTE)
                 </p>
-                <p className="text-xs text-[#64748b] mt-1">
+                <p className="text-xs text-[#555C56] mt-1">
                   {app.actionRequired ?? 'Scrutiny will commence automatically once the prerequisite clearance from MPCB is finalized and published.'}
                 </p>
               </div>
@@ -283,7 +283,7 @@ export function ApplicationDetailScreen({
             <div className="flex items-center gap-2 shrink-0">
               <Link
                 href={ENTREPRENEUR_ROUTES.dependencies(project.id)}
-                className="text-xs bg-[#d97706] text-white hover:bg-[#b45309] px-4 py-2 rounded-md font-semibold transition-colors shadow-xs flex items-center gap-1"
+                className="text-xs bg-[#D4A017] text-white hover:bg-[#7a5807] px-4 py-2 rounded-md font-semibold transition-colors shadow-xs flex items-center gap-1"
               >
                 Inspect Dependency Graph →
               </Link>
@@ -304,11 +304,11 @@ export function ApplicationDetailScreen({
                     DigiLocker Synced
                   </span>
                 </div>
-                <p className="text-sm font-bold text-[#1a3a5c] mt-1">
+                <p className="text-sm font-bold text-[#355E3B] mt-1">
                   Official Statutory Approval Issued by {app.dept}
                 </p>
-                <p className="text-xs text-[#64748b] mt-1">
-                  Approved on <strong className="text-[#334155]">{decision?.issueDate ?? app.lastUpdated}</strong>. Certificate generated with cryptographic verification QR code.
+                <p className="text-xs text-[#555C56] mt-1">
+                  Approved on <strong className="text-[#3A3E39]">{decision?.issueDate ?? app.lastUpdated}</strong>. Certificate generated with cryptographic verification QR code.
                 </p>
               </div>
             </div>
@@ -327,11 +327,11 @@ export function ApplicationDetailScreen({
         )}
 
         {/* ─── Application Identity & Metadata Card ───────────────────────── */}
-        <section aria-label="Application Identity" className="bg-white border border-[#e2e8f0] rounded-lg p-5 shadow-2xs">
-          <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#f1f5f9]">
+        <section aria-label="Application Identity" className="bg-white border border-[#e3ebe1] rounded-lg p-5 shadow-2xs">
+          <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#F9FAF2]">
             <div className="flex items-center gap-2">
-              <Building2 className="w-4 h-4 text-[#1a56db]" />
-              <h2 className="text-sm font-bold text-[#1a3a5c] uppercase tracking-wider">
+              <Building2 className="w-4 h-4 text-[#6DAE7C]" />
+              <h2 className="text-sm font-bold text-[#355E3B] uppercase tracking-wider">
                 Application Identity & Single Window Registration
               </h2>
             </div>
@@ -339,7 +339,7 @@ export function ApplicationDetailScreen({
               <button
                 type="button"
                 onClick={handleCopyId}
-                className="text-xs text-[#1a56db] hover:bg-[#eff6ff] px-2.5 py-1 rounded border border-[#bfdbfe] flex items-center gap-1 font-medium transition-colors"
+                className="text-xs text-[#6DAE7C] hover:bg-[#edf5ef] px-2.5 py-1 rounded border border-[#c5e2cb] flex items-center gap-1 font-medium transition-colors"
                 title="Copy Application ID"
               >
                 {copiedId ? <Check className="w-3.5 h-3.5 text-[#15803d]" /> : <Copy className="w-3.5 h-3.5" />}
@@ -349,26 +349,26 @@ export function ApplicationDetailScreen({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
-            <div className="bg-[#f8f9fb] p-3 rounded border border-[#f1f5f9]">
-              <span className="text-[#64748b] block font-medium">Application ID (UID)</span>
-              <span className="font-mono font-bold text-sm text-[#1a3a5c] mt-0.5 block">{app.appId}</span>
-              <span className="text-[10px] text-[#94a3b8] mt-0.5 block">State Single Window Portal Ref</span>
+            <div className="bg-[#F9FAF2] p-3 rounded border border-[#F9FAF2]">
+              <span className="text-[#555C56] block font-medium">Application ID (UID)</span>
+              <span className="font-mono font-bold text-sm text-[#355E3B] mt-0.5 block">{app.appId}</span>
+              <span className="text-[10px] text-[#9ab098] mt-0.5 block">State Single Window Portal Ref</span>
             </div>
 
-            <div className="bg-[#f8f9fb] p-3 rounded border border-[#f1f5f9]">
-              <span className="text-[#64748b] block font-medium">Competent Authority</span>
+            <div className="bg-[#F9FAF2] p-3 rounded border border-[#F9FAF2]">
+              <span className="text-[#555C56] block font-medium">Competent Authority</span>
               <span className="font-semibold text-[#1e293b] text-sm mt-0.5 block">{app.dept}</span>
-              <span className="text-[10px] text-[#94a3b8] mt-0.5 block">Government of Maharashtra</span>
+              <span className="text-[10px] text-[#9ab098] mt-0.5 block">Government of Maharashtra</span>
             </div>
 
-            <div className="bg-[#f8f9fb] p-3 rounded border border-[#f1f5f9]">
-              <span className="text-[#64748b] block font-medium">Legal Entity & Location</span>
+            <div className="bg-[#F9FAF2] p-3 rounded border border-[#F9FAF2]">
+              <span className="text-[#555C56] block font-medium">Legal Entity & Location</span>
               <span className="font-semibold text-[#1e293b] text-sm mt-0.5 block">{project.name}</span>
-              <span className="text-[10px] text-[#64748b] mt-0.5 block truncate">{project.location}</span>
+              <span className="text-[10px] text-[#555C56] mt-0.5 block truncate">{project.location}</span>
             </div>
 
-            <div className="bg-[#f8f9fb] p-3 rounded border border-[#f1f5f9]">
-              <span className="text-[#64748b] block font-medium">Submission Timestamp</span>
+            <div className="bg-[#F9FAF2] p-3 rounded border border-[#F9FAF2]">
+              <span className="text-[#555C56] block font-medium">Submission Timestamp</span>
               <span className="font-semibold text-[#1e293b] text-sm mt-0.5 block">
                 {app.submittedDate ?? '14 Sep 2026'}
               </span>
@@ -380,19 +380,19 @@ export function ApplicationDetailScreen({
         {/* ─── 4 Intelligence Metrics: Stage, Status, SLA, Processing Authority ───── */}
         <section aria-label="Key Operational Status" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* 1. Current Stage */}
-          <div className="bg-white border border-[#e2e8f0] rounded-lg p-4 shadow-2xs">
-            <span className="text-[10px] font-bold text-[#64748b] uppercase tracking-wider block">
+          <div className="bg-white border border-[#e3ebe1] rounded-lg p-4 shadow-2xs">
+            <span className="text-[10px] font-bold text-[#555C56] uppercase tracking-wider block">
               Current Stage
             </span>
-            <p className="text-base font-bold text-[#1a3a5c] mt-1">{app.stage}</p>
-            <p className="text-xs text-[#64748b] mt-1 leading-snug">
+            <p className="text-base font-bold text-[#355E3B] mt-1">{app.stage}</p>
+            <p className="text-xs text-[#555C56] mt-1 leading-snug">
               Stage {lifecycleStages.findIndex(s => s.status === 'in-progress' || s.status === 'action-required') + 1 || lifecycleStages.length} of {lifecycleStages.length} · Dynamic Lifecycle
             </p>
           </div>
 
           {/* 2. Current Status */}
-          <div className="bg-white border border-[#e2e8f0] rounded-lg p-4 shadow-2xs">
-            <span className="text-[10px] font-bold text-[#64748b] uppercase tracking-wider block">
+          <div className="bg-white border border-[#e3ebe1] rounded-lg p-4 shadow-2xs">
+            <span className="text-[10px] font-bold text-[#555C56] uppercase tracking-wider block">
               Current Status
             </span>
             <div className="mt-1 flex items-center gap-1.5 flex-wrap">
@@ -403,7 +403,7 @@ export function ApplicationDetailScreen({
                 {app.status}
               </span>
             </div>
-            <p className="text-xs text-[#64748b] mt-1.5 leading-snug">
+            <p className="text-xs text-[#555C56] mt-1.5 leading-snug">
               {resp === 'entrepreneur'
                 ? 'Applicant response required to resume scrutiny'
                 : resp === 'government'
@@ -415,9 +415,9 @@ export function ApplicationDetailScreen({
           </div>
 
           {/* 3. Statutory SLA Clock */}
-          <div className="bg-white border border-[#e2e8f0] rounded-lg p-4 shadow-2xs">
+          <div className="bg-white border border-[#e3ebe1] rounded-lg p-4 shadow-2xs">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold text-[#64748b] uppercase tracking-wider">
+              <span className="text-[10px] font-bold text-[#555C56] uppercase tracking-wider">
                 Statutory SLA Clock
               </span>
               <Clock className="w-3.5 h-3.5 text-[#15803d]" />
@@ -426,50 +426,50 @@ export function ApplicationDetailScreen({
               {app.daysElapsed} of {totalSlaDays} Days Elapsed
             </p>
             {/* Progress Bar */}
-            <div className="w-full bg-[#e2e8f0] h-1.5 rounded-full overflow-hidden mt-2">
+            <div className="w-full bg-[#e3ebe1] h-1.5 rounded-full overflow-hidden mt-2">
               <div
                 className={`h-full rounded-full ${
-                  app.slaType === 'over' ? 'bg-[#b91c1c]' : app.slaType === 'due-soon' ? 'bg-[#d97706]' : 'bg-[#15803d]'
+                  app.slaType === 'over' ? 'bg-[#b91c1c]' : app.slaType === 'due-soon' ? 'bg-[#D4A017]' : 'bg-[#15803d]'
                 }`}
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
-            <p className="text-[11px] text-[#64748b] mt-1 flex justify-between">
+            <p className="text-[11px] text-[#555C56] mt-1 flex justify-between">
               <span>{app.sla}</span>
               <span>Due: {app.targetDate ?? 'Statutory'}</span>
             </p>
           </div>
 
           {/* 4. Processing Authority (Plain Language) */}
-          <div className="bg-white border border-[#e2e8f0] rounded-lg p-4 shadow-2xs">
-            <span className="text-[10px] font-bold text-[#64748b] uppercase tracking-wider block">
+          <div className="bg-white border border-[#e3ebe1] rounded-lg p-4 shadow-2xs">
+            <span className="text-[10px] font-bold text-[#555C56] uppercase tracking-wider block">
               Processing Authority
             </span>
-            <p className="text-sm font-bold text-[#1a3a5c] mt-1 leading-snug truncate" title={humanAuthority}>
+            <p className="text-sm font-bold text-[#355E3B] mt-1 leading-snug truncate" title={humanAuthority}>
               {humanAuthority}
             </p>
-            <p className="text-xs text-[#64748b] mt-1 leading-snug">
+            <p className="text-xs text-[#555C56] mt-1 leading-snug">
               {app.dept} Regional Authority · {app.daysElapsed} days on desk
             </p>
           </div>
         </section>
 
         {/* ─── Interactive Cockpit Tabs (Lifecycle, Documents, Queries, Inspection, Decision) ─── */}
-        <div className="bg-white border border-[#e2e8f0] rounded-lg shadow-2xs overflow-hidden">
+        <div className="bg-white border border-[#e3ebe1] rounded-lg shadow-2xs overflow-hidden">
           {/* Navigation Tab Bar */}
-          <div className="border-b border-[#e2e8f0] bg-[#f8f9fb] px-4 flex flex-wrap items-center gap-1 overflow-x-auto">
+          <div className="border-b border-[#e3ebe1] bg-[#F9FAF2] px-4 flex flex-wrap items-center gap-1 overflow-x-auto">
             <button
               type="button"
               onClick={() => setActiveTab('timeline')}
               className={`text-xs font-semibold py-3 px-3.5 border-b-2 transition-colors flex items-center gap-1.5 whitespace-nowrap ${
                 activeTab === 'timeline'
-                  ? 'border-[#1a3a5c] text-[#1a3a5c] bg-white'
-                  : 'border-transparent text-[#64748b] hover:text-[#1a3a5c]'
+                  ? 'border-[#355E3B] text-[#355E3B] bg-white'
+                  : 'border-transparent text-[#555C56] hover:text-[#355E3B]'
               }`}
             >
               <Clock className="w-3.5 h-3.5" />
               Processing Lifecycle
-              <span className="ml-1 text-[10px] bg-[#e2e8f0] text-[#334155] px-1.5 py-0.2 rounded-full font-bold">
+              <span className="ml-1 text-[10px] bg-[#e3ebe1] text-[#3A3E39] px-1.5 py-0.2 rounded-full font-bold">
                 {lifecycleStages.length}
               </span>
             </button>
@@ -479,13 +479,13 @@ export function ApplicationDetailScreen({
               onClick={() => setActiveTab('documents')}
               className={`text-xs font-semibold py-3 px-3.5 border-b-2 transition-colors flex items-center gap-1.5 whitespace-nowrap ${
                 activeTab === 'documents'
-                  ? 'border-[#1a3a5c] text-[#1a3a5c] bg-white'
-                  : 'border-transparent text-[#64748b] hover:text-[#1a3a5c]'
+                  ? 'border-[#355E3B] text-[#355E3B] bg-white'
+                  : 'border-transparent text-[#555C56] hover:text-[#355E3B]'
               }`}
             >
               <FileText className="w-3.5 h-3.5" />
               Attached Documents
-              <span className="ml-1 text-[10px] bg-[#e2e8f0] text-[#334155] px-1.5 py-0.2 rounded-full font-bold">
+              <span className="ml-1 text-[10px] bg-[#e3ebe1] text-[#3A3E39] px-1.5 py-0.2 rounded-full font-bold">
                 {appDocs.length}
               </span>
             </button>
@@ -495,8 +495,8 @@ export function ApplicationDetailScreen({
               onClick={() => setActiveTab('queries')}
               className={`text-xs font-semibold py-3 px-3.5 border-b-2 transition-colors flex items-center gap-1.5 whitespace-nowrap ${
                 activeTab === 'queries'
-                  ? 'border-[#1a3a5c] text-[#1a3a5c] bg-white'
-                  : 'border-transparent text-[#64748b] hover:text-[#1a3a5c]'
+                  ? 'border-[#355E3B] text-[#355E3B] bg-white'
+                  : 'border-transparent text-[#555C56] hover:text-[#355E3B]'
               }`}
             >
               <AlertTriangle className={`w-3.5 h-3.5 ${query ? 'text-[#b91c1c]' : ''}`} />
@@ -513,14 +513,14 @@ export function ApplicationDetailScreen({
               onClick={() => setActiveTab('inspection')}
               className={`text-xs font-semibold py-3 px-3.5 border-b-2 transition-colors flex items-center gap-1.5 whitespace-nowrap ${
                 activeTab === 'inspection'
-                  ? 'border-[#1a3a5c] text-[#1a3a5c] bg-white'
-                  : 'border-transparent text-[#64748b] hover:text-[#1a3a5c]'
+                  ? 'border-[#355E3B] text-[#355E3B] bg-white'
+                  : 'border-transparent text-[#555C56] hover:text-[#355E3B]'
               }`}
             >
               <ShieldCheck className="w-3.5 h-3.5" />
               Site Inspection
               {appInspection && (
-                <span className="ml-1 text-[10px] bg-[#dbeafe] text-[#1e40af] px-1.5 py-0.2 rounded-full font-bold">
+                <span className="ml-1 text-[10px] bg-[#edf5ef] text-[#539160] px-1.5 py-0.2 rounded-full font-bold">
                   {appInspection.status}
                 </span>
               )}
@@ -531,8 +531,8 @@ export function ApplicationDetailScreen({
               onClick={() => setActiveTab('decision')}
               className={`text-xs font-semibold py-3 px-3.5 border-b-2 transition-colors flex items-center gap-1.5 whitespace-nowrap ${
                 activeTab === 'decision'
-                  ? 'border-[#1a3a5c] text-[#1a3a5c] bg-white'
-                  : 'border-transparent text-[#64748b] hover:text-[#1a3a5c]'
+                  ? 'border-[#355E3B] text-[#355E3B] bg-white'
+                  : 'border-transparent text-[#555C56] hover:text-[#355E3B]'
               }`}
             >
               <Award className={`w-3.5 h-3.5 ${decision ? 'text-[#15803d]' : ''}`} />
@@ -552,13 +552,13 @@ export function ApplicationDetailScreen({
               <div className="space-y-6">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <h3 className="text-sm font-bold text-[#1a3a5c]">Dynamic Processing Lifecycle</h3>
-                    <p className="text-xs text-[#64748b] mt-0.5">
+                    <h3 className="text-sm font-bold text-[#355E3B]">Dynamic Processing Lifecycle</h3>
+                    <p className="text-xs text-[#555C56] mt-0.5">
                       Statutory progression showing only stages applicable to this clearance. No internal jargon.
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold px-2.5 py-0.5 rounded border border-[#cbd5e1] bg-[#f8f9fb] text-[#475569]">
+                    <span className="text-xs font-semibold px-2.5 py-0.5 rounded border border-[#c8d4c7] bg-[#F9FAF2] text-[#4A4A4A]">
                       {lifecycleStages.filter(s => s.status === 'completed').length} of {lifecycleStages.length} Stages Completed
                     </span>
                     <span className="text-xs text-[#15803d] font-semibold bg-[#dcfce7] border border-[#86efac] px-2.5 py-0.5 rounded">
@@ -567,7 +567,7 @@ export function ApplicationDetailScreen({
                   </div>
                 </div>
 
-                <div className="relative pl-6 space-y-6 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-[#e2e8f0]">
+                <div className="relative pl-6 space-y-6 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-[#e3ebe1]">
                   {lifecycleStages.map((stage, idx) => (
                     <div key={stage.id} className="relative group">
                       {/* Node Bullet */}
@@ -578,8 +578,8 @@ export function ApplicationDetailScreen({
                             : stage.status === 'action-required'
                             ? 'bg-[#b91c1c] border-[#b91c1c] text-white animate-pulse'
                             : stage.status === 'in-progress'
-                            ? 'bg-[#1a56db] border-[#1a56db] text-white animate-pulse'
-                            : 'bg-white border-[#cbd5e1] text-[#94a3b8]'
+                            ? 'bg-[#6DAE7C] border-[#6DAE7C] text-white animate-pulse'
+                            : 'bg-white border-[#c8d4c7] text-[#9ab098]'
                         }`}
                       >
                         {stage.status === 'completed' ? (
@@ -595,14 +595,14 @@ export function ApplicationDetailScreen({
                         stage.status === 'action-required'
                           ? 'bg-[#fff5f5]/80 border-[#fca5a5] shadow-xs'
                           : stage.status === 'in-progress'
-                          ? 'bg-[#eff6ff]/70 border-[#bfdbfe] shadow-xs'
+                          ? 'bg-[#edf5ef]/70 border-[#c5e2cb] shadow-xs'
                           : stage.status === 'completed'
-                          ? 'bg-white border-[#e2e8f0]'
-                          : 'bg-[#fcfdfd] border-[#f1f5f9] opacity-75'
+                          ? 'bg-white border-[#e3ebe1]'
+                          : 'bg-[#fcfdfd] border-[#F9FAF2] opacity-75'
                       }`}>
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <div className="flex flex-wrap items-center gap-2">
-                            <h4 className="text-sm font-bold text-[#1a3a5c]">
+                            <h4 className="text-sm font-bold text-[#355E3B]">
                               {idx + 1}. {stage.name}
                             </h4>
                             <span className={`text-[10px] font-semibold px-2 py-0.5 rounded border ${
@@ -611,8 +611,8 @@ export function ApplicationDetailScreen({
                                 : stage.status === 'action-required'
                                 ? 'bg-[#fee2e2] text-[#991b1b] border-[#fca5a5]'
                                 : stage.status === 'in-progress'
-                                ? 'bg-[#dbeafe] text-[#1e40af] border-[#93c5fd]'
-                                : 'bg-[#f1f5f9] text-[#64748b] border-[#e2e8f0]'
+                                ? 'bg-[#edf5ef] text-[#539160] border-[#a1cba9]'
+                                : 'bg-[#F9FAF2] text-[#555C56] border-[#e3ebe1]'
                             }`}>
                               {stage.statusLabel}
                             </span>
@@ -620,10 +620,10 @@ export function ApplicationDetailScreen({
                               stage.status === 'action-required'
                                 ? 'bg-[#b91c1c] text-white'
                                 : stage.status === 'in-progress'
-                                ? 'bg-[#1a56db] text-white'
+                                ? 'bg-[#6DAE7C] text-white'
                                 : stage.status === 'completed'
                                 ? 'bg-[#15803d] text-white'
-                                : 'bg-[#e2e8f0] text-[#475569]'
+                                : 'bg-[#e3ebe1] text-[#4A4A4A]'
                             }`}>
                               {stage.status === 'action-required'
                                 ? 'Entrepreneur Action'
@@ -634,18 +634,18 @@ export function ApplicationDetailScreen({
                                 : 'Upcoming'}
                             </span>
                           </div>
-                          <span className="text-xs text-[#64748b] font-medium">{stage.date}</span>
+                          <span className="text-xs text-[#555C56] font-medium">{stage.date}</span>
                         </div>
 
                         {/* Meta row: Owner & Time spent */}
-                        <div className="mt-2 flex flex-wrap items-center gap-4 text-xs text-[#475569]">
+                        <div className="mt-2 flex flex-wrap items-center gap-4 text-xs text-[#4A4A4A]">
                           <div>
-                            <span className="text-[#64748b]">Processing Authority: </span>
+                            <span className="text-[#555C56]">Processing Authority: </span>
                             <strong className="text-[#1e293b] font-medium">{stage.owner}</strong>
                           </div>
                           {stage.timeSpent && (
                             <div>
-                              <span className="text-[#64748b]">Time Spent: </span>
+                              <span className="text-[#555C56]">Time Spent: </span>
                               <strong className="text-[#1e293b] font-medium">{stage.timeSpent}</strong>
                             </div>
                           )}
@@ -656,7 +656,7 @@ export function ApplicationDetailScreen({
                           <div className={`mt-3 p-3 rounded border text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
                             stage.status === 'action-required'
                               ? 'bg-[#fee2e2]/60 border-[#fca5a5] text-[#991b1b]'
-                              : 'bg-[#f8f9fb] border-[#e2e8f0] text-[#334155]'
+                              : 'bg-[#F9FAF2] border-[#e3ebe1] text-[#3A3E39]'
                           }`}>
                             <div>
                               <span className="font-bold block text-[11px] uppercase tracking-wider">
@@ -680,7 +680,7 @@ export function ApplicationDetailScreen({
                                     else if (stage.id === 'doc-review') setActiveTab('documents');
                                     else if (stage.id === 'decision') setActiveTab('decision');
                                   }}
-                                  className="shrink-0 text-xs bg-[#1a3a5c] text-white hover:bg-[#0f2338] px-3 py-1.5 rounded font-semibold transition-colors shadow-2xs"
+                                  className="shrink-0 text-xs bg-[#355E3B] text-white hover:bg-[#0f2338] px-3 py-1.5 rounded font-semibold transition-colors shadow-2xs"
                                 >
                                   {stage.actionLabel} →
                                 </button>
@@ -700,62 +700,62 @@ export function ApplicationDetailScreen({
               <div className="space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <h3 className="text-sm font-bold text-[#1a3a5c]">Documents Attached to this Application</h3>
-                    <p className="text-xs text-[#64748b] mt-0.5">
+                    <h3 className="text-sm font-bold text-[#355E3B]">Documents Attached to this Application</h3>
+                    <p className="text-xs text-[#555C56] mt-0.5">
                       Verified project files reused from the Document Centre and submitted for department review.
                     </p>
                   </div>
                   <Link
                     href={ENTREPRENEUR_ROUTES.documents(project.id)}
-                    className="text-xs text-[#1a56db] hover:underline font-medium flex items-center gap-1"
+                    className="text-xs text-[#6DAE7C] hover:underline font-medium flex items-center gap-1"
                   >
                     Document Centre →
                   </Link>
                 </div>
 
-                <div className="border border-[#e2e8f0] rounded-lg overflow-hidden">
+                <div className="border border-[#e3ebe1] rounded-lg overflow-hidden">
                   <table className="w-full text-left text-xs border-collapse">
                     <thead>
-                      <tr className="bg-[#f8f9fb] border-b border-[#e2e8f0] text-[11px] font-semibold text-[#64748b] uppercase tracking-wider">
-                        <th className="px-4 py-2.5 border-r border-[#e8edf2]">Doc ID</th>
-                        <th className="px-4 py-2.5 border-r border-[#e8edf2]">Document Name</th>
-                        <th className="px-4 py-2.5 border-r border-[#e8edf2]">Category</th>
-                        <th className="px-4 py-2.5 border-r border-[#e8edf2]">Verification</th>
-                        <th className="px-4 py-2.5 border-r border-[#e8edf2]">Validity</th>
+                      <tr className="bg-[#F9FAF2] border-b border-[#e3ebe1] text-[11px] font-semibold text-[#555C56] uppercase tracking-wider">
+                        <th className="px-4 py-2.5 border-r border-[#e3ebe1]">Doc ID</th>
+                        <th className="px-4 py-2.5 border-r border-[#e3ebe1]">Document Name</th>
+                        <th className="px-4 py-2.5 border-r border-[#e3ebe1]">Category</th>
+                        <th className="px-4 py-2.5 border-r border-[#e3ebe1]">Verification</th>
+                        <th className="px-4 py-2.5 border-r border-[#e3ebe1]">Validity</th>
                         <th className="px-4 py-2.5">Action</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#f1f5f9]">
+                    <tbody className="divide-y divide-[#F9FAF2]">
                       {appDocs.length === 0 ? (
                         <tr>
-                          <td colSpan={6} className="px-4 py-8 text-center text-[#94a3b8]">
+                          <td colSpan={6} className="px-4 py-8 text-center text-[#9ab098]">
                             No documents currently attached.
                           </td>
                         </tr>
                       ) : (
                         appDocs.map(doc => (
-                          <tr key={doc.id} className="hover:bg-[#f8f9fb]">
-                            <td className="px-4 py-3 font-mono font-semibold text-[#1a56db] border-r border-[#f1f5f9] whitespace-nowrap">
+                          <tr key={doc.id} className="hover:bg-[#F9FAF2]">
+                            <td className="px-4 py-3 font-mono font-semibold text-[#6DAE7C] border-r border-[#F9FAF2] whitespace-nowrap">
                               {doc.id}
                             </td>
-                            <td className="px-4 py-3 border-r border-[#f1f5f9]">
-                              <span className="font-medium text-[#1a3a5c] block">{doc.name}</span>
-                              <span className="text-[11px] text-[#64748b]">Source: {doc.source} · v{doc.version}</span>
+                            <td className="px-4 py-3 border-r border-[#F9FAF2]">
+                              <span className="font-medium text-[#355E3B] block">{doc.name}</span>
+                              <span className="text-[11px] text-[#555C56]">Source: {doc.source} · v{doc.version}</span>
                             </td>
-                            <td className="px-4 py-3 border-r border-[#f1f5f9] whitespace-nowrap text-[#475569]">
+                            <td className="px-4 py-3 border-r border-[#F9FAF2] whitespace-nowrap text-[#4A4A4A]">
                               {doc.category}
                             </td>
-                            <td className="px-4 py-3 border-r border-[#f1f5f9] whitespace-nowrap">
+                            <td className="px-4 py-3 border-r border-[#F9FAF2] whitespace-nowrap">
                               {verifBadge(doc.verification)}
                             </td>
-                            <td className="px-4 py-3 border-r border-[#f1f5f9] whitespace-nowrap">
+                            <td className="px-4 py-3 border-r border-[#F9FAF2] whitespace-nowrap">
                               {validityBadge(doc.validity)}
                             </td>
                             <td className="px-4 py-3 whitespace-nowrap">
                               <div className="flex items-center gap-2">
                                 <Link
                                   href={ENTREPRENEUR_ROUTES.document(project.id, doc.id)}
-                                  className="text-xs text-[#1a56db] hover:underline font-medium"
+                                  className="text-xs text-[#6DAE7C] hover:underline font-medium"
                                 >
                                   View Details →
                                 </Link>
@@ -763,7 +763,7 @@ export function ApplicationDetailScreen({
                                   <button
                                     type="button"
                                     onClick={() => setPreviewCertDoc(doc)}
-                                    className="text-[11px] bg-[#eff6ff] text-[#1e40af] border border-[#bfdbfe] hover:bg-[#dbeafe] px-2 py-0.5 rounded font-medium"
+                                    className="text-[11px] bg-[#edf5ef] text-[#539160] border border-[#c5e2cb] hover:bg-[#edf5ef] px-2 py-0.5 rounded font-medium"
                                   >
                                     Preview Cert (QR)
                                   </button>
@@ -784,8 +784,8 @@ export function ApplicationDetailScreen({
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-sm font-bold text-[#1a3a5c]">Department Query Records</h3>
-                    <p className="text-xs text-[#64748b] mt-0.5">
+                    <h3 className="text-sm font-bold text-[#355E3B]">Department Query Records</h3>
+                    <p className="text-xs text-[#555C56] mt-0.5">
                       Statutory deficiencies raised by scrutiny officers requiring official clarification or resubmission.
                     </p>
                   </div>
@@ -802,9 +802,9 @@ export function ApplicationDetailScreen({
                       <div>
                         <div className="flex items-center gap-2">
                           <span className="font-mono text-xs font-bold text-[#b91c1c]">{query.queryId}</span>
-                          <span className="text-xs font-semibold text-[#1a3a5c]">— Consolidated Deficiency Memo</span>
+                          <span className="text-xs font-semibold text-[#355E3B]">— Consolidated Deficiency Memo</span>
                         </div>
-                        <p className="text-[11px] text-[#64748b] mt-0.5">
+                        <p className="text-[11px] text-[#555C56] mt-0.5">
                           Issued on {query.issuedDate} by {query.dept} Technical Scrutiny Cell
                         </p>
                       </div>
@@ -816,7 +816,7 @@ export function ApplicationDetailScreen({
                       </Link>
                     </div>
 
-                    <div className="divide-y divide-[#f1f5f9] p-4 space-y-4">
+                    <div className="divide-y divide-[#F9FAF2] p-4 space-y-4">
                       {query.deficiencies.map((def, idx) => (
                         <div key={def.id} className="pt-3 first:pt-0">
                           <div className="flex items-center justify-between gap-2">
@@ -827,13 +827,13 @@ export function ApplicationDetailScreen({
                               Correction Required
                             </span>
                           </div>
-                          <p className="text-xs text-[#334155] mt-1.5 leading-relaxed bg-[#f8f9fb] p-3 rounded border border-[#e2e8f0]">
+                          <p className="text-xs text-[#3A3E39] mt-1.5 leading-relaxed bg-[#F9FAF2] p-3 rounded border border-[#e3ebe1]">
                             <strong>Officer Note:</strong> {def.officerComment}
                           </p>
-                          <div className="mt-2 text-xs text-[#475569] space-y-1">
+                          <div className="mt-2 text-xs text-[#4A4A4A] space-y-1">
                             <p><strong>Required Action:</strong> {def.requiredAction}</p>
                             {def.regulatoryRef && (
-                              <p className="text-[11px] text-[#64748b]">
+                              <p className="text-[11px] text-[#555C56]">
                                 <strong>Legal Reference:</strong> {def.regulatoryRef}
                               </p>
                             )}
@@ -842,23 +842,23 @@ export function ApplicationDetailScreen({
                       ))}
                     </div>
 
-                    <div className="bg-[#f8f9fb] px-4 py-3 border-t border-[#e2e8f0] flex items-center justify-between text-xs">
-                      <span className="text-[#64748b]">
+                    <div className="bg-[#F9FAF2] px-4 py-3 border-t border-[#e3ebe1] flex items-center justify-between text-xs">
+                      <span className="text-[#555C56]">
                         Need to review changes across multiple applications?
                       </span>
                       <Link
                         href={ENTREPRENEUR_ROUTES.applicationResubmission(project.id, app.appId, 'APP-2026-MPCB-00412-R2')}
-                        className="text-[#1a56db] hover:underline font-semibold"
+                        className="text-[#6DAE7C] hover:underline font-semibold"
                       >
                         Inspect Delta Resubmission →
                       </Link>
                     </div>
                   </div>
                 ) : (
-                  <div className="border border-[#e2e8f0] rounded-lg p-8 text-center bg-white">
+                  <div className="border border-[#e3ebe1] rounded-lg p-8 text-center bg-white">
                     <CheckCircle2 className="w-8 h-8 text-[#15803d] mx-auto mb-2" />
-                    <h4 className="text-sm font-bold text-[#1a3a5c]">No Open Queries</h4>
-                    <p className="text-xs text-[#64748b] mt-1 max-w-md mx-auto">
+                    <h4 className="text-sm font-bold text-[#355E3B]">No Open Queries</h4>
+                    <p className="text-xs text-[#555C56] mt-1 max-w-md mx-auto">
                       The department has not raised any deficiency memo for this application. Scrutiny is proceeding smoothly.
                     </p>
                   </div>
@@ -871,15 +871,15 @@ export function ApplicationDetailScreen({
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-sm font-bold text-[#1a3a5c]">Field Site Inspection Records</h3>
-                    <p className="text-xs text-[#64748b] mt-0.5">
+                    <h3 className="text-sm font-bold text-[#355E3B]">Field Site Inspection Records</h3>
+                    <p className="text-xs text-[#555C56] mt-0.5">
                       Mandatory joint or departmental site verification records under Maharashtra industrial norms.
                     </p>
                   </div>
                   {appInspection && (
                     <Link
                       href={ENTREPRENEUR_ROUTES.inspection(project.id, appInspection.id)}
-                      className="text-xs text-[#1a56db] hover:underline font-medium"
+                      className="text-xs text-[#6DAE7C] hover:underline font-medium"
                     >
                       View in Inspection Centre →
                     </Link>
@@ -887,23 +887,23 @@ export function ApplicationDetailScreen({
                 </div>
 
                 {appInspection ? (
-                  <div className="border border-[#e2e8f0] rounded-lg bg-white overflow-hidden shadow-2xs">
-                    <div className="bg-[#f8f9fb] px-4 py-3 border-b border-[#e2e8f0] flex flex-wrap items-center justify-between gap-3">
+                  <div className="border border-[#e3ebe1] rounded-lg bg-white overflow-hidden shadow-2xs">
+                    <div className="bg-[#F9FAF2] px-4 py-3 border-b border-[#e3ebe1] flex flex-wrap items-center justify-between gap-3">
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="font-mono text-xs font-bold text-[#1a3a5c]">{appInspection.id}</span>
+                          <span className="font-mono text-xs font-bold text-[#355E3B]">{appInspection.id}</span>
                           <span className="text-xs font-semibold text-[#1e293b]">— {appInspection.type}</span>
                           <span className="text-[10px] font-semibold px-2 py-0.5 rounded border border-[#86efac] bg-[#dcfce7] text-[#166534]">
                             {appInspection.status}
                           </span>
                         </div>
-                        <p className="text-[11px] text-[#64748b] mt-0.5">
+                        <p className="text-[11px] text-[#555C56] mt-0.5">
                           Conducted on {appInspection.date} at {appInspection.time} · {appInspection.site}
                         </p>
                       </div>
                       <Link
                         href={ENTREPRENEUR_ROUTES.inspection(project.id, appInspection.id)}
-                        className="text-xs border border-[#cbd5e1] text-[#1a3a5c] hover:bg-white px-3 py-1.5 rounded font-medium shadow-2xs"
+                        className="text-xs border border-[#c8d4c7] text-[#355E3B] hover:bg-white px-3 py-1.5 rounded font-medium shadow-2xs"
                       >
                         Inspect Observations →
                       </Link>
@@ -911,38 +911,38 @@ export function ApplicationDetailScreen({
 
                     <div className="p-4 space-y-4">
                       <div>
-                        <h4 className="text-xs font-bold text-[#64748b] uppercase tracking-wider mb-2">
+                        <h4 className="text-xs font-bold text-[#555C56] uppercase tracking-wider mb-2">
                           Field Observations ({appInspection.observations.length})
                         </h4>
                         {appInspection.observations.length > 0 ? (
                           <div className="space-y-2.5">
                             {appInspection.observations.map(obs => (
-                              <div key={obs.id} className="p-3 bg-[#f8f9fb] rounded border border-[#e2e8f0] text-xs">
+                              <div key={obs.id} className="p-3 bg-[#F9FAF2] rounded border border-[#e3ebe1] text-xs">
                                 <div className="flex items-center justify-between gap-2">
-                                  <strong className="text-[#1a3a5c]">{obs.id}: {obs.checklistItem}</strong>
+                                  <strong className="text-[#355E3B]">{obs.id}: {obs.checklistItem}</strong>
                                   <span className="text-[10px] bg-[#dcfce7] text-[#166534] px-1.5 py-0.2 rounded font-medium">
                                     {obs.responseState}
                                   </span>
                                 </div>
-                                <p className="text-[#475569] mt-1">{obs.description}</p>
-                                <p className="text-[11px] text-[#64748b] mt-1">
+                                <p className="text-[#4A4A4A] mt-1">{obs.description}</p>
+                                <p className="text-[11px] text-[#555C56] mt-1">
                                   <strong>Resolution:</strong> {obs.requiredCorrection}
                                 </p>
                               </div>
                             ))}
                           </div>
                         ) : (
-                          <p className="text-xs text-[#64748b]">No adverse observations recorded during site verification.</p>
+                          <p className="text-xs text-[#555C56]">No adverse observations recorded during site verification.</p>
                         )}
                       </div>
 
-                      <div className="pt-2 border-t border-[#f1f5f9]">
-                        <h4 className="text-xs font-bold text-[#64748b] uppercase tracking-wider mb-2">
+                      <div className="pt-2 border-t border-[#F9FAF2]">
+                        <h4 className="text-xs font-bold text-[#555C56] uppercase tracking-wider mb-2">
                           Preparation Checklist Items
                         </h4>
-                        <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-[#334155]">
+                        <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-[#3A3E39]">
                           {appInspection.prepRequirements.map((req, i) => (
-                            <li key={i} className="flex items-start gap-2 bg-[#f8f9fb] p-2 rounded border border-[#f1f5f9]">
+                            <li key={i} className="flex items-start gap-2 bg-[#F9FAF2] p-2 rounded border border-[#F9FAF2]">
                               <CheckCircle2 className="w-3.5 h-3.5 text-[#15803d] shrink-0 mt-0.5" />
                               <span>{req}</span>
                             </li>
@@ -952,10 +952,10 @@ export function ApplicationDetailScreen({
                     </div>
                   </div>
                 ) : (
-                  <div className="border border-[#e2e8f0] rounded-lg p-8 text-center bg-white">
-                    <ShieldCheck className="w-8 h-8 text-[#94a3b8] mx-auto mb-2" />
-                    <h4 className="text-sm font-bold text-[#1a3a5c]">Inspection Not Scheduled Yet</h4>
-                    <p className="text-xs text-[#64748b] mt-1 max-w-md mx-auto">
+                  <div className="border border-[#e3ebe1] rounded-lg p-8 text-center bg-white">
+                    <ShieldCheck className="w-8 h-8 text-[#9ab098] mx-auto mb-2" />
+                    <h4 className="text-sm font-bold text-[#355E3B]">Inspection Not Scheduled Yet</h4>
+                    <p className="text-xs text-[#555C56] mt-1 max-w-md mx-auto">
                       Field inspection will be scheduled by the regional department officer once preliminary technical scrutiny is completed.
                     </p>
                   </div>
@@ -968,15 +968,15 @@ export function ApplicationDetailScreen({
               <div className="space-y-5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-sm font-bold text-[#1a3a5c]">Approval Grant & Compliance Transition</h3>
-                    <p className="text-xs text-[#64748b] mt-0.5">
+                    <h3 className="text-sm font-bold text-[#355E3B]">Approval Grant & Compliance Transition</h3>
+                    <p className="text-xs text-[#555C56] mt-0.5">
                       Statutory determination, clearance certificate, and automatically enrolled ongoing compliance obligations.
                     </p>
                   </div>
                   {decision && (
                     <Link
                       href={ENTREPRENEUR_ROUTES.applicationDecision(project.id, app.appId, decision.decisionId)}
-                      className="text-xs text-[#1a56db] hover:underline font-medium"
+                      className="text-xs text-[#6DAE7C] hover:underline font-medium"
                     >
                       Open Decision Notice →
                     </Link>
@@ -1029,70 +1029,70 @@ export function ApplicationDetailScreen({
                       {/* THE 6 CORE APPROVAL FACETS */}
                       <div className="p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
                         {/* 1. What was approved */}
-                        <div className="p-3.5 border border-[#e2e8f0] bg-[#f8f9fb] rounded space-y-1.5">
-                          <span className="text-[10px] font-bold text-[#64748b] uppercase tracking-wider block">
+                        <div className="p-3.5 border border-[#e3ebe1] bg-[#F9FAF2] rounded space-y-1.5">
+                          <span className="text-[10px] font-bold text-[#555C56] uppercase tracking-wider block">
                             1. What Was Approved
                           </span>
-                          <p className="font-semibold text-xs text-[#1a3a5c]">
+                          <p className="font-semibold text-xs text-[#355E3B]">
                             {decision.whatWasApproved?.service || decision.service}
                           </p>
-                          <p className="text-[11px] text-[#475569] leading-relaxed">
+                          <p className="text-[11px] text-[#4A4A4A] leading-relaxed">
                             {decision.whatWasApproved?.scope || 'Industrial establishment parameters and environmental pollution control system approved.'}
                           </p>
-                          <p className="text-[10px] text-[#64748b] pt-1 border-t border-[#e2e8f0]">
+                          <p className="text-[10px] text-[#555C56] pt-1 border-t border-[#e3ebe1]">
                             Authority: <strong>{decision.whatWasApproved?.authority || decision.dept}</strong>
                           </p>
                         </div>
 
                         {/* 2. Validity */}
-                        <div className="p-3.5 border border-[#e2e8f0] bg-[#f8f9fb] rounded space-y-1.5">
+                        <div className="p-3.5 border border-[#e3ebe1] bg-[#F9FAF2] rounded space-y-1.5">
                           <span className="text-[10px] font-bold text-[#166534] uppercase tracking-wider block">
                             2. Validity
                           </span>
                           <p className="font-semibold text-xs text-[#166534]">
                             {decision.validityPeriod || '5 Years Validity'}
                           </p>
-                          <div className="space-y-0.5 text-[11px] text-[#334155]">
+                          <div className="space-y-0.5 text-[11px] text-[#3A3E39]">
                             <p className="flex justify-between">
-                              <span className="text-[#64748b]">Issued:</span>
+                              <span className="text-[#555C56]">Issued:</span>
                               <strong className="font-mono">{decision.issueDate}</strong>
                             </p>
                             <p className="flex justify-between">
-                              <span className="text-[#64748b]">Expires:</span>
+                              <span className="text-[#555C56]">Expires:</span>
                               <strong className="font-mono text-[#b91c1c]">{decision.expiryDate}</strong>
                             </p>
                           </div>
-                          <p className="text-[10px] text-[#166534] font-semibold pt-1 border-t border-[#e2e8f0]">
+                          <p className="text-[10px] text-[#166534] font-semibold pt-1 border-t border-[#e3ebe1]">
                             Status: Active & Valid
                           </p>
                         </div>
 
                         {/* 3. Documents */}
-                        <div className="p-3.5 border border-[#e2e8f0] bg-[#f8f9fb] rounded space-y-1.5">
-                          <span className="text-[10px] font-bold text-[#64748b] uppercase tracking-wider block">
+                        <div className="p-3.5 border border-[#e3ebe1] bg-[#F9FAF2] rounded space-y-1.5">
+                          <span className="text-[10px] font-bold text-[#555C56] uppercase tracking-wider block">
                             3. Documents
                           </span>
-                          <p className="font-semibold text-xs text-[#1a3a5c]">
+                          <p className="font-semibold text-xs text-[#355E3B]">
                             Clearance Certificate ({decision.certId})
                           </p>
-                          <p className="text-[11px] text-[#475569]">
+                          <p className="text-[11px] text-[#4A4A4A]">
                             Registered under <strong>{decision.certDocId || 'DOC-003'}</strong> with digital QR seal.
                           </p>
-                          <div className="pt-1 border-t border-[#e2e8f0] flex items-center gap-2">
+                          <div className="pt-1 border-t border-[#e3ebe1] flex items-center gap-2">
                             <button
                               type="button"
                               onClick={() => {
                                 const doc = allDocs.find(d => d.id === decision.certDocId);
                                 if (doc) setPreviewCertDoc(doc);
                               }}
-                              className="text-[11px] text-[#1a56db] font-semibold hover:underline"
+                              className="text-[11px] text-[#6DAE7C] font-semibold hover:underline"
                             >
                               Preview QR →
                             </button>
-                            <span className="text-[#cbd5e1]">|</span>
+                            <span className="text-[#c8d4c7]">|</span>
                             <Link
                               href={ENTREPRENEUR_ROUTES.document(project.id, decision.certDocId || 'DOC-003')}
-                              className="text-[11px] text-[#64748b] hover:text-[#1a3a5c] hover:underline"
+                              className="text-[11px] text-[#555C56] hover:text-[#355E3B] hover:underline"
                             >
                               Document Centre
                             </Link>
@@ -1100,20 +1100,20 @@ export function ApplicationDetailScreen({
                         </div>
 
                         {/* 4. Conditions */}
-                        <div className="p-3.5 border border-[#e2e8f0] bg-[#f8f9fb] rounded space-y-1.5 lg:col-span-2">
-                          <span className="text-[10px] font-bold text-[#64748b] uppercase tracking-wider block">
+                        <div className="p-3.5 border border-[#e3ebe1] bg-[#F9FAF2] rounded space-y-1.5 lg:col-span-2">
+                          <span className="text-[10px] font-bold text-[#555C56] uppercase tracking-wider block">
                             4. Conditions ({decision.conditions?.length ?? 0} General, {decision.specialConditions?.length ?? 0} Special)
                           </span>
                           <div className="space-y-1 max-h-28 overflow-y-auto pr-1">
                             {decision.conditions?.slice(0, 2).map((cond, i) => (
-                              <div key={i} className="text-[11px] text-[#334155] flex items-start gap-1.5">
-                                <span className="font-mono text-[#94a3b8] font-bold shrink-0">{i + 1}.</span>
+                              <div key={i} className="text-[11px] text-[#3A3E39] flex items-start gap-1.5">
+                                <span className="font-mono text-[#9ab098] font-bold shrink-0">{i + 1}.</span>
                                 <span>{cond}</span>
                               </div>
                             ))}
                             {decision.specialConditions?.map((sCond, i) => (
-                              <div key={i} className="text-[11px] text-[#92400e] bg-[#fefce8] p-1.5 rounded border border-[#fef08a] flex items-start gap-1.5">
-                                <AlertTriangle className="w-3.5 h-3.5 text-[#d97706] shrink-0 mt-0.5" />
+                              <div key={i} className="text-[11px] text-[#7a5807] bg-[#fefce8] p-1.5 rounded border border-[#fae69e] flex items-start gap-1.5">
+                                <AlertTriangle className="w-3.5 h-3.5 text-[#D4A017] shrink-0 mt-0.5" />
                                 <span>{sCond}</span>
                               </div>
                             ))}
@@ -1121,17 +1121,17 @@ export function ApplicationDetailScreen({
                         </div>
 
                         {/* 5. Renewal requirements */}
-                        <div className="p-3.5 border border-[#e2e8f0] bg-[#f8f9fb] rounded space-y-1.5">
+                        <div className="p-3.5 border border-[#e3ebe1] bg-[#F9FAF2] rounded space-y-1.5">
                           <span className="text-[10px] font-bold text-[#9333ea] uppercase tracking-wider block">
                             5. Renewal Requirements
                           </span>
-                          <p className="font-semibold text-xs text-[#1a3a5c]">
+                          <p className="font-semibold text-xs text-[#355E3B]">
                             {decision.renewalRequirements?.frequency || 'Every 5 Years'}
                           </p>
-                          <p className="text-[11px] text-[#475569] leading-relaxed">
+                          <p className="text-[11px] text-[#4A4A4A] leading-relaxed">
                             {decision.renewalRequirements?.renewalDeadline || 'Apply 120 days prior to expiry.'}
                           </p>
-                          <p className="text-[10px] text-[#9333ea] font-semibold pt-1 border-t border-[#e2e8f0]">
+                          <p className="text-[10px] text-[#9333ea] font-semibold pt-1 border-t border-[#e3ebe1]">
                             Cutoff: {decision.renewalRequirements?.cutoffDate || '11 Jun 2031'}
                           </p>
                         </div>
@@ -1154,80 +1154,80 @@ export function ApplicationDetailScreen({
 
                     {/* NEW COMPLIANCE OBLIGATIONS TABLE */}
                     {appObligations.length > 0 && (
-                      <div className="border border-[#e2e8f0] rounded-lg bg-white p-5 shadow-2xs space-y-4">
-                        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#e2e8f0] pb-3">
+                      <div className="border border-[#e3ebe1] rounded-lg bg-white p-5 shadow-2xs space-y-4">
+                        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#e3ebe1] pb-3">
                           <div>
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-[#1e40af] bg-[#eff6ff] px-2 py-0.5 rounded border border-[#bfdbfe]">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-[#539160] bg-[#edf5ef] px-2 py-0.5 rounded border border-[#c5e2cb]">
                               Automatic Enrollment
                             </span>
-                            <h4 className="text-sm font-bold text-[#1a3a5c] mt-1">
+                            <h4 className="text-sm font-bold text-[#355E3B] mt-1">
                               NEW COMPLIANCE OBLIGATIONS ({appObligations.length})
                             </h4>
-                            <p className="text-xs text-[#64748b] mt-0.5">
+                            <p className="text-xs text-[#555C56] mt-0.5">
                               Enrolled directly from statutory approval order <strong>{decision.approvalId}</strong>.
                             </p>
                           </div>
                           <Link
                             href={ENTREPRENEUR_ROUTES.compliance(project.id)}
-                            className="text-xs bg-[#1a3a5c] text-white hover:bg-[#0f2540] px-3 py-1.5 rounded font-semibold transition-colors shadow-2xs inline-flex items-center gap-1.5"
+                            className="text-xs bg-[#355E3B] text-white hover:bg-[#27472c] px-3 py-1.5 rounded font-semibold transition-colors shadow-2xs inline-flex items-center gap-1.5"
                           >
                             <span>Compliance Dashboard</span>
                             <span>→</span>
                           </Link>
                         </div>
 
-                        <div className="overflow-x-auto border border-[#e2e8f0] rounded">
+                        <div className="overflow-x-auto border border-[#e3ebe1] rounded">
                           <table className="w-full text-xs border-collapse">
                             <thead>
-                              <tr className="bg-[#f8f9fb] border-b border-[#e2e8f0]">
-                                <th className="text-left px-3.5 py-2.5 text-[10px] font-bold text-[#64748b] uppercase tracking-wider border-r border-[#e8edf2]">
+                              <tr className="bg-[#F9FAF2] border-b border-[#e3ebe1]">
+                                <th className="text-left px-3.5 py-2.5 text-[10px] font-bold text-[#555C56] uppercase tracking-wider border-r border-[#e3ebe1]">
                                   Obligation
                                 </th>
-                                <th className="text-left px-3.5 py-2.5 text-[10px] font-bold text-[#64748b] uppercase tracking-wider border-r border-[#e8edf2]">
+                                <th className="text-left px-3.5 py-2.5 text-[10px] font-bold text-[#555C56] uppercase tracking-wider border-r border-[#e3ebe1]">
                                   Due Date
                                 </th>
-                                <th className="text-left px-3.5 py-2.5 text-[10px] font-bold text-[#64748b] uppercase tracking-wider border-r border-[#e8edf2]">
+                                <th className="text-left px-3.5 py-2.5 text-[10px] font-bold text-[#555C56] uppercase tracking-wider border-r border-[#e3ebe1]">
                                   Frequency
                                 </th>
-                                <th className="text-left px-3.5 py-2.5 text-[10px] font-bold text-[#64748b] uppercase tracking-wider border-r border-[#e8edf2]">
+                                <th className="text-left px-3.5 py-2.5 text-[10px] font-bold text-[#555C56] uppercase tracking-wider border-r border-[#e3ebe1]">
                                   Source Approval
                                 </th>
-                                <th className="text-left px-3.5 py-2.5 text-[10px] font-bold text-[#64748b] uppercase tracking-wider border-r border-[#e8edf2]">
+                                <th className="text-left px-3.5 py-2.5 text-[10px] font-bold text-[#555C56] uppercase tracking-wider border-r border-[#e3ebe1]">
                                   Required Action
                                 </th>
-                                <th className="text-left px-3.5 py-2.5 text-[10px] font-bold text-[#64748b] uppercase tracking-wider border-r border-[#e8edf2]">
+                                <th className="text-left px-3.5 py-2.5 text-[10px] font-bold text-[#555C56] uppercase tracking-wider border-r border-[#e3ebe1]">
                                   Status
                                 </th>
-                                <th className="text-right px-3.5 py-2.5 text-[10px] font-bold text-[#64748b] uppercase tracking-wider">
+                                <th className="text-right px-3.5 py-2.5 text-[10px] font-bold text-[#555C56] uppercase tracking-wider">
                                   Action
                                 </th>
                               </tr>
                             </thead>
-                            <tbody className="divide-y divide-[#f1f5f9]">
+                            <tbody className="divide-y divide-[#F9FAF2]">
                               {appObligations.map(obl => (
-                                <tr key={obl.id} className="hover:bg-[#f8f9fb] transition-colors">
-                                  <td className="px-3.5 py-2.5 border-r border-[#f1f5f9]">
-                                    <span className="font-mono text-[10px] font-bold text-[#64748b] block">{obl.id}</span>
-                                    <p className="font-semibold text-xs text-[#1a3a5c]">{obl.name}</p>
-                                    <span className="text-[10px] text-[#64748b]">{obl.category}</span>
+                                <tr key={obl.id} className="hover:bg-[#F9FAF2] transition-colors">
+                                  <td className="px-3.5 py-2.5 border-r border-[#F9FAF2]">
+                                    <span className="font-mono text-[10px] font-bold text-[#555C56] block">{obl.id}</span>
+                                    <p className="font-semibold text-xs text-[#355E3B]">{obl.name}</p>
+                                    <span className="text-[10px] text-[#555C56]">{obl.category}</span>
                                   </td>
-                                  <td className="px-3.5 py-2.5 whitespace-nowrap border-r border-[#f1f5f9]">
-                                    <span className="font-bold text-[#1a3a5c] block">{obl.dueDate}</span>
-                                    <span className="text-[10px] text-[#64748b]">Statutory Deadline</span>
+                                  <td className="px-3.5 py-2.5 whitespace-nowrap border-r border-[#F9FAF2]">
+                                    <span className="font-bold text-[#355E3B] block">{obl.dueDate}</span>
+                                    <span className="text-[10px] text-[#555C56]">Statutory Deadline</span>
                                   </td>
-                                  <td className="px-3.5 py-2.5 text-[#475569] border-r border-[#f1f5f9]">
+                                  <td className="px-3.5 py-2.5 text-[#4A4A4A] border-r border-[#F9FAF2]">
                                     {obl.frequency}
                                   </td>
-                                  <td className="px-3.5 py-2.5 border-r border-[#f1f5f9]">
-                                    <span className="font-mono text-[11px] font-semibold text-[#1e40af] block">
+                                  <td className="px-3.5 py-2.5 border-r border-[#F9FAF2]">
+                                    <span className="font-mono text-[11px] font-semibold text-[#539160] block">
                                       {obl.sourceApprovalId}
                                     </span>
-                                    <span className="text-[10px] text-[#64748b]">{obl.sourceCondition}</span>
+                                    <span className="text-[10px] text-[#555C56]">{obl.sourceCondition}</span>
                                   </td>
-                                  <td className="px-3.5 py-2.5 text-[#334155] border-r border-[#f1f5f9] max-w-[220px]">
+                                  <td className="px-3.5 py-2.5 text-[#3A3E39] border-r border-[#F9FAF2] max-w-[220px]">
                                     <p className="line-clamp-2 leading-relaxed">{obl.actionRequired || obl.description}</p>
                                   </td>
-                                  <td className="px-3.5 py-2.5 whitespace-nowrap border-r border-[#f1f5f9]">
+                                  <td className="px-3.5 py-2.5 whitespace-nowrap border-r border-[#F9FAF2]">
                                     <span className="text-[10px] font-bold px-2 py-0.5 border rounded-sm uppercase tracking-wide border-[#fca5a5] bg-[#fee2e2] text-[#b91c1c]">
                                       {obl.status}
                                     </span>
@@ -1235,7 +1235,7 @@ export function ApplicationDetailScreen({
                                   <td className="px-3.5 py-2.5 text-right whitespace-nowrap">
                                     <Link
                                       href={ENTREPRENEUR_ROUTES.complianceDetail(project.id, obl.id)}
-                                      className="text-xs font-semibold text-[#1a56db] hover:underline"
+                                      className="text-xs font-semibold text-[#6DAE7C] hover:underline"
                                     >
                                       Manage →
                                     </Link>
@@ -1247,16 +1247,16 @@ export function ApplicationDetailScreen({
                         </div>
 
                         {/* Architectural separation banner */}
-                        <div className="bg-[#f8f9fb] border border-[#d1d9e0] rounded p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
+                        <div className="bg-[#F9FAF2] border border-[#d6dfd5] rounded p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
                           <div>
-                            <span className="font-bold text-[#1a3a5c]">The Approval page summarizes. The Compliance page manages.</span>
-                            <p className="text-[#64748b] mt-0.5">
+                            <span className="font-bold text-[#355E3B]">The Approval page summarizes. The Compliance page manages.</span>
+                            <p className="text-[#555C56] mt-0.5">
                               Filing returns, evidence submissions, and ongoing renewals take place in the Compliance Ledger.
                             </p>
                           </div>
                           <Link
                             href={ENTREPRENEUR_ROUTES.compliance(project.id)}
-                            className="bg-[#1a3a5c] text-white hover:bg-[#0f2540] px-3 py-1.5 rounded font-semibold text-xs whitespace-nowrap shadow-2xs"
+                            className="bg-[#355E3B] text-white hover:bg-[#27472c] px-3 py-1.5 rounded font-semibold text-xs whitespace-nowrap shadow-2xs"
                           >
                             Manage in Compliance Dashboard →
                           </Link>
@@ -1265,10 +1265,10 @@ export function ApplicationDetailScreen({
                     )}
                   </div>
                 ) : (
-                  <div className="border border-[#e2e8f0] rounded-lg p-8 text-center bg-white">
-                    <Clock className="w-8 h-8 text-[#94a3b8] mx-auto mb-2" />
-                    <h4 className="text-sm font-bold text-[#1a3a5c]">Decision Pending</h4>
-                    <p className="text-xs text-[#64748b] mt-1 max-w-md mx-auto">
+                  <div className="border border-[#e3ebe1] rounded-lg p-8 text-center bg-white">
+                    <Clock className="w-8 h-8 text-[#9ab098] mx-auto mb-2" />
+                    <h4 className="text-sm font-bold text-[#355E3B]">Decision Pending</h4>
+                    <p className="text-xs text-[#555C56] mt-1 max-w-md mx-auto">
                       This application is currently in technical assessment. Official clearance decision and certificate will appear here once the Consent Committee reviews the dossier.
                     </p>
                   </div>
@@ -1280,49 +1280,49 @@ export function ApplicationDetailScreen({
 
         {/* ─── Contextual Sidebar & Legal Assistance ──────────────────────── */}
         <section aria-label="Contextual Resources" className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white border border-[#e2e8f0] rounded-lg p-4 shadow-2xs space-y-2">
-            <h3 className="text-xs font-bold text-[#1a3a5c] uppercase tracking-wider flex items-center gap-1.5">
-              <Layers className="w-3.5 h-3.5 text-[#1a56db]" />
+          <div className="bg-white border border-[#e3ebe1] rounded-lg p-4 shadow-2xs space-y-2">
+            <h3 className="text-xs font-bold text-[#355E3B] uppercase tracking-wider flex items-center gap-1.5">
+              <Layers className="w-3.5 h-3.5 text-[#6DAE7C]" />
               Downstream Dependencies
             </h3>
-            <p className="text-xs text-[#64748b]">
+            <p className="text-xs text-[#555C56]">
               See which subsequent building permits and operational registrations depend on this approval.
             </p>
             <Link
               href={ENTREPRENEUR_ROUTES.dependencies(project.id)}
-              className="text-xs text-[#1a56db] hover:underline font-semibold block pt-1"
+              className="text-xs text-[#6DAE7C] hover:underline font-semibold block pt-1"
             >
               Dependency Graph →
             </Link>
           </div>
 
-          <div className="bg-white border border-[#e2e8f0] rounded-lg p-4 shadow-2xs space-y-2">
-            <h3 className="text-xs font-bold text-[#1a3a5c] uppercase tracking-wider flex items-center gap-1.5">
+          <div className="bg-white border border-[#e3ebe1] rounded-lg p-4 shadow-2xs space-y-2">
+            <h3 className="text-xs font-bold text-[#355E3B] uppercase tracking-wider flex items-center gap-1.5">
               <ShieldCheck className="w-3.5 h-3.5 text-[#15803d]" />
               Maharashtra RTS Protection
             </h3>
-            <p className="text-xs text-[#64748b]">
+            <p className="text-xs text-[#555C56]">
               This application is protected under the Right to Public Services Act (RTS Act, 2015).
             </p>
             <Link
               href={ENTREPRENEUR_ROUTES.grievances(project.id, { applicationId: app.appId })}
-              className="text-xs text-[#1a56db] hover:underline font-semibold block pt-1"
+              className="text-xs text-[#6DAE7C] hover:underline font-semibold block pt-1"
             >
               File SLA Grievance →
             </Link>
           </div>
 
-          <div className="bg-white border border-[#e2e8f0] rounded-lg p-4 shadow-2xs space-y-2">
-            <h3 className="text-xs font-bold text-[#1a3a5c] uppercase tracking-wider flex items-center gap-1.5">
+          <div className="bg-white border border-[#e3ebe1] rounded-lg p-4 shadow-2xs space-y-2">
+            <h3 className="text-xs font-bold text-[#355E3B] uppercase tracking-wider flex items-center gap-1.5">
               <HelpCircle className="w-3.5 h-3.5 text-[#0891b2]" />
               Regulatory Assistant
             </h3>
-            <p className="text-xs text-[#64748b]">
+            <p className="text-xs text-[#555C56]">
               Have questions regarding {app.dept} scrutiny standards or water balance norms?
             </p>
             <Link
               href={ENTREPRENEUR_ROUTES.assistant()}
-              className="text-xs text-[#1a56db] hover:underline font-semibold block pt-1"
+              className="text-xs text-[#6DAE7C] hover:underline font-semibold block pt-1"
             >
               Ask Regulatory Assistant →
             </Link>

@@ -204,7 +204,7 @@ export function MaharashtraApprovalHeatmap({ changeType, proposedValue }: { chan
 
   return (
     <section className="overflow-hidden rounded-2xl border border-[#d8e2ec] bg-white shadow-sm" aria-labelledby="maharashtra-heatmap-heading">
-      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[#e8edf2] px-5 py-4">
+      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[#e3ebe1] px-5 py-4">
         <div>
           <h3 id="maharashtra-heatmap-heading" className="text-sm font-bold text-[#173b64]">Maharashtra approval intensity</h3>
           <p className="mt-1 max-w-2xl text-[11px] leading-relaxed text-[#66788e]">Configured simulation estimate by division for <strong>{changeType}</strong>. Select an area to inspect its relative approval burden.</p>
@@ -213,7 +213,7 @@ export function MaharashtraApprovalHeatmap({ changeType, proposedValue }: { chan
       </div>
 
       {mapState === 'loading' && <div className="p-10 text-center text-xs text-[#66788e]">Loading Maharashtra map…</div>}
-      {mapState === 'error' && <div className="p-10 text-center text-xs text-[#92400e]">The Maharashtra map could not be loaded. The simulation results remain available below.</div>}
+      {mapState === 'error' && <div className="p-10 text-center text-xs text-[#7a5807]">The Maharashtra map could not be loaded. The simulation results remain available below.</div>}
       {mapState === 'ready' && selected && (
         <div className="grid gap-4 p-4 lg:grid-cols-[minmax(0,1.45fr)_220px]">
           <div className="min-w-0 rounded-xl border border-[#e4ebf2] bg-[#f7fbff] p-2">
@@ -270,8 +270,8 @@ export function MaharashtraApprovalHeatmap({ changeType, proposedValue }: { chan
           </div>
 
           <aside className="space-y-3" aria-label="Selected division details">
-            <div className="rounded-xl border border-[#dbe4ed] bg-[#f8fafc] p-3">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-[#64748b]">Selected area</p>
+            <div className="rounded-xl border border-[#dbe4ed] bg-[#F9FAF2] p-3">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[#555C56]">Selected area</p>
               <p className="mt-1 text-base font-bold text-[#173b64]">{selectedCityMarker?.name ?? selected.label}</p>
               {selectedCityMarker && <p className="mt-0.5 text-[10px] text-[#66788e]">{selected.label}</p>}
               <div className="mt-2 flex items-center gap-2">
@@ -281,7 +281,7 @@ export function MaharashtraApprovalHeatmap({ changeType, proposedValue }: { chan
               <p className="mt-2 text-[11px] leading-relaxed text-[#66788e]">Relative estimate: <strong className="text-[#173b64]">{selectedScore} / 6</strong> configured approval intensity for this simulation.</p>
             </div>
             <div className="rounded-xl border border-[#dbe4ed] bg-white p-3">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-[#64748b]">Legend</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[#555C56]">Legend</p>
               <div className="mt-2 space-y-2">
                 {(Object.keys(LEVEL_STYLE) as HeatLevel[]).map(level => (
                   <div key={level} className="flex items-center gap-2 text-[11px] text-[#40536a]">

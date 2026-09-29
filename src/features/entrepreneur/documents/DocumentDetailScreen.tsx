@@ -71,12 +71,12 @@ export function DocumentDetailScreen({
 
   if (!doc) {
     return (
-      <main className="flex-1 bg-[#f8f9fb] flex items-center justify-center min-h-[60vh]">
+      <main className="flex-1 bg-[#F9FAF2] flex items-center justify-center min-h-[60vh]">
         <div className="text-center py-16">
-          <p className="text-[#6b7a8d] text-sm">Document not found.</p>
+          <p className="text-[#555C56] text-sm">Document not found.</p>
           <Link
             href={ENTREPRENEUR_ROUTES.documents(project.id)}
-            className="mt-3 inline-block text-sm text-[#1a56db] hover:underline"
+            className="mt-3 inline-block text-sm text-[#6DAE7C] hover:underline"
           >
             ← Back to Document Centre
           </Link>
@@ -105,40 +105,40 @@ export function DocumentDetailScreen({
     });
 
   return (
-    <main id="main-content" className="flex-1 bg-[#F8F9FA] pb-16 font-sans" tabIndex={-1}>
+    <main id="main-content" className="flex-1 bg-[#F9FAF2] pb-16 font-sans" tabIndex={-1}>
       {/* ── Page Header ── */}
       <div className="bg-white border-b border-slate-200 px-6 py-4 shadow-xs">
         <div className="max-w-[1100px] mx-auto">
-          <nav className="text-xs text-[#6b7a8d] mb-2 flex items-center gap-1.5" aria-label="Breadcrumb">
-            <Link href={ENTREPRENEUR_ROUTES.businesses()} className="hover:text-[#1a3a5c] hover:underline">
+          <nav className="text-xs text-[#555C56] mb-2 flex items-center gap-1.5" aria-label="Breadcrumb">
+            <Link href={ENTREPRENEUR_ROUTES.businesses()} className="hover:text-[#355E3B] hover:underline">
               My Businesses
             </Link>
             <span>›</span>
-            <Link href={ENTREPRENEUR_ROUTES.business(project.id)} className="hover:text-[#1a3a5c] hover:underline">
+            <Link href={ENTREPRENEUR_ROUTES.business(project.id)} className="hover:text-[#355E3B] hover:underline">
               {project.name}
             </Link>
             <span>›</span>
-            <Link href={ENTREPRENEUR_ROUTES.documents(project.id)} className="hover:text-[#1a3a5c] hover:underline">
+            <Link href={ENTREPRENEUR_ROUTES.documents(project.id)} className="hover:text-[#355E3B] hover:underline">
               Document Centre
             </Link>
             <span>›</span>
-            <span className="text-[#1a3a5c] font-medium">{doc.id}</span>
+            <span className="text-[#355E3B] font-medium">{doc.id}</span>
           </nav>
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-xs font-mono text-[#6b7a8d] bg-[#f1f5f9] border border-[#e2e8f0] px-2 py-0.5 rounded">
+                <span className="text-xs font-mono text-[#555C56] bg-[#F9FAF2] border border-[#e3ebe1] px-2 py-0.5 rounded">
                   {doc.id}
                 </span>
-                <span className="text-xs text-[#6b7a8d]">{doc.category}</span>
-                {doc.version > 0 && <span className="text-xs text-[#94a3b8]">v{doc.version}</span>}
+                <span className="text-xs text-[#555C56]">{doc.category}</span>
+                {doc.version > 0 && <span className="text-xs text-[#9ab098]">v{doc.version}</span>}
               </div>
-              <h1 className="text-xl sm:text-2xl font-bold text-[#1a3a5c]">{doc.name}</h1>
+              <h1 className="text-xl font-bold text-[#355E3B]">{doc.name}</h1>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
               <Link
                 href={ENTREPRENEUR_ROUTES.documents(project.id)}
-                className="text-sm border border-[#d1d9e0] rounded-lg px-3 py-1.5 text-[#475569] hover:bg-[#f1f5f9] transition-colors"
+                className="text-sm border border-[#d6dfd5] rounded-lg px-3 py-1.5 text-[#4A4A4A] hover:bg-[#F9FAF2] transition-colors"
               >
                 ← Back to Documents
               </Link>
@@ -159,14 +159,14 @@ export function DocumentDetailScreen({
                 <button
                   type="button"
                   onClick={() => (isCertificate ? setShowCertModal(true) : null)}
-                  className="text-sm bg-[#17365D] text-white rounded-lg px-3.5 py-1.5 hover:bg-[#245B8A] font-semibold transition-colors"
+                  className="text-sm bg-[#355E3B] text-white rounded-lg px-3.5 py-1.5 hover:bg-[#3d7a4d] font-semibold transition-colors"
                 >
                   {isCertificate ? 'Preview Document' : 'View File'}
                 </button>
               ) : (
                 <button
                   type="button"
-                  className="text-sm bg-[#1a56db] text-white rounded-lg px-3.5 py-1.5 hover:bg-[#1e40af] font-semibold transition-colors"
+                  className="text-sm bg-[#6DAE7C] text-white rounded-lg px-3.5 py-1.5 hover:bg-[#539160] font-semibold transition-colors"
                 >
                   Upload Document
                 </button>
@@ -288,7 +288,7 @@ export function DocumentDetailScreen({
 
           {/* Document Information */}
           <section className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
-            <h2 className="text-sm font-bold text-[#1a3a5c] mb-3 border-b border-slate-200 pb-2">
+            <h2 className="text-sm font-bold text-[#355E3B] mb-3 border-b border-slate-200 pb-2">
               Document Purpose & Content
             </h2>
             <div className="space-y-3.5 text-xs text-slate-700 leading-relaxed">
@@ -313,7 +313,7 @@ export function DocumentDetailScreen({
 
           {/* Regulatory source */}
           <section className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
-            <h2 className="text-sm font-bold text-[#1a3a5c] mb-3 border-b border-slate-200 pb-2">
+            <h2 className="text-sm font-bold text-[#355E3B] mb-3 border-b border-slate-200 pb-2">
               Regulatory Source
             </h2>
             {doc.grRule ? (
@@ -347,7 +347,7 @@ export function DocumentDetailScreen({
           {/* Service usage table */}
           <section className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
             <div className="flex items-center justify-between mb-3 border-b border-slate-200 pb-2">
-              <h2 className="text-sm font-bold text-[#1a3a5c]">
+              <h2 className="text-sm font-bold text-[#355E3B]">
                 Applications Using This Document ({doc.usedBy.length})
               </h2>
               <span className="text-[10px] font-bold text-purple-800 bg-purple-50 border border-purple-200 px-2 py-0.5 rounded">
@@ -370,12 +370,12 @@ export function DocumentDetailScreen({
                     const reqId = u.dept === 'MPCB' && u.service.includes('Consent to Establish') ? 'EST-001' : null;
                     return (
                       <tr key={i} className="hover:bg-slate-50/50">
-                        <td className="px-3 py-2.5 font-bold text-[#1a3a5c]">{u.dept}</td>
+                        <td className="px-3 py-2.5 font-bold text-[#355E3B]">{u.dept}</td>
                         <td className="px-3 py-2.5 text-slate-800">
                           {reqId ? (
                             <Link
                               href={ENTREPRENEUR_ROUTES.requirement(project.id, reqId)}
-                              className="hover:underline text-[#1a56db] font-semibold"
+                              className="hover:underline text-[#6DAE7C] font-semibold"
                             >
                               {u.service}
                             </Link>
@@ -394,7 +394,7 @@ export function DocumentDetailScreen({
 
           {/* Version history */}
           <section className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
-            <h2 className="text-sm font-bold text-[#1a3a5c] mb-3 border-b border-slate-200 pb-2">Version History</h2>
+            <h2 className="text-sm font-bold text-[#355E3B] mb-3 border-b border-slate-200 pb-2">Version History</h2>
             {doc.versionHistory.length === 0 ? (
               <p className="text-xs text-slate-400">No versions uploaded yet.</p>
             ) : (
@@ -417,7 +417,7 @@ export function DocumentDetailScreen({
                     </div>
                     <div className="flex items-center gap-2">
                       {verifBadge(v.verification as DocVerifState)}
-                      <button type="button" className="text-xs text-[#1a56db] hover:underline font-semibold">
+                      <button type="button" className="text-xs text-[#6DAE7C] hover:underline font-semibold">
                         View version
                       </button>
                     </div>
@@ -432,7 +432,7 @@ export function DocumentDetailScreen({
         <div className="space-y-4">
           {/* Validity card */}
           <section className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs">
-            <h2 className="text-sm font-bold text-[#1a3a5c] mb-3 border-b border-slate-200 pb-2">Validity & Term</h2>
+            <h2 className="text-sm font-bold text-[#355E3B] mb-3 border-b border-slate-200 pb-2">Validity & Term</h2>
             <div className="space-y-2.5 text-xs">
               <div className="flex justify-between items-center">
                 <span className="text-slate-500">Status</span>
@@ -454,7 +454,7 @@ export function DocumentDetailScreen({
           </section>
 
           {/* Assistant callout */}
-          <div className="bg-[#17365D] text-white rounded-xl p-4 shadow-xs">
+          <div className="bg-[#355E3B] text-white rounded-xl p-4 shadow-xs">
             <p className="text-xs font-bold mb-1">Need help with this document?</p>
             <p className="text-[11px] text-slate-300 mb-3 leading-relaxed">
               Ask about required formats, issuing departments, or regulatory conditions.
@@ -462,7 +462,7 @@ export function DocumentDetailScreen({
             <button
               type="button"
               onClick={openDocumentAssistant}
-              className="w-full text-xs font-bold bg-[#245B8A] hover:bg-[#1E4870] text-white py-2 rounded-lg border border-[#3A75A4] transition-colors"
+              className="w-full text-xs font-bold bg-[#3d7a4d] hover:bg-[#2d5132] text-white py-2 rounded-lg border border-[#3A75A4] transition-colors"
             >
               Ask Regulatory Assistant →
             </button>

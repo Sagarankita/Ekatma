@@ -88,7 +88,7 @@ export function ApplicationWorkflowStepper({
                   href={href}
                   className={`group flex items-center gap-2.5 p-2 rounded-lg transition-all w-full ${
                     isCurrent
-                      ? 'bg-[#17365D]/8 border border-[#17365D]/20 shadow-2xs'
+                      ? 'bg-[#355E3B]/8 border border-[#355E3B]/20 shadow-2xs'
                       : isCompleted
                       ? 'hover:bg-slate-50'
                       : 'opacity-70 hover:opacity-100'
@@ -100,7 +100,7 @@ export function ApplicationWorkflowStepper({
                       isCompleted
                         ? 'bg-emerald-600 text-white'
                         : isCurrent
-                        ? 'bg-[#17365D] text-white shadow-2xs'
+                        ? 'bg-[#355E3B] text-white shadow-2xs'
                         : 'bg-slate-100 text-slate-500 border border-slate-200'
                     }`}
                   >
@@ -112,7 +112,7 @@ export function ApplicationWorkflowStepper({
                     <p
                       className={`text-[11px] font-extrabold uppercase tracking-wider truncate leading-tight ${
                         isCurrent
-                          ? 'text-[#17365D]'
+                          ? 'text-[#355E3B]'
                           : isCompleted
                           ? 'text-emerald-800'
                           : 'text-slate-600'

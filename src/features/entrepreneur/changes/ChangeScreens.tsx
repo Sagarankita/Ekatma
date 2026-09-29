@@ -109,16 +109,16 @@ export function listRegulatoryChangesForBusiness(businessId: string): Regulatory
 function regChangeBadge(v: RegulatoryChangeVerification) {
   const map: Record<RegulatoryChangeVerification, string> = {
     'Validated': 'border-[#86efac] bg-[#dcfce7] text-[#166534]',
-    'Needs Verification': 'border-[#fcd34d] bg-[#fef3c7] text-[#92400e]',
-    'Under Review': 'border-[#93c5fd] bg-[#dbeafe] text-[#1e40af]',
+    'Needs Verification': 'border-[#fae69e] bg-[#fdf8e6] text-[#7a5807]',
+    'Under Review': 'border-[#a1cba9] bg-[#edf5ef] text-[#539160]',
   }
   return <span className={`text-[10px] font-semibold px-1.5 py-0.5 border ${map[v]}`}>{v}</span>
 }
 
 function regImpactBadge(c: RegulatoryChangeImpact) {
   const map: Record<RegulatoryChangeImpact, string> = {
-    'No action': 'border-[#cbd5e1] bg-[#f1f5f9] text-[#64748b]',
-    'Review recommended': 'border-[#fcd34d] bg-[#fef3c7] text-[#92400e]',
+    'No action': 'border-[#c8d4c7] bg-[#F9FAF2] text-[#555C56]',
+    'Review recommended': 'border-[#fae69e] bg-[#fdf8e6] text-[#7a5807]',
     'New document': 'border-[#fdba74] bg-[#fff7ed] text-[#9a3412]',
     'Application affected': 'border-[#fca5a5] bg-[#fee2e2] text-[#b91c1c]',
     'Renewal affected': 'border-[#fdba74] bg-[#fff7ed] text-[#9a3412]',
@@ -160,8 +160,8 @@ export function E29RegChangeImpactPage({ changes, contextLabel, onBack, onGoToAp
   const selected = selectedId ? changes.find(r => r.id === selectedId) : null
 
   const summaryTiles = [
-    { label: 'Relevant changes', value: changes.length, color: 'text-[#1a3a5c]' },
-    { label: 'Needs Verification', value: changes.filter(r => r.verification === 'Needs Verification').length, color: 'text-[#92400e]' },
+    { label: 'Relevant changes', value: changes.length, color: 'text-[#355E3B]' },
+    { label: 'Needs Verification', value: changes.filter(r => r.verification === 'Needs Verification').length, color: 'text-[#7a5807]' },
     { label: 'Applications affected', value: changes.flatMap(r => r.affectedRecords).filter(r => r.type === 'application').length, color: 'text-[#b91c1c]' },
     { label: 'Compliance affected', value: changes.flatMap(r => r.affectedRecords).filter(r => r.type === 'compliance').length, color: 'text-[#b91c1c]' },
   ]
@@ -189,14 +189,14 @@ export function E29RegChangeImpactPage({ changes, contextLabel, onBack, onGoToAp
   }
 
   return (
-    <main id="main-content" className="flex-1 bg-[#f8f9fb]" tabIndex={-1}>
-      <div className="bg-white border-b border-[#d1d9e0] px-6 py-4">
+    <main id="main-content" className="flex-1 bg-[#F9FAF2]" tabIndex={-1}>
+      <div className="bg-white border-b border-[#d6dfd5] px-6 py-4">
         <div className="max-w-[1280px] mx-auto">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h1 className="text-xl font-bold text-[#1a3a5c]">Regulatory Change Impact</h1>
-              <p className="mt-0.5 text-xs text-[#6b7a8d]">{contextLabel}</p>
-              <p className="text-xs text-[#6b7a8d] mt-1 max-w-2xl">Relevant regulatory updates, the part of your business they may affect, and what you need to do.</p>
+              <h1 className="text-xl font-bold text-[#355E3B]">Regulatory Change Impact</h1>
+              <p className="mt-0.5 text-xs text-[#555C56]">{contextLabel}</p>
+              <p className="text-xs text-[#555C56] mt-1 max-w-2xl">Relevant regulatory updates, the part of your business they may affect, and what you need to do.</p>
             </div>
             {onOpenRegAssistant && (
               <RegAssistantTrigger lang="en" size="sm" onClick={() => onOpenRegAssistant({ entryPoint: 'reg-change', initialQuestion: 'What exactly changed?' })} />
@@ -208,7 +208,7 @@ export function E29RegChangeImpactPage({ changes, contextLabel, onBack, onGoToAp
       <div className="max-w-[1280px] mx-auto px-6 py-5 space-y-4">
 
         {/* AI safety notice */}
-        <div className="bg-white border border-[#bfdbfe] border-l-4 border-l-[#1d4ed8] px-4 py-3 text-xs text-[#1e3a8a]">
+        <div className="bg-white border border-[#c5e2cb] border-l-4 border-l-[#539160] px-4 py-3 text-xs text-[#1e3a8a]">
           <p className="font-semibold mb-0.5">Important — Verification Required</p>
           <p>Regulatory changes marked <strong>Needs Verification</strong> have been identified as potentially relevant to this business but have not been confirmed as applicable. Do not treat unvalidated changes as binding obligations. Validated changes have been confirmed by a verified source.</p>
         </div>
@@ -216,30 +216,30 @@ export function E29RegChangeImpactPage({ changes, contextLabel, onBack, onGoToAp
         {/* Summary tiles */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {summaryTiles.map(t => (
-            <div key={t.label} className="bg-white border border-[#e2e8f0] px-4 py-3">
+            <div key={t.label} className="bg-white border border-[#e3ebe1] px-4 py-3">
               <p className={`text-2xl font-bold ${t.color}`}>{t.value}</p>
-              <p className="text-xs text-[#6b7a8d] mt-0.5">{t.label}</p>
+              <p className="text-xs text-[#555C56] mt-0.5">{t.label}</p>
             </div>
           ))}
         </div>
 
         {/* Filters */}
-        <div className="bg-white border border-[#e2e8f0] px-4 py-3 flex flex-wrap gap-3 items-center">
+        <div className="bg-white border border-[#e3ebe1] px-4 py-3 flex flex-wrap gap-3 items-center">
           <div className="flex items-center gap-2">
-            <label className="text-[10px] font-bold text-[#64748b] uppercase tracking-wider">Department</label>
-            <select value={deptFilter} onChange={e => setDeptFilter(e.target.value)} className="text-xs border border-[#d1d9e0] px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[#1a56db]">
+            <label className="text-[10px] font-bold text-[#555C56] uppercase tracking-wider">Department</label>
+            <select value={deptFilter} onChange={e => setDeptFilter(e.target.value)} className="text-xs border border-[#d6dfd5] px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[#6DAE7C]">
               {allDepts.map(v => <option key={v}>{v}</option>)}
             </select>
           </div>
           <div className="flex items-center gap-2">
-            <label className="text-[10px] font-bold text-[#64748b] uppercase tracking-wider">Impact</label>
-            <select value={impactFilter} onChange={e => setImpactFilter(e.target.value as typeof impactFilter)} className="text-xs border border-[#d1d9e0] px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[#1a56db] max-w-[220px]">
+            <label className="text-[10px] font-bold text-[#555C56] uppercase tracking-wider">Impact</label>
+            <select value={impactFilter} onChange={e => setImpactFilter(e.target.value as typeof impactFilter)} className="text-xs border border-[#d6dfd5] px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[#6DAE7C] max-w-[220px]">
               {allImpacts.map(v => <option key={v}>{v}</option>)}
             </select>
           </div>
           <div className="flex items-center gap-2">
-            <label className="text-[10px] font-bold text-[#64748b] uppercase tracking-wider">Verification</label>
-            <select value={verifFilter} onChange={e => setVerifFilter(e.target.value as typeof verifFilter)} className="text-xs border border-[#d1d9e0] px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[#1a56db]">
+            <label className="text-[10px] font-bold text-[#555C56] uppercase tracking-wider">Verification</label>
+            <select value={verifFilter} onChange={e => setVerifFilter(e.target.value as typeof verifFilter)} className="text-xs border border-[#d6dfd5] px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[#6DAE7C]">
               {allVerifs.map(v => <option key={v}>{v}</option>)}
             </select>
           </div>
@@ -250,34 +250,34 @@ export function E29RegChangeImpactPage({ changes, contextLabel, onBack, onGoToAp
 
         {/* Change list */}
         {filtered.length === 0 ? (
-          <div className="bg-white border border-[#e2e8f0] px-6 py-10 text-center">
-            <p className="text-sm font-semibold text-[#1a3a5c] mb-1">No validated regulatory changes currently affect this business.</p>
-            <p className="text-xs text-[#6b7a8d]">Adjust filters or check back after the next regulatory update cycle.</p>
+          <div className="bg-white border border-[#e3ebe1] px-6 py-10 text-center">
+            <p className="text-sm font-semibold text-[#355E3B] mb-1">No validated regulatory changes currently affect this business.</p>
+            <p className="text-xs text-[#555C56]">Adjust filters or check back after the next regulatory update cycle.</p>
           </div>
         ) : (
           <div className="space-y-3">
             {filtered.map(rc => (
-              <div key={rc.id} className={`bg-white border ${selectedId === rc.id ? 'border-[#1a56db]' : 'border-[#e2e8f0]'}`}>
+              <div key={rc.id} className={`bg-white border ${selectedId === rc.id ? 'border-[#6DAE7C]' : 'border-[#e3ebe1]'}`}>
                 {/* Row header */}
                 <button
                   onClick={() => setSelectedId(rc.id === selectedId ? null : rc.id)}
-                  className="w-full text-left px-5 py-4 hover:bg-[#f8f9fb] transition-colors"
+                  className="w-full text-left px-5 py-4 hover:bg-[#F9FAF2] transition-colors"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
-                      <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-[#64748b]">What changed</p>
+                      <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-[#555C56]">What changed</p>
                       <div className="flex flex-wrap items-center gap-2 mb-2">
-                        <p className="text-xs font-bold text-[#1a3a5c]">{rc.title}</p>
-                        <span className="text-[10px] font-mono text-[#94a3b8]">{rc.id}</span>
+                        <p className="text-xs font-bold text-[#355E3B]">{rc.title}</p>
+                        <span className="text-[10px] font-mono text-[#9ab098]">{rc.id}</span>
                       </div>
                       <div className="grid gap-3 text-xs sm:grid-cols-[160px_minmax(0,1fr)]">
                         <div>
-                          <p className="text-[10px] font-semibold uppercase tracking-wider text-[#64748b]">Effective date</p>
-                          <p className="mt-0.5 font-semibold text-[#334155]">{rc.effectiveDate}</p>
+                          <p className="text-[10px] font-semibold uppercase tracking-wider text-[#555C56]">Effective date</p>
+                          <p className="mt-0.5 font-semibold text-[#3A3E39]">{rc.effectiveDate}</p>
                         </div>
                         <div>
-                          <p className="text-[10px] font-semibold uppercase tracking-wider text-[#64748b]">Part of my business that may be affected</p>
-                          <p className="mt-0.5 text-[#334155]">{rc.affectedRequirement}</p>
+                          <p className="text-[10px] font-semibold uppercase tracking-wider text-[#555C56]">Part of my business that may be affected</p>
+                          <p className="mt-0.5 text-[#3A3E39]">{rc.affectedRequirement}</p>
                         </div>
                       </div>
                     </div>
@@ -290,27 +290,27 @@ export function E29RegChangeImpactPage({ changes, contextLabel, onBack, onGoToAp
 
                 {/* Expanded detail */}
                 {selectedId === rc.id && (
-                  <div className="border-t border-[#e8edf2] px-5 py-4 space-y-4 text-xs bg-[#f8f9fb]">
+                  <div className="border-t border-[#e3ebe1] px-5 py-4 space-y-4 text-xs bg-[#F9FAF2]">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
                       <div>
-                        <p className="text-[10px] font-semibold text-[#64748b] uppercase tracking-wider mb-1">What this means for my business</p>
-                        <p className="text-[#334155]">{rc.businessImpact}</p>
+                        <p className="text-[10px] font-semibold text-[#555C56] uppercase tracking-wider mb-1">What this means for my business</p>
+                        <p className="text-[#3A3E39]">{rc.businessImpact}</p>
                       </div>
                       <div>
-                        <p className="text-[10px] font-semibold text-[#64748b] uppercase tracking-wider mb-1">What I need to do</p>
-                        <p className="text-[#334155]">{rc.requiredAction}</p>
+                        <p className="text-[10px] font-semibold text-[#555C56] uppercase tracking-wider mb-1">What I need to do</p>
+                        <p className="text-[#3A3E39]">{rc.requiredAction}</p>
                       </div>
                       <div className="sm:col-span-2">
                         <details>
-                          <summary className="cursor-pointer text-[10px] font-semibold uppercase tracking-wider text-[#1a3a5c]">Source and detailed change</summary>
-                          <p className="mt-2 text-[#334155] leading-relaxed">{rc.detail}</p>
-                          <p className="mt-2 text-[10px] text-[#64748b]">{rc.department} · {rc.source}</p>
+                          <summary className="cursor-pointer text-[10px] font-semibold uppercase tracking-wider text-[#355E3B]">Source and detailed change</summary>
+                          <p className="mt-2 text-[#3A3E39] leading-relaxed">{rc.detail}</p>
+                          <p className="mt-2 text-[10px] text-[#555C56]">{rc.department} · {rc.source}</p>
                         </details>
                       </div>
                     </div>
 
                     {rc.verification === 'Needs Verification' && (
-                      <div className="border border-[#fcd34d] bg-[#fefce8] px-3 py-2 text-[#92400e]">
+                      <div className="border border-[#fae69e] bg-[#fefce8] px-3 py-2 text-[#7a5807]">
                         <p className="font-semibold text-[10px] uppercase tracking-wider mb-0.5">Needs Verification</p>
                         <p>Potential regulatory impact identified, but applicability to this business requires verification. Do not treat this as a confirmed obligation until validated.</p>
                       </div>
@@ -318,7 +318,7 @@ export function E29RegChangeImpactPage({ changes, contextLabel, onBack, onGoToAp
 
                     {rc.affectedRecords.length > 0 && (
                       <div>
-                        <p className="text-[10px] font-semibold text-[#64748b] uppercase tracking-wider mb-2">Affected Records</p>
+                        <p className="text-[10px] font-semibold text-[#555C56] uppercase tracking-wider mb-2">Affected Records</p>
                         <div className="flex flex-wrap gap-2">
                           {rc.affectedRecords.map(r => (
                             <button
@@ -326,7 +326,7 @@ export function E29RegChangeImpactPage({ changes, contextLabel, onBack, onGoToAp
                               disabled={!canOpenAffectedRecord(r)}
                               title={!canOpenAffectedRecord(r) ? 'Source reference does not match an exact record for this business' : undefined}
                               onClick={() => r.type === 'compliance' ? onGoToCompliance(r.id) : onGoToApplication(r.id)}
-                              className="text-xs border border-[#d1d9e0] bg-white text-[#1a3a5c] px-3 py-1.5 enabled:hover:bg-[#f1f5f9] disabled:opacity-50 disabled:cursor-not-allowed text-left"
+                              className="text-xs border border-[#d6dfd5] bg-white text-[#355E3B] px-3 py-1.5 enabled:hover:bg-[#F9FAF2] disabled:opacity-50 disabled:cursor-not-allowed text-left"
                             >
                               {r.type === 'compliance' ? 'View Compliance — ' : r.type === 'application' ? 'View Application — ' : 'View Record — '}
                               {r.label}
@@ -336,14 +336,14 @@ export function E29RegChangeImpactPage({ changes, contextLabel, onBack, onGoToAp
                       </div>
                     )}
 
-                    <div className="flex flex-wrap gap-2 pt-1 border-t border-[#e2e8f0]">
+                    <div className="flex flex-wrap gap-2 pt-1 border-t border-[#e3ebe1]">
                       <button
                         onClick={() => selected && onOpenRegAssistant?.({ entryPoint: 'reg-change', recordId: selected.id, recordName: selected.title, department: selected.department, initialQuestion: 'What exactly changed?' })}
-                        className="text-xs border border-[#d1d9e0] text-[#1a3a5c] px-3 py-1.5 hover:bg-[#f1f5f9]"
+                        className="text-xs border border-[#d6dfd5] text-[#355E3B] px-3 py-1.5 hover:bg-[#F9FAF2]"
                       >
                         Ask Assistant
                       </button>
-                      <button disabled title="The source circular is cited in the prototype but no source document is bound" className="text-xs border border-[#d1d9e0] text-[#94a3b8] px-3 py-1.5 cursor-not-allowed">View Source</button>
+                      <button disabled title="The source circular is cited in the prototype but no source document is bound" className="text-xs border border-[#d6dfd5] text-[#9ab098] px-3 py-1.5 cursor-not-allowed">View Source</button>
                     </div>
                   </div>
                 )}
@@ -353,27 +353,27 @@ export function E29RegChangeImpactPage({ changes, contextLabel, onBack, onGoToAp
         )}
 
         {/* Regulatory Assistant */}
-        <div className="bg-white border border-[#e2e8f0]">
+        <div className="bg-white border border-[#e3ebe1]">
           <button
             onClick={() => onOpenRegAssistant?.({ entryPoint: 'reg-change', initialQuestion: 'Which change requires my immediate attention?' })}
-            className="w-full flex items-center justify-between px-5 py-3 text-xs font-semibold text-[#1a3a5c] hover:bg-[#f8f9fb] transition-colors"
+            className="w-full flex items-center justify-between px-5 py-3 text-xs font-semibold text-[#355E3B] hover:bg-[#F9FAF2] transition-colors"
           >
             <span>Regulatory Assistant — Change Impact Queries</span>
-            <span className="text-[#6b7a8d] font-normal">Open shared assistant</span>
+            <span className="text-[#555C56] font-normal">Open shared assistant</span>
           </button>
           {ragOpen && (
-            <div className="border-t border-[#e8edf2] px-5 py-4 space-y-3">
-              <p className="text-xs text-[#6b7a8d]">Ask about a change, its source, or its potential impact.</p>
+            <div className="border-t border-[#e3ebe1] px-5 py-4 space-y-3">
+              <p className="text-xs text-[#555C56]">Ask about a change, its source, or its potential impact.</p>
               <div className="flex flex-wrap gap-2">
                 {RAG_SUGGESTED.map(p => (
-                  <button key={p} onClick={() => handleRagSend(p)} className="text-[10px] border border-[#bfdbfe] bg-[#eff6ff] text-[#1e40af] px-2 py-1 hover:bg-[#dbeafe] transition-colors">{p}</button>
+                  <button key={p} onClick={() => handleRagSend(p)} className="text-[10px] border border-[#c5e2cb] bg-[#edf5ef] text-[#539160] px-2 py-1 hover:bg-[#edf5ef] transition-colors">{p}</button>
                 ))}
               </div>
               {ragMessages.length > 0 && (
-                <div className="space-y-2 max-h-48 overflow-y-auto border border-[#e2e8f0] bg-[#f8f9fb] p-3">
+                <div className="space-y-2 max-h-48 overflow-y-auto border border-[#e3ebe1] bg-[#F9FAF2] p-3">
                   {ragMessages.map((m, i) => (
-                    <div key={i} className={`text-xs ${m.role === 'user' ? 'text-[#1a3a5c] font-semibold' : 'text-[#334155]'}`}>
-                      <span className="text-[10px] text-[#94a3b8] mr-1">{m.role === 'user' ? 'You:' : 'Assistant:'}</span>
+                    <div key={i} className={`text-xs ${m.role === 'user' ? 'text-[#355E3B] font-semibold' : 'text-[#3A3E39]'}`}>
+                      <span className="text-[10px] text-[#9ab098] mr-1">{m.role === 'user' ? 'You:' : 'Assistant:'}</span>
                       {m.text}
                     </div>
                   ))}
@@ -386,17 +386,17 @@ export function E29RegChangeImpactPage({ changes, contextLabel, onBack, onGoToAp
                   onChange={e => setRagInput(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter') handleRagSend(ragInput) }}
                   placeholder="Ask about a regulatory change..."
-                  className="flex-1 text-xs border border-[#d1d9e0] px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#1a56db]"
+                  className="flex-1 text-xs border border-[#d6dfd5] px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#6DAE7C]"
                 />
-                <button onClick={() => handleRagSend(ragInput)} className="text-xs bg-[#1a3a5c] text-white px-4 py-2 font-semibold hover:bg-[#0f2540] transition-colors">Send</button>
+                <button onClick={() => handleRagSend(ragInput)} className="text-xs bg-[#355E3B] text-white px-4 py-2 font-semibold hover:bg-[#27472c] transition-colors">Send</button>
               </div>
             </div>
           )}
         </div>
 
         {/* Footer disclaimer */}
-        <details className="border border-[#e2e8f0] bg-white px-4 py-3 text-xs text-[#6b7a8d]">
-          <summary className="cursor-pointer font-semibold text-[#1a3a5c]">Source and legal note</summary>
+        <details className="border border-[#e3ebe1] bg-white px-4 py-3 text-xs text-[#555C56]">
+          <summary className="cursor-pointer font-semibold text-[#355E3B]">Source and legal note</summary>
           <p className="mt-2">Impacts use validated notifications and Business Profile matching. Needs Verification items are not confirmed obligations, and no application, approval, or compliance record is changed automatically.</p>
         </details>
       </div>
@@ -588,9 +588,9 @@ function getE31Delta(changeType: ChangeType): DeltaItem[] {
 function simCategoryBadge(c: SimImpactCategory) {
   const map: Record<SimImpactCategory, string> = {
     'REMAIN VALID': 'border-[#86efac] bg-[#dcfce7] text-[#166534]',
-    'MAY REQUIRE AMENDMENT': 'border-[#fcd34d] bg-[#fef3c7] text-[#92400e]',
+    'MAY REQUIRE AMENDMENT': 'border-[#fae69e] bg-[#fdf8e6] text-[#7a5807]',
     'POTENTIALLY NEW': 'border-[#c4b5fd] bg-[#ede9fe] text-[#5b21b6]',
-    'INSPECTION IMPACT': 'border-[#93c5fd] bg-[#dbeafe] text-[#1e40af]',
+    'INSPECTION IMPACT': 'border-[#a1cba9] bg-[#edf5ef] text-[#539160]',
     'COMPLIANCE IMPACT': 'border-[#fdba74] bg-[#fff7ed] text-[#9a3412]',
     'INCENTIVE IMPACT': 'border-[#fca5a5] bg-[#fee2e2] text-[#b91c1c]',
   }
@@ -600,10 +600,10 @@ function simCategoryBadge(c: SimImpactCategory) {
 function deltaStatusBadge(s: DeltaItem['status']) {
   const map: Record<DeltaItem['status'], string> = {
     'New': 'border-[#c4b5fd] bg-[#ede9fe] text-[#5b21b6]',
-    'Amendment Required': 'border-[#fcd34d] bg-[#fef3c7] text-[#92400e]',
-    'No Change': 'border-[#d1d9e0] bg-[#f1f5f9] text-[#64748b]',
+    'Amendment Required': 'border-[#fae69e] bg-[#fdf8e6] text-[#7a5807]',
+    'No Change': 'border-[#d6dfd5] bg-[#F9FAF2] text-[#555C56]',
     'Triggered': 'border-[#fdba74] bg-[#fff7ed] text-[#9a3412]',
-    'Review Required': 'border-[#93c5fd] bg-[#dbeafe] text-[#1e40af]',
+    'Review Required': 'border-[#a1cba9] bg-[#edf5ef] text-[#539160]',
   }
   return <span className={`text-[10px] font-semibold px-1.5 py-0.5 border ${map[s]}`}>{s}</span>
 }
@@ -623,7 +623,6 @@ export function E30BusinessChangeSimulator({ project, onBack, onGoToE31 }: {
   const [analysed, setAnalysed] = useState(false)
   const [results, setResults] = useState<SimResult[]>([])
   const [expandedId, setExpandedId] = useState<string | null>(null)
-  const [viewMode, setViewMode] = useState<'beginner' | 'advanced'>('beginner')
   const [impactTab, setImpactTab] = useState<'Overall Summary' | 'Approvals' | 'Compliance' | 'Inspections' | 'Incentives'>('Overall Summary')
   const [timeHorizon, setTimeHorizon] = useState<'1 year' | '3 years' | '5 years'>('3 years')
 
@@ -665,26 +664,14 @@ export function E30BusinessChangeSimulator({ project, onBack, onGoToE31 }: {
   const currentStep = !selectedChange ? 1 : !analysed ? 2 : 3
 
   return (
-    <main id="main-content" className="flex-1 bg-[#f8f9fb]" tabIndex={-1}>
-      <div className="border-b border-[#d1d9e0] bg-white px-6 py-4">
+    <main id="main-content" className="flex-1 bg-[#F9FAF2]" tabIndex={-1}>
+      <div className="border-b border-[#d6dfd5] bg-white px-6 py-4">
         <div className="mx-auto flex max-w-[1440px] flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-[#102f55]">Business Change Simulator</h1>
+            <h1 className="text-xl font-bold text-[#355E3B]">Business Change Simulator</h1>
             <p className="mt-1 text-sm text-[#5d7189]">Simulate how a proposed business change may affect approvals, compliance, inspections, documents, and incentives.</p>
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex rounded-lg border border-[#d6e0ea] bg-[#f8fafc] p-1" aria-label="Simulation view">
-              {(['beginner', 'advanced'] as const).map(mode => (
-                <button
-                  key={mode}
-                  onClick={() => setViewMode(mode)}
-                  aria-pressed={viewMode === mode}
-                  className={`rounded-md px-3 py-1.5 text-xs font-semibold capitalize transition-colors ${viewMode === mode ? 'bg-[#1d63d8] text-white shadow-sm' : 'text-[#52667d] hover:bg-white'}`}
-                >
-                  {mode} View
-                </button>
-              ))}
-            </div>
             <button onClick={handleReset} className="rounded-lg border border-[#b8c7d8] bg-white px-3 py-2 text-xs font-semibold text-[#173b64] hover:bg-[#f5f8fb]">Reset Simulation</button>
           </div>
         </div>
@@ -699,7 +686,7 @@ export function E30BusinessChangeSimulator({ project, onBack, onGoToE31 }: {
               const active = number === currentStep
               return (
                 <li key={step} className="flex items-center last:flex-none">
-                  <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${complete || active ? 'bg-[#1d63d8] text-white' : 'bg-[#e8edf3] text-[#6b7a8d]'}`}>{complete ? '✓' : number}</span>
+                  <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${complete || active ? 'bg-[#1d63d8] text-white' : 'bg-[#e8edf3] text-[#555C56]'}`}>{complete ? '✓' : number}</span>
                   <span className={`ml-2 whitespace-nowrap text-xs font-semibold ${active ? 'text-[#174b91]' : 'text-[#5f7084]'}`}>{step}</span>
                   {index < 4 && <span className={`mx-4 h-px min-w-8 flex-1 ${complete ? 'bg-[#5f96ee]' : 'bg-[#d8e1ea]'}`} />}
                 </li>
@@ -708,17 +695,11 @@ export function E30BusinessChangeSimulator({ project, onBack, onGoToE31 }: {
           </ol>
         </nav>
 
-        {/* Simulation notice */}
-        <div className="flex items-center justify-between gap-3 rounded-lg border border-[#f2d788] bg-[#fffaf0] px-4 py-2.5 text-xs text-[#78580b]">
-          <p><strong>Simulation only.</strong> Nothing here changes your live Business Profile, applications, approvals, or compliance obligations.</p>
-          <span className="shrink-0 rounded border border-[#e9c65c] bg-white px-2 py-1 text-[10px] font-bold uppercase tracking-wide">Not statutory approval</span>
-        </div>
-
         <div className="grid items-start gap-4 xl:grid-cols-[360px_minmax(0,1fr)]">
         <section className="overflow-hidden rounded-2xl border border-[#d8e2ec] bg-white shadow-sm xl:sticky xl:top-4" aria-labelledby="simulation-deck-heading">
-          <div className="border-b border-[#e8edf2] bg-gradient-to-r from-[#eef5fb] via-white to-[#f5f0ff] px-5 py-4">
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#64748b]">Configure scenario</p>
-            <h2 id="simulation-deck-heading" className="mt-1 text-base font-bold text-[#1a3a5c]">1. Select a business change</h2>
+          <div className="border-b border-[#e3ebe1] bg-gradient-to-r from-[#eef5fb] via-white to-[#f5f0ff] px-5 py-4">
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#555C56]">Configure scenario</p>
+            <h2 id="simulation-deck-heading" className="mt-1 text-base font-bold text-[#355E3B]">1. Select a business change</h2>
           </div>
 
           <div className="grid max-h-[260px] grid-cols-2 gap-2 overflow-y-auto p-4">
@@ -726,31 +707,31 @@ export function E30BusinessChangeSimulator({ project, onBack, onGoToE31 }: {
               <button
                 key={changeType}
                 onClick={() => { setSelectedChange(changeType); setProposedValue(''); setAnalysed(false); setResults([]); setExpandedId(null) }}
-                className={`group min-h-16 rounded-xl border p-2.5 text-left transition-all ${selectedChange === changeType ? 'border-[#1a56db] bg-[#ebf3ff] shadow-sm ring-1 ring-[#1a56db]' : 'border-[#dbe3ea] bg-white hover:border-[#93b4d5] hover:shadow-sm'}`}
+                className={`group min-h-16 rounded-xl border p-2.5 text-left transition-all ${selectedChange === changeType ? 'border-[#6DAE7C] bg-[#edf5ef] shadow-sm ring-1 ring-[#6DAE7C]' : 'border-[#dbe3ea] bg-white hover:border-[#93b4d5] hover:shadow-sm'}`}
               >
-                <span className={`mb-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-bold ${selectedChange === changeType ? 'bg-[#1a3a5c] text-white' : 'bg-[#eef2f6] text-[#64748b]'}`}>{String(index + 1).padStart(2, '0')}</span>
-                <span className="block text-[11px] font-bold leading-tight text-[#1a3a5c]">{changeType}</span>
+                <span className={`mb-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-bold ${selectedChange === changeType ? 'bg-[#355E3B] text-white' : 'bg-[#edf5ef] text-[#555C56]'}`}>{String(index + 1).padStart(2, '0')}</span>
+                <span className="block text-[11px] font-bold leading-tight text-[#355E3B]">{changeType}</span>
               </button>
             ))}
           </div>
 
           {selectedChange && cfg ? (
-            <div className="border-t border-[#e8edf2] bg-[#f8fafc] p-4">
+            <div className="border-t border-[#e3ebe1] bg-[#F9FAF2] p-4">
               <h3 className="mb-3 text-sm font-bold text-[#173b64]">2. Set parameters</h3>
               <div className="grid gap-3">
                 <div className="rounded-xl border border-[#dbe3ea] bg-white p-4">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-[#64748b]">Existing Business DNA</p>
-                  <p className="mt-2 text-sm font-bold text-[#1a2533]">{cfg.currentValue}</p>
-                  <p className="mt-2 text-[11px] text-[#64748b]">From the current Business DNA · {project.stage}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-[#555C56]">Existing Business DNA</p>
+                  <p className="mt-2 text-sm font-bold text-[#2B2B2B]">{cfg.currentValue}</p>
+                  <p className="mt-2 text-[11px] text-[#555C56]">From the current Business DNA · {project.stage}</p>
                 </div>
                 <div className="rounded-xl border border-[#93b4d5] bg-white p-4">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-[#64748b]">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-[#555C56]">
                     Proposed Change
                     {cfg.proposedOptions ? (
                       <select
                         value={proposedValue}
                         onChange={event => { setProposedValue(event.target.value); setAnalysed(false) }}
-                        className="mt-2 w-full rounded-lg border border-[#cbd5e1] bg-white px-3 py-2.5 text-sm font-semibold normal-case tracking-normal text-[#1a2533] focus:outline-none focus:ring-2 focus:ring-[#1a56db]"
+                        className="mt-2 w-full rounded-lg border border-[#c8d4c7] bg-white px-3 py-2.5 text-sm font-semibold normal-case tracking-normal text-[#2B2B2B] focus:outline-none focus:ring-2 focus:ring-[#6DAE7C]"
                       >
                         <option value="">Select proposed value…</option>
                         {cfg.proposedOptions.map(option => <option key={option}>{option}</option>)}
@@ -760,16 +741,16 @@ export function E30BusinessChangeSimulator({ project, onBack, onGoToE31 }: {
                         value={proposedValue}
                         onChange={event => { setProposedValue(event.target.value); setAnalysed(false) }}
                         placeholder={cfg.proposedPlaceholder}
-                        className="mt-2 w-full rounded-lg border border-[#cbd5e1] bg-white px-3 py-2.5 text-sm font-semibold normal-case tracking-normal text-[#1a2533] focus:outline-none focus:ring-2 focus:ring-[#1a56db]"
+                        className="mt-2 w-full rounded-lg border border-[#c8d4c7] bg-white px-3 py-2.5 text-sm font-semibold normal-case tracking-normal text-[#2B2B2B] focus:outline-none focus:ring-2 focus:ring-[#6DAE7C]"
                       />
                     )}
                   </label>
                 </div>
                 <div className="rounded-xl border border-[#dbe3ea] bg-white p-4">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-[#64748b]">Planning horizon</p>
-                  <div className="mt-2 grid grid-cols-3 gap-1 rounded-lg bg-[#eef2f6] p-1">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-[#555C56]">Planning horizon</p>
+                  <div className="mt-2 grid grid-cols-3 gap-1 rounded-lg bg-[#edf5ef] p-1">
                     {(['1 year', '3 years', '5 years'] as const).map(horizon => (
-                      <button key={horizon} onClick={() => setTimeHorizon(horizon)} className={`rounded-md py-1.5 text-[10px] font-semibold ${timeHorizon === horizon ? 'bg-white text-[#174b91] shadow-sm' : 'text-[#6b7a8d]'}`}>{horizon}</button>
+                      <button key={horizon} onClick={() => setTimeHorizon(horizon)} className={`rounded-md py-1.5 text-[10px] font-semibold ${timeHorizon === horizon ? 'bg-white text-[#174b91] shadow-sm' : 'text-[#555C56]'}`}>{horizon}</button>
                     ))}
                   </div>
                 </div>
@@ -781,7 +762,7 @@ export function E30BusinessChangeSimulator({ project, onBack, onGoToE31 }: {
               </div>
             </div>
           ) : (
-            <div className="border-t border-[#e8edf2] bg-[#f8fafc] px-5 py-6 text-center text-xs text-[#64748b]">Select a possibility to configure a proposed change.</div>
+            <div className="border-t border-[#e3ebe1] bg-[#F9FAF2] px-5 py-6 text-center text-xs text-[#555C56]">Select a possibility to configure a proposed change.</div>
           )}
         </section>
 
@@ -798,7 +779,7 @@ export function E30BusinessChangeSimulator({ project, onBack, onGoToE31 }: {
 
           {!analysed && (
             <div className="rounded-2xl border border-dashed border-[#b9c8d8] bg-white px-6 py-16 text-center shadow-sm">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#eaf2ff] text-xl text-[#1d63d8]" aria-hidden="true">↗</div>
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#edf5ef] text-xl text-[#1d63d8]" aria-hidden="true">↗</div>
               <h3 className="mt-4 text-base font-bold text-[#173b64]">Configure a change to preview its impact</h3>
               <p className="mx-auto mt-2 max-w-lg text-xs leading-relaxed text-[#66788e]">Select a business change, enter the proposed value, and run the simulation. Your live records will remain untouched.</p>
             </div>
@@ -807,17 +788,17 @@ export function E30BusinessChangeSimulator({ project, onBack, onGoToE31 }: {
         {/* Step 3 — Results */}
         {analysed && results.length > 0 && selectedChange && (
           <>
-            <div className="overflow-hidden rounded-2xl border border-[#e2e8f0] bg-white shadow-sm">
-              <div className="flex items-center justify-between border-b border-[#e8edf2] bg-[#f8f9fb] px-5 py-3">
-                <p className="text-xs font-bold text-[#1a3a5c] uppercase tracking-wider">Impact Simulation — {selectedChange}{proposedValue ? ` (${proposedValue})` : ''}</p>
-                <span className="text-[10px] font-semibold text-[#92400e] border border-[#fcd34d] bg-[#fef3c7] px-1.5 py-0.5">SIMULATION ONLY</span>
+            <div className="overflow-hidden rounded-2xl border border-[#e3ebe1] bg-white shadow-sm">
+              <div className="flex items-center justify-between border-b border-[#e3ebe1] bg-[#F9FAF2] px-5 py-3">
+                <p className="text-xs font-bold text-[#355E3B] uppercase tracking-wider">Impact Simulation — {selectedChange}{proposedValue ? ` (${proposedValue})` : ''}</p>
+                <span className="text-[10px] font-semibold text-[#7a5807] border border-[#fae69e] bg-[#fdf8e6] px-1.5 py-0.5">SIMULATION ONLY</span>
               </div>
 
-              <div className="border-b border-[#e8edf2] bg-gradient-to-r from-[#f7fbff] to-white px-5 py-4">
+              <div className="border-b border-[#e3ebe1] bg-gradient-to-r from-[#f7fbff] to-white px-5 py-4">
                 <div className="grid items-stretch gap-2 md:grid-cols-[1fr_auto_1fr_auto_1fr]">
                   <div className="rounded-lg border border-[#dce5ee] bg-white p-3">
-                    <p className="text-[9px] font-bold uppercase tracking-wider text-[#6b7a8d]">Current State</p>
-                    <p className="mt-1.5 text-xs font-semibold text-[#1a3a5c]">{cfg?.currentValue}</p>
+                    <p className="text-[9px] font-bold uppercase tracking-wider text-[#555C56]">Current State</p>
+                    <p className="mt-1.5 text-xs font-semibold text-[#355E3B]">{cfg?.currentValue}</p>
                     <p className="mt-1 text-[10px] text-[#718096]">Existing Business DNA</p>
                   </div>
                   <span className="self-center text-[#8ea1b5]" aria-hidden="true">→</span>
@@ -835,7 +816,7 @@ export function E30BusinessChangeSimulator({ project, onBack, onGoToE31 }: {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 border-b border-[#eef2f6] p-4 lg:grid-cols-4">
+              <div className="grid grid-cols-2 gap-3 border-b border-[#edf5ef] p-4 lg:grid-cols-4">
                 {[
                   { label: 'Affected records', value: results.length, note: 'across this simulation', color: 'text-[#174b91]', icon: '◎' },
                   { label: 'Potentially new', value: results.filter(result => result.category === 'POTENTIALLY NEW').length, note: 'requirements identified', color: 'text-[#6d28d9]', icon: '+' },
@@ -850,10 +831,10 @@ export function E30BusinessChangeSimulator({ project, onBack, onGoToE31 }: {
                 ))}
               </div>
 
-              <div className="border-b border-[#f1f5f9] px-5 py-4">
+              <div className="border-b border-[#F9FAF2] px-5 py-4">
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-xs font-bold text-[#1a3a5c]">Impact overview</p>
-                  <p className="text-[10px] text-[#64748b]">{needsVerifCount} item{needsVerifCount === 1 ? '' : 's'} need verification</p>
+                  <p className="text-xs font-bold text-[#355E3B]">Impact overview</p>
+                  <p className="text-[10px] text-[#555C56]">{needsVerifCount} item{needsVerifCount === 1 ? '' : 's'} need verification</p>
                 </div>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7">
                   {impactAreas.map(area => (
@@ -865,16 +846,16 @@ export function E30BusinessChangeSimulator({ project, onBack, onGoToE31 }: {
                 </div>
               </div>
 
-              <div className="border-b border-[#e8edf2] p-4">
+              <div className="border-b border-[#e3ebe1] p-4">
                 <MaharashtraApprovalHeatmap changeType={selectedChange} proposedValue={proposedValue} />
               </div>
 
               {/* Results list */}
-              <div className="border-b border-[#e8edf2] px-5 pt-4">
+              <div className="border-b border-[#e3ebe1] px-5 pt-4">
                 <div className="flex flex-wrap items-end justify-between gap-3">
                   <div>
                     <p className="text-sm font-bold text-[#173b64]">Detailed Impact View</p>
-                    <p className="mt-0.5 text-[10px] text-[#6b7a8d]">Open a result to understand why it may be affected.</p>
+                    <p className="mt-0.5 text-[10px] text-[#555C56]">Open a result to understand why it may be affected.</p>
                   </div>
                   <Link href={ENTREPRENEUR_ROUTES.dependencies(project.id)} className="mb-2 text-[11px] font-semibold text-[#1559c5] hover:underline">View Dependency Graph →</Link>
                 </div>
@@ -892,57 +873,55 @@ export function E30BusinessChangeSimulator({ project, onBack, onGoToE31 }: {
                   ))}
                 </div>
               </div>
-              <div className="divide-y divide-[#f1f5f9]">
+              <div className="divide-y divide-[#F9FAF2]">
                 {filteredResults.map(r => (
                   <div key={r.id}>
                     <button
                       onClick={() => setExpandedId(r.id === expandedId ? null : r.id)}
-                      className="w-full text-left px-5 py-3.5 hover:bg-[#f8f9fb] transition-colors"
+                      className="w-full text-left px-5 py-3.5 hover:bg-[#F9FAF2] transition-colors"
                     >
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-semibold text-[#1a2533] mb-0.5">{r.affectedRecord}</p>
-                          <p className="text-[10px] text-[#6b7a8d]"><strong className="text-[#475569]">Current State:</strong> {r.currentState}</p>
+                          <p className="text-xs font-semibold text-[#2B2B2B] mb-0.5">{r.affectedRecord}</p>
+                          <p className="text-[10px] text-[#555C56]"><strong className="text-[#4A4A4A]">Current State:</strong> {r.currentState}</p>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
                           {simCategoryBadge(r.category)}
                           {r.verification === 'Needs Verification' && (
-                            <span className="text-[10px] font-semibold px-1.5 py-0.5 border border-[#fcd34d] bg-[#fef3c7] text-[#92400e]">Needs Verification</span>
+                            <span className="text-[10px] font-semibold px-1.5 py-0.5 border border-[#fae69e] bg-[#fdf8e6] text-[#7a5807]">Needs Verification</span>
                           )}
-                          <span className="text-[10px] text-[#94a3b8]">{expandedId === r.id ? '▲' : '▼'}</span>
+                          <span className="text-[10px] text-[#9ab098]">{expandedId === r.id ? '▲' : '▼'}</span>
                         </div>
                       </div>
                     </button>
                     {expandedId === r.id && (
-                      <div className="bg-[#f8f9fb] border-t border-[#e8edf2] px-5 py-4 space-y-3 text-xs">
+                      <div className="bg-[#F9FAF2] border-t border-[#e3ebe1] px-5 py-4 space-y-3 text-xs">
                         <p className="text-xs font-bold text-[#173b64]">Why is this affected?</p>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2.5">
                           <div>
-                            <p className="text-[10px] font-semibold text-[#64748b] uppercase tracking-wider mb-1">Impact</p>
-                            <p className="text-[#334155] leading-relaxed">{r.potentialImpact}</p>
+                            <p className="text-[10px] font-semibold text-[#555C56] uppercase tracking-wider mb-1">Impact</p>
+                            <p className="text-[#3A3E39] leading-relaxed">{r.potentialImpact}</p>
                           </div>
                           <div>
-                            <p className="text-[10px] font-semibold text-[#64748b] uppercase tracking-wider mb-1">Suggested Next Step</p>
-                            <p className="text-[#334155] leading-relaxed">{r.suggestedNextStep}</p>
+                            <p className="text-[10px] font-semibold text-[#555C56] uppercase tracking-wider mb-1">Suggested Next Step</p>
+                            <p className="text-[#3A3E39] leading-relaxed">{r.suggestedNextStep}</p>
                           </div>
                         </div>
                         {r.verification === 'Needs Verification' && (
-                          <div className="border border-[#fcd34d] bg-[#fefce8] px-3 py-2 text-[#92400e]">
+                          <div className="border border-[#fae69e] bg-[#fefce8] px-3 py-2 text-[#7a5807]">
                             Potential impact identified. Applicability to this business requires verification before treating as a confirmed obligation.
                           </div>
                         )}
-                        {viewMode === 'advanced' && (
-                          <div className="rounded-lg border border-[#cddbea] bg-white p-3">
-                            <p className="text-[10px] font-bold uppercase tracking-wider text-[#52677e]">Regulatory reasoning</p>
-                            <p className="mt-1 text-[#40536a]">This simulation compares the proposed value with the current Business DNA and the configured relationship for this record. Use the Dependency Graph to inspect prerequisites and downstream approvals.</p>
-                          </div>
-                        )}
+                        <div className="rounded-lg border border-[#cddbea] bg-white p-3">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-[#52677e]">Regulatory reasoning</p>
+                          <p className="mt-1 text-[#40536a]">This simulation compares the proposed value with the current Business DNA and the configured relationship for this record. Use the Dependency Graph to inspect prerequisites and downstream approvals.</p>
+                        </div>
                       </div>
                     )}
                   </div>
                 ))}
                 {filteredResults.length === 0 && (
-                  <div className="px-5 py-8 text-center text-xs text-[#6b7a8d]">No configured impact was identified in this category for the current scenario.</div>
+                  <div className="px-5 py-8 text-center text-xs text-[#555C56]">No configured impact was identified in this category for the current scenario.</div>
                 )}
               </div>
             </div>
@@ -951,8 +930,8 @@ export function E30BusinessChangeSimulator({ project, onBack, onGoToE31 }: {
             <div className="rounded-2xl border border-[#cddbea] bg-white px-5 py-5 shadow-sm">
               <div className="flex flex-wrap items-start justify-between gap-5">
               <div className="max-w-2xl text-xs">
-                <p className="text-sm font-bold text-[#1a3a5c]">Next Steps</p>
-                <p className="mt-1 text-[#6b7a8d]">Review the proposed regulatory delta before starting any workflow. Your live Business Profile remains unchanged.</p>
+                <p className="text-sm font-bold text-[#355E3B]">Next Steps</p>
+                <p className="mt-1 text-[#555C56]">Review the proposed regulatory delta before starting any workflow. Your live Business Profile remains unchanged.</p>
                 <ol className="mt-3 grid gap-2 text-[11px] text-[#40536a] sm:grid-cols-2">
                   <li className="rounded-lg bg-[#f5f8fb] px-3 py-2"><strong>1.</strong> Review potential amendments</li>
                   <li className="rounded-lg bg-[#f5f8fb] px-3 py-2"><strong>2.</strong> Verify conditional impacts</li>
@@ -1002,42 +981,42 @@ export function E31AmendmentsPage({ changeType, proposedValue, onBack, onGoToE30
   const needsVerifCount = delta.filter(d => d.verification === 'Needs Verification').length
 
   return (
-    <main id="main-content" className="flex-1 bg-[#f8f9fb]" tabIndex={-1}>
-      <div className="bg-white border-b border-[#d1d9e0] px-6 py-4">
+    <main id="main-content" className="flex-1 bg-[#F9FAF2]" tabIndex={-1}>
+      <div className="bg-white border-b border-[#d6dfd5] px-6 py-4">
         <div className="max-w-[1200px] mx-auto">
-          <h1 className="text-xl font-bold text-[#1a3a5c]">Amendments / New Requirements</h1>
-          <p className="text-xs text-[#6b7a8d] mt-1">Review the simulated regulatory delta before starting a change workflow.</p>
+          <h1 className="text-xl font-bold text-[#355E3B]">Amendments / New Requirements</h1>
+          <p className="text-xs text-[#555C56] mt-1">Review the simulated regulatory delta before starting a change workflow.</p>
         </div>
       </div>
 
       <div className="max-w-[1200px] mx-auto px-6 py-5 space-y-4">
         {/* Safety notice */}
-        <div className="bg-white border border-[#bfdbfe] border-l-4 border-l-[#1d4ed8] px-4 py-3 text-xs text-[#1e3a8a]">
+        <div className="bg-white border border-[#c5e2cb] border-l-4 border-l-[#539160] px-4 py-3 text-xs text-[#1e3a8a]">
           <p className="font-semibold mb-0.5">This view does not alter your existing Business Profile, approvals, or compliance obligations.</p>
           <p>The regulatory delta below identifies what changes if the proposed business change is accepted. Items marked "Needs Verification" require confirmation. Historical records are preserved. Existing approvals and obligations are not modified by this view.</p>
         </div>
 
         {/* Change context */}
-        <div className="bg-white border border-[#e2e8f0] px-5 py-4">
-          <p className="text-[10px] font-semibold text-[#64748b] uppercase tracking-wider mb-3">Proposed Change</p>
+        <div className="bg-white border border-[#e3ebe1] px-5 py-4">
+          <p className="text-[10px] font-semibold text-[#555C56] uppercase tracking-wider mb-3">Proposed Change</p>
           <div className="flex flex-wrap gap-x-10 gap-y-2 text-xs">
             <div>
-              <p className="text-[10px] text-[#64748b] mb-0.5">Change Type</p>
-              <p className="font-semibold text-[#1a2533]">{changeType}</p>
+              <p className="text-[10px] text-[#555C56] mb-0.5">Change Type</p>
+              <p className="font-semibold text-[#2B2B2B]">{changeType}</p>
             </div>
             <div>
-              <p className="text-[10px] text-[#64748b] mb-0.5">Current Value</p>
-              <p className="text-[#1a2533]">{cfg.currentValue}</p>
+              <p className="text-[10px] text-[#555C56] mb-0.5">Current Value</p>
+              <p className="text-[#2B2B2B]">{cfg.currentValue}</p>
             </div>
             {proposedValue && (
               <div>
-                <p className="text-[10px] text-[#64748b] mb-0.5">Proposed Value</p>
-                <p className="text-[#1a2533] font-semibold">{proposedValue}</p>
+                <p className="text-[10px] text-[#555C56] mb-0.5">Proposed Value</p>
+                <p className="text-[#2B2B2B] font-semibold">{proposedValue}</p>
               </div>
             )}
             <div>
-              <p className="text-[10px] text-[#64748b] mb-0.5">Status</p>
-              <span className="text-[10px] font-semibold px-1.5 py-0.5 border border-[#93c5fd] bg-[#dbeafe] text-[#1e40af]">Proposed — Not Yet Accepted</span>
+              <p className="text-[10px] text-[#555C56] mb-0.5">Status</p>
+              <span className="text-[10px] font-semibold px-1.5 py-0.5 border border-[#a1cba9] bg-[#edf5ef] text-[#539160]">Proposed — Not Yet Accepted</span>
             </div>
           </div>
         </div>
@@ -1045,26 +1024,26 @@ export function E31AmendmentsPage({ changeType, proposedValue, onBack, onGoToE30
         {/* Delta summary tiles */}
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           {[
-            { label: 'New requirements', value: newCount, color: newCount > 0 ? 'text-[#5b21b6]' : 'text-[#94a3b8]' },
-            { label: 'Amendments', value: amendCount, color: amendCount > 0 ? 'text-[#92400e]' : 'text-[#94a3b8]' },
-            { label: 'Triggered', value: triggeredCount, color: triggeredCount > 0 ? 'text-[#9a3412]' : 'text-[#94a3b8]' },
-            { label: 'Review required', value: reviewCount, color: reviewCount > 0 ? 'text-[#1e40af]' : 'text-[#94a3b8]' },
-            { label: 'Needs Verification', value: needsVerifCount, color: needsVerifCount > 0 ? 'text-[#92400e]' : 'text-[#94a3b8]' },
+            { label: 'New requirements', value: newCount, color: newCount > 0 ? 'text-[#5b21b6]' : 'text-[#9ab098]' },
+            { label: 'Amendments', value: amendCount, color: amendCount > 0 ? 'text-[#7a5807]' : 'text-[#9ab098]' },
+            { label: 'Triggered', value: triggeredCount, color: triggeredCount > 0 ? 'text-[#9a3412]' : 'text-[#9ab098]' },
+            { label: 'Review required', value: reviewCount, color: reviewCount > 0 ? 'text-[#539160]' : 'text-[#9ab098]' },
+            { label: 'Needs Verification', value: needsVerifCount, color: needsVerifCount > 0 ? 'text-[#7a5807]' : 'text-[#9ab098]' },
           ].map(t => (
-            <div key={t.label} className="bg-white border border-[#e2e8f0] px-4 py-3">
+            <div key={t.label} className="bg-white border border-[#e3ebe1] px-4 py-3">
               <p className={`text-2xl font-bold ${t.color}`}>{t.value}</p>
-              <p className="text-xs text-[#6b7a8d] mt-0.5">{t.label}</p>
+              <p className="text-xs text-[#555C56] mt-0.5">{t.label}</p>
             </div>
           ))}
         </div>
 
         {/* Journey delta visual */}
-        <div className="bg-white border border-[#e2e8f0] px-5 py-4">
-          <p className="text-[10px] font-semibold text-[#64748b] uppercase tracking-wider mb-3">Regulatory Delta — Existing Journey vs. Change</p>
+        <div className="bg-white border border-[#e3ebe1] px-5 py-4">
+          <p className="text-[10px] font-semibold text-[#555C56] uppercase tracking-wider mb-3">Regulatory Delta — Existing Journey vs. Change</p>
           <div className="flex flex-wrap items-start gap-4 text-xs">
             <div className="flex-1 min-w-[200px]">
               <p className="text-[10px] font-semibold text-[#166534] uppercase tracking-wider mb-2">Existing Journey (unchanged)</p>
-              <ul className="space-y-1 text-[#334155] border border-[#e2e8f0] divide-y divide-[#f1f5f9]">
+              <ul className="space-y-1 text-[#3A3E39] border border-[#e3ebe1] divide-y divide-[#F9FAF2]">
                 {['MPCB CTE Application — under processing', 'MIDC Allotment — active', 'PSI 2019 Eligibility Certificate — issued', 'Compliance Calendar — active obligations'].map(r => (
                   <li key={r} className="px-3 py-1.5 flex items-start gap-1.5">
                     <span className="text-[#22c55e] mt-0.5 shrink-0">&#10003;</span>
@@ -1073,14 +1052,14 @@ export function E31AmendmentsPage({ changeType, proposedValue, onBack, onGoToE30
                 ))}
               </ul>
             </div>
-            <div className="text-[#94a3b8] self-center text-lg font-bold shrink-0">›</div>
+            <div className="text-[#9ab098] self-center text-lg font-bold shrink-0">›</div>
             <div className="flex-1 min-w-[200px]">
-              <p className="text-[10px] font-semibold text-[#92400e] uppercase tracking-wider mb-2">Delta — Change Impact</p>
-              <ul className="space-y-1 border border-[#e2e8f0] divide-y divide-[#f1f5f9]">
+              <p className="text-[10px] font-semibold text-[#7a5807] uppercase tracking-wider mb-2">Delta — Change Impact</p>
+              <ul className="space-y-1 border border-[#e3ebe1] divide-y divide-[#F9FAF2]">
                 {delta.filter(d => d.status !== 'No Change').map(d => (
                   <li key={d.id} className="px-3 py-1.5 flex items-start gap-1.5">
                     <span className="shrink-0 mt-0.5">{deltaStatusBadge(d.status)}</span>
-                    <span className="text-[#334155]">{d.newOrAmended}</span>
+                    <span className="text-[#3A3E39]">{d.newOrAmended}</span>
                   </li>
                 ))}
               </ul>
@@ -1089,16 +1068,16 @@ export function E31AmendmentsPage({ changeType, proposedValue, onBack, onGoToE30
         </div>
 
         {/* Delta items table */}
-        <div className="bg-white border border-[#e2e8f0]">
-          <div className="px-5 py-3 border-b border-[#e8edf2] bg-[#f8f9fb]">
-            <p className="text-xs font-bold text-[#1a3a5c] uppercase tracking-wider">Regulatory Delta — All Items</p>
+        <div className="bg-white border border-[#e3ebe1]">
+          <div className="px-5 py-3 border-b border-[#e3ebe1] bg-[#F9FAF2]">
+            <p className="text-xs font-bold text-[#355E3B] uppercase tracking-wider">Regulatory Delta — All Items</p>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-xs border-collapse">
               <thead>
-                <tr className="bg-[#f8f9fb] border-b border-[#e2e8f0]">
+                <tr className="bg-[#F9FAF2] border-b border-[#e3ebe1]">
                   {['What Changed', 'Existing Record', 'New / Amended Requirement', 'Status', 'Verification', ''].map(h => (
-                    <th key={h} className="text-left px-3 py-2.5 text-[10px] font-semibold text-[#64748b] uppercase tracking-wider border-r border-[#e8edf2] last:border-r-0 whitespace-nowrap">{h}</th>
+                    <th key={h} className="text-left px-3 py-2.5 text-[10px] font-semibold text-[#555C56] uppercase tracking-wider border-r border-[#e3ebe1] last:border-r-0 whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -1107,44 +1086,44 @@ export function E31AmendmentsPage({ changeType, proposedValue, onBack, onGoToE30
                   <React.Fragment key={d.id}>
                     <tr
                       onClick={() => setExpandedId(d.id === expandedId ? null : d.id)}
-                      className={`border-b border-[#f1f5f9] cursor-pointer ${expandedId === d.id ? 'bg-[#ebf3ff]' : 'hover:bg-[#f8f9fb]'} ${d.status === 'No Change' ? 'opacity-60' : ''}`}
+                      className={`border-b border-[#F9FAF2] cursor-pointer ${expandedId === d.id ? 'bg-[#edf5ef]' : 'hover:bg-[#F9FAF2]'} ${d.status === 'No Change' ? 'opacity-60' : ''}`}
                     >
-                      <td className="px-3 py-2.5 border-r border-[#f1f5f9] font-medium text-[#1a2533] min-w-[160px]">{d.whatChanged}</td>
-                      <td className="px-3 py-2.5 border-r border-[#f1f5f9] text-[#475569] min-w-[180px]">{d.existingRecord}</td>
-                      <td className="px-3 py-2.5 border-r border-[#f1f5f9] text-[#334155] min-w-[200px]">{d.newOrAmended}</td>
-                      <td className="px-3 py-2.5 border-r border-[#f1f5f9] whitespace-nowrap">{deltaStatusBadge(d.status)}</td>
-                      <td className="px-3 py-2.5 border-r border-[#f1f5f9] whitespace-nowrap">
+                      <td className="px-3 py-2.5 border-r border-[#F9FAF2] font-medium text-[#2B2B2B] min-w-[160px]">{d.whatChanged}</td>
+                      <td className="px-3 py-2.5 border-r border-[#F9FAF2] text-[#4A4A4A] min-w-[180px]">{d.existingRecord}</td>
+                      <td className="px-3 py-2.5 border-r border-[#F9FAF2] text-[#3A3E39] min-w-[200px]">{d.newOrAmended}</td>
+                      <td className="px-3 py-2.5 border-r border-[#F9FAF2] whitespace-nowrap">{deltaStatusBadge(d.status)}</td>
+                      <td className="px-3 py-2.5 border-r border-[#F9FAF2] whitespace-nowrap">
                         {d.verification === 'Needs Verification'
-                          ? <span className="text-[10px] font-semibold px-1.5 py-0.5 border border-[#fcd34d] bg-[#fef3c7] text-[#92400e]">Needs Verification</span>
+                          ? <span className="text-[10px] font-semibold px-1.5 py-0.5 border border-[#fae69e] bg-[#fdf8e6] text-[#7a5807]">Needs Verification</span>
                           : <span className="text-[10px] font-semibold px-1.5 py-0.5 border border-[#86efac] bg-[#dcfce7] text-[#166534]">Validated</span>}
                       </td>
                       <td className="px-3 py-2.5 whitespace-nowrap">
-                        <button className="text-[#1a56db] hover:underline text-[10px]">Detail</button>
+                        <button className="text-[#6DAE7C] hover:underline text-[10px]">Detail</button>
                       </td>
                     </tr>
                     {expandedId === d.id && (
-                      <tr className="bg-[#f8f9fb]">
-                        <td colSpan={6} className="px-5 py-4 border-b border-[#e8edf2]">
+                      <tr className="bg-[#F9FAF2]">
+                        <td colSpan={6} className="px-5 py-4 border-b border-[#e3ebe1]">
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-xs">
                             <div>
-                              <p className="text-[10px] font-semibold text-[#64748b] uppercase tracking-wider mb-1">Reason</p>
-                              <p className="text-[#334155] leading-relaxed">{d.reason}</p>
+                              <p className="text-[10px] font-semibold text-[#555C56] uppercase tracking-wider mb-1">Reason</p>
+                              <p className="text-[#3A3E39] leading-relaxed">{d.reason}</p>
                             </div>
                             <div>
-                              <p className="text-[10px] font-semibold text-[#64748b] uppercase tracking-wider mb-1">Required Action</p>
-                              <p className="text-[#334155] leading-relaxed">{d.requiredAction}</p>
+                              <p className="text-[10px] font-semibold text-[#555C56] uppercase tracking-wider mb-1">Required Action</p>
+                              <p className="text-[#3A3E39] leading-relaxed">{d.requiredAction}</p>
                             </div>
                           </div>
                           {d.verification === 'Needs Verification' && (
-                            <div className="mt-3 border border-[#fcd34d] bg-[#fefce8] px-3 py-2 text-xs text-[#92400e]">
+                            <div className="mt-3 border border-[#fae69e] bg-[#fefce8] px-3 py-2 text-xs text-[#7a5807]">
                               Applicability requires verification. Do not treat this as a confirmed obligation until validated.
                             </div>
                           )}
                           <div className="mt-3 flex gap-2">
                             {d.status !== 'No Change' && (
-                              <button onClick={onGoToE14} className="text-xs border border-[#d1d9e0] text-[#1a3a5c] px-3 py-1.5 hover:bg-[#f1f5f9]">Start Application</button>
+                              <button onClick={onGoToE14} className="text-xs border border-[#d6dfd5] text-[#355E3B] px-3 py-1.5 hover:bg-[#F9FAF2]">Start Application</button>
                             )}
-                            <button onClick={onGoToE11} className="text-xs border border-[#d1d9e0] text-[#1a3a5c] px-3 py-1.5 hover:bg-[#f1f5f9]">Document Centre</button>
+                            <button onClick={onGoToE11} className="text-xs border border-[#d6dfd5] text-[#355E3B] px-3 py-1.5 hover:bg-[#F9FAF2]">Document Centre</button>
                           </div>
                         </td>
                       </tr>
@@ -1157,14 +1136,14 @@ export function E31AmendmentsPage({ changeType, proposedValue, onBack, onGoToE30
         </div>
 
         {/* Start Change Workflow CTA */}
-        <div className="bg-white border border-[#e2e8f0] px-5 py-4 flex flex-wrap items-center justify-between gap-4">
+        <div className="bg-white border border-[#e3ebe1] px-5 py-4 flex flex-wrap items-center justify-between gap-4">
           <div className="text-xs">
-            <p className="font-semibold text-[#1a3a5c]">Ready to proceed?</p>
-            <p className="text-[#6b7a8d] mt-0.5">Start Change Workflow to enter the existing EKATMA application journey for the required amendments and new approvals.</p>
+            <p className="font-semibold text-[#355E3B]">Ready to proceed?</p>
+            <p className="text-[#555C56] mt-0.5">Start Change Workflow to enter the existing EKATMA application journey for the required amendments and new approvals.</p>
           </div>
           <div className="flex flex-wrap gap-2 shrink-0">
-            <button onClick={onGoToE09} className="text-xs bg-[#1a3a5c] text-white px-4 py-2 font-semibold hover:bg-[#0f2540] transition-colors">Start Change Workflow</button>
-            <button onClick={onGoToE30} className="text-xs border border-[#d1d9e0] text-[#475569] px-4 py-2 hover:bg-[#f1f5f9]">Back to Simulator</button>
+            <button onClick={onGoToE09} className="text-xs bg-[#355E3B] text-white px-4 py-2 font-semibold hover:bg-[#27472c] transition-colors">Start Change Workflow</button>
+            <button onClick={onGoToE30} className="text-xs border border-[#d6dfd5] text-[#4A4A4A] px-4 py-2 hover:bg-[#F9FAF2]">Back to Simulator</button>
           </div>
         </div>
       </div>

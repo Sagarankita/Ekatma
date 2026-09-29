@@ -24,6 +24,8 @@ describe('Entrepreneur route contract', () => {
     expect(ENTREPRENEUR_ROUTES.dossier('BP-001')).toBe('/entrepreneur/businesses/BP-001/dossier');
     expect(ENTREPRENEUR_ROUTES.provenance('BP-001')).toBe('/entrepreneur/businesses/BP-001/dossier/provenance');
     expect(ENTREPRENEUR_ROUTES.journey('BP-001')).toBe('/entrepreneur/businesses/BP-001/journey');
+    expect(ENTREPRENEUR_ROUTES.knowYourApprovals('BP-001')).toBe('/entrepreneur/businesses/BP-001/approvals');
+    expect(ENTREPRENEUR_ROUTES.approvals('BP-001')).toBe('/entrepreneur/businesses/BP-001/approvals');
     expect(ENTREPRENEUR_ROUTES.documents('BP-001')).toBe('/entrepreneur/businesses/BP-001/documents');
     expect(ENTREPRENEUR_ROUTES.dependencies('BP-001')).toBe('/entrepreneur/businesses/BP-001/dependencies');
     expect(ENTREPRENEUR_ROUTES.applications('BP-001')).toBe('/entrepreneur/businesses/BP-001/applications');

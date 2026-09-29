@@ -130,16 +130,16 @@ export function ServiceExplorer() {
   });
 
   return (
-    <section id="service-explorer" className="py-16 bg-[#F8F9FA] border-b border-slate-200 scroll-mt-12">
+    <section id="service-explorer" className="py-16 bg-[#F9FAF2] border-b border-slate-200 scroll-mt-12">
       <div className="max-w-7xl mx-auto px-6 sm:px-8">
         
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
           <div>
-            <span className="text-[#17365D] text-xs font-bold uppercase tracking-wider bg-[#17365D]/10 px-3 py-1 rounded-full border border-[#17365D]/20">
+            <span className="text-[#355E3B] text-xs font-bold uppercase tracking-wider bg-[#355E3B]/10 px-3 py-1 rounded-full border border-[#355E3B]/20">
               SERVICE CATALOGUE
             </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#17365D] mt-3 mb-2">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#355E3B] mt-3 mb-2">
               Explore EKATMA Services
             </h2>
             <p className="text-slate-600 text-sm max-w-2xl">
@@ -156,7 +156,7 @@ export function ServiceExplorer() {
               id="dept-filter"
               value={selectedDept}
               onChange={(e) => setSelectedDept(e.target.value)}
-              className="bg-white border border-slate-300 rounded-md px-3 py-1.5 text-xs text-[#20242A] focus:ring-2 focus:ring-[#245B8A] outline-none"
+              className="bg-white border border-slate-300 rounded-md px-3 py-1.5 text-xs text-[#2B2B2B] focus:ring-2 focus:ring-[#3d7a4d] outline-none"
             >
               <option value="All">All Departments</option>
               <option value="MIDC">MIDC</option>
@@ -178,7 +178,7 @@ export function ServiceExplorer() {
                 onClick={() => setActiveStage(stage)}
                 className={`px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
                   isActive
-                    ? 'bg-[#17365D] text-white shadow-sm'
+                    ? 'bg-[#355E3B] text-white shadow-sm'
                     : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
                 }`}
               >
@@ -193,11 +193,11 @@ export function ServiceExplorer() {
           {filteredServices.map((service) => (
             <div
               key={service.id}
-              className="bg-white rounded-xl border border-slate-200 hover:border-[#245B8A]/40 p-6 flex flex-col justify-between transition-all hover:shadow-md"
+              className="bg-white rounded-xl border border-slate-200 hover:border-[#3d7a4d]/40 p-6 flex flex-col justify-between transition-all hover:shadow-md"
             >
               <div>
                 <div className="flex items-center justify-between gap-2 mb-3">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#17365D] bg-[#17365D]/10 px-2 py-0.5 rounded">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#355E3B] bg-[#355E3B]/10 px-2 py-0.5 rounded">
                     {service.dept}
                   </span>
                   <span className="text-[10px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
@@ -205,7 +205,7 @@ export function ServiceExplorer() {
                   </span>
                 </div>
 
-                <h3 className="text-base font-bold text-[#17365D] mb-2 leading-snug">
+                <h3 className="text-base font-bold text-[#355E3B] mb-2 leading-snug">
                   {service.title}
                 </h3>
                 <p className="text-slate-600 text-xs leading-relaxed mb-4">
@@ -214,12 +214,12 @@ export function ServiceExplorer() {
               </div>
 
               <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                <span className="text-[10px] font-semibold text-[#E68A2E]">
+                <span className="text-[10px] font-semibold text-[#D4A017]">
                   Stage: {service.stage}
                 </span>
                 <button
                   onClick={() => router.push(ENTREPRENEUR_ROUTES.login())}
-                  className="text-xs font-semibold text-[#245B8A] hover:text-[#17365D] flex items-center gap-1 group"
+                  className="text-xs font-semibold text-[#3d7a4d] hover:text-[#355E3B] flex items-center gap-1 group"
                 >
                   <span>Apply</span>
                   <svg className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">

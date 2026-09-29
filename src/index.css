@@ -2,15 +2,15 @@
 @import 'tailwindcss';
 
 @theme {
-  --color-gov-navy: #1a3a5c;
-  --color-gov-navy-dark: #0f2540;
-  --color-gov-blue: #1a56db;
-  --color-gov-blue-light: #ebf3ff;
-  --color-gov-orange: #f97316;
-  --color-gov-surface: #f8f9fb;
-  --color-gov-border: #d1d9e0;
-  --color-gov-text: #1a2533;
-  --color-gov-muted: #374151;
+  --color-gov-navy: #355E3B;
+  --color-gov-navy-dark: #27472c;
+  --color-gov-blue: #6DAE7C;
+  --color-gov-blue-light: #edf5ef;
+  --color-gov-orange: #D4A017;
+  --color-gov-surface: #F9FAF2;
+  --color-gov-border: #d6dfd5;
+  --color-gov-text: #2B2B2B;
+  --color-gov-muted: #4A4A4A;
   --font-sans: 'Noto Sans', 'Noto Sans Devanagari', system-ui, sans-serif;
 }
 
@@ -20,12 +20,12 @@
 
 body {
   font-family: 'Noto Sans', 'Noto Sans Devanagari', system-ui, sans-serif;
-  color: #1a2533;
-  background: #fff;
+  color: #2B2B2B;
+  background: #F9FAF2;
 }
 
 :focus-visible {
-  outline: 3px solid #1a56db;
+  outline: 3px solid #D4A017;
   outline-offset: 2px;
 }
 
@@ -33,7 +33,7 @@ body {
   position: absolute;
   top: -100%;
   left: 0;
-  background: #1a3a5c;
+  background: #355E3B;
   color: white;
   padding: 8px 16px;
   z-index: 9999;
@@ -46,7 +46,7 @@ body {
 
 /* ── Table row borders — darker, more legible ────────────────────────────── */
 table tbody tr {
-  border-bottom: 1px solid #94a3b8 !important;
+  border-bottom: 1px solid #9ab098 !important;
 }
 table tbody tr:last-child {
   border-bottom: none !important;
@@ -56,7 +56,7 @@ table tbody tr:last-child {
 
 /* Navy header on all data tables */
 table thead tr {
-  background: #1a3a5c !important;
+  background: #355E3B !important;
 }
 table thead tr th {
   color: rgba(255,255,255,0.90) !important;
@@ -65,23 +65,23 @@ table thead tr th {
 }
 /* Override any specific bg that was already set inline */
 table thead {
-  background: #1a3a5c !important;
-  border-bottom-color: #0f2540 !important;
+  background: #355E3B !important;
+  border-bottom-color: #27472c !important;
 }
 
 /* Subtle alternating row stripe using a very light blue tint */
 table tbody tr:nth-child(even) {
-  background-color: #f4f8ff !important;
+  background-color: #f3f7f2 !important;
 }
 table tbody tr:hover {
-  background-color: #eaf2ff !important;
+  background-color: #edf5ef !important;
 }
 
 /* ── Status chip elevation ─────────────────────────────────────────────────── */
 
 /* Section title accent bars */
 .section-accent {
-  border-left: 3px solid #1a56db;
+  border-left: 3px solid #6DAE7C;
   padding-left: 8px;
 }
 
@@ -91,18 +91,18 @@ table tbody tr:hover {
 }
 .kpi-card:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(26,58,92,0.12);
+  box-shadow: 0 4px 12px rgba(53,94,59,0.12);
 }
 
 /* Sidebar active state — stronger left accent */
 .dept-nav-active {
-  border-left: 3px solid #1a56db;
-  background: #eff6ff !important;
-  color: #1a3a5c !important;
+  border-left: 3px solid #6DAE7C;
+  background: #edf5ef !important;
+  color: #355E3B !important;
   font-weight: 600;
 }
 
 /* Breadcrumb separator color */
 .breadcrumb-sep {
-  color: #b0bcc9;
+  color: #a5b5a3;
 }

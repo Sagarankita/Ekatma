@@ -73,10 +73,10 @@ export function ConnectedJourney() {
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-14">
-          <span className="text-[#E68A2E] text-xs font-bold uppercase tracking-wider bg-[#E68A2E]/10 px-3 py-1 rounded-full border border-[#E68A2E]/20">
+          <span className="text-[#D4A017] text-xs font-bold uppercase tracking-wider bg-[#D4A017]/10 px-3 py-1 rounded-full border border-[#D4A017]/20">
             PLATFORM ORCHESTRATION
           </span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#17365D] mt-3 mb-3">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#355E3B] mt-3 mb-3">
             From Business Setup to Continuous Compliance
           </h2>
           <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
@@ -89,19 +89,19 @@ export function ConnectedJourney() {
           {STEPS.map((item, idx) => (
             <div
               key={item.step}
-              className="bg-[#F8F9FA] rounded-xl border border-slate-200 p-6 flex flex-col justify-between hover:border-[#17365D]/30 transition-all hover:shadow-md relative group"
+              className="bg-[#F9FAF2] rounded-xl border border-slate-200 p-6 flex flex-col justify-between hover:border-[#355E3B]/30 transition-all hover:shadow-md relative group"
             >
               <div>
                 <div className="flex items-center justify-between gap-2 mb-4">
-                  <span className="text-xs font-black text-[#17365D] bg-[#17365D]/10 px-2.5 py-1 rounded-md">
+                  <span className="text-xs font-black text-[#355E3B] bg-[#355E3B]/10 px-2.5 py-1 rounded-md">
                     STEP {item.step}
                   </span>
-                  <div className="w-9 h-9 rounded-lg bg-[#17365D] text-white flex items-center justify-center shadow-xs">
+                  <div className="w-9 h-9 rounded-lg bg-[#355E3B] text-white flex items-center justify-center shadow-xs">
                     {item.icon}
                   </div>
                 </div>
 
-                <h3 className="text-base font-bold text-[#17365D] mb-2">
+                <h3 className="text-base font-bold text-[#355E3B] mb-2">
                   {item.title}
                 </h3>
                 <p className="text-slate-600 text-xs leading-relaxed">

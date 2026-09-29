@@ -307,7 +307,7 @@ export function DocumentOcrInsightsPage({
   };
 
   return (
-    <div className="min-h-screen bg-[#f1f5f9] text-[#1a2533] pb-16">
+    <div className="min-h-screen bg-[#F9FAF2] text-[#2B2B2B] pb-16">
       {/* Toast Notification */}
       {notification && (
         <div className="fixed top-5 right-5 z-50 bg-[#1e293b] text-white text-xs px-4 py-3 rounded-lg shadow-lg border border-slate-700 flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-200">
@@ -317,13 +317,13 @@ export function DocumentOcrInsightsPage({
       )}
 
       {/* Top Sticky Navigation Bar */}
-      <div className="bg-white border-b border-[#cbd5e1] sticky top-0 z-20 shadow-xs">
+      <div className="bg-white border-b border-[#c8d4c7] sticky top-0 z-20 shadow-xs">
         <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={onBackToWorkflow}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-[#cbd5e1] rounded-md bg-white hover:bg-slate-50 text-xs font-bold text-[#1a2533] transition-colors shadow-xs"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-[#c8d4c7] rounded-md bg-white hover:bg-slate-50 text-xs font-bold text-[#2B2B2B] transition-colors shadow-xs"
             >
               ← Back to Scrutiny Workflow
             </button>
@@ -349,12 +349,12 @@ export function DocumentOcrInsightsPage({
               href="#deficiencies-report"
               className="px-3 py-1.5 bg-amber-50 text-amber-900 border border-amber-300 rounded-md text-xs font-bold hover:bg-amber-100 transition-colors shadow-xs flex items-center gap-1.5"
             >
-              <span>📋 Deficiencies Report ({deficienciesList.length})</span>
+              <span> Deficiencies Report ({deficienciesList.length})</span>
             </a>
             <button
               type="button"
               onClick={handleSaveAll}
-              className="px-3.5 py-1.5 bg-[#1a56db] text-white rounded-md text-xs font-bold hover:bg-blue-700 transition-colors shadow-xs"
+              className="px-3.5 py-1.5 bg-[#6DAE7C] text-white rounded-md text-xs font-bold hover:bg-blue-700 transition-colors shadow-xs"
             >
               Save Determinations ✓
             </button>
@@ -364,7 +364,7 @@ export function DocumentOcrInsightsPage({
 
       <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 pt-6 space-y-6">
         {/* Document Header Card */}
-        <div className="bg-white border border-[#cbd5e1] rounded-xl p-5 shadow-xs flex flex-wrap items-center justify-between gap-4">
+        <div className="bg-white border border-[#c8d4c7] rounded-xl p-5 shadow-xs flex flex-wrap items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="px-2.5 py-0.5 rounded text-[11px] font-bold bg-slate-100 text-slate-800 border border-slate-300 font-mono">
@@ -374,7 +374,7 @@ export function DocumentOcrInsightsPage({
                 {config.docCategory}
               </span>
               <span className="px-2.5 py-0.5 rounded text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                ⚡ OCR Processed ({config.overallConfidence}% Accuracy)
+                 OCR Processed ({config.overallConfidence}% Accuracy)
               </span>
             </div>
             <h2 className="text-lg font-bold text-slate-900">{config.docTitle}</h2>
@@ -408,10 +408,9 @@ export function DocumentOcrInsightsPage({
         </div>
 
         {/* ── 1. TOP SECTION: Document Viewer ─────────────────────────────────── */}
-        <div className="bg-white border border-[#cbd5e1] rounded-xl overflow-hidden shadow-xs">
-          <div className="px-5 py-3.5 bg-[#f8fafc] border-b border-[#e2e8f0] flex flex-wrap items-center justify-between gap-3">
+        <div className="bg-white border border-[#c8d4c7] rounded-xl overflow-hidden shadow-xs">
+          <div className="px-5 py-3.5 bg-[#F9FAF2] border-b border-[#e3ebe1] flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <span className="text-sm">📄</span>
               <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
                 Document Preview
               </h3>
@@ -421,7 +420,7 @@ export function DocumentOcrInsightsPage({
             </div>
 
             {/* Viewer Controls */}
-            <div className="inline-flex items-center rounded-md border border-[#cbd5e1] bg-white p-0.5 text-xs shadow-xs">
+            <div className="inline-flex items-center rounded-md border border-[#c8d4c7] bg-white p-0.5 text-xs shadow-xs">
               <button
                 type="button"
                 onClick={() => setZoomLevel((z) => Math.min(1.6, z + 0.15))}
@@ -461,19 +460,18 @@ export function DocumentOcrInsightsPage({
           </div>
 
           {/* Document Viewport */}
-          <div className="bg-[#0f172a]/5 p-6 overflow-auto max-h-[500px] flex items-center justify-center">
+          <div className="bg-[#2B2B2B]/5 p-6 overflow-auto max-h-[500px] flex items-center justify-center">
             <div
               style={{
                 transform: `scale(${zoomLevel}) rotate(${rotation}deg)`,
                 transformOrigin: 'center center',
                 transition: 'transform 0.15s ease-out',
               }}
-              className="w-full max-w-[620px] aspect-[1/1.3] bg-white rounded-lg shadow-md border border-[#cbd5e1] p-8 text-slate-800 font-sans select-none overflow-hidden"
+              className="w-full max-w-[620px] aspect-[1/1.3] bg-white rounded-lg shadow-md border border-[#c8d4c7] p-8 text-slate-800 font-sans select-none overflow-hidden"
             >
               {/* Official Letterhead */}
               <div className="border-b-2 border-slate-900 pb-3 mb-5 text-center">
                 <div className="flex items-center justify-center gap-2 mb-1">
-                  <span className="text-lg">🏛</span>
                   <span className="text-xs font-bold uppercase tracking-wider text-slate-900">
                     Maharashtra Industrial Development Corporation
                   </span>
@@ -562,7 +560,7 @@ export function DocumentOcrInsightsPage({
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <span>🔍</span> OCR Insights & Clause-by-Clause Determinations
+                OCR Insights & Clause-by-Clause Determinations
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
                 Review each flagged parameter. Click <strong>Approve</strong>, <strong>Reject</strong>, or <strong>Query</strong>. Selecting Reject or Query opens the determination form to add items directly to the Deficiency Report.
@@ -599,7 +597,7 @@ export function DocumentOcrInsightsPage({
                       ? 'border-amber-300 ring-2 ring-amber-100'
                       : isApproved
                       ? 'border-emerald-300'
-                      : 'border-[#cbd5e1]'
+                      : 'border-[#c8d4c7]'
                   }`}
                 >
                   {/* Clause Header & OCR Comparison Row */}
@@ -630,7 +628,7 @@ export function DocumentOcrInsightsPage({
                         )}
                         {tok.status === 'warning' && (
                           <span className="text-[10px] font-bold text-purple-800 bg-purple-50 border border-purple-200 px-2.5 py-0.5 rounded">
-                            ⏳ Prerequisite Condition
+                             Prerequisite Condition
                           </span>
                         )}
                         {tok.status === 'matched' && (
@@ -647,7 +645,7 @@ export function DocumentOcrInsightsPage({
                     </div>
 
                     {/* Extracted OCR Value vs Applicant Declared Value Box */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4 text-xs bg-[#f8fafc] border border-slate-200 rounded-lg p-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4 text-xs bg-[#F9FAF2] border border-slate-200 rounded-lg p-3">
                       <div className="space-y-0.5">
                         <span className="text-[10px] uppercase font-bold text-slate-500">
                           Extracted from Document (OCR)
@@ -861,7 +859,6 @@ export function DocumentOcrInsightsPage({
           <div className="px-6 py-4 bg-slate-900 text-white flex flex-wrap items-center justify-between gap-3">
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-base">📋</span>
                 <h3 className="text-sm font-bold uppercase tracking-wider text-white">
                   Official Deficiencies & Objections Report
                 </h3>
@@ -877,7 +874,7 @@ export function DocumentOcrInsightsPage({
                 onClick={handleExportReport}
                 className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-100 rounded text-xs font-bold transition-colors border border-slate-600 flex items-center gap-1.5"
               >
-                <span>📄 Export Report (PDF)</span>
+                <span> Export Report (PDF)</span>
               </button>
               {deficienciesList.length > 0 && (
                 <button
@@ -894,7 +891,6 @@ export function DocumentOcrInsightsPage({
           <div className="p-6">
             {deficienciesList.length === 0 ? (
               <div className="py-10 text-center space-y-2 bg-emerald-50/50 rounded-xl border border-emerald-200 p-6">
-                <div className="text-3xl">🎉</div>
                 <h4 className="text-base font-bold text-emerald-900">No Deficiencies or Objections Recorded</h4>
                 <p className="text-xs text-emerald-700 max-w-md mx-auto">
                   All {config.tokens.length} document clauses have been marked as approved and compliant by the reviewing officer. No statutory deficiency notice is required for this document.
@@ -911,10 +907,10 @@ export function DocumentOcrInsightsPage({
                   </span>
                 </div>
 
-                <div className="border border-[#cbd5e1] rounded-lg overflow-hidden bg-white">
+                <div className="border border-[#c8d4c7] rounded-lg overflow-hidden bg-white">
                   <table className="w-full text-xs">
                     <thead>
-                      <tr className="bg-[#f1f5f9] text-[#1a2533] border-b border-[#cbd5e1] text-left font-bold">
+                      <tr className="bg-[#F9FAF2] text-[#2B2B2B] border-b border-[#c8d4c7] text-left font-bold">
                         <th className="p-3">S.No.</th>
                         <th className="p-3">Clause / Subject</th>
                         <th className="p-3">OCR Extracted vs Standard</th>
@@ -924,7 +920,7 @@ export function DocumentOcrInsightsPage({
                         <th className="p-3 text-right">Action</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#cbd5e1]">
+                    <tbody className="divide-y divide-[#c8d4c7]">
                       {deficienciesList.map((item, idx) => (
                         <tr key={item.tokenId} className="hover:bg-slate-50">
                           <td className="p-3 font-bold text-slate-500 font-mono">#{idx + 1}</td>
@@ -983,7 +979,7 @@ export function DocumentOcrInsightsPage({
                     <button
                       type="button"
                       onClick={handleSaveAll}
-                      className="px-4 py-2 bg-[#1a56db] text-white rounded font-bold hover:bg-blue-700 transition-colors shadow-xs"
+                      className="px-4 py-2 bg-[#6DAE7C] text-white rounded font-bold hover:bg-blue-700 transition-colors shadow-xs"
                     >
                       Save & Confirm Determinations ✓
                     </button>

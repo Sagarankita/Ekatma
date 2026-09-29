@@ -6,10 +6,10 @@ import { useRegulatoryAssistant } from '@/features/regulatory-assistant/Provider
 import { inlineContext } from '@/features/regulatory-assistant/context';
 import { useSpeechToText, useTextToSpeech } from '@/features/regulatory-assistant/useSpeech';
 
-const inputDefault = 'w-full px-3 py-2 text-sm border rounded bg-white focus:outline-none focus:ring-2 focus:ring-[#1a56db] focus:border-[#1a56db] transition-colors placeholder:text-[#9aa5b4] border-[#d1d9e0]';
+const inputDefault = 'w-full px-3 py-2 text-sm border rounded bg-white focus:outline-none focus:ring-2 focus:ring-[#6DAE7C] focus:border-[#6DAE7C] transition-colors placeholder:text-[#8c9f8a] border-[#d6dfd5]';
 
 function Breadcrumb({ items }: { items: { label: string; href?: string }[] }) {
-  return <nav aria-label="Breadcrumb"><ol className="flex items-center gap-1 text-sm text-[#6b7a8d]">{items.map((item, i) => <li key={`${item.label}-${i}`} className="flex items-center gap-1">{i > 0 && <Icon.ChevronRight />}<span className="text-[#1a2533]">{item.label}</span></li>)}</ol></nav>;
+  return <nav aria-label="Breadcrumb"><ol className="flex items-center gap-1 text-sm text-[#555C56]">{items.map((item, i) => <li key={`${item.label}-${i}`} className="flex items-center gap-1">{i > 0 && <Icon.ChevronRight />}<span className="text-[#2B2B2B]">{item.label}</span></li>)}</ol></nav>;
 }
 
 type RegEntryPoint = 'requirement' | 'document' | 'application' | 'query' | 'compliance' | 'incentive' | 'reg-change' | 'general'
@@ -226,8 +226,8 @@ function RegAssistantTrigger({ onClick, label, lang, size = 'sm' }: {
 }) {
   const defaultLabel = lang === 'mr' ? 'नियामक सहाय्यक' : 'Regulatory Assistant'
   const cls = size === 'xs'
-    ? 'flex items-center gap-1.5 text-[11px] border border-[#d1d9e0] text-[#1a3a5c] px-2.5 py-1 rounded hover:bg-[#f0f4f8] font-medium transition-colors'
-    : 'flex items-center gap-2 text-xs border border-[#d1d9e0] text-[#1a3a5c] px-3 py-1.5 rounded hover:bg-[#f0f4f8] font-medium transition-colors'
+    ? 'flex items-center gap-1.5 text-[11px] border border-[#d6dfd5] text-[#355E3B] px-2.5 py-1 rounded hover:bg-[#F9FAF2] font-medium transition-colors'
+    : 'flex items-center gap-2 text-xs border border-[#d6dfd5] text-[#355E3B] px-3 py-1.5 rounded hover:bg-[#F9FAF2] font-medium transition-colors'
   return (
     <button onClick={onClick} className={cls} aria-label="Open Regulatory Assistant">
       <Icon.Shield />
@@ -358,10 +358,10 @@ export function E34RegAssistantDrawer({
   return (
     <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-labelledby="reg-assistant-title">
       <div className="absolute inset-0 bg-black/25 backdrop-blur-[1px]" onClick={onClose} aria-hidden="true" />
-      <div className="relative bg-white w-[460px] max-w-[95vw] h-full shadow-2xl flex flex-col border-l border-[#d1d9e0]">
+      <div className="relative bg-white w-[460px] max-w-[95vw] h-full shadow-2xl flex flex-col border-l border-[#d6dfd5]">
 
         {/* ── Header ── */}
-        <div className="bg-[#1a3a5c] text-white px-4 pt-4 pb-3 shrink-0">
+        <div className="bg-[#355E3B] text-white px-4 pt-4 pb-3 shrink-0">
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-0.5">
@@ -405,18 +405,18 @@ export function E34RegAssistantDrawer({
         </div>
 
         {/* ── Messages area ── */}
-        <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 bg-[#f8f9fb]">
+        <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 bg-[#F9FAF2]">
 
           {/* Initial state — suggested questions */}
           {messages.length === 0 && !loading && (
             <div className="space-y-2.5">
-              <p className="text-[10px] text-[#9aa5b4] font-bold uppercase tracking-wider">
+              <p className="text-[10px] text-[#8c9f8a] font-bold uppercase tracking-wider">
                 {contextHasRecord ? t.suggested : t.suggestedGeneral}
               </p>
               <div className="space-y-1.5">
                 {suggestedQs.map(q => (
                   <button key={q} onClick={() => sendMessage(q)}
-                    className="w-full text-left text-xs text-[#1a56db] bg-white hover:bg-[#ebf3ff] border border-[#d1d9e0] hover:border-blue-200 rounded px-3 py-2 transition-colors leading-snug">
+                    className="w-full text-left text-xs text-[#6DAE7C] bg-white hover:bg-[#edf5ef] border border-[#d6dfd5] hover:border-blue-200 rounded px-3 py-2 transition-colors leading-snug">
                     {q}
                   </button>
                 ))}
@@ -428,13 +428,13 @@ export function E34RegAssistantDrawer({
           {messages.map((msg, i) => (
             <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               {msg.role === 'user' ? (
-                <div className="bg-[#1a3a5c] text-white text-xs rounded-2xl rounded-tr-sm px-3.5 py-2.5 max-w-[85%] leading-relaxed">
+                <div className="bg-[#355E3B] text-white text-xs rounded-2xl rounded-tr-sm px-3.5 py-2.5 max-w-[85%] leading-relaxed">
                   {msg.text}
                 </div>
               ) : (
-                <div className="bg-white border border-[#d1d9e0] rounded-2xl rounded-tl-sm p-3.5 max-w-[100%] space-y-2.5 shadow-sm">
+                <div className="bg-white border border-[#d6dfd5] rounded-2xl rounded-tl-sm p-3.5 max-w-[100%] space-y-2.5 shadow-sm">
                   {/* Answer */}
-                  <p className="text-xs text-[#1a2533] leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+                  <p className="text-xs text-[#2B2B2B] leading-relaxed whitespace-pre-wrap">{msg.text}</p>
 
                   {/* Needs Verification callout */}
                   {msg.needsVerification && (
@@ -449,33 +449,33 @@ export function E34RegAssistantDrawer({
 
                   {/* Structured citation block */}
                   {(msg.source || msg.clause || msg.effectiveDate || msg.related) && (
-                    <div className="border border-[#e8edf2] rounded-lg overflow-hidden bg-[#fafbfc]">
-                      <div className="px-3 py-1.5 bg-[#f0f4f8] border-b border-[#e8edf2]">
-                        <p className="text-[10px] font-bold text-[#6b7a8d] uppercase tracking-wider">Regulatory Reference</p>
+                    <div className="border border-[#e3ebe1] rounded-lg overflow-hidden bg-[#fafbfc]">
+                      <div className="px-3 py-1.5 bg-[#F9FAF2] border-b border-[#e3ebe1]">
+                        <p className="text-[10px] font-bold text-[#555C56] uppercase tracking-wider">Regulatory Reference</p>
                       </div>
                       <div className="px-3 py-2.5 space-y-2">
                         {msg.source && (
                           <div className="flex gap-2">
-                            <span className="text-[10px] font-bold text-[#9aa5b4] uppercase tracking-wider w-20 shrink-0 mt-px">{t.source}</span>
-                            <span className="text-[11px] text-[#374151] leading-snug flex-1">{msg.source}</span>
+                            <span className="text-[10px] font-bold text-[#8c9f8a] uppercase tracking-wider w-20 shrink-0 mt-px">{t.source}</span>
+                            <span className="text-[11px] text-[#4A4A4A] leading-snug flex-1">{msg.source}</span>
                           </div>
                         )}
                         {msg.clause && (
                           <div className="flex gap-2">
-                            <span className="text-[10px] font-bold text-[#9aa5b4] uppercase tracking-wider w-20 shrink-0 mt-px">{t.clause}</span>
-                            <span className="text-[11px] text-[#374151] leading-snug flex-1">{msg.clause}</span>
+                            <span className="text-[10px] font-bold text-[#8c9f8a] uppercase tracking-wider w-20 shrink-0 mt-px">{t.clause}</span>
+                            <span className="text-[11px] text-[#4A4A4A] leading-snug flex-1">{msg.clause}</span>
                           </div>
                         )}
                         {msg.effectiveDate && (
                           <div className="flex gap-2">
-                            <span className="text-[10px] font-bold text-[#9aa5b4] uppercase tracking-wider w-20 shrink-0 mt-px">{t.effective}</span>
-                            <span className="text-[11px] text-[#374151] leading-snug flex-1">{msg.effectiveDate}</span>
+                            <span className="text-[10px] font-bold text-[#8c9f8a] uppercase tracking-wider w-20 shrink-0 mt-px">{t.effective}</span>
+                            <span className="text-[11px] text-[#4A4A4A] leading-snug flex-1">{msg.effectiveDate}</span>
                           </div>
                         )}
                         {msg.related && (
                           <div className="flex gap-2">
-                            <span className="text-[10px] font-bold text-[#9aa5b4] uppercase tracking-wider w-20 shrink-0 mt-px">{t.related}</span>
-                            <span className="text-[11px] text-[#374151] leading-snug flex-1">{msg.related}</span>
+                            <span className="text-[10px] font-bold text-[#8c9f8a] uppercase tracking-wider w-20 shrink-0 mt-px">{t.related}</span>
+                            <span className="text-[11px] text-[#4A4A4A] leading-snug flex-1">{msg.related}</span>
                           </div>
                         )}
                       </div>
@@ -487,7 +487,7 @@ export function E34RegAssistantDrawer({
                     <div className="flex flex-wrap gap-1.5 pt-0.5">
                       {suggestedQs.slice(0, 3).filter(q => !messages.some(m => m.role === 'user' && m.text === q)).map(q => (
                         <button key={q} onClick={() => sendMessage(q)}
-                          className="text-[10px] text-[#1a56db] bg-[#ebf3ff] hover:bg-blue-100 border border-blue-200 rounded-full px-2 py-0.5 transition-colors leading-snug">
+                          className="text-[10px] text-[#6DAE7C] bg-[#edf5ef] hover:bg-blue-100 border border-blue-200 rounded-full px-2 py-0.5 transition-colors leading-snug">
                           {q}
                         </button>
                       ))}
@@ -499,7 +499,7 @@ export function E34RegAssistantDrawer({
                       type="button"
                       onClick={() => speak(msg.text, `msg-${i}`)}
                       className={`mt-2 flex items-center gap-1.5 text-[10px] font-medium transition-colors ${
-                        speakingId === `msg-${i}` ? 'text-[#1a56db] font-bold' : 'text-[#6b7a8d] hover:text-[#1a3a5c]'
+                        speakingId === `msg-${i}` ? 'text-[#6DAE7C] font-bold' : 'text-[#555C56] hover:text-[#355E3B]'
                       }`}
                       title={speakingId === `msg-${i}` ? 'Stop reading' : 'Read response aloud'}
                       aria-label={speakingId === `msg-${i}` ? 'Stop reading' : 'Read response aloud'}
@@ -516,7 +516,7 @@ export function E34RegAssistantDrawer({
           {/* Loading indicator */}
           {loading && (
             <div className="flex justify-start">
-              <div className="bg-white border border-[#d1d9e0] rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-2 text-xs text-[#6b7a8d] shadow-sm">
+              <div className="bg-white border border-[#d6dfd5] rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-2 text-xs text-[#555C56] shadow-sm">
                 <Icon.Loader />
                 {t.consulting}
               </div>
@@ -527,8 +527,8 @@ export function E34RegAssistantDrawer({
         </div>
 
         {/* ── Input ── */}
-        <div className="border-t border-[#d1d9e0] bg-white px-3 pt-2.5 pb-3 shrink-0">
-          <p className="text-[10px] text-[#b0bcc9] mb-2">{t.noApproval}</p>
+        <div className="border-t border-[#d6dfd5] bg-white px-3 pt-2.5 pb-3 shrink-0">
+          <p className="text-[10px] text-[#a5b5a3] mb-2">{t.noApproval}</p>
           <div className="flex gap-2">
             <input
               ref={inputRef}
@@ -554,7 +554,7 @@ export function E34RegAssistantDrawer({
                 className={`px-3 py-2 border text-xs font-semibold rounded flex items-center gap-1 transition-colors shrink-0 ${
                   isListening
                     ? 'bg-red-600 text-white border-red-700 animate-pulse'
-                    : 'bg-white text-[#4a5568] border-[#d1d9e0] hover:bg-[#f0f4f8] hover:text-[#1a3a5c]'
+                    : 'bg-white text-[#4A4A4A] border-[#d6dfd5] hover:bg-[#F9FAF2] hover:text-[#355E3B]'
                 }`}
                 title={isListening ? 'Stop listening' : 'Voice Input (Speech to Text)'}
                 aria-label={isListening ? 'Stop listening' : 'Start voice input'}
@@ -565,7 +565,7 @@ export function E34RegAssistantDrawer({
             <button
               onClick={() => sendMessage(input)}
               disabled={!input.trim() || loading}
-              className="bg-[#1a3a5c] text-white text-xs font-semibold px-3.5 py-2 rounded hover:bg-[#0f2540] transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+              className="bg-[#355E3B] text-white text-xs font-semibold px-3.5 py-2 rounded hover:bg-[#27472c] transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
             >
               {t.send}
             </button>
@@ -590,18 +590,18 @@ export function E34RegAssistantPage({ lang, context = { entryPoint: 'general' } 
     mr: { title: 'नियामक सहाय्यक', intro: 'आवश्यकता, दस्तऐवज, GR, विभागीय चौकशी आणि नियामक बदलांबद्दल प्रश्न विचारा.', open: 'नियामक सहाय्यक उघडा' },
   }[lang]
   return (
-    <main id="main-content" className="flex-1 bg-[#f8f9fb]" tabIndex={-1}>
+    <main id="main-content" className="flex-1 bg-[#F9FAF2]" tabIndex={-1}>
       <div className="max-w-[960px] mx-auto px-6 py-5">
         <div className="mb-4">
           <Breadcrumb items={[{ label: 'Home', href: '#' }, { label: t.title }]} />
         </div>
-        <div className="bg-white border border-[#d1d9e0] rounded p-8 text-center">
-          <div className="w-12 h-12 rounded-full bg-[#f0f4f8] border border-[#d1d9e0] flex items-center justify-center text-[#1a3a5c] mx-auto mb-4">
+        <div className="bg-white border border-[#d6dfd5] rounded p-8 text-center">
+          <div className="w-12 h-12 rounded-full bg-[#F9FAF2] border border-[#d6dfd5] flex items-center justify-center text-[#355E3B] mx-auto mb-4">
             <Icon.Shield />
           </div>
-          <h1 className="text-base font-semibold text-[#1a2533] mb-2">{t.title}</h1>
-          <p className="text-sm text-[#6b7a8d] max-w-sm mx-auto mb-5">{t.intro}</p>
-          <button onClick={() => openAssistant({ origin: 'full-page', mode: 'research', context: sharedContext, preset: context.initialQuestion })} className="bg-[#1a3a5c] text-white text-sm font-medium px-5 py-2 rounded hover:bg-[#0f2540] transition-colors">
+          <h1 className="text-base font-semibold text-[#2B2B2B] mb-2">{t.title}</h1>
+          <p className="text-sm text-[#555C56] max-w-sm mx-auto mb-5">{t.intro}</p>
+          <button onClick={() => openAssistant({ origin: 'full-page', mode: 'research', context: sharedContext, preset: context.initialQuestion })} className="bg-[#355E3B] text-white text-sm font-medium px-5 py-2 rounded hover:bg-[#27472c] transition-colors">
             {t.open}
           </button>
         </div>

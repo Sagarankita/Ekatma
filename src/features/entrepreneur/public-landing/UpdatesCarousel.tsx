@@ -148,16 +148,16 @@ EKATMA Single Window Clearance Portal - Official Gazette Record.
   );
 
   return (
-    <section id="policies-schemes" className="py-16 bg-[#F8F9FA] border-b border-slate-200 scroll-mt-12">
+    <section id="policies-schemes" className="py-16 bg-[#F9FAF2] border-b border-slate-200 scroll-mt-12">
       <div className="max-w-7xl mx-auto px-6 sm:px-8">
         
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
           <div>
-            <span className="text-[#245B8A] text-xs font-bold uppercase tracking-wider bg-[#245B8A]/10 px-3 py-1 rounded-full border border-[#245B8A]/20">
+            <span className="text-[#3d7a4d] text-xs font-bold uppercase tracking-wider bg-[#3d7a4d]/10 px-3 py-1 rounded-full border border-[#3d7a4d]/20">
               NOTIFICATIONS & RESOURCES
             </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#17365D] mt-3 mb-2">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#355E3B] mt-3 mb-2">
               Policies, Schemes & Regulatory Updates
             </h2>
             <p className="text-slate-600 text-sm max-w-2xl">
@@ -173,7 +173,7 @@ EKATMA Single Window Clearance Portal - Official Gazette Record.
                 onClick={() => setActiveFilter(cat)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
                   activeFilter === cat
-                    ? 'bg-[#17365D] text-white shadow-xs'
+                    ? 'bg-[#355E3B] text-white shadow-xs'
                     : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
                 }`}
               >
@@ -188,11 +188,11 @@ EKATMA Single Window Clearance Portal - Official Gazette Record.
           {filtered.map((card) => (
             <div
               key={card.id}
-              className="bg-white rounded-xl border border-slate-200 hover:border-[#17365D]/30 p-6 flex flex-col justify-between transition-all hover:shadow-md"
+              className="bg-white rounded-xl border border-slate-200 hover:border-[#355E3B]/30 p-6 flex flex-col justify-between transition-all hover:shadow-md"
             >
               <div>
                 <div className="flex items-center justify-between gap-2 mb-3">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#245B8A] bg-[#245B8A]/10 px-2 py-0.5 rounded">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#3d7a4d] bg-[#3d7a4d]/10 px-2 py-0.5 rounded">
                     {card.category}
                   </span>
                   <span className="text-[11px] font-medium text-slate-400">
@@ -200,7 +200,7 @@ EKATMA Single Window Clearance Portal - Official Gazette Record.
                   </span>
                 </div>
 
-                <h3 className="text-base font-bold text-[#17365D] mb-2 leading-snug">
+                <h3 className="text-base font-bold text-[#355E3B] mb-2 leading-snug">
                   {card.headline}
                 </h3>
                 <p className="text-slate-600 text-xs leading-relaxed mb-4">
@@ -214,7 +214,7 @@ EKATMA Single Window Clearance Portal - Official Gazette Record.
                 </span>
                 <button
                   onClick={() => setSelectedCard(card)}
-                  className="text-xs font-semibold text-[#17365D] hover:text-[#245B8A] flex items-center gap-1 group"
+                  className="text-xs font-semibold text-[#355E3B] hover:text-[#3d7a4d] flex items-center gap-1 group"
                 >
                   <span>Read Notice</span>
                   <svg className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -246,29 +246,29 @@ EKATMA Single Window Clearance Portal - Official Gazette Record.
               <div className="border-b border-slate-200 pb-4">
                 <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#17365D] bg-[#17365D]/10 px-2.5 py-1 rounded">
+                    <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#355E3B] bg-[#355E3B]/10 px-2.5 py-1 rounded">
                       GOVERNMENT OF MAHARASHTRA
                     </span>
-                    <span className="text-xs font-bold text-[#245B8A] bg-[#245B8A]/10 px-2 py-0.5 rounded">
+                    <span className="text-xs font-bold text-[#3d7a4d] bg-[#3d7a4d]/10 px-2 py-0.5 rounded">
                       {selectedCard.category}
                     </span>
                   </div>
                   <span className="text-xs font-semibold text-slate-500">Issued: {selectedCard.date}</span>
                 </div>
                 
-                <h3 className="text-xl font-extrabold text-[#17365D] mt-2 leading-snug">
+                <h3 className="text-xl font-extrabold text-[#355E3B] mt-2 leading-snug">
                   {selectedCard.headline}
                 </h3>
                 
                 <div className="flex items-center gap-4 text-xs text-slate-500 mt-2">
                   <span>Department: <strong className="text-slate-800">{selectedCard.dept}</strong></span>
                   <span>•</span>
-                  <span>Ref No: <code className="bg-slate-100 text-[#17365D] px-1.5 py-0.5 rounded font-mono font-semibold">{selectedCard.refNo}</code></span>
+                  <span>Ref No: <code className="bg-slate-100 text-[#355E3B] px-1.5 py-0.5 rounded font-mono font-semibold">{selectedCard.refNo}</code></span>
                 </div>
               </div>
 
               {/* Document Text Body */}
-              <div className="bg-[#F8F9FA] rounded-xl p-5 border border-slate-200/80 space-y-3">
+              <div className="bg-[#F9FAF2] rounded-xl p-5 border border-slate-200/80 space-y-3">
                 <div className="flex items-center justify-between text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">
                   <span>OFFICIAL GAZETTE NOTIFICATION TEXT</span>
                   <span>PUBLIC RELEASE</span>
@@ -309,7 +309,7 @@ EKATMA Single Window Clearance Portal - Official Gazette Record.
                       setSelectedCard(null);
                       router.push('/entrepreneur/login');
                     }}
-                    className="flex-1 sm:flex-none bg-[#17365D] hover:bg-[#0f2540] text-white font-semibold text-xs px-4 py-2.5 rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow-xs"
+                    className="flex-1 sm:flex-none bg-[#355E3B] hover:bg-[#27472c] text-white font-semibold text-xs px-4 py-2.5 rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow-xs"
                   >
                     <span>Log In to Access Portal</span>
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

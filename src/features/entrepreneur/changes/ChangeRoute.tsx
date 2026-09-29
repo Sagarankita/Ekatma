@@ -46,13 +46,13 @@ export function ChangeRoute({ project, screen }: { project: BusinessProject; scr
 
   if (screen === 'amendments') {
     if (!draft) return (
-      <main id="main-content" className="flex-1 bg-[#f8f9fb] px-6 py-12" tabIndex={-1}>
-        <div className="max-w-[720px] mx-auto bg-white border border-[#d1d9e0] p-8 text-center rounded">
-          <h2 className="text-base font-semibold text-[#1a2533] mb-2">No Active Change Proposal</h2>
-          <p className="text-xs text-[#6b7a8d] mb-6">No change proposal draft was found in this browser tab for {project.name}. Simulate a business change first to initiate amendments.</p>
+      <main id="main-content" className="flex-1 bg-[#F9FAF2] px-6 py-12" tabIndex={-1}>
+        <div className="max-w-[720px] mx-auto bg-white border border-[#d6dfd5] p-8 text-center rounded">
+          <h2 className="text-base font-semibold text-[#2B2B2B] mb-2">No Active Change Proposal</h2>
+          <p className="text-xs text-[#555C56] mb-6">No change proposal draft was found in this browser tab for {project.name}. Simulate a business change first to initiate amendments.</p>
           <button
             onClick={() => router.push(ENTREPRENEUR_ROUTES.changes(project.id))}
-            className="bg-[#1a3a5c] text-white text-xs font-semibold px-4 py-2 hover:bg-[#0f2540] transition-colors"
+            className="bg-[#355E3B] text-white text-xs font-semibold px-4 py-2 hover:bg-[#27472c] transition-colors"
           >
             Go to Business Change Simulator
           </button>

@@ -122,14 +122,14 @@ export function ApprovalSidebar({
       return {
         label: 'Start Application →',
         href: ENTREPRENEUR_ROUTES.newApplication(projectId),
-        cls: 'bg-[#1a56db] hover:bg-[#1542a8] text-white',
+        cls: 'bg-[#6DAE7C] hover:bg-[#1542a8] text-white',
       };
     }
     if (isInProgress) {
       return {
         label: 'Continue Application →',
         href: ENTREPRENEUR_ROUTES.newApplication(projectId),
-        cls: 'bg-[#1a56db] hover:bg-[#1542a8] text-white',
+        cls: 'bg-[#6DAE7C] hover:bg-[#1542a8] text-white',
       };
     }
     if (isBlocked && uncompletedParents.length > 0) {
@@ -149,10 +149,10 @@ export function ApprovalSidebar({
   return (
     <aside className="w-full lg:w-[420px] shrink-0 bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden sticky top-4 flex flex-col max-h-[calc(100vh-2rem)] z-30 transition-all font-sans">
       {/* ── 1. REQUIREMENT HEADER ── */}
-      <div className="bg-[#17365D] text-white p-5 flex items-start justify-between gap-3">
+      <div className="bg-[#355E3B] text-white p-5 flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-            <span className="text-[10px] font-black uppercase tracking-wider text-[#B8D5E5] bg-[#245B8A] px-2 py-0.5 rounded border border-[#3A75A4]">
+            <span className="text-[10px] font-black uppercase tracking-wider text-[#B8D5E5] bg-[#3d7a4d] px-2 py-0.5 rounded border border-[#3A75A4]">
               {department}
             </span>
             <span className="text-[10px] font-semibold text-slate-300">
@@ -356,7 +356,7 @@ export function ApprovalSidebar({
           <div className="text-center pt-1">
             <Link
               href={ENTREPRENEUR_ROUTES.requirement(projectId, id)}
-              className="text-[11px] text-[#1a56db] hover:underline font-semibold"
+              className="text-[11px] text-[#6DAE7C] hover:underline font-semibold"
             >
               View Full Requirement Detail Page →
             </Link>

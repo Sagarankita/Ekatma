@@ -6,7 +6,7 @@ import { Icon, inputBase, inputDefault, inputError } from './PublicChrome'
 function AuthCard({ children }: { children: React.ReactNode }) {
   return (
     <div className="max-w-[520px] mx-auto px-4 py-10">
-      <div className="bg-white border border-[#d1d9e0] rounded shadow-sm">
+      <div className="bg-white border border-[#d6dfd5] rounded shadow-sm">
         {children}
       </div>
     </div>
@@ -16,9 +16,9 @@ function AuthCard({ children }: { children: React.ReactNode }) {
 // ─── Auth Card Header ─────────────────────────────────────────────────────────
 function AuthCardHeader({ title, subtitle }: { title: string, subtitle: string }) {
   return (
-    <div className="px-8 py-6 border-b border-[#d1d9e0] bg-[#f8f9fb]">
-      <h1 className="text-xl font-bold text-[#1a3a5c]">{title}</h1>
-      <p className="text-sm text-[#6b7a8d] mt-1">{subtitle}</p>
+    <div className="px-8 py-6 border-b border-[#d6dfd5] bg-[#F9FAF2]">
+      <h1 className="text-xl font-bold text-[#355E3B]">{title}</h1>
+      <p className="text-sm text-[#555C56] mt-1">{subtitle}</p>
     </div>
   )
 }
@@ -29,7 +29,7 @@ function Field({ label, required, children, error, hint }: {
 }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-[#374151] mb-1">
+      <label className="block text-sm font-medium text-[#4A4A4A] mb-1">
         {label}{required && <span className="text-red-600 ml-0.5" aria-hidden="true">*</span>}
       </label>
       {children}
@@ -38,7 +38,7 @@ function Field({ label, required, children, error, hint }: {
           <Icon.AlertCircle /> {error}
         </p>
       )}
-      {hint && !error && <p className="mt-1 text-xs text-[#6b7a8d]">{hint}</p>}
+      {hint && !error && <p className="mt-1 text-xs text-[#555C56]">{hint}</p>}
     </div>
   )
 }
@@ -63,7 +63,7 @@ function PasswordInput({ id, value, onChange, placeholder, error }: {
       <button
         type="button"
         onClick={() => setShow(s => !s)}
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9aa5b4] hover:text-[#4a5568] transition-colors"
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8c9f8a] hover:text-[#4A4A4A] transition-colors"
         aria-label={show ? 'Hide password' : 'Show password'}
       >
         {show ? <Icon.EyeOff /> : <Icon.Eye />}
@@ -121,13 +121,13 @@ export function IndustrialLoginPage({
 
   return (
     <AuthCard>
-      <div className="px-8 py-5 border-b border-[#d1d9e0] bg-[#f8f9fb] flex items-center gap-3">
-        <button onClick={onBack} className="text-[#6b7a8d] hover:text-[#1a3a5c] transition-colors" aria-label="Back to portal">
+      <div className="px-8 py-5 border-b border-[#d6dfd5] bg-[#F9FAF2] flex items-center gap-3">
+        <button onClick={onBack} className="text-[#555C56] hover:text-[#355E3B] transition-colors" aria-label="Back to portal">
           <Icon.ChevronLeft />
         </button>
         <div>
-          <h1 className="text-xl font-bold text-[#1a3a5c]">Industrial Login</h1>
-          <p className="text-sm text-[#6b7a8d] mt-0.5">Sign in to access your EKATMA account.</p>
+          <h1 className="text-xl font-bold text-[#355E3B]">Industrial Login</h1>
+          <p className="text-sm text-[#555C56] mt-0.5">Sign in to access your EKATMA account.</p>
         </div>
       </div>
       <form onSubmit={handleSubmit} className="px-8 py-6 space-y-4" noValidate>
@@ -162,14 +162,14 @@ export function IndustrialLoginPage({
           <button
             type="submit"
             disabled={loading || successFlash}
-            className="w-full flex items-center justify-center gap-2 bg-[#1a3a5c] text-white text-sm font-medium px-4 py-2.5 rounded hover:bg-[#0f2540] focus:ring-2 focus:ring-[#1a56db] focus:ring-offset-2 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-2 bg-[#355E3B] text-white text-sm font-medium px-4 py-2.5 rounded hover:bg-[#27472c] focus:ring-2 focus:ring-[#6DAE7C] focus:ring-offset-2 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {loading ? <><Icon.Loader /> Signing in…</> : 'Login'}
           </button>
         </div>
-        <p className="text-sm text-center text-[#6b7a8d]">
+        <p className="text-sm text-center text-[#555C56]">
           New user?{' '}
-          <button type="button" onClick={onSignUp} className="text-[#1a56db] font-medium hover:underline focus:outline-none focus-visible:underline">
+          <button type="button" onClick={onSignUp} className="text-[#6DAE7C] font-medium hover:underline focus:outline-none focus-visible:underline">
             Sign up first
           </button>
         </p>
@@ -246,13 +246,13 @@ export function CreateAccountPage({
 
   return (
     <AuthCard>
-      <div className="px-8 py-5 border-b border-[#d1d9e0] bg-[#f8f9fb] flex items-center gap-3">
-        <button onClick={onBack} className="text-[#6b7a8d] hover:text-[#1a3a5c] transition-colors" aria-label="Back to login">
+      <div className="px-8 py-5 border-b border-[#d6dfd5] bg-[#F9FAF2] flex items-center gap-3">
+        <button onClick={onBack} className="text-[#555C56] hover:text-[#355E3B] transition-colors" aria-label="Back to login">
           <Icon.ChevronLeft />
         </button>
         <div>
-          <h1 className="text-xl font-bold text-[#1a3a5c]">Create Account</h1>
-          <p className="text-sm text-[#6b7a8d] mt-0.5">Verify your email address to create your account.</p>
+          <h1 className="text-xl font-bold text-[#355E3B]">Create Account</h1>
+          <p className="text-sm text-[#555C56] mt-0.5">Verify your email address to create your account.</p>
         </div>
       </div>
 
@@ -284,7 +284,7 @@ export function CreateAccountPage({
             onChange={e => { setEmail(e.target.value); setEmailError('') }}
             placeholder="Enter your email ID"
             readOnly={otpState !== 'email-entry'}
-            className={`${otpState === 'email-entry' ? (emailError ? inputError : inputDefault) : `${inputBase} border-[#d1d9e0] bg-[#f8f9fb] text-[#6b7a8d] cursor-not-allowed`}`}
+            className={`${otpState === 'email-entry' ? (emailError ? inputError : inputDefault) : `${inputBase} border-[#d6dfd5] bg-[#F9FAF2] text-[#555C56] cursor-not-allowed`}`}
             aria-invalid={!!emailError}
             aria-required="true"
             autoComplete="email"
@@ -311,11 +311,11 @@ export function CreateAccountPage({
 
         {/* Resend OTP */}
         {otpState === 'otp-entry' && (
-          <p className="text-xs text-[#6b7a8d]">
+          <p className="text-xs text-[#555C56]">
             {countdown > 0 ? (
-              <>Resend OTP in <span className="font-semibold text-[#1a3a5c]">{countdown}s</span></>
+              <>Resend OTP in <span className="font-semibold text-[#355E3B]">{countdown}s</span></>
             ) : (
-              <button type="button" onClick={handleResend} className="text-[#1a56db] font-medium hover:underline focus:outline-none focus-visible:underline">
+              <button type="button" onClick={handleResend} className="text-[#6DAE7C] font-medium hover:underline focus:outline-none focus-visible:underline">
                 Resend OTP
               </button>
             )}
@@ -328,7 +328,7 @@ export function CreateAccountPage({
             type="button"
             onClick={handleSendOtp}
             disabled={sendingOtp}
-            className="w-full flex items-center justify-center gap-2 bg-[#1a3a5c] text-white text-sm font-medium px-4 py-2.5 rounded hover:bg-[#0f2540] focus:ring-2 focus:ring-[#1a56db] focus:ring-offset-2 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-2 bg-[#355E3B] text-white text-sm font-medium px-4 py-2.5 rounded hover:bg-[#27472c] focus:ring-2 focus:ring-[#6DAE7C] focus:ring-offset-2 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {sendingOtp ? <><Icon.Loader /> Sending OTP…</> : 'Send OTP'}
           </button>
@@ -339,7 +339,7 @@ export function CreateAccountPage({
             type="button"
             onClick={handleVerify}
             disabled={verifying}
-            className="w-full flex items-center justify-center gap-2 bg-[#1a3a5c] text-white text-sm font-medium px-4 py-2.5 rounded hover:bg-[#0f2540] focus:ring-2 focus:ring-[#1a56db] focus:ring-offset-2 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-2 bg-[#355E3B] text-white text-sm font-medium px-4 py-2.5 rounded hover:bg-[#27472c] focus:ring-2 focus:ring-[#6DAE7C] focus:ring-offset-2 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {verifying ? <><Icon.Loader /> Verifying…</> : 'Verify OTP'}
           </button>
@@ -422,39 +422,39 @@ export function CompleteRegistrationPage({
   }
 
   const reqRow = (met: boolean, label: string) => (
-    <li className={`flex items-center gap-1.5 ${met ? 'text-green-700' : 'text-[#6b7a8d]'}`}>
+    <li className={`flex items-center gap-1.5 ${met ? 'text-green-700' : 'text-[#555C56]'}`}>
       {met
         ? <span className="text-green-600"><Icon.CheckCircle /></span>
-        : <span className="w-4 h-4 rounded-full border border-[#d1d9e0] inline-block shrink-0" />}
+        : <span className="w-4 h-4 rounded-full border border-[#d6dfd5] inline-block shrink-0" />}
       {label}
     </li>
   )
 
   return (
     <div className="max-w-[820px] mx-auto px-4 py-10">
-      <div className="bg-white border border-[#d1d9e0] rounded shadow-sm">
+      <div className="bg-white border border-[#d6dfd5] rounded shadow-sm">
         {/* Header */}
-        <div className="px-8 py-5 border-b border-[#d1d9e0] bg-[#f8f9fb] flex items-center gap-3">
-          <button onClick={onBack} className="text-[#6b7a8d] hover:text-[#1a3a5c] transition-colors" aria-label="Back">
+        <div className="px-8 py-5 border-b border-[#d6dfd5] bg-[#F9FAF2] flex items-center gap-3">
+          <button onClick={onBack} className="text-[#555C56] hover:text-[#355E3B] transition-colors" aria-label="Back">
             <Icon.ChevronLeft />
           </button>
           <div>
-            <h1 className="text-xl font-bold text-[#1a3a5c]">Complete Registration</h1>
-            <p className="text-sm text-[#6b7a8d] mt-0.5">Enter your details to create your EKATMA account.</p>
+            <h1 className="text-xl font-bold text-[#355E3B]">Complete Registration</h1>
+            <p className="text-sm text-[#555C56] mt-0.5">Enter your details to create your EKATMA account.</p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="px-8 py-6 space-y-8" noValidate>
           {/* ── Email (verified, read-only) ── */}
           <section aria-labelledby="reg-email-heading">
-            <h2 id="reg-email-heading" className="text-sm font-semibold text-[#1a3a5c] uppercase tracking-wider mb-4">Email</h2>
+            <h2 id="reg-email-heading" className="text-sm font-semibold text-[#355E3B] uppercase tracking-wider mb-4">Email</h2>
             <Field label="Email ID" required>
               <div className="relative">
                 <input
                   type="email"
                   value={verifiedEmail}
                   readOnly
-                  className={`${inputBase} border-[#d1d9e0] bg-[#f8f9fb] text-[#6b7a8d] cursor-not-allowed pr-24`}
+                  className={`${inputBase} border-[#d6dfd5] bg-[#F9FAF2] text-[#555C56] cursor-not-allowed pr-24`}
                   aria-readonly="true"
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-green-50 border border-green-200 rounded px-2 py-0.5">
@@ -464,11 +464,11 @@ export function CompleteRegistrationPage({
             </Field>
           </section>
 
-          <div className="border-t border-[#e8edf2]" />
+          <div className="border-t border-[#e3ebe1]" />
 
           {/* ── Personal Details ── */}
           <section aria-labelledby="reg-personal-heading">
-            <h2 id="reg-personal-heading" className="text-sm font-semibold text-[#1a3a5c] uppercase tracking-wider mb-4">Personal Details</h2>
+            <h2 id="reg-personal-heading" className="text-sm font-semibold text-[#355E3B] uppercase tracking-wider mb-4">Personal Details</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <Field label="Mobile No." required error={errors.mobile}>
                 <input type="tel" value={form.mobile} onChange={e => set('mobile', e.target.value.replace(/\D/g, '').slice(0, 10))}
@@ -509,11 +509,11 @@ export function CompleteRegistrationPage({
             </div>
           </section>
 
-          <div className="border-t border-[#e8edf2]" />
+          <div className="border-t border-[#e3ebe1]" />
 
           {/* ── Address Details ── */}
           <section aria-labelledby="reg-address-heading">
-            <h2 id="reg-address-heading" className="text-sm font-semibold text-[#1a3a5c] uppercase tracking-wider mb-4">Address Details</h2>
+            <h2 id="reg-address-heading" className="text-sm font-semibold text-[#355E3B] uppercase tracking-wider mb-4">Address Details</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="sm:col-span-2 lg:col-span-3">
                 <Field label="Communication Address" required error={errors.address}>
@@ -566,11 +566,11 @@ export function CompleteRegistrationPage({
             </div>
           </section>
 
-          <div className="border-t border-[#e8edf2]" />
+          <div className="border-t border-[#e3ebe1]" />
 
           {/* ── Password Creation ── */}
           <section aria-labelledby="reg-pw-heading">
-            <h2 id="reg-pw-heading" className="text-sm font-semibold text-[#1a3a5c] uppercase tracking-wider mb-4">Password Creation</h2>
+            <h2 id="reg-pw-heading" className="text-sm font-semibold text-[#355E3B] uppercase tracking-wider mb-4">Password Creation</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Field label="Password" required error={errors.password}>
                 <PasswordInput id="reg-password" value={form.password} onChange={v => set('password', v)} placeholder="Enter your password" error={errors.password} />
@@ -581,8 +581,8 @@ export function CompleteRegistrationPage({
             </div>
 
             {/* Password requirements panel */}
-            <div className="mt-3 p-3 bg-[#f8f9fb] border border-[#d1d9e0] rounded">
-              <p className="text-xs font-medium text-[#374151] mb-2">Password requirements:</p>
+            <div className="mt-3 p-3 bg-[#F9FAF2] border border-[#d6dfd5] rounded">
+              <p className="text-xs font-medium text-[#4A4A4A] mb-2">Password requirements:</p>
               <ul className="space-y-1 text-xs">
                 {reqRow(pwReqs.length,  'Minimum 8 characters')}
                 {reqRow(pwReqs.upper,   'At least one uppercase letter (A–Z)')}
@@ -593,7 +593,7 @@ export function CompleteRegistrationPage({
             </div>
           </section>
 
-          <div className="border-t border-[#e8edf2]" />
+          <div className="border-t border-[#e3ebe1]" />
 
           {/* ── Terms ── */}
           <div className="space-y-1">
@@ -602,10 +602,10 @@ export function CompleteRegistrationPage({
                 type="checkbox"
                 checked={form.terms}
                 onChange={e => set('terms', e.target.checked)}
-                className="mt-0.5 w-4 h-4 accent-[#1a3a5c] shrink-0"
+                className="mt-0.5 w-4 h-4 accent-[#355E3B] shrink-0"
                 aria-required="true"
               />
-              <span className="text-sm text-[#374151]">
+              <span className="text-sm text-[#4A4A4A]">
                 I understand this is a demo registration.
               </span>
             </label>
@@ -621,14 +621,14 @@ export function CompleteRegistrationPage({
             <button
               type="submit"
               disabled={!canSubmit}
-              className="flex items-center justify-center gap-2 bg-[#1a3a5c] text-white text-sm font-medium px-6 py-2.5 rounded hover:bg-[#0f2540] focus:ring-2 focus:ring-[#1a56db] focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center justify-center gap-2 bg-[#355E3B] text-white text-sm font-medium px-6 py-2.5 rounded hover:bg-[#27472c] focus:ring-2 focus:ring-[#6DAE7C] focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? <><Icon.Loader /> Registering…</> : 'Register'}
             </button>
             <button
               type="button"
               onClick={onBack}
-              className="border border-[#d1d9e0] text-[#374151] text-sm font-medium px-6 py-2.5 rounded hover:bg-[#f0f4f8] focus:ring-2 focus:ring-[#1a56db] focus:ring-offset-2 transition-colors"
+              className="border border-[#d6dfd5] text-[#4A4A4A] text-sm font-medium px-6 py-2.5 rounded hover:bg-[#F9FAF2] focus:ring-2 focus:ring-[#6DAE7C] focus:ring-offset-2 transition-colors"
             >
               Cancel
             </button>
@@ -650,15 +650,15 @@ export function RegistrationSuccessPage({ onGoToLogin }: { onGoToLogin: () => vo
           </span>
         </div>
         <div>
-          <h1 className="text-xl font-bold text-[#1a3a5c]">Registration Successful</h1>
-          <p className="text-sm text-[#6b7a8d] mt-2 max-w-xs mx-auto">
+          <h1 className="text-xl font-bold text-[#355E3B]">Registration Successful</h1>
+          <p className="text-sm text-[#555C56] mt-2 max-w-xs mx-auto">
             Your account has been created successfully. You can now log in using your email ID and password.
           </p>
         </div>
         <div className="pt-2">
           <button
             onClick={onGoToLogin}
-            className="bg-[#1a3a5c] text-white text-sm font-medium px-6 py-2.5 rounded hover:bg-[#0f2540] focus:ring-2 focus:ring-[#1a56db] focus:ring-offset-2 transition-colors"
+            className="bg-[#355E3B] text-white text-sm font-medium px-6 py-2.5 rounded hover:bg-[#27472c] focus:ring-2 focus:ring-[#6DAE7C] focus:ring-offset-2 transition-colors"
           >
             Go to Login
           </button>

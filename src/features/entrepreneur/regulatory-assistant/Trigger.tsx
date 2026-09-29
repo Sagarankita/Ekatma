@@ -20,7 +20,7 @@ export function RegAssistantTrigger({ onClick, label, lang, size = 'sm' }: {
 }) {
   const defaultLabel = lang === 'mr' ? 'नियामक सहाय्यक' : 'Regulatory Assistant';
   const cls = size === 'xs'
-    ? 'flex items-center gap-1.5 text-[11px] border border-[#d1d9e0] text-[#1a3a5c] px-2.5 py-1 rounded hover:bg-[#f0f4f8] font-medium transition-colors'
-    : 'flex items-center gap-2 text-xs border border-[#d1d9e0] text-[#1a3a5c] px-3 py-1.5 rounded hover:bg-[#f0f4f8] font-medium transition-colors';
+    ? 'flex items-center gap-1.5 text-[11px] border border-[#d6dfd5] text-[#355E3B] px-2.5 py-1 rounded hover:bg-[#F9FAF2] font-medium transition-colors'
+    : 'flex items-center gap-2 text-xs border border-[#d6dfd5] text-[#355E3B] px-3 py-1.5 rounded hover:bg-[#F9FAF2] font-medium transition-colors';
   return <button type="button" onClick={onClick} className={cls} aria-label="Open Regulatory Assistant"><Icon.Shield />{label ?? defaultLabel}</button>;
 }

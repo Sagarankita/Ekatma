@@ -41,24 +41,24 @@ export interface GraphNodeData extends Record<string, unknown> {
 // Horizontal stage positioning to reinforce lifecycle milestone progression
 const STAGE_X_OFFSET: Record<string, number> = {
   land: 40,
-  establishment: 350,
-  construction: 660,
-  utilities: 970,
-  'pre-operation': 1280,
-  compliance: 1590,
-  operations: 1590,
-  growth: 1590,
+  establishment: 360,
+  construction: 680,
+  utilities: 1000,
+  'pre-operation': 1320,
+  compliance: 1640,
+  operations: 1960,
+  growth: 2280,
 };
 
-// Compute Dagre Hierarchical Layout (Left-to-Right DAG workflow)
+// Compute Dagre Hierarchical Layout with stage vertical spacing (Left-to-Right DAG workflow)
 function getLayoutedElements(nodes: Node<GraphNodeData>[], edges: Edge[]) {
   const dagreGraph = new dagre.graphlib.Graph();
   dagreGraph.setDefaultEdgeLabel(() => ({}));
 
-  dagreGraph.setGraph({ rankdir: 'LR', nodesep: 45, ranksep: 90 });
+  dagreGraph.setGraph({ rankdir: 'LR', nodesep: 70, ranksep: 120 });
 
   nodes.forEach(node => {
-    dagreGraph.setNode(node.id, { width: 230, height: 100 });
+    dagreGraph.setNode(node.id, { width: 230, height: 130 });
   });
 
   edges.forEach(edge => {
@@ -67,21 +67,40 @@ function getLayoutedElements(nodes: Node<GraphNodeData>[], edges: Edge[]) {
 
   dagre.layout(dagreGraph);
 
-  const layoutedNodes = nodes.map(node => {
-    const nodeWithPosition = dagreGraph.node(node.id);
-    const stageKey = node.data.stage;
-    const customX = STAGE_X_OFFSET[stageKey] ?? (nodeWithPosition ? nodeWithPosition.x : 0);
-    const customY = nodeWithPosition ? nodeWithPosition.y - 50 : 0;
+  // Group nodes by stage to assign non-overlapping vertical positions
+  const nodesByStage: Record<string, Node<GraphNodeData>[]> = {};
+  nodes.forEach(node => {
+    const stageKey = node.data.stage || 'land';
+    if (!nodesByStage[stageKey]) nodesByStage[stageKey] = [];
+    nodesByStage[stageKey].push(node);
+  });
 
-    return {
-      ...node,
-      targetPosition: Position.Left,
-      sourcePosition: Position.Right,
-      position: {
-        x: customX,
-        y: customY,
-      },
-    };
+  const NODE_HEIGHT = 135;
+  const GAP_Y = 35;
+  const layoutedNodes: Node<GraphNodeData>[] = [];
+
+  Object.entries(nodesByStage).forEach(([stage, stageNodes]) => {
+    const customX = STAGE_X_OFFSET[stage] ?? (dagreGraph.node(stageNodes[0]?.id)?.x ?? 40);
+
+    // Sort nodes within the stage by Dagre Y rank or ID
+    stageNodes.sort((a, b) => {
+      const posA = dagreGraph.node(a.id)?.y ?? 0;
+      const posB = dagreGraph.node(b.id)?.y ?? 0;
+      return posA - posB;
+    });
+
+    stageNodes.forEach((node, index) => {
+      const customY = 40 + index * (NODE_HEIGHT + GAP_Y);
+      layoutedNodes.push({
+        ...node,
+        targetPosition: Position.Left,
+        sourcePosition: Position.Right,
+        position: {
+          x: customX,
+          y: customY,
+        },
+      });
+    });
   });
 
   return { nodes: layoutedNodes, edges };
@@ -245,7 +264,7 @@ export function useDependencyGraph(projectId: string, initialCteApproved = false
         const isOutgoingFromSelected = selectedNodeId === dep.reqId;
         const isDirectlyConnected = isIncomingToSelected || isOutgoingFromSelected;
 
-        let edgeColor = '#64748b';
+        let edgeColor = '#555C56';
         let strokeWidth = 2;
         let opacity = 0.75;
         let isAnimated = false;
@@ -259,13 +278,13 @@ export function useDependencyGraph(projectId: string, initialCteApproved = false
             isAnimated = true;
           } else if (isOutgoingFromSelected) {
             // Downstream line flowing out of selected node
-            edgeColor = '#2563eb'; // Blue
+            edgeColor = '#6DAE7C'; // Blue
             strokeWidth = 3;
             opacity = 1;
             isAnimated = true;
           } else {
             // Unrelated edge dimmed
-            edgeColor = '#94a3b8';
+            edgeColor = '#9ab098';
             strokeWidth = 1.5;
             opacity = 0.12;
           }

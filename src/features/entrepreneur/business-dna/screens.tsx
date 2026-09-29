@@ -17,7 +17,7 @@ function Breadcrumb({ items }: { items: { label: string; href?: string }[] }) {
     if (item.label === 'Business Discovery') return ENTREPRENEUR_ROUTES.newBusinessDiscovery()
     return item.href
   }
-  return <nav aria-label="Breadcrumb"><ol className="flex items-center gap-1 text-sm text-[#6b7a8d]" role="list">{items.map((item, i) => <li key={`${item.label}-${i}`} className="flex items-center gap-1">{i > 0 && <span aria-hidden="true" className="text-[#b0bcc9]"><Icon.ChevronRight /></span>}{i === items.length - 1 ? <span className="text-[#1a2533] font-medium" aria-current="page">{item.label}</span> : routeFor(item) ? <Link href={routeFor(item)!} className="hover:text-[#1a56db] hover:underline transition-colors">{item.label}</Link> : <span>{item.label}</span>}</li>)}</ol></nav>
+  return <nav aria-label="Breadcrumb"><ol className="flex items-center gap-1 text-sm text-[#555C56]" role="list">{items.map((item, i) => <li key={`${item.label}-${i}`} className="flex items-center gap-1">{i > 0 && <span aria-hidden="true" className="text-[#a5b5a3]"><Icon.ChevronRight /></span>}{i === items.length - 1 ? <span className="text-[#2B2B2B] font-medium" aria-current="page">{item.label}</span> : routeFor(item) ? <Link href={routeFor(item)!} className="hover:text-[#6DAE7C] hover:underline transition-colors">{item.label}</Link> : <span>{item.label}</span>}</li>)}</ol></nav>
 }
 
 // ─── E03/E04 Shared: Step Indicator ──────────────────────────────────────────
@@ -36,18 +36,18 @@ function CreateStepIndicator({ current }: { current: 'e03' | 'e04' | 'e05' }) {
           <li key={step.key} className={`flex items-center ${i < CREATE_STEPS.length - 1 ? 'flex-1' : ''}`}>
             <div className="flex flex-col items-center gap-1">
               <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold border-2 transition-colors
-                ${i < idx ? 'bg-[#1a3a5c] border-[#1a3a5c] text-white' : ''}
-                ${i === idx ? 'bg-white border-[#1a3a5c] text-[#1a3a5c]' : ''}
-                ${i > idx ? 'bg-white border-[#d1d9e0] text-[#9aa5b4]' : ''}
+                ${i < idx ? 'bg-[#355E3B] border-[#355E3B] text-white' : ''}
+                ${i === idx ? 'bg-white border-[#355E3B] text-[#355E3B]' : ''}
+                ${i > idx ? 'bg-white border-[#d6dfd5] text-[#8c9f8a]' : ''}
               `}>
                 {i < idx ? <Icon.Check /> : i + 1}
               </div>
-              <span className={`text-xs font-medium whitespace-nowrap ${i === idx ? 'text-[#1a3a5c]' : i < idx ? 'text-[#374151]' : 'text-[#9aa5b4]'}`}>
+              <span className={`text-xs font-medium whitespace-nowrap ${i === idx ? 'text-[#355E3B]' : i < idx ? 'text-[#4A4A4A]' : 'text-[#8c9f8a]'}`}>
                 {step.label}
               </span>
             </div>
             {i < CREATE_STEPS.length - 1 && (
-              <div className={`flex-1 h-0.5 mx-2 mb-4 ${i < idx ? 'bg-[#1a3a5c]' : 'bg-[#d1d9e0]'}`} aria-hidden="true" />
+              <div className={`flex-1 h-0.5 mx-2 mb-4 ${i < idx ? 'bg-[#355E3B]' : 'bg-[#d6dfd5]'}`} aria-hidden="true" />
             )}
           </li>
         ))}
@@ -65,19 +65,19 @@ function CreateActionBar({ onBack, onSaveExit, onContinue, continueLabel = 'Cont
   saved?: boolean
 }) {
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-6 border-t border-[#e8edf2]">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-6 border-t border-[#e3ebe1]">
       <div className="flex items-center gap-3">
         <button
           type="button"
           onClick={onBack}
-          className="border border-[#d1d9e0] text-[#374151] text-sm font-medium px-5 py-2.5 rounded hover:bg-[#f0f4f8] focus:ring-2 focus:ring-[#1a56db] focus:ring-offset-2 transition-colors"
+          className="border border-[#d6dfd5] text-[#4A4A4A] text-sm font-medium px-5 py-2.5 rounded hover:bg-[#F9FAF2] focus:ring-2 focus:ring-[#6DAE7C] focus:ring-offset-2 transition-colors"
         >
           Back
         </button>
         <button
           type="button"
           onClick={onSaveExit}
-          className="border border-[#1a3a5c] text-[#1a3a5c] text-sm font-medium px-5 py-2.5 rounded hover:bg-[#f0f4f8] focus:ring-2 focus:ring-[#1a56db] focus:ring-offset-2 transition-colors"
+          className="border border-[#355E3B] text-[#355E3B] text-sm font-medium px-5 py-2.5 rounded hover:bg-[#F9FAF2] focus:ring-2 focus:ring-[#6DAE7C] focus:ring-offset-2 transition-colors"
         >
           Save & Exit
         </button>
@@ -90,7 +90,7 @@ function CreateActionBar({ onBack, onSaveExit, onContinue, continueLabel = 'Cont
       <button
         type="button"
         onClick={onContinue}
-        className="flex items-center gap-2 bg-[#1a3a5c] text-white text-sm font-medium px-6 py-2.5 rounded hover:bg-[#0f2540] focus:ring-2 focus:ring-[#1a56db] focus:ring-offset-2 transition-colors"
+        className="flex items-center gap-2 bg-[#355E3B] text-white text-sm font-medium px-6 py-2.5 rounded hover:bg-[#27472c] focus:ring-2 focus:ring-[#6DAE7C] focus:ring-offset-2 transition-colors"
       >
         {continueLabel}
         <Icon.ChevronRight />
@@ -103,8 +103,8 @@ function CreateActionBar({ onBack, onSaveExit, onContinue, continueLabel = 'Cont
 function QuestionBlock({ question, helper, children }: { question: string; helper?: string; children: React.ReactNode }) {
   return (
     <div>
-      <p className="text-sm font-semibold text-[#1a2533] mb-1">{question}</p>
-      {helper && <p className="text-xs text-[#6b7a8d] mb-2.5">{helper}</p>}
+      <p className="text-sm font-semibold text-[#2B2B2B] mb-1">{question}</p>
+      {helper && <p className="text-xs text-[#555C56] mb-2.5">{helper}</p>}
       {children}
     </div>
   )
@@ -125,14 +125,14 @@ function YesNoNotSure({ name, value, onChange }: {
     <div className="flex flex-wrap gap-3">
       {opts.map(o => (
         <label key={o.val} className={`flex items-center gap-2 px-4 py-2.5 rounded border cursor-pointer text-sm transition-colors
-          ${value === o.val ? 'border-[#1a3a5c] bg-[#ebf3ff] text-[#1a3a5c] font-medium' : 'border-[#d1d9e0] bg-white text-[#374151] hover:border-[#a0b4cc] hover:bg-[#f8f9fb]'}`}>
+          ${value === o.val ? 'border-[#355E3B] bg-[#edf5ef] text-[#355E3B] font-medium' : 'border-[#d6dfd5] bg-white text-[#4A4A4A] hover:border-[#a0b4cc] hover:bg-[#F9FAF2]'}`}>
           <input
             type="radio"
             name={name}
             value={o.val}
             checked={value === o.val}
             onChange={() => onChange(o.val)}
-            className="accent-[#1a3a5c]"
+            className="accent-[#355E3B]"
           />
           {o.label}
         </label>
@@ -152,18 +152,18 @@ function RadioCardGroup({ name, value, onChange, options }: {
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
       {options.map(o => (
         <label key={o.val} className={`flex items-start gap-3 p-4 rounded border cursor-pointer transition-colors
-          ${value === o.val ? 'border-[#1a3a5c] bg-[#ebf3ff]' : 'border-[#d1d9e0] bg-white hover:border-[#a0b4cc] hover:bg-[#f8f9fb]'}`}>
+          ${value === o.val ? 'border-[#355E3B] bg-[#edf5ef]' : 'border-[#d6dfd5] bg-white hover:border-[#a0b4cc] hover:bg-[#F9FAF2]'}`}>
           <input
             type="radio"
             name={name}
             value={o.val}
             checked={value === o.val}
             onChange={() => onChange(o.val)}
-            className="mt-0.5 accent-[#1a3a5c] shrink-0"
+            className="mt-0.5 accent-[#355E3B] shrink-0"
           />
           <div>
-            <p className={`text-sm font-medium leading-snug ${value === o.val ? 'text-[#1a3a5c]' : 'text-[#1a2533]'}`}>{o.label}</p>
-            {o.desc && <p className="text-xs text-[#6b7a8d] mt-0.5">{o.desc}</p>}
+            <p className={`text-sm font-medium leading-snug ${value === o.val ? 'text-[#355E3B]' : 'text-[#2B2B2B]'}`}>{o.label}</p>
+            {o.desc && <p className="text-xs text-[#555C56] mt-0.5">{o.desc}</p>}
           </div>
         </label>
       ))}
@@ -185,16 +185,16 @@ function ProjectContextSummary({ name, projectType, existingBusiness, onEdit }: 
     modification: 'Modification / Diversification',
   }
   return (
-    <div className="bg-[#f0f4f8] border border-[#c8d6e4] rounded p-4 mb-6 flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+    <div className="bg-[#F9FAF2] border border-[#d6dfd5] rounded p-4 mb-6 flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
       <div className="space-y-0.5">
-        <p className="text-xs text-[#6b7a8d] uppercase tracking-wider font-medium">Project</p>
-        <p className="text-sm font-semibold text-[#1a2533]">{name || '—'}</p>
-        <p className="text-xs text-[#4a5568]">{typeLabels[projectType] ?? '—'}{existingBusiness ? ` · based on ${existingBusiness}` : ''}</p>
+        <p className="text-xs text-[#555C56] uppercase tracking-wider font-medium">Project</p>
+        <p className="text-sm font-semibold text-[#2B2B2B]">{name || '—'}</p>
+        <p className="text-xs text-[#4A4A4A]">{typeLabels[projectType] ?? '—'}{existingBusiness ? ` · based on ${existingBusiness}` : ''}</p>
       </div>
       <button
         type="button"
         onClick={onEdit}
-        className="text-xs text-[#1a56db] font-medium hover:underline focus:outline-none focus-visible:underline shrink-0"
+        className="text-xs text-[#6DAE7C] font-medium hover:underline focus:outline-none focus-visible:underline shrink-0"
       >
         Edit
       </button>
@@ -250,7 +250,7 @@ export function CreateBusinessPage({
   ]
 
   return (
-    <main id="main-content" className="flex-1 bg-[#f8f9fb]" tabIndex={-1}>
+    <main id="main-content" className="flex-1 bg-[#F9FAF2]" tabIndex={-1}>
       <div className="max-w-[800px] mx-auto px-6 py-5">
         <div className="mb-4">
           <Breadcrumb items={[
@@ -260,19 +260,19 @@ export function CreateBusinessPage({
           ]} />
         </div>
 
-        <div className="mb-5 pb-4 border-b border-[#d1d9e0]">
-          <h1 className="text-2xl font-bold text-[#1a3a5c]">Create Business / Project</h1>
-          <p className="text-sm text-[#6b7a8d] mt-1">Start by telling us what you are creating. Detailed business information will be collected in the next steps.</p>
+        <div className="mb-5 pb-4 border-b border-[#d6dfd5]">
+          <h1 className="text-xl font-bold text-[#355E3B]">Create Business / Project</h1>
+          <p className="text-sm text-[#555C56] mt-1">Start by telling us what you are creating. Detailed business information will be collected in the next steps.</p>
         </div>
 
         <CreateStepIndicator current="e03" />
 
-        <div className="bg-white border border-[#d1d9e0] rounded shadow-sm">
+        <div className="bg-white border border-[#d6dfd5] rounded shadow-sm">
           <div className="px-6 py-5 space-y-6">
 
             {/* Field 1: Name */}
             <div>
-              <label className="block text-sm font-semibold text-[#1a2533] mb-1">
+              <label className="block text-sm font-semibold text-[#2B2B2B] mb-1">
                 Business / Project Name <span className="text-red-600" aria-hidden="true">*</span>
               </label>
               <input
@@ -280,11 +280,11 @@ export function CreateBusinessPage({
                 value={data.name}
                 onChange={e => { onChange({ name: e.target.value }); setErrors(prev => ({ ...prev, name: undefined })) }}
                 placeholder="e.g. ABC Pharma Manufacturing Unit"
-                className={`w-full px-3 py-2 text-sm border rounded bg-white focus:outline-none focus:ring-2 focus:ring-[#1a56db] focus:border-[#1a56db] transition-colors placeholder:text-[#9aa5b4] ${errors.name ? 'border-red-500' : 'border-[#d1d9e0]'}`}
+                className={`w-full px-3 py-2 text-sm border rounded bg-white focus:outline-none focus:ring-2 focus:ring-[#6DAE7C] focus:border-[#6DAE7C] transition-colors placeholder:text-[#8c9f8a] ${errors.name ? 'border-red-500' : 'border-[#d6dfd5]'}`}
                 aria-invalid={!!errors.name}
                 aria-required="true"
               />
-              <p className="mt-1 text-xs text-[#6b7a8d]">Enter a name that helps you identify this business / project.</p>
+              <p className="mt-1 text-xs text-[#555C56]">Enter a name that helps you identify this business / project.</p>
               {errors.name && (
                 <p className="mt-1 text-xs text-red-600 flex items-center gap-1" role="alert">
                   <Icon.AlertCircle /> {errors.name}
@@ -292,14 +292,14 @@ export function CreateBusinessPage({
               )}
             </div>
 
-            <div className="border-t border-[#e8edf2]" />
+            <div className="border-t border-[#e3ebe1]" />
 
             {/* Field 2: Project type */}
             <div>
-              <p className="text-sm font-semibold text-[#1a2533] mb-1">
+              <p className="text-sm font-semibold text-[#2B2B2B] mb-1">
                 What Are You Creating? <span className="text-red-600" aria-hidden="true">*</span>
               </p>
-              <p className="text-xs text-[#6b7a8d] mb-3">Select the type of project you are starting.</p>
+              <p className="text-xs text-[#555C56] mb-3">Select the type of project you are starting.</p>
               <RadioCardGroup
                 name="projectType"
                 value={data.projectType}
@@ -316,14 +316,14 @@ export function CreateBusinessPage({
             {/* Conditional: existing business selector for expansion/modification */}
             {needsExisting && (
               <div>
-                <label className="block text-sm font-semibold text-[#1a2533] mb-1">
+                <label className="block text-sm font-semibold text-[#2B2B2B] mb-1">
                   Select Existing Business / Project <span className="text-red-600" aria-hidden="true">*</span>
                 </label>
-                <p className="text-xs text-[#6b7a8d] mb-2">Select the existing business this {data.projectType === 'expansion' ? 'expansion' : 'modification'} is based on.</p>
+                <p className="text-xs text-[#555C56] mb-2">Select the existing business this {data.projectType === 'expansion' ? 'expansion' : 'modification'} is based on.</p>
                 <select
                   value={data.existingBusinessId}
                   onChange={e => { onChange({ existingBusinessId: e.target.value }); setErrors(prev => ({ ...prev, existingBusinessId: undefined })) }}
-                  className={`w-full px-3 py-2 text-sm border rounded bg-white focus:outline-none focus:ring-2 focus:ring-[#1a56db] focus:border-[#1a56db] transition-colors ${errors.existingBusinessId ? 'border-red-500' : 'border-[#d1d9e0]'}`}
+                  className={`w-full px-3 py-2 text-sm border rounded bg-white focus:outline-none focus:ring-2 focus:ring-[#6DAE7C] focus:border-[#6DAE7C] transition-colors ${errors.existingBusinessId ? 'border-red-500' : 'border-[#d6dfd5]'}`}
                   aria-invalid={!!errors.existingBusinessId}
                   aria-required="true"
                 >
@@ -340,21 +340,21 @@ export function CreateBusinessPage({
               </div>
             )}
 
-            <div className="border-t border-[#e8edf2]" />
+            <div className="border-t border-[#e3ebe1]" />
 
             {/* Field 3: Description (optional) */}
             <div>
-              <label className="block text-sm font-semibold text-[#1a2533] mb-1">
-                Short Project Description <span className="text-xs text-[#9aa5b4] font-normal ml-1">Optional</span>
+              <label className="block text-sm font-semibold text-[#2B2B2B] mb-1">
+                Short Project Description <span className="text-xs text-[#8c9f8a] font-normal ml-1">Optional</span>
               </label>
               <textarea
                 rows={3}
                 value={data.description}
                 onChange={e => onChange({ description: e.target.value })}
                 placeholder="Briefly describe the proposed project."
-                className="w-full px-3 py-2 text-sm border border-[#d1d9e0] rounded bg-white focus:outline-none focus:ring-2 focus:ring-[#1a56db] focus:border-[#1a56db] transition-colors placeholder:text-[#9aa5b4] resize-none"
+                className="w-full px-3 py-2 text-sm border border-[#d6dfd5] rounded bg-white focus:outline-none focus:ring-2 focus:ring-[#6DAE7C] focus:border-[#6DAE7C] transition-colors placeholder:text-[#8c9f8a] resize-none"
               />
-              <p className="mt-1 text-xs text-[#6b7a8d]">Structured details will be collected in the next steps.</p>
+              <p className="mt-1 text-xs text-[#555C56]">Structured details will be collected in the next steps.</p>
             </div>
 
             <CreateActionBar
@@ -423,7 +423,7 @@ export function BasicRequirementsPage({
   ]
 
   return (
-    <main id="main-content" className="flex-1 bg-[#f8f9fb]" tabIndex={-1}>
+    <main id="main-content" className="flex-1 bg-[#F9FAF2]" tabIndex={-1}>
       <div className="max-w-[800px] mx-auto px-6 py-5">
         <div className="mb-4">
           <Breadcrumb items={[
@@ -434,9 +434,9 @@ export function BasicRequirementsPage({
           ]} />
         </div>
 
-        <div className="mb-5 pb-4 border-b border-[#d1d9e0]">
-          <h1 className="text-2xl font-bold text-[#1a3a5c]">Basic Requirements</h1>
-          <p className="mt-1 text-sm text-[#6b7a8d]">Tell us what you know. EKATMA will identify the relevant requirements.</p>
+        <div className="mb-5 pb-4 border-b border-[#d6dfd5]">
+          <h1 className="text-xl font-bold text-[#355E3B]">Basic Requirements</h1>
+          <p className="mt-1 text-sm text-[#555C56]">Tell us what you know. EKATMA will identify the relevant requirements.</p>
         </div>
 
         <CreateStepIndicator current="e04" />
@@ -449,12 +449,12 @@ export function BasicRequirementsPage({
           onEdit={onBack}
         />
 
-        <div className="bg-white border border-[#d1d9e0] rounded shadow-sm">
+        <div className="bg-white border border-[#d6dfd5] rounded shadow-sm">
           <div className="px-6 py-5 space-y-8">
 
             {/* ── LAND & LOCATION CONTEXT ── */}
             <section aria-labelledby="e04-land-heading">
-              <h2 id="e04-land-heading" className="text-xs font-semibold text-[#1a3a5c] uppercase tracking-wider mb-4 pb-2 border-b border-[#e8edf2]">Land &amp; Location Context</h2>
+              <h2 id="e04-land-heading" className="text-xs font-semibold text-[#355E3B] uppercase tracking-wider mb-4 pb-2 border-b border-[#e3ebe1]">Land &amp; Location Context</h2>
               <div className="space-y-5">
 
                 <QuestionBlock
@@ -469,14 +469,14 @@ export function BasicRequirementsPage({
                     <div className="flex flex-col gap-2">
                       {landStatusOptions.map(o => (
                         <label key={o.val} className={`flex items-center gap-3 px-4 py-2.5 rounded border cursor-pointer text-sm transition-colors
-                          ${data.landStatus === o.val ? 'border-[#1a3a5c] bg-[#ebf3ff] text-[#1a3a5c] font-medium' : 'border-[#d1d9e0] bg-white text-[#374151] hover:border-[#a0b4cc]'}`}>
+                          ${data.landStatus === o.val ? 'border-[#355E3B] bg-[#edf5ef] text-[#355E3B] font-medium' : 'border-[#d6dfd5] bg-white text-[#4A4A4A] hover:border-[#a0b4cc]'}`}>
                           <input
                             type="radio"
                             name="landStatus"
                             value={o.val}
                             checked={data.landStatus === o.val}
                             onChange={() => onChange({ landStatus: o.val as E04Data['landStatus'] })}
-                            className="accent-[#1a3a5c]"
+                            className="accent-[#355E3B]"
                           />
                           {o.label}
                         </label>
@@ -495,25 +495,25 @@ export function BasicRequirementsPage({
               </div>
             </section>
 
-            <div className="border-t border-[#e8edf2]" />
+            <div className="border-t border-[#e3ebe1]" />
 
             {/* ── PROJECT SETUP ── */}
             <section aria-labelledby="e04-setup-heading">
-              <h2 id="e04-setup-heading" className="text-xs font-semibold text-[#1a3a5c] uppercase tracking-wider mb-4 pb-2 border-b border-[#e8edf2]">Project Setup</h2>
+              <h2 id="e04-setup-heading" className="text-xs font-semibold text-[#355E3B] uppercase tracking-wider mb-4 pb-2 border-b border-[#e3ebe1]">Project Setup</h2>
               <div className="space-y-5">
 
                 <QuestionBlock question="What is the current premises / construction situation?">
                   <div className="flex flex-col gap-2">
                     {constructionOptions.map(o => (
                       <label key={o.val} className={`flex items-center gap-3 px-4 py-2.5 rounded border cursor-pointer text-sm transition-colors
-                        ${data.construction === o.val ? 'border-[#1a3a5c] bg-[#ebf3ff] text-[#1a3a5c] font-medium' : 'border-[#d1d9e0] bg-white text-[#374151] hover:border-[#a0b4cc]'}`}>
+                        ${data.construction === o.val ? 'border-[#355E3B] bg-[#edf5ef] text-[#355E3B] font-medium' : 'border-[#d6dfd5] bg-white text-[#4A4A4A] hover:border-[#a0b4cc]'}`}>
                         <input
                           type="radio"
                           name="construction"
                           value={o.val}
                           checked={data.construction === o.val}
                           onChange={() => onChange({ construction: o.val as E04Data['construction'] })}
-                          className="accent-[#1a3a5c]"
+                          className="accent-[#355E3B]"
                         />
                         {o.label}
                       </label>
@@ -532,11 +532,11 @@ export function BasicRequirementsPage({
               </div>
             </section>
 
-            <div className="border-t border-[#e8edf2]" />
+            <div className="border-t border-[#e3ebe1]" />
 
             {/* ── BUSINESS ── */}
             <section aria-labelledby="e04-business-heading">
-              <h2 id="e04-business-heading" className="text-xs font-semibold text-[#1a3a5c] uppercase tracking-wider mb-4 pb-2 border-b border-[#e8edf2]">Business</h2>
+              <h2 id="e04-business-heading" className="text-xs font-semibold text-[#355E3B] uppercase tracking-wider mb-4 pb-2 border-b border-[#e3ebe1]">Business</h2>
               <div className="space-y-5">
 
                 <QuestionBlock
@@ -546,14 +546,14 @@ export function BasicRequirementsPage({
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {businessNatureOptions.map(o => (
                       <label key={o.val} className={`flex items-center gap-2 px-3 py-2.5 rounded border cursor-pointer text-sm transition-colors
-                        ${data.businessNature === o.val ? 'border-[#1a3a5c] bg-[#ebf3ff] text-[#1a3a5c] font-medium' : 'border-[#d1d9e0] bg-white text-[#374151] hover:border-[#a0b4cc]'}`}>
+                        ${data.businessNature === o.val ? 'border-[#355E3B] bg-[#edf5ef] text-[#355E3B] font-medium' : 'border-[#d6dfd5] bg-white text-[#4A4A4A] hover:border-[#a0b4cc]'}`}>
                         <input
                           type="radio"
                           name="businessNature"
                           value={o.val}
                           checked={data.businessNature === o.val}
                           onChange={() => onChange({ businessNature: o.val as E04Data['businessNature'] })}
-                          className="accent-[#1a3a5c]"
+                          className="accent-[#355E3B]"
                         />
                         {o.label}
                       </label>
@@ -567,7 +567,7 @@ export function BasicRequirementsPage({
                 >
                   <YesNoNotSure name="existingApprovals" value={data.existingApprovals} onChange={v => onChange({ existingApprovals: v as E04Data['existingApprovals'] })} />
                   {data.existingApprovals === 'yes' && (
-                    <p className="mt-2 text-xs text-[#6b7a8d] bg-[#f8f9fb] border border-[#d1d9e0] rounded px-3 py-2">
+                    <p className="mt-2 text-xs text-[#555C56] bg-[#F9FAF2] border border-[#d6dfd5] rounded px-3 py-2">
                       Existing approval details will be collected in the next stage.
                     </p>
                   )}
@@ -663,9 +663,9 @@ function E05SectionProgress({ current, completed }: { current: number; completed
       {E05_SECTIONS.map((s, i) => (
         <div key={s.num} className="flex items-center gap-1 shrink-0">
           <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border transition-colors
-            ${s.num === current ? 'border-[#1a3a5c] bg-[#1a3a5c] text-white' : ''}
+            ${s.num === current ? 'border-[#355E3B] bg-[#355E3B] text-white' : ''}
             ${completed.has(s.num) && s.num !== current ? 'border-green-500 bg-green-50 text-green-800' : ''}
-            ${!completed.has(s.num) && s.num !== current ? 'border-[#d1d9e0] bg-white text-[#9aa5b4]' : ''}
+            ${!completed.has(s.num) && s.num !== current ? 'border-[#d6dfd5] bg-white text-[#8c9f8a]' : ''}
           `}>
             {completed.has(s.num) && s.num !== current ? (
               <span className="text-green-600"><Icon.CheckCircle /></span>
@@ -675,7 +675,7 @@ function E05SectionProgress({ current, completed }: { current: number; completed
             {s.label}
           </div>
           {i < E05_SECTIONS.length - 1 && (
-            <div className={`w-4 h-0.5 ${completed.has(s.num) ? 'bg-green-400' : 'bg-[#d1d9e0]'}`} aria-hidden="true" />
+            <div className={`w-4 h-0.5 ${completed.has(s.num) ? 'bg-green-400' : 'bg-[#d6dfd5]'}`} aria-hidden="true" />
           )}
         </div>
       ))}
@@ -688,14 +688,14 @@ function ReusedAnswerBlock({ label, value, source, onEdit }: {
   label: string; value: string; source: string; onEdit?: () => void
 }) {
   return (
-    <div className="flex items-start justify-between gap-3 p-3 bg-[#f0f4f8] border border-[#c8d6e4] rounded">
+    <div className="flex items-start justify-between gap-3 p-3 bg-[#F9FAF2] border border-[#d6dfd5] rounded">
       <div>
-        <p className="text-xs text-[#6b7a8d] uppercase tracking-wider font-medium mb-0.5">{label}</p>
-        <p className="text-sm font-semibold text-[#1a2533]">{value}</p>
+        <p className="text-xs text-[#555C56] uppercase tracking-wider font-medium mb-0.5">{label}</p>
+        <p className="text-sm font-semibold text-[#2B2B2B]">{value}</p>
         <p className="text-xs text-green-700 mt-0.5 flex items-center gap-1"><Icon.CheckCircle /> {source}</p>
       </div>
       {onEdit && (
-        <button type="button" onClick={onEdit} className="text-xs text-[#1a56db] font-medium hover:underline shrink-0">Edit</button>
+        <button type="button" onClick={onEdit} className="text-xs text-[#6DAE7C] font-medium hover:underline shrink-0">Edit</button>
       )}
     </div>
   )
@@ -704,13 +704,13 @@ function ReusedAnswerBlock({ label, value, source, onEdit }: {
 // ─── Change Detected Banner ───────────────────────────────────────────────────
 function ChangeDetectedBanner({ fieldLabel, onDismiss }: { fieldLabel: string; onDismiss: () => void }) {
   return (
-    <div className="flex items-start gap-2 px-3 py-2 bg-[#fffbeb] border border-[#f59e0b] rounded text-sm" role="status" aria-live="polite">
-      <svg className="shrink-0 mt-0.5 text-[#d97706]" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    <div className="flex items-start gap-2 px-3 py-2 bg-[#fdf8e6] border border-[#D4A017] rounded text-sm" role="status" aria-live="polite">
+      <svg className="shrink-0 mt-0.5 text-[#D4A017]" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
       <div className="flex-1">
-        <span className="font-medium text-[#92400e]">Business profile change detected.</span>
-        <span className="text-[#92400e]"> {fieldLabel} has been updated. Relevant requirements will be re-evaluated.</span>
+        <span className="font-medium text-[#7a5807]">Business profile change detected.</span>
+        <span className="text-[#7a5807]"> {fieldLabel} has been updated. Relevant requirements will be re-evaluated.</span>
       </div>
-      <button type="button" onClick={onDismiss} className="text-[#92400e] hover:text-[#78350f] shrink-0 text-xs font-medium">Dismiss</button>
+      <button type="button" onClick={onDismiss} className="text-[#7a5807] hover:text-[#634805] shrink-0 text-xs font-medium">Dismiss</button>
     </div>
   )
 }
@@ -721,30 +721,30 @@ function ActiveUseWarningModal({ fieldLabel, usedBy, onCancel, onConfirm }: {
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" role="dialog" aria-modal="true" aria-labelledby="auw-title">
-      <div className="bg-white border border-[#d1d9e0] rounded-lg shadow-xl max-w-sm w-full mx-4 p-6">
+      <div className="bg-white border border-[#d6dfd5] rounded-lg shadow-xl max-w-sm w-full mx-4 p-6">
         <div className="flex items-start gap-3 mb-4">
           <div className="w-9 h-9 rounded-full bg-[#fff7ed] border border-[#fed7aa] flex items-center justify-center shrink-0">
-            <svg className="text-[#ea580c]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <svg className="text-[#b88a14]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
           </div>
           <div>
-            <p id="auw-title" className="text-sm font-bold text-[#1a2533]">This information is currently in use</p>
-            <p className="text-xs text-[#6b7a8d] mt-1">
-              <span className="font-semibold text-[#374151]">{fieldLabel}</span> is used by:
+            <p id="auw-title" className="text-sm font-bold text-[#2B2B2B]">This information is currently in use</p>
+            <p className="text-xs text-[#555C56] mt-1">
+              <span className="font-semibold text-[#4A4A4A]">{fieldLabel}</span> is used by:
             </p>
             <ul className="mt-1 space-y-0.5">
               {usedBy.map(u => (
-                <li key={u} className="text-xs text-[#374151] flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#ea580c] shrink-0" />
+                <li key={u} className="text-xs text-[#4A4A4A] flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#b88a14] shrink-0" />
                   {u}
                 </li>
               ))}
             </ul>
           </div>
         </div>
-        <p className="text-xs text-[#6b7a8d] mb-4">Changing this value may affect your regulatory journey. This does not block you from proceeding.</p>
+        <p className="text-xs text-[#555C56] mb-4">Changing this value may affect your regulatory journey. This does not block you from proceeding.</p>
         <div className="flex gap-2 justify-end">
-          <button type="button" onClick={onCancel} className="px-4 py-2 text-sm border border-[#d1d9e0] text-[#374151] rounded hover:bg-[#f0f4f8] transition-colors">Cancel</button>
-          <button type="button" onClick={onConfirm} className="px-4 py-2 text-sm bg-[#1a3a5c] text-white rounded hover:bg-[#0f2540] transition-colors font-medium">Confirm Change</button>
+          <button type="button" onClick={onCancel} className="px-4 py-2 text-sm border border-[#d6dfd5] text-[#4A4A4A] rounded hover:bg-[#F9FAF2] transition-colors">Cancel</button>
+          <button type="button" onClick={onConfirm} className="px-4 py-2 text-sm bg-[#355E3B] text-white rounded hover:bg-[#27472c] transition-colors font-medium">Confirm Change</button>
         </div>
       </div>
     </div>
@@ -754,7 +754,7 @@ function ActiveUseWarningModal({ fieldLabel, usedBy, onCancel, onConfirm }: {
 // ─── Not Applicable Section Banner ───────────────────────────────────────────
 function NotApplicableBanner({ reason }: { reason: string }) {
   return (
-    <div className="flex items-center gap-2 px-3 py-2.5 bg-[#f8f9fb] border border-[#d1d9e0] rounded text-sm text-[#6b7a8d]">
+    <div className="flex items-center gap-2 px-3 py-2.5 bg-[#F9FAF2] border border-[#d6dfd5] rounded text-sm text-[#555C56]">
       <svg className="shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
       <span>Not applicable — {reason}</span>
     </div>
@@ -782,32 +782,32 @@ function SearchableSelect({ options, value, onChange, placeholder, id }: {
   return (
     <div className="relative" ref={ref}>
       <div
-        className={`flex items-center justify-between px-3 py-2 text-sm border rounded bg-white cursor-pointer focus-within:ring-2 focus-within:ring-[#1a56db] focus-within:border-[#1a56db] transition-colors ${open ? 'border-[#1a56db]' : 'border-[#d1d9e0]'}`}
+        className={`flex items-center justify-between px-3 py-2 text-sm border rounded bg-white cursor-pointer focus-within:ring-2 focus-within:ring-[#6DAE7C] focus-within:border-[#6DAE7C] transition-colors ${open ? 'border-[#6DAE7C]' : 'border-[#d6dfd5]'}`}
         onClick={() => setOpen(o => !o)}
       >
-        <span className={value ? 'text-[#1a2533]' : 'text-[#9aa5b4]'}>{value || placeholder || 'Select…'}</span>
-        <span className={`text-[#9aa5b4] transition-transform ${open ? 'rotate-180' : ''}`}><Icon.ChevronDown /></span>
+        <span className={value ? 'text-[#2B2B2B]' : 'text-[#8c9f8a]'}>{value || placeholder || 'Select…'}</span>
+        <span className={`text-[#8c9f8a] transition-transform ${open ? 'rotate-180' : ''}`}><Icon.ChevronDown /></span>
       </div>
       {open && (
-        <div className="absolute left-0 top-full mt-1 w-full bg-white border border-[#d1d9e0] rounded shadow-lg z-40 max-h-60 overflow-hidden flex flex-col">
-          <div className="p-2 border-b border-[#e8edf2]">
+        <div className="absolute left-0 top-full mt-1 w-full bg-white border border-[#d6dfd5] rounded shadow-lg z-40 max-h-60 overflow-hidden flex flex-col">
+          <div className="p-2 border-b border-[#e3ebe1]">
             <input
               type="text"
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search…"
-              className="w-full px-2 py-1.5 text-sm border border-[#d1d9e0] rounded focus:outline-none focus:ring-2 focus:ring-[#1a56db]"
+              className="w-full px-2 py-1.5 text-sm border border-[#d6dfd5] rounded focus:outline-none focus:ring-2 focus:ring-[#6DAE7C]"
               onClick={e => e.stopPropagation()}
               autoFocus
             />
           </div>
           <ul className="overflow-y-auto">
-            {filtered.length === 0 && <li className="px-4 py-3 text-sm text-[#9aa5b4]">No results</li>}
+            {filtered.length === 0 && <li className="px-4 py-3 text-sm text-[#8c9f8a]">No results</li>}
             {filtered.map(o => (
               <li key={o}>
                 <button
                   type="button"
-                  className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${value === o ? 'bg-[#ebf3ff] text-[#1a3a5c] font-medium' : 'hover:bg-[#f8f9fb] text-[#374151]'}`}
+                  className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${value === o ? 'bg-[#edf5ef] text-[#355E3B] font-medium' : 'hover:bg-[#F9FAF2] text-[#4A4A4A]'}`}
                   onClick={() => { onChange(o); setOpen(false); setSearch('') }}
                 >
                   {o}
@@ -832,14 +832,14 @@ function MultiCheckboxGroup({ name, options, selected, onChange }: {
     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
       {options.map(o => (
         <label key={o} className={`flex items-center gap-2 px-3 py-2.5 rounded border cursor-pointer text-sm transition-colors
-          ${selected.includes(o) ? 'border-[#1a3a5c] bg-[#ebf3ff] text-[#1a3a5c] font-medium' : 'border-[#d1d9e0] bg-white text-[#374151] hover:border-[#a0b4cc]'}`}>
+          ${selected.includes(o) ? 'border-[#355E3B] bg-[#edf5ef] text-[#355E3B] font-medium' : 'border-[#d6dfd5] bg-white text-[#4A4A4A] hover:border-[#a0b4cc]'}`}>
           <input
             type="checkbox"
             name={name}
             value={o}
             checked={selected.includes(o)}
             onChange={() => toggle(o)}
-            className="accent-[#1a3a5c] shrink-0"
+            className="accent-[#355E3B] shrink-0"
           />
           {o}
         </label>
@@ -861,11 +861,11 @@ function ProductList({ products, onChange }: {
   return (
     <div className="space-y-3">
       {products.map((p, i) => (
-        <div key={p.id} className="border border-[#d1d9e0] rounded p-3 bg-[#fafbfc] space-y-2">
+        <div key={p.id} className="border border-[#d6dfd5] rounded p-3 bg-[#fafbfc] space-y-2">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-[#6b7a8d] uppercase tracking-wider">Product / Service {i + 1}</p>
+            <p className="text-xs font-medium text-[#555C56] uppercase tracking-wider">Product / Service {i + 1}</p>
             {products.length > 1 && (
-              <button type="button" onClick={() => remove(p.id)} className="text-[#9aa5b4] hover:text-red-500 transition-colors" aria-label="Remove">
+              <button type="button" onClick={() => remove(p.id)} className="text-[#8c9f8a] hover:text-red-500 transition-colors" aria-label="Remove">
                 <Icon.X />
               </button>
             )}
@@ -882,7 +882,7 @@ function ProductList({ products, onChange }: {
               value={p.description}
               onChange={e => update(p.id, 'description', e.target.value)}
               placeholder="Describe product / service"
-              className="w-full px-3 py-2 text-sm border border-[#d1d9e0] rounded focus:outline-none focus:ring-2 focus:ring-[#1a56db] placeholder:text-[#9aa5b4]"
+              className="w-full px-3 py-2 text-sm border border-[#d6dfd5] rounded focus:outline-none focus:ring-2 focus:ring-[#6DAE7C] placeholder:text-[#8c9f8a]"
             />
           )}
         </div>
@@ -890,7 +890,7 @@ function ProductList({ products, onChange }: {
       <button
         type="button"
         onClick={add}
-        className="flex items-center gap-2 text-sm text-[#1a56db] font-medium hover:underline focus:outline-none"
+        className="flex items-center gap-2 text-sm text-[#6DAE7C] font-medium hover:underline focus:outline-none"
       >
         <Icon.Plus /> Add Product / Service
       </button>
@@ -984,33 +984,33 @@ export function E05AdaptiveQuestionnairePage({
   }
 
   const inputCls = (err?: string) =>
-    `w-full px-3 py-2 text-sm border rounded bg-white focus:outline-none focus:ring-2 focus:ring-[#1a56db] focus:border-[#1a56db] transition-colors placeholder:text-[#9aa5b4] ${err ? 'border-red-500' : 'border-[#d1d9e0]'}`
+    `w-full px-3 py-2 text-sm border rounded bg-white focus:outline-none focus:ring-2 focus:ring-[#6DAE7C] focus:border-[#6DAE7C] transition-colors placeholder:text-[#8c9f8a] ${err ? 'border-red-500' : 'border-[#d6dfd5]'}`
 
   // ── Change gate for expansion/modification ──────────────────────────────────
   if (showChangeGate) {
     return (
-      <main id="main-content" className="flex-1 bg-[#f8f9fb]" tabIndex={-1}>
+      <main id="main-content" className="flex-1 bg-[#F9FAF2]" tabIndex={-1}>
         <div className="max-w-[820px] mx-auto px-6 py-5">
           <div className="mb-4">
             <Breadcrumb items={[{ label: 'Home', href: '#' }, { label: 'My Businesses', href: '#' }, { label: 'Create Business / Project', href: '#' }, { label: 'Business Discovery' }]} />
           </div>
-          <div className="mb-4 pb-4 border-b border-[#d1d9e0]">
-            <h1 className="text-2xl font-bold text-[#1a3a5c]">Business Discovery</h1>
-            <p className="text-sm text-[#6b7a8d] mt-1">
+          <div className="mb-4 pb-4 border-b border-[#d6dfd5]">
+            <h1 className="text-xl font-bold text-[#355E3B]">Business Discovery</h1>
+            <p className="text-sm text-[#555C56] mt-1">
               {e03Data.projectType === 'expansion' ? 'Expansion of Existing Business' : 'Modification / Diversification'} — EKATMA will load your existing Business DNA and ask only about the areas you are changing.
             </p>
           </div>
           <ProjectContextSummary name={e03Data.name} projectType={e03Data.projectType} existingBusiness={existingProject?.name} onEdit={onBack} />
-          <div className="bg-white border border-[#d1d9e0] rounded shadow-sm mt-4">
+          <div className="bg-white border border-[#d6dfd5] rounded shadow-sm mt-4">
             <div className="px-6 py-5 space-y-5">
               <div>
-                <h2 className="text-base font-bold text-[#1a2533] mb-1">What are you changing in this project?</h2>
-                <p className="text-sm text-[#6b7a8d] mb-4">Select all that apply. EKATMA will show only the relevant change areas in detail.</p>
+                <h2 className="text-base font-bold text-[#2B2B2B] mb-1">What are you changing in this project?</h2>
+                <p className="text-sm text-[#555C56] mb-4">Select all that apply. EKATMA will show only the relevant change areas in detail.</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {EXPANSION_CHANGE_OPTIONS.map(opt => {
                     const checked = expansionChangeAreas.includes(opt.val)
                     return (
-                      <label key={opt.val} className={`flex items-center gap-3 px-3 py-2.5 border rounded cursor-pointer transition-colors ${checked ? 'border-[#1a3a5c] bg-[#ebf3ff]' : 'border-[#d1d9e0] hover:border-[#a0b4cc]'}`}>
+                      <label key={opt.val} className={`flex items-center gap-3 px-3 py-2.5 border rounded cursor-pointer transition-colors ${checked ? 'border-[#355E3B] bg-[#edf5ef]' : 'border-[#d6dfd5] hover:border-[#a0b4cc]'}`}>
                         <input
                           type="checkbox"
                           checked={checked}
@@ -1018,9 +1018,9 @@ export function E05AdaptiveQuestionnairePage({
                             const next = checked ? expansionChangeAreas.filter(a => a !== opt.val) : [...expansionChangeAreas, opt.val]
                             onExpansionChangeAreas(next)
                           }}
-                          className="accent-[#1a3a5c]"
+                          className="accent-[#355E3B]"
                         />
-                        <span className={`text-sm ${checked ? 'font-medium text-[#1a3a5c]' : 'text-[#374151]'}`}>{opt.label}</span>
+                        <span className={`text-sm ${checked ? 'font-medium text-[#355E3B]' : 'text-[#4A4A4A]'}`}>{opt.label}</span>
                       </label>
                     )
                   })}
@@ -1029,15 +1029,15 @@ export function E05AdaptiveQuestionnairePage({
               </div>
               {/* Show existing business DNA context if available */}
               {existingProject && (
-                <div className="px-4 py-3 bg-[#f0f4f8] border border-[#c8d6e4] rounded">
-                  <p className="text-xs text-[#6b7a8d] uppercase tracking-wider font-semibold mb-1">Existing Business DNA</p>
-                  <p className="text-sm font-semibold text-[#1a2533]">{existingProject.name}</p>
-                  <p className="text-xs text-[#6b7a8d] mt-0.5">{existingProject.industry} · {existingProject.location}</p>
+                <div className="px-4 py-3 bg-[#F9FAF2] border border-[#d6dfd5] rounded">
+                  <p className="text-xs text-[#555C56] uppercase tracking-wider font-semibold mb-1">Existing Business DNA</p>
+                  <p className="text-sm font-semibold text-[#2B2B2B]">{existingProject.name}</p>
+                  <p className="text-xs text-[#555C56] mt-0.5">{existingProject.industry} · {existingProject.location}</p>
                   <p className="text-xs text-green-700 mt-1 flex items-center gap-1"><Icon.CheckCircle /> Current profile will be pre-loaded. Only selected change areas will be asked.</p>
                 </div>
               )}
-              <div className="flex gap-3 pt-2 border-t border-[#e8edf2]">
-                <button type="button" onClick={onBack} className="border border-[#d1d9e0] text-[#374151] text-sm font-medium px-5 py-2.5 rounded hover:bg-[#f0f4f8] transition-colors">Back</button>
+              <div className="flex gap-3 pt-2 border-t border-[#e3ebe1]">
+                <button type="button" onClick={onBack} className="border border-[#d6dfd5] text-[#4A4A4A] text-sm font-medium px-5 py-2.5 rounded hover:bg-[#F9FAF2] transition-colors">Back</button>
                 <button
                   type="button"
                   onClick={() => {
@@ -1045,7 +1045,7 @@ export function E05AdaptiveQuestionnairePage({
                     setChangeGateErrors('')
                     setShowChangeGate(false)
                   }}
-                  className="bg-[#1a3a5c] text-white text-sm font-semibold px-6 py-2.5 rounded hover:bg-[#0f2540] transition-colors"
+                  className="bg-[#355E3B] text-white text-sm font-semibold px-6 py-2.5 rounded hover:bg-[#27472c] transition-colors"
                 >
                   Continue to Business Discovery →
                 </button>
@@ -1058,7 +1058,7 @@ export function E05AdaptiveQuestionnairePage({
   }
 
   return (
-    <main id="main-content" className="flex-1 bg-[#f8f9fb]" tabIndex={-1}>
+    <main id="main-content" className="flex-1 bg-[#F9FAF2]" tabIndex={-1}>
       <div className="max-w-[820px] mx-auto px-6 py-5">
         {/* Breadcrumb */}
         <div className="mb-4">
@@ -1071,9 +1071,9 @@ export function E05AdaptiveQuestionnairePage({
         </div>
 
         {/* Page header */}
-        <div className="mb-4 pb-4 border-b border-[#d1d9e0]">
-          <h1 className="text-2xl font-bold text-[#1a3a5c]">Business Discovery</h1>
-          <p className="text-sm text-[#6b7a8d] mt-1">
+        <div className="mb-4 pb-4 border-b border-[#d6dfd5]">
+          <h1 className="text-xl font-bold text-[#355E3B]">Business Discovery</h1>
+          <p className="text-sm text-[#555C56] mt-1">
             {isExpansionOrMod
               ? `${e03Data.projectType === 'expansion' ? 'Expansion' : 'Modification'} — showing only areas selected for change.`
               : 'Tell us about your business and project. EKATMA will ask only the questions relevant to your situation.'}
@@ -1098,26 +1098,26 @@ export function E05AdaptiveQuestionnairePage({
         {/* Expansion change areas summary chip */}
         {isExpansionOrMod && expansionChangeAreas.length > 0 && (
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <span className="text-xs text-[#6b7a8d] font-medium">Changing:</span>
+            <span className="text-xs text-[#555C56] font-medium">Changing:</span>
             {expansionChangeAreas.map(a => {
               const opt = EXPANSION_CHANGE_OPTIONS.find(o => o.val === a)
-              return <span key={a} className="text-xs bg-[#ebf3ff] border border-[#b8d0f5] text-[#1a3a5c] font-medium px-2 py-0.5 rounded-full">{opt?.label ?? a}</span>
+              return <span key={a} className="text-xs bg-[#edf5ef] border border-[#b8d0f5] text-[#355E3B] font-medium px-2 py-0.5 rounded-full">{opt?.label ?? a}</span>
             })}
-            <button type="button" onClick={() => setShowChangeGate(true)} className="text-xs text-[#1a56db] hover:underline">Edit</button>
+            <button type="button" onClick={() => setShowChangeGate(true)} className="text-xs text-[#6DAE7C] hover:underline">Edit</button>
           </div>
         )}
 
         {/* Section progress */}
-        <p className="text-xs text-[#6b7a8d] font-medium mb-2 mt-4">Business Discovery · Section {section} of 6</p>
+        <p className="text-xs text-[#555C56] font-medium mb-2 mt-4">Business Discovery · Section {section} of 6</p>
         <E05SectionProgress current={section} completed={completed} />
 
-        <div className="bg-white border border-[#d1d9e0] rounded shadow-sm">
+        <div className="bg-white border border-[#d6dfd5] rounded shadow-sm">
           <div className="px-6 py-5 space-y-6">
 
             {/* ══════════════════════════════════ SECTION 1 ══════════════════════════════════ */}
             {section === 1 && (
               <section aria-labelledby="s1-heading">
-                <h2 id="s1-heading" className="text-xs font-semibold text-[#1a3a5c] uppercase tracking-wider mb-4 pb-2 border-b border-[#e8edf2]">Project Classification</h2>
+                <h2 id="s1-heading" className="text-xs font-semibold text-[#355E3B] uppercase tracking-wider mb-4 pb-2 border-b border-[#e3ebe1]">Project Classification</h2>
                 <div className="space-y-5">
                   <QuestionBlock
                     question="Do you know your project classification?"
@@ -1148,7 +1148,7 @@ export function E05AdaptiveQuestionnairePage({
                     <QuestionBlock question="Is this project being considered as a Mega-project?">
                       <YesNoNotSure name="megaProject" value={data.megaProject} onChange={v => onChange({ megaProject: v as E05Data['megaProject'] })} />
                       {(data.megaProject === 'yes' || data.megaProject === 'not-sure') && (
-                        <p className="mt-2 text-xs text-[#6b7a8d] bg-[#f8f9fb] border border-[#d1d9e0] rounded px-3 py-2">
+                        <p className="mt-2 text-xs text-[#555C56] bg-[#F9FAF2] border border-[#d6dfd5] rounded px-3 py-2">
                           Additional classification information may be required later.
                         </p>
                       )}
@@ -1161,7 +1161,7 @@ export function E05AdaptiveQuestionnairePage({
             {/* ══════════════════════════════════ SECTION 2 ══════════════════════════════════ */}
             {section === 2 && (
               <section aria-labelledby="s2-heading">
-                <h2 id="s2-heading" className="text-xs font-semibold text-[#1a3a5c] uppercase tracking-wider mb-4 pb-2 border-b border-[#e8edf2]">Business Identity</h2>
+                <h2 id="s2-heading" className="text-xs font-semibold text-[#355E3B] uppercase tracking-wider mb-4 pb-2 border-b border-[#e3ebe1]">Business Identity</h2>
                 <div className="space-y-5">
                   {/* Business name — reused from E03 */}
                   <ReusedAnswerBlock
@@ -1173,18 +1173,18 @@ export function E05AdaptiveQuestionnairePage({
 
                   {/* Legal entity type */}
                   <div>
-                    <p className="text-sm font-semibold text-[#1a2533] mb-1">
+                    <p className="text-sm font-semibold text-[#2B2B2B] mb-1">
                       Legal Entity Type <span className="text-red-600" aria-hidden="true">*</span>
                     </p>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       {LEGAL_ENTITY_TYPES.map(o => (
                         <label key={o.val} className={`flex items-center gap-2 px-3 py-2.5 rounded border cursor-pointer text-sm transition-colors
-                          ${data.legalEntityType === o.val ? 'border-[#1a3a5c] bg-[#ebf3ff] text-[#1a3a5c] font-medium' : 'border-[#d1d9e0] bg-white text-[#374151] hover:border-[#a0b4cc]'}`}>
+                          ${data.legalEntityType === o.val ? 'border-[#355E3B] bg-[#edf5ef] text-[#355E3B] font-medium' : 'border-[#d6dfd5] bg-white text-[#4A4A4A] hover:border-[#a0b4cc]'}`}>
                           <input
                             type="radio" name="legalEntityType" value={o.val}
                             checked={data.legalEntityType === o.val}
                             onChange={() => { onChange({ legalEntityType: o.val }); setSectionErrors(e => ({ ...e, legalEntityType: '' })) }}
-                            className="accent-[#1a3a5c]"
+                            className="accent-[#355E3B]"
                           />
                           {o.label}
                         </label>
@@ -1205,45 +1205,45 @@ export function E05AdaptiveQuestionnairePage({
 
                   {/* Legal entity / organisation name */}
                   <div>
-                    <label className="block text-sm font-semibold text-[#1a2533] mb-1">Legal Entity / Organisation Name</label>
+                    <label className="block text-sm font-semibold text-[#2B2B2B] mb-1">Legal Entity / Organisation Name</label>
                     <input
                       type="text" value={data.legalEntityName}
                       onChange={e => onChange({ legalEntityName: e.target.value })}
                       placeholder="Enter registered entity name"
                       className={inputCls()}
                     />
-                    <p className="mt-1 text-xs text-[#6b7a8d]">Enter the full legal registered name as it appears in official documents.</p>
+                    <p className="mt-1 text-xs text-[#555C56]">Enter the full legal registered name as it appears in official documents.</p>
                   </div>
 
                   {/* Legal identifiers — conditional on entity type */}
                   {data.legalEntityType && data.legalEntityType !== '' && (
                     <div>
-                      <p className="text-sm font-semibold text-[#1a2533] mb-2">Legal Identifiers</p>
+                      <p className="text-sm font-semibold text-[#2B2B2B] mb-2">Legal Identifiers</p>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {legalIdFields().includes('PAN') && (
                           <div>
-                            <label className="block text-xs font-medium text-[#374151] mb-1">PAN</label>
+                            <label className="block text-xs font-medium text-[#4A4A4A] mb-1">PAN</label>
                             <input type="text" value={data.pan} onChange={e => onChange({ pan: e.target.value.toUpperCase().slice(0, 10) })}
                               placeholder="e.g. AAAAA0000A" maxLength={10} className={inputCls()} />
                           </div>
                         )}
                         {legalIdFields().includes('CIN') && (
                           <div>
-                            <label className="block text-xs font-medium text-[#374151] mb-1">CIN</label>
+                            <label className="block text-xs font-medium text-[#4A4A4A] mb-1">CIN</label>
                             <input type="text" value={data.cin} onChange={e => onChange({ cin: e.target.value.toUpperCase() })}
                               placeholder="Company Identification Number" className={inputCls()} />
                           </div>
                         )}
                         {legalIdFields().includes('LLPIN') && (
                           <div>
-                            <label className="block text-xs font-medium text-[#374151] mb-1">LLPIN</label>
+                            <label className="block text-xs font-medium text-[#4A4A4A] mb-1">LLPIN</label>
                             <input type="text" value={data.llpin} onChange={e => onChange({ llpin: e.target.value.toUpperCase() })}
                               placeholder="LLP Identification Number" className={inputCls()} />
                           </div>
                         )}
                         {legalIdFields().includes('Registration Number') && (
                           <div>
-                            <label className="block text-xs font-medium text-[#374151] mb-1">Registration Number</label>
+                            <label className="block text-xs font-medium text-[#4A4A4A] mb-1">Registration Number</label>
                             <input type="text" value={data.registrationNumber} onChange={e => onChange({ registrationNumber: e.target.value })}
                               placeholder="Registration / Certificate Number" className={inputCls()} />
                           </div>
@@ -1254,7 +1254,7 @@ export function E05AdaptiveQuestionnairePage({
 
                   {/* Authorised person role */}
                   <div>
-                    <label className="block text-sm font-semibold text-[#1a2533] mb-1">Authorised Person / Promoter Role</label>
+                    <label className="block text-sm font-semibold text-[#2B2B2B] mb-1">Authorised Person / Promoter Role</label>
                     <select
                       value={data.authorisedPersonRole}
                       onChange={e => onChange({ authorisedPersonRole: e.target.value })}
@@ -1270,12 +1270,12 @@ export function E05AdaptiveQuestionnairePage({
                     <div className="flex flex-wrap gap-3">
                       {[{ val: 'yes', label: 'Yes' }, { val: 'no', label: 'No' }].map(o => (
                         <label key={o.val} className={`flex items-center gap-2 px-4 py-2.5 rounded border cursor-pointer text-sm transition-colors
-                          ${data.projectOperatedBySameEntity === o.val ? 'border-[#1a3a5c] bg-[#ebf3ff] text-[#1a3a5c] font-medium' : 'border-[#d1d9e0] bg-white text-[#374151] hover:border-[#a0b4cc]'}`}>
+                          ${data.projectOperatedBySameEntity === o.val ? 'border-[#355E3B] bg-[#edf5ef] text-[#355E3B] font-medium' : 'border-[#d6dfd5] bg-white text-[#4A4A4A] hover:border-[#a0b4cc]'}`}>
                           <input
                             type="radio" name="projectOperatedBySameEntity" value={o.val}
                             checked={data.projectOperatedBySameEntity === o.val}
                             onChange={() => onChange({ projectOperatedBySameEntity: o.val as 'yes' | 'no' })}
-                            className="accent-[#1a3a5c]"
+                            className="accent-[#355E3B]"
                           />
                           {o.label}
                         </label>
@@ -1284,12 +1284,12 @@ export function E05AdaptiveQuestionnairePage({
                     {data.projectOperatedBySameEntity === 'no' && (
                       <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-xs font-medium text-[#374151] mb-1">Operator / Project Entity</label>
+                          <label className="block text-xs font-medium text-[#4A4A4A] mb-1">Operator / Project Entity</label>
                           <input type="text" value={data.operatorName} onChange={e => onChange({ operatorName: e.target.value })}
                             placeholder="Enter operator name" className={inputCls()} />
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-[#374151] mb-1">Relationship to Registered Entity</label>
+                          <label className="block text-xs font-medium text-[#4A4A4A] mb-1">Relationship to Registered Entity</label>
                           <input type="text" value={data.operatorRelationship} onChange={e => onChange({ operatorRelationship: e.target.value })}
                             placeholder="e.g. Subsidiary, Joint Venture" className={inputCls()} />
                         </div>
@@ -1303,7 +1303,7 @@ export function E05AdaptiveQuestionnairePage({
             {/* ══════════════════════════════════ SECTION 3 ══════════════════════════════════ */}
             {section === 3 && (
               <section aria-labelledby="s3-heading">
-                <h2 id="s3-heading" className="text-xs font-semibold text-[#1a3a5c] uppercase tracking-wider mb-4 pb-2 border-b border-[#e8edf2]">Industry &amp; Activity</h2>
+                <h2 id="s3-heading" className="text-xs font-semibold text-[#355E3B] uppercase tracking-wider mb-4 pb-2 border-b border-[#e3ebe1]">Industry &amp; Activity</h2>
                 <div className="space-y-5">
                   {/* Primary business nature — reuse from E04 if answered and not Not Sure */}
                   {e04Data.businessNature && e04Data.businessNature !== 'not-sure' && !editingNature ? (
@@ -1315,7 +1315,7 @@ export function E05AdaptiveQuestionnairePage({
                     />
                   ) : (
                     <div>
-                      <p className="text-sm font-semibold text-[#1a2533] mb-1">What will this business / project primarily do?</p>
+                      <p className="text-sm font-semibold text-[#2B2B2B] mb-1">What will this business / project primarily do?</p>
                       {editingNature && <p className="text-xs text-amber-700 mb-2">You are editing a previously saved answer.</p>}
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                         {[
@@ -1329,12 +1329,12 @@ export function E05AdaptiveQuestionnairePage({
                           { val: 'not-sure',      label: 'Not sure' },
                         ].map(o => (
                           <label key={o.val} className={`flex items-center gap-2 px-3 py-2.5 rounded border cursor-pointer text-sm transition-colors
-                            ${e04Data.businessNature === o.val ? 'border-[#1a3a5c] bg-[#ebf3ff] text-[#1a3a5c] font-medium' : 'border-[#d1d9e0] bg-white text-[#374151] hover:border-[#a0b4cc]'}`}>
+                            ${e04Data.businessNature === o.val ? 'border-[#355E3B] bg-[#edf5ef] text-[#355E3B] font-medium' : 'border-[#d6dfd5] bg-white text-[#4A4A4A] hover:border-[#a0b4cc]'}`}>
                             <input
                               type="radio" name="e05Nature" value={o.val}
                               checked={e04Data.businessNature === o.val}
                               onChange={() => { setE04Data({ businessNature: o.val as E04Data['businessNature'] }); setEditingNature(false) }}
-                              className="accent-[#1a3a5c]"
+                              className="accent-[#355E3B]"
                             />
                             {o.label}
                           </label>
@@ -1345,7 +1345,7 @@ export function E05AdaptiveQuestionnairePage({
 
                   {/* Industry / sector */}
                   <div>
-                    <p className="text-sm font-semibold text-[#1a2533] mb-1">
+                    <p className="text-sm font-semibold text-[#2B2B2B] mb-1">
                       Select Your Industry / Sector <span className="text-red-600" aria-hidden="true">*</span>
                     </p>
                     <SearchableSelect
@@ -1358,7 +1358,7 @@ export function E05AdaptiveQuestionnairePage({
                       <p className="mt-1 text-xs text-red-600 flex items-center gap-1"><Icon.AlertCircle /> {sectionErrors.industry}</p>
                     )}
                     {data.industry && (
-                      <p className="mt-2 text-xs text-[#6b7a8d] bg-[#f8f9fb] border border-[#d1d9e0] rounded px-3 py-2">
+                      <p className="mt-2 text-xs text-[#555C56] bg-[#F9FAF2] border border-[#d6dfd5] rounded px-3 py-2">
                         Additional sector-specific information may be requested in a later stage.
                       </p>
                     )}
@@ -1366,8 +1366,8 @@ export function E05AdaptiveQuestionnairePage({
 
                   {/* Activities */}
                   <div>
-                    <p className="text-sm font-semibold text-[#1a2533] mb-1">What Activities will you Perform?</p>
-                    <p className="text-xs text-[#6b7a8d] mb-2">Select all that apply.</p>
+                    <p className="text-sm font-semibold text-[#2B2B2B] mb-1">What Activities will you Perform?</p>
+                    <p className="text-xs text-[#555C56] mb-2">Select all that apply.</p>
                     <MultiCheckboxGroup
                       name="activities"
                       options={ACTIVITIES_LIST}
@@ -1383,7 +1383,7 @@ export function E05AdaptiveQuestionnairePage({
                       />
                     )}
                     {data.activities.length > 0 && (
-                      <div className="mt-2 text-xs text-[#6b7a8d]">
+                      <div className="mt-2 text-xs text-[#555C56]">
                         {showProcess && <span className="text-blue-700">Process section will be shown based on selected activities.</span>}
                         {!showProcess && data.activities.length > 0 && <span>Manufacturing process details are not required for the selected activities.</span>}
                       </div>
@@ -1396,11 +1396,11 @@ export function E05AdaptiveQuestionnairePage({
             {/* ══════════════════════════════════ SECTION 4 ══════════════════════════════════ */}
             {section === 4 && (
               <section aria-labelledby="s4-heading">
-                <h2 id="s4-heading" className="text-xs font-semibold text-[#1a3a5c] uppercase tracking-wider mb-4 pb-2 border-b border-[#e8edf2]">Products / Services &amp; Process</h2>
+                <h2 id="s4-heading" className="text-xs font-semibold text-[#355E3B] uppercase tracking-wider mb-4 pb-2 border-b border-[#e3ebe1]">Products / Services &amp; Process</h2>
                 <div className="space-y-6">
                   <div>
-                    <p className="text-sm font-semibold text-[#1a2533] mb-1">What will you produce or provide?</p>
-                    <p className="text-xs text-[#6b7a8d] mb-3">Add one or more products or services.</p>
+                    <p className="text-sm font-semibold text-[#2B2B2B] mb-1">What will you produce or provide?</p>
+                    <p className="text-xs text-[#555C56] mb-3">Add one or more products or services.</p>
                     <ProductList
                       products={data.products.length > 0 ? data.products : [{ id: 'p-init', name: '', description: '' }]}
                       onChange={v => onChange({ products: v })}
@@ -1410,34 +1410,34 @@ export function E05AdaptiveQuestionnairePage({
                   {/* Process — only shown when relevant */}
                   {showProcess ? (
                     <>
-                      <div className="border-t border-[#e8edf2]" />
+                      <div className="border-t border-[#e3ebe1]" />
                       <div>
-                        <p className="text-sm font-semibold text-[#1a2533] mb-1">What type of process will you perform?</p>
+                        <p className="text-sm font-semibold text-[#2B2B2B] mb-1">What type of process will you perform?</p>
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                           {PROCESS_TYPES.map(o => (
                             <label key={o} className={`flex items-center gap-2 px-3 py-2.5 rounded border cursor-pointer text-sm transition-colors
-                              ${data.processType === o ? 'border-[#1a3a5c] bg-[#ebf3ff] text-[#1a3a5c] font-medium' : 'border-[#d1d9e0] bg-white text-[#374151] hover:border-[#a0b4cc]'}`}>
+                              ${data.processType === o ? 'border-[#355E3B] bg-[#edf5ef] text-[#355E3B] font-medium' : 'border-[#d6dfd5] bg-white text-[#4A4A4A] hover:border-[#a0b4cc]'}`}>
                               <input type="radio" name="processType" value={o} checked={data.processType === o}
-                                onChange={() => onChange({ processType: o })} className="accent-[#1a3a5c]" />
+                                onChange={() => onChange({ processType: o })} className="accent-[#355E3B]" />
                               {o}
                             </label>
                           ))}
                         </div>
                       </div>
                       <div>
-                        <label className="block text-sm font-semibold text-[#1a2533] mb-1">Brief Process Description <span className="text-xs font-normal text-[#9aa5b4]">Optional</span></label>
+                        <label className="block text-sm font-semibold text-[#2B2B2B] mb-1">Brief Process Description <span className="text-xs font-normal text-[#8c9f8a]">Optional</span></label>
                         <textarea
                           rows={3}
                           value={data.processDescription}
                           onChange={e => onChange({ processDescription: e.target.value })}
                           placeholder="Briefly describe the main steps involved in your process."
-                          className="w-full px-3 py-2 text-sm border border-[#d1d9e0] rounded bg-white focus:outline-none focus:ring-2 focus:ring-[#1a56db] transition-colors placeholder:text-[#9aa5b4] resize-none"
+                          className="w-full px-3 py-2 text-sm border border-[#d6dfd5] rounded bg-white focus:outline-none focus:ring-2 focus:ring-[#6DAE7C] transition-colors placeholder:text-[#8c9f8a] resize-none"
                         />
-                        <p className="mt-1 text-xs text-[#6b7a8d]">This description provides supplementary context. Structured regulatory applicability is based on Business DNA inputs.</p>
+                        <p className="mt-1 text-xs text-[#555C56]">This description provides supplementary context. Structured regulatory applicability is based on Business DNA inputs.</p>
                       </div>
                     </>
                   ) : (
-                    <div className="p-3 bg-[#f8f9fb] border border-[#d1d9e0] rounded text-xs text-[#6b7a8d]">
+                    <div className="p-3 bg-[#F9FAF2] border border-[#d6dfd5] rounded text-xs text-[#555C56]">
                       Manufacturing process details are not required based on your selected activities.
                     </div>
                   )}
@@ -1448,28 +1448,28 @@ export function E05AdaptiveQuestionnairePage({
             {/* ══════════════════════════════════ SECTION 5 ══════════════════════════════════ */}
             {section === 5 && (
               <section aria-labelledby="s5-heading">
-                <h2 id="s5-heading" className="text-xs font-semibold text-[#1a3a5c] uppercase tracking-wider mb-4 pb-2 border-b border-[#e8edf2]">Project Stage</h2>
+                <h2 id="s5-heading" className="text-xs font-semibold text-[#355E3B] uppercase tracking-wider mb-4 pb-2 border-b border-[#e3ebe1]">Project Stage</h2>
                 <div className="space-y-4">
-                  <p className="text-sm font-semibold text-[#1a2533] mb-2">What stage is the project currently in?</p>
+                  <p className="text-sm font-semibold text-[#2B2B2B] mb-2">What stage is the project currently in?</p>
                   <div className="flex flex-col gap-2">
                     {PROJECT_STAGES.map(s => (
                       <label key={s} className={`flex items-center gap-3 px-4 py-3 rounded border cursor-pointer text-sm transition-colors
-                        ${data.projectStage === s ? 'border-[#1a3a5c] bg-[#ebf3ff] text-[#1a3a5c] font-medium' : 'border-[#d1d9e0] bg-white text-[#374151] hover:border-[#a0b4cc]'}`}>
+                        ${data.projectStage === s ? 'border-[#355E3B] bg-[#edf5ef] text-[#355E3B] font-medium' : 'border-[#d6dfd5] bg-white text-[#4A4A4A] hover:border-[#a0b4cc]'}`}>
                         <input
                           type="radio" name="projectStage" value={s}
                           checked={data.projectStage === s}
                           onChange={() => onChange({ projectStage: s })}
-                          className="accent-[#1a3a5c]"
+                          className="accent-[#355E3B]"
                         />
                         {s}
                       </label>
                     ))}
                   </div>
                   {existingProject && (e03Data.projectType === 'expansion' || e03Data.projectType === 'modification') && (
-                    <div className="p-3 bg-[#f0f4f8] border border-[#c8d6e4] rounded text-xs text-[#4a5568]">
+                    <div className="p-3 bg-[#F9FAF2] border border-[#d6dfd5] rounded text-xs text-[#4A4A4A]">
                       <p className="font-medium">Based on: {existingProject.name}</p>
                       <p className="mt-0.5">Current stage of existing project: <span className="font-semibold">{existingProject.stage}</span></p>
-                      <p className="mt-0.5 text-[#6b7a8d]">The stage above reflects the proposed expansion / modification stage.</p>
+                      <p className="mt-0.5 text-[#555C56]">The stage above reflects the proposed expansion / modification stage.</p>
                     </div>
                   )}
                 </div>
@@ -1479,8 +1479,8 @@ export function E05AdaptiveQuestionnairePage({
             {/* ══════════════════════════════════ SECTION 6 ══════════════════════════════════ */}
             {section === 6 && (
               <section aria-labelledby="s6-heading">
-                <h2 id="s6-heading" className="text-xs font-semibold text-[#1a3a5c] uppercase tracking-wider mb-4 pb-2 border-b border-[#e8edf2]">Project Location</h2>
-                <p className="text-xs text-[#6b7a8d] mb-4">Enter the location of the industrial / business project. This is the project site location, not an account or correspondence address.</p>
+                <h2 id="s6-heading" className="text-xs font-semibold text-[#355E3B] uppercase tracking-wider mb-4 pb-2 border-b border-[#e3ebe1]">Project Location</h2>
+                <p className="text-xs text-[#555C56] mb-4">Enter the location of the industrial / business project. This is the project site location, not an account or correspondence address.</p>
                 <div className="space-y-4">
                   {/* MIDC answer from E04 — not re-asked */}
                   {e04Data.midc && (
@@ -1493,18 +1493,18 @@ export function E05AdaptiveQuestionnairePage({
 
                   {/* State fixed */}
                   <div>
-                    <label className="block text-sm font-semibold text-[#1a2533] mb-1">State</label>
+                    <label className="block text-sm font-semibold text-[#2B2B2B] mb-1">State</label>
                     <input
                       type="text" value="Maharashtra" readOnly
-                      className="w-full px-3 py-2 text-sm border border-[#d1d9e0] rounded bg-[#f8f9fb] text-[#6b7a8d] cursor-not-allowed"
+                      className="w-full px-3 py-2 text-sm border border-[#d6dfd5] rounded bg-[#F9FAF2] text-[#555C56] cursor-not-allowed"
                       aria-readonly="true"
                     />
-                    <p className="mt-1 text-xs text-[#9aa5b4]">This portal serves industrial projects in Maharashtra.</p>
+                    <p className="mt-1 text-xs text-[#8c9f8a]">This portal serves industrial projects in Maharashtra.</p>
                   </div>
 
                   {/* District */}
                   <div>
-                    <label className="block text-sm font-semibold text-[#1a2533] mb-1">District <span className="text-red-600">*</span></label>
+                    <label className="block text-sm font-semibold text-[#2B2B2B] mb-1">District <span className="text-red-600">*</span></label>
                     <SearchableSelect
                       options={MH_DISTRICTS_EXTENDED}
                       value={data.district}
@@ -1516,7 +1516,7 @@ export function E05AdaptiveQuestionnairePage({
                   {/* Taluka — dependent on district */}
                   {data.district && (
                     <div>
-                      <label className="block text-sm font-semibold text-[#1a2533] mb-1">Taluka</label>
+                      <label className="block text-sm font-semibold text-[#2B2B2B] mb-1">Taluka</label>
                       <SearchableSelect
                         options={MH_TALUKAS_BY_DISTRICT[data.district] ?? ['(Talukas will be available in production)']}
                         value={data.taluka}
@@ -1529,7 +1529,7 @@ export function E05AdaptiveQuestionnairePage({
                   {/* Village / City */}
                   {data.taluka && (
                     <div>
-                      <label className="block text-sm font-semibold text-[#1a2533] mb-1">Village / City</label>
+                      <label className="block text-sm font-semibold text-[#2B2B2B] mb-1">Village / City</label>
                       <input
                         type="text" value={data.village}
                         onChange={e => onChange({ village: e.target.value })}
@@ -1541,7 +1541,7 @@ export function E05AdaptiveQuestionnairePage({
 
                   {/* PIN */}
                   <div>
-                    <label className="block text-sm font-semibold text-[#1a2533] mb-1">PIN Code</label>
+                    <label className="block text-sm font-semibold text-[#2B2B2B] mb-1">PIN Code</label>
                     <input
                       type="text" inputMode="numeric" maxLength={6}
                       value={data.pincode}
@@ -1572,12 +1572,12 @@ export function E05AdaptiveQuestionnairePage({
 
               return (
                 <section aria-labelledby="s7-heading">
-                  <h2 id="s7-heading" className="text-xs font-semibold text-[#1a3a5c] uppercase tracking-wider mb-4 pb-2 border-b border-[#e8edf2]">MIDC &amp; Land</h2>
+                  <h2 id="s7-heading" className="text-xs font-semibold text-[#355E3B] uppercase tracking-wider mb-4 pb-2 border-b border-[#e3ebe1]">MIDC &amp; Land</h2>
                   <div className="space-y-6">
 
                     {/* ── MIDC status from E04 ── */}
                     <div>
-                      <p className="text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider mb-2">Land Location Context</p>
+                      <p className="text-xs font-semibold text-[#555C56] uppercase tracking-wider mb-2">Land Location Context</p>
                       {midcStatus && midcStatus !== 'not-sure' ? (
                         <ReusedAnswerBlock
                           label="MIDC / Non-MIDC"
@@ -1586,10 +1586,10 @@ export function E05AdaptiveQuestionnairePage({
                         />
                       ) : (
                         <div>
-                          <p className="text-sm font-semibold text-[#1a2533] mb-1">Is the project located in MIDC?</p>
+                          <p className="text-sm font-semibold text-[#2B2B2B] mb-1">Is the project located in MIDC?</p>
                           <YesNoNotSure name="midcEdit" value={e04Data.midc} onChange={v => setE04Data({ midc: v as E04Data['midc'] })} />
                           {midcUnknown && (
-                            <p className="mt-2 text-xs text-[#6b7a8d]">EKATMA will use project location and land information to help determine the applicable route.</p>
+                            <p className="mt-2 text-xs text-[#555C56]">EKATMA will use project location and land information to help determine the applicable route.</p>
                           )}
                         </div>
                       )}
@@ -1602,34 +1602,34 @@ export function E05AdaptiveQuestionnairePage({
 
                     {/* ── MIDC details — only when MIDC = YES ── */}
                     {showMidc && (
-                      <div className="border border-[#c8d6e4] rounded p-4 space-y-4 bg-[#f8fbff]">
-                        <p className="text-sm font-semibold text-[#1a3a5c]">MIDC Details</p>
-                        <p className="text-xs text-[#6b7a8d]">Provide the available MIDC land / plot information.</p>
+                      <div className="border border-[#d6dfd5] rounded p-4 space-y-4 bg-[#f8fbff]">
+                        <p className="text-sm font-semibold text-[#355E3B]">MIDC Details</p>
+                        <p className="text-xs text-[#555C56]">Provide the available MIDC land / plot information.</p>
                         <div className="space-y-4">
                           <div>
-                            <label className="block text-xs font-medium text-[#374151] mb-1">MIDC Estate</label>
+                            <label className="block text-xs font-medium text-[#4A4A4A] mb-1">MIDC Estate</label>
                             <SearchableSelect options={MIDC_ESTATES} value={data.midcEstate} onChange={v => onChange({ midcEstate: v })} placeholder="Search MIDC estate…" />
-                            <p className="mt-1 text-xs text-[#9aa5b4]">Sample values only — complete list connected in production.</p>
+                            <p className="mt-1 text-xs text-[#8c9f8a]">Sample values only — complete list connected in production.</p>
                           </div>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
-                              <label className="block text-xs font-medium text-[#374151] mb-1">Plot Number</label>
+                              <label className="block text-xs font-medium text-[#4A4A4A] mb-1">Plot Number</label>
                               <input type="text" value={data.midcPlotNumber} onChange={e => onChange({ midcPlotNumber: e.target.value })}
                                 placeholder="e.g. A-42" className={inputCls()} />
                             </div>
                             <div>
-                              <label className="block text-xs font-medium text-[#374151] mb-1">Plot Area (sq.m)</label>
+                              <label className="block text-xs font-medium text-[#4A4A4A] mb-1">Plot Area (sq.m)</label>
                               <input type="text" inputMode="numeric" value={data.midcPlotArea} onChange={e => onChange({ midcPlotArea: e.target.value.replace(/[^0-9.]/g, '') })}
                                 placeholder="e.g. 4800" className={inputCls()} />
                             </div>
                           </div>
                           <div>
-                            <p className="text-xs font-medium text-[#374151] mb-2">Allotment Status</p>
+                            <p className="text-xs font-medium text-[#4A4A4A] mb-2">Allotment Status</p>
                             <div className="flex flex-col gap-2">
                               {['Not applied', 'Applied', 'Allotted', 'Possession received', 'Already registered'].map(o => (
                                 <label key={o} className={`flex items-center gap-3 px-4 py-2.5 rounded border cursor-pointer text-sm transition-colors
-                                  ${data.midcAllotmentStatus === o ? 'border-[#1a3a5c] bg-[#ebf3ff] text-[#1a3a5c] font-medium' : 'border-[#d1d9e0] bg-white text-[#374151] hover:border-[#a0b4cc]'}`}>
-                                  <input type="radio" name="midcAllotmentStatus" value={o} checked={data.midcAllotmentStatus === o} onChange={() => onChange({ midcAllotmentStatus: o })} className="accent-[#1a3a5c]" />
+                                  ${data.midcAllotmentStatus === o ? 'border-[#355E3B] bg-[#edf5ef] text-[#355E3B] font-medium' : 'border-[#d6dfd5] bg-white text-[#4A4A4A] hover:border-[#a0b4cc]'}`}>
+                                  <input type="radio" name="midcAllotmentStatus" value={o} checked={data.midcAllotmentStatus === o} onChange={() => onChange({ midcAllotmentStatus: o })} className="accent-[#355E3B]" />
                                   {o}
                                 </label>
                               ))}
@@ -1641,25 +1641,25 @@ export function E05AdaptiveQuestionnairePage({
 
                     {/* ── MIDC = NO — not applicable note ── */}
                     {midcStatus === 'no' && (
-                      <p className="text-xs text-[#6b7a8d] bg-[#f8f9fb] border border-[#d1d9e0] rounded px-3 py-2">
+                      <p className="text-xs text-[#555C56] bg-[#F9FAF2] border border-[#d6dfd5] rounded px-3 py-2">
                         MIDC details are not applicable for this project. Continuing with private / non-MIDC land discovery.
                       </p>
                     )}
 
-                    <div className="border-t border-[#e8edf2]" />
+                    <div className="border-t border-[#e3ebe1]" />
 
                     {/* ── Land possession — reuse from E04 ── */}
                     <div>
-                      <p className="text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider mb-2">Land Status</p>
+                      <p className="text-xs font-semibold text-[#555C56] uppercase tracking-wider mb-2">Land Status</p>
                       {noLand ? (
-                        <div className="p-3 bg-[#f8f9fb] border border-[#d1d9e0] rounded text-xs text-[#6b7a8d]">
+                        <div className="p-3 bg-[#F9FAF2] border border-[#d6dfd5] rounded text-xs text-[#555C56]">
                           Land not required for this project (from Basic Requirements).
                         </div>
                       ) : landStatus && landStatus !== 'not-sure' ? (
                         <ReusedAnswerBlock label="Current Land Status" value={landStatusLabels[landStatus] ?? landStatus} source="Basic Requirements" />
                       ) : (
                         <div>
-                          <p className="text-sm font-semibold text-[#1a2533] mb-1">What is your current land status?</p>
+                          <p className="text-sm font-semibold text-[#2B2B2B] mb-1">What is your current land status?</p>
                           <div className="flex flex-col gap-2">
                             {[
                               { val: 'possessed',   label: 'Land already in possession' },
@@ -1669,9 +1669,9 @@ export function E05AdaptiveQuestionnairePage({
                               { val: 'not-sure',    label: 'Not sure' },
                             ].map(o => (
                               <label key={o.val} className={`flex items-center gap-3 px-4 py-2.5 rounded border cursor-pointer text-sm transition-colors
-                                ${e04Data.landStatus === o.val ? 'border-[#1a3a5c] bg-[#ebf3ff] text-[#1a3a5c] font-medium' : 'border-[#d1d9e0] bg-white text-[#374151] hover:border-[#a0b4cc]'}`}>
+                                ${e04Data.landStatus === o.val ? 'border-[#355E3B] bg-[#edf5ef] text-[#355E3B] font-medium' : 'border-[#d6dfd5] bg-white text-[#4A4A4A] hover:border-[#a0b4cc]'}`}>
                                 <input type="radio" name="landStatusEdit" value={o.val} checked={e04Data.landStatus === o.val}
-                                  onChange={() => setE04Data({ landStatus: o.val as E04Data['landStatus'] })} className="accent-[#1a3a5c]" />
+                                  onChange={() => setE04Data({ landStatus: o.val as E04Data['landStatus'] })} className="accent-[#355E3B]" />
                                 {o.label}
                               </label>
                             ))}
@@ -1682,13 +1682,13 @@ export function E05AdaptiveQuestionnairePage({
                       {/* Acquisition section — skipped if possession received */}
                       {!noLand && !possessionReceived && landNotAcquired && (
                         <div className="mt-4">
-                          <p className="text-sm font-semibold text-[#1a2533] mb-1">Preferred Land Route</p>
+                          <p className="text-sm font-semibold text-[#2B2B2B] mb-1">Preferred Land Route</p>
                           <div className="flex flex-wrap gap-3">
                             {[{ val: 'midc', label: 'MIDC' }, { val: 'private', label: 'Private' }, { val: 'not-decided', label: 'Not decided' }].map(o => (
                               <label key={o.val} className={`flex items-center gap-2 px-4 py-2.5 rounded border cursor-pointer text-sm transition-colors
-                                ${data.preferredLandRoute === o.val ? 'border-[#1a3a5c] bg-[#ebf3ff] text-[#1a3a5c] font-medium' : 'border-[#d1d9e0] bg-white text-[#374151] hover:border-[#a0b4cc]'}`}>
+                                ${data.preferredLandRoute === o.val ? 'border-[#355E3B] bg-[#edf5ef] text-[#355E3B] font-medium' : 'border-[#d6dfd5] bg-white text-[#4A4A4A] hover:border-[#a0b4cc]'}`}>
                                 <input type="radio" name="preferredLandRoute" value={o.val} checked={data.preferredLandRoute === o.val}
-                                  onChange={() => onChange({ preferredLandRoute: o.val as E05Data['preferredLandRoute'] })} className="accent-[#1a3a5c]" />
+                                  onChange={() => onChange({ preferredLandRoute: o.val as E05Data['preferredLandRoute'] })} className="accent-[#355E3B]" />
                                 {o.label}
                               </label>
                             ))}
@@ -1698,13 +1698,13 @@ export function E05AdaptiveQuestionnairePage({
 
                       {!noLand && !possessionReceived && inProgress && (
                         <div className="mt-4">
-                          <p className="text-sm font-semibold text-[#1a2533] mb-1">Current Acquisition / Allotment Status</p>
+                          <p className="text-sm font-semibold text-[#2B2B2B] mb-1">Current Acquisition / Allotment Status</p>
                           <div className="flex flex-col gap-2">
                             {['Application submitted', 'Negotiation / purchase', 'Allotment process', 'Other'].map(o => (
                               <label key={o} className={`flex items-center gap-3 px-4 py-2.5 rounded border cursor-pointer text-sm transition-colors
-                                ${data.acquisitionCurrentStatus === o ? 'border-[#1a3a5c] bg-[#ebf3ff] text-[#1a3a5c] font-medium' : 'border-[#d1d9e0] bg-white text-[#374151] hover:border-[#a0b4cc]'}`}>
+                                ${data.acquisitionCurrentStatus === o ? 'border-[#355E3B] bg-[#edf5ef] text-[#355E3B] font-medium' : 'border-[#d6dfd5] bg-white text-[#4A4A4A] hover:border-[#a0b4cc]'}`}>
                                 <input type="radio" name="acquisitionStatus" value={o} checked={data.acquisitionCurrentStatus === o}
-                                  onChange={() => onChange({ acquisitionCurrentStatus: o })} className="accent-[#1a3a5c]" />
+                                  onChange={() => onChange({ acquisitionCurrentStatus: o })} className="accent-[#355E3B]" />
                                 {o}
                               </label>
                             ))}
@@ -1718,13 +1718,13 @@ export function E05AdaptiveQuestionnairePage({
                       )}
                     </div>
 
-                    <div className="border-t border-[#e8edf2]" />
+                    <div className="border-t border-[#e3ebe1]" />
 
                     {/* ── Land Type ── */}
                     {!noLand && (
                       <div>
-                        <p className="text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider mb-2">Land Type</p>
-                        <p className="text-sm font-semibold text-[#1a2533] mb-2">What type of land is involved?</p>
+                        <p className="text-xs font-semibold text-[#555C56] uppercase tracking-wider mb-2">Land Type</p>
+                        <p className="text-sm font-semibold text-[#2B2B2B] mb-2">What type of land is involved?</p>
                         <div className="flex flex-col gap-2">
                           {[
                             { val: 'midc-industrial', label: 'MIDC / Industrial Estate Land' },
@@ -1734,9 +1734,9 @@ export function E05AdaptiveQuestionnairePage({
                             { val: 'not-sure',        label: 'Not Sure' },
                           ].map(o => (
                             <label key={o.val} className={`flex items-center gap-3 px-4 py-2.5 rounded border cursor-pointer text-sm transition-colors
-                              ${data.landType === o.val ? 'border-[#1a3a5c] bg-[#ebf3ff] text-[#1a3a5c] font-medium' : 'border-[#d1d9e0] bg-white text-[#374151] hover:border-[#a0b4cc]'}`}>
+                              ${data.landType === o.val ? 'border-[#355E3B] bg-[#edf5ef] text-[#355E3B] font-medium' : 'border-[#d6dfd5] bg-white text-[#4A4A4A] hover:border-[#a0b4cc]'}`}>
                               <input type="radio" name="landType" value={o.val} checked={data.landType === o.val}
-                                onChange={() => onChange({ landType: o.val as E05Data['landType'] })} className="accent-[#1a3a5c]" />
+                                onChange={() => onChange({ landType: o.val as E05Data['landType'] })} className="accent-[#355E3B]" />
                               {o.label}
                             </label>
                           ))}
@@ -1763,23 +1763,23 @@ export function E05AdaptiveQuestionnairePage({
 
               return (
                 <section aria-labelledby="s8-heading">
-                  <h2 id="s8-heading" className="text-xs font-semibold text-[#1a3a5c] uppercase tracking-wider mb-4 pb-2 border-b border-[#e8edf2]">Land Details &amp; Documents</h2>
+                  <h2 id="s8-heading" className="text-xs font-semibold text-[#355E3B] uppercase tracking-wider mb-4 pb-2 border-b border-[#e3ebe1]">Land Details &amp; Documents</h2>
                   <div className="space-y-6">
 
                     {/* ── Private land details ── */}
                     {isPrivate && (
                       <div>
-                        <p className="text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider mb-3">Private Land Details</p>
+                        <p className="text-xs font-semibold text-[#555C56] uppercase tracking-wider mb-3">Private Land Details</p>
                         <div className="space-y-4">
                           {/* Ownership status */}
                           <div>
-                            <p className="text-sm font-semibold text-[#1a2533] mb-2">Ownership Status</p>
+                            <p className="text-sm font-semibold text-[#2B2B2B] mb-2">Ownership Status</p>
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                               {['Owned', 'Leased', 'Being Purchased', 'Jointly Owned', 'Other'].map(o => (
                                 <label key={o} className={`flex items-center gap-2 px-3 py-2.5 rounded border cursor-pointer text-sm transition-colors
-                                  ${data.ownershipStatus === o ? 'border-[#1a3a5c] bg-[#ebf3ff] text-[#1a3a5c] font-medium' : 'border-[#d1d9e0] bg-white text-[#374151] hover:border-[#a0b4cc]'}`}>
+                                  ${data.ownershipStatus === o ? 'border-[#355E3B] bg-[#edf5ef] text-[#355E3B] font-medium' : 'border-[#d6dfd5] bg-white text-[#4A4A4A] hover:border-[#a0b4cc]'}`}>
                                   <input type="radio" name="ownershipStatus" value={o} checked={data.ownershipStatus === o}
-                                    onChange={() => onChange({ ownershipStatus: o })} className="accent-[#1a3a5c]" />
+                                    onChange={() => onChange({ ownershipStatus: o })} className="accent-[#355E3B]" />
                                   {o}
                                 </label>
                               ))}
@@ -1792,25 +1792,25 @@ export function E05AdaptiveQuestionnairePage({
 
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
-                              <label className="block text-xs font-medium text-[#374151] mb-1">Survey / Plot Number</label>
+                              <label className="block text-xs font-medium text-[#4A4A4A] mb-1">Survey / Plot Number</label>
                               <input type="text" value={data.surveyPlotNumber} onChange={e => onChange({ surveyPlotNumber: e.target.value })}
                                 placeholder="e.g. 124/3 or Gat No. 45" className={inputCls()} />
                             </div>
                             <div>
-                              <label className="block text-xs font-medium text-[#374151] mb-1">Land Area (sq.m)</label>
+                              <label className="block text-xs font-medium text-[#4A4A4A] mb-1">Land Area (sq.m)</label>
                               <input type="text" inputMode="numeric" value={data.landArea} onChange={e => onChange({ landArea: e.target.value.replace(/[^0-9.]/g, '') })}
                                 placeholder="e.g. 5500" className={inputCls()} />
                             </div>
                           </div>
 
                           <div>
-                            <label className="block text-xs font-medium text-[#374151] mb-1">Current Land-Use Classification</label>
+                            <label className="block text-xs font-medium text-[#4A4A4A] mb-1">Current Land-Use Classification</label>
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                               {['Industrial', 'Commercial', 'Residential', 'Agricultural', 'Other', 'Not Sure'].map(o => (
                                 <label key={o} className={`flex items-center gap-2 px-3 py-2.5 rounded border cursor-pointer text-sm transition-colors
-                                  ${data.landUseClassification === o ? 'border-[#1a3a5c] bg-[#ebf3ff] text-[#1a3a5c] font-medium' : 'border-[#d1d9e0] bg-white text-[#374151] hover:border-[#a0b4cc]'}`}>
+                                  ${data.landUseClassification === o ? 'border-[#355E3B] bg-[#edf5ef] text-[#355E3B] font-medium' : 'border-[#d6dfd5] bg-white text-[#4A4A4A] hover:border-[#a0b4cc]'}`}>
                                   <input type="radio" name="landUseClassification" value={o} checked={data.landUseClassification === o}
-                                    onChange={() => onChange({ landUseClassification: o })} className="accent-[#1a3a5c]" />
+                                    onChange={() => onChange({ landUseClassification: o })} className="accent-[#355E3B]" />
                                   {o}
                                 </label>
                               ))}
@@ -1823,14 +1823,14 @@ export function E05AdaptiveQuestionnairePage({
                     {/* ── Agricultural conditional branch ── */}
                     {isAgri && (
                       <>
-                        <div className="border-t border-[#e8edf2]" />
+                        <div className="border-t border-[#e3ebe1]" />
                         <div>
-                          <p className="text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider mb-3">Agricultural Land Details</p>
+                          <p className="text-xs font-semibold text-[#555C56] uppercase tracking-wider mb-3">Agricultural Land Details</p>
                           <div className="space-y-5">
                             <QuestionBlock question="Is the land intended for industrial / business use?">
                               <YesNoNotSure name="agriIntended" value={data.agriIntendedForIndustrial} onChange={v => onChange({ agriIntendedForIndustrial: v as E05Data['agriIntendedForIndustrial'] })} />
                               {data.agriIntendedForIndustrial === 'no' && (
-                                <p className="mt-2 text-xs text-[#6b7a8d] bg-[#f8f9fb] border border-[#d1d9e0] rounded px-3 py-2">
+                                <p className="mt-2 text-xs text-[#555C56] bg-[#F9FAF2] border border-[#d6dfd5] rounded px-3 py-2">
                                   Additional land-use action may not be relevant until industrial / business use is proposed.
                                 </p>
                               )}
@@ -1849,9 +1849,9 @@ export function E05AdaptiveQuestionnairePage({
                                     { val: 'not-sure', label: 'Not sure' },
                                   ].map(o => (
                                     <label key={o.val} className={`flex items-center gap-2 px-4 py-2.5 rounded border cursor-pointer text-sm transition-colors
-                                      ${data.agriLandUsePermission === o.val ? 'border-[#1a3a5c] bg-[#ebf3ff] text-[#1a3a5c] font-medium' : 'border-[#d1d9e0] bg-white text-[#374151] hover:border-[#a0b4cc]'}`}>
+                                      ${data.agriLandUsePermission === o.val ? 'border-[#355E3B] bg-[#edf5ef] text-[#355E3B] font-medium' : 'border-[#d6dfd5] bg-white text-[#4A4A4A] hover:border-[#a0b4cc]'}`}>
                                       <input type="radio" name="agriLandUsePermission" value={o.val} checked={data.agriLandUsePermission === o.val}
-                                        onChange={() => onChange({ agriLandUsePermission: o.val as E05Data['agriLandUsePermission'] })} className="accent-[#1a3a5c]" />
+                                        onChange={() => onChange({ agriLandUsePermission: o.val as E05Data['agriLandUsePermission'] })} className="accent-[#355E3B]" />
                                       {o.label}
                                     </label>
                                   ))}
@@ -1871,7 +1871,7 @@ export function E05AdaptiveQuestionnairePage({
                                   </div>
                                 )}
                                 {data.agriPurchaseAboveThreshold === 'no' && (
-                                  <p className="mt-2 text-xs text-[#6b7a8d] bg-[#f8f9fb] border border-[#d1d9e0] rounded px-3 py-2">
+                                  <p className="mt-2 text-xs text-[#555C56] bg-[#F9FAF2] border border-[#d6dfd5] rounded px-3 py-2">
                                     This specific threshold check is not triggered. Other land-use or regulatory requirements may still apply.
                                   </p>
                                 )}
@@ -1884,7 +1884,7 @@ export function E05AdaptiveQuestionnairePage({
 
                     {/* ── MIDC land — no duplicate details ── */}
                     {data.landType === 'midc-industrial' && (
-                      <div className="p-3 bg-[#f0f4f8] border border-[#c8d6e4] rounded text-xs text-[#4a5568]">
+                      <div className="p-3 bg-[#F9FAF2] border border-[#d6dfd5] rounded text-xs text-[#4A4A4A]">
                         <p className="font-medium">MIDC / Industrial Estate Land</p>
                         <p className="mt-0.5">MIDC estate and plot details were captured in the MIDC Details section above.</p>
                       </div>
@@ -1892,24 +1892,24 @@ export function E05AdaptiveQuestionnairePage({
 
                     {/* ── Not applicable messages for hidden branches ── */}
                     {noLand && (
-                      <div className="p-3 bg-[#f8f9fb] border border-[#d1d9e0] rounded text-xs text-[#6b7a8d]">
+                      <div className="p-3 bg-[#F9FAF2] border border-[#d6dfd5] rounded text-xs text-[#555C56]">
                         Land details are not applicable for this project.
                       </div>
                     )}
 
-                    <div className="border-t border-[#e8edf2]" />
+                    <div className="border-t border-[#e3ebe1]" />
 
                     {/* ── Land Documents ── */}
                     <div>
-                      <p className="text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider mb-2">Land Documents</p>
-                      <p className="text-sm font-semibold text-[#1a2533] mb-1">Which land documents do you already have?</p>
-                      <p className="text-xs text-[#6b7a8d] mb-3">
+                      <p className="text-xs font-semibold text-[#555C56] uppercase tracking-wider mb-2">Land Documents</p>
+                      <p className="text-sm font-semibold text-[#2B2B2B] mb-1">Which land documents do you already have?</p>
+                      <p className="text-xs text-[#555C56] mb-3">
                         Tell us which documents are available. You can upload and manage reusable documents later in the Document Centre.
                       </p>
                       <div className="space-y-2">
                         {LAND_DOCUMENTS_LIST.map(doc => (
                           <label key={doc} className={`flex items-center gap-3 px-4 py-2.5 rounded border cursor-pointer text-sm transition-colors
-                            ${data.landDocuments.includes(doc) ? 'border-[#1a3a5c] bg-[#ebf3ff] text-[#1a3a5c]' : 'border-[#d1d9e0] bg-white text-[#374151] hover:border-[#a0b4cc]'}`}>
+                            ${data.landDocuments.includes(doc) ? 'border-[#355E3B] bg-[#edf5ef] text-[#355E3B]' : 'border-[#d6dfd5] bg-white text-[#4A4A4A] hover:border-[#a0b4cc]'}`}>
                             <input
                               type="checkbox"
                               checked={data.landDocuments.includes(doc)}
@@ -1919,16 +1919,16 @@ export function E05AdaptiveQuestionnairePage({
                                   : [...data.landDocuments, doc]
                                 onChange({ landDocuments: next })
                               }}
-                              className="accent-[#1a3a5c] shrink-0"
+                              className="accent-[#355E3B] shrink-0"
                             />
                             {doc}
                           </label>
                         ))}
                       </div>
                       {data.landDocuments.length > 0 && !data.landDocuments.includes('I do not have these yet') && (
-                        <div className="mt-3 p-3 bg-[#f0f4f8] border border-[#c8d6e4] rounded flex items-start gap-2">
-                          <span className="text-[#6b7a8d] shrink-0"><Icon.Info /></span>
-                          <p className="text-xs text-[#4a5568]">
+                        <div className="mt-3 p-3 bg-[#F9FAF2] border border-[#d6dfd5] rounded flex items-start gap-2">
+                          <span className="text-[#555C56] shrink-0"><Icon.Info /></span>
+                          <p className="text-xs text-[#4A4A4A]">
                             Document uploads are optional at this stage. You can manage and upload all documents in the Document Centre after project creation.
                           </p>
                         </div>
@@ -1999,15 +1999,15 @@ function formatInrDisplay(raw: string): string {
 function CurrencyInput({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
   return (
     <div>
-      <label className="block text-xs font-medium text-[#374151] mb-1">{label}</label>
+      <label className="block text-xs font-medium text-[#4A4A4A] mb-1">{label}</label>
       <div className="relative">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[#6b7a8d] font-medium select-none">₹</span>
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[#555C56] font-medium select-none">₹</span>
         <input type="text" inputMode="numeric" value={value}
           onChange={e => onChange(e.target.value.replace(/[^0-9]/g, ''))}
           placeholder={placeholder ?? '0'}
-          className="w-full border border-[#c8d6e4] rounded px-3 py-2 pl-7 text-sm text-[#1a2533] focus:outline-none focus:ring-2 focus:ring-[#1a56db] focus:border-transparent bg-white" />
+          className="w-full border border-[#d6dfd5] rounded px-3 py-2 pl-7 text-sm text-[#2B2B2B] focus:outline-none focus:ring-2 focus:ring-[#6DAE7C] focus:border-transparent bg-white" />
       </div>
-      {value && <p className="mt-0.5 text-xs text-[#6b7a8d]">{formatInrDisplay(value)}</p>}
+      {value && <p className="mt-0.5 text-xs text-[#555C56]">{formatInrDisplay(value)}</p>}
     </div>
   )
 }
@@ -2016,16 +2016,16 @@ function CurrentProposedRow({ label, current, proposed, unit, onChangeProposed }
   return (
     <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
       <div>
-        <p className="text-xs text-[#9aa5b4] mb-1">Current</p>
-        <div className="px-3 py-2 bg-[#f0f4f8] border border-[#d1d9e0] rounded text-sm text-[#374151]">{current || '—'}{unit ? ` ${unit}` : ''}</div>
+        <p className="text-xs text-[#8c9f8a] mb-1">Current</p>
+        <div className="px-3 py-2 bg-[#F9FAF2] border border-[#d6dfd5] rounded text-sm text-[#4A4A4A]">{current || '—'}{unit ? ` ${unit}` : ''}</div>
       </div>
-      <div className="text-[#9aa5b4] text-sm font-medium pt-4">→</div>
+      <div className="text-[#8c9f8a] text-sm font-medium pt-4">→</div>
       <div>
-        <p className="text-xs text-[#374151] mb-1">Proposed</p>
+        <p className="text-xs text-[#4A4A4A] mb-1">Proposed</p>
         <input type="text" value={proposed} onChange={e => onChangeProposed(e.target.value)}
-          className="w-full border border-[#c8d6e4] rounded px-3 py-2 text-sm text-[#1a2533] focus:outline-none focus:ring-2 focus:ring-[#1a56db] focus:border-transparent bg-white" />
+          className="w-full border border-[#d6dfd5] rounded px-3 py-2 text-sm text-[#2B2B2B] focus:outline-none focus:ring-2 focus:ring-[#6DAE7C] focus:border-transparent bg-white" />
       </div>
-      {label && <p className="col-span-3 text-xs font-medium text-[#6b7a8d] -mt-2">{label}{unit ? ` (${unit})` : ''}</p>}
+      {label && <p className="col-span-3 text-xs font-medium text-[#555C56] -mt-2">{label}{unit ? ` (${unit})` : ''}</p>}
     </div>
   )
 }
@@ -2048,12 +2048,12 @@ function SubsectionNav({ subsections, current, onGo }: { subsections: typeof SCA
         return (
           <button key={s.num} onClick={() => s.num <= current && onGo(s.num)}
             className={`flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium transition-colors border
-              ${active ? 'bg-[#1a3a5c] text-white border-[#1a3a5c]'
-                : done ? 'bg-[#e8f0fe] text-[#1a56db] border-[#c8d6e4] cursor-pointer hover:bg-[#d0e4fd]'
-                : 'bg-white text-[#9aa5b4] border-[#e8edf2] cursor-not-allowed'}`}>
+              ${active ? 'bg-[#355E3B] text-white border-[#355E3B]'
+                : done ? 'bg-[#e8f0fe] text-[#6DAE7C] border-[#d6dfd5] cursor-pointer hover:bg-[#d0e4fd]'
+                : 'bg-white text-[#8c9f8a] border-[#e3ebe1] cursor-not-allowed'}`}>
             {done && <span className="text-[10px]">✓</span>}
             {s.num}. {s.label}
-            {i < subsections.length - 1 && <span className="ml-1.5 text-[#c8d6e4]">›</span>}
+            {i < subsections.length - 1 && <span className="ml-1.5 text-[#d6dfd5]">›</span>}
           </button>
         )
       })}
@@ -2099,7 +2099,7 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
   const isMfg = ['manufacturing', 'processing', 'mfg-trading', 'construction'].includes(e04Data.businessNature ?? '')
     || data.activities.some(a => ['manufacturing', 'assembly', 'processing', 'packaging', 'r&d'].some(kw => a.toLowerCase().includes(kw)))
 
-  const inputCls = () => 'w-full border border-[#c8d6e4] rounded px-3 py-2 text-sm text-[#1a2533] focus:outline-none focus:ring-2 focus:ring-[#1a56db] focus:border-transparent bg-white'
+  const inputCls = () => 'w-full border border-[#d6dfd5] rounded px-3 py-2 text-sm text-[#2B2B2B] focus:outline-none focus:ring-2 focus:ring-[#6DAE7C] focus:border-transparent bg-white'
 
   function handleSaveExit() {
     setSaved(true)
@@ -2186,7 +2186,7 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
   const ctxType = ctxTypeMap[e03Data.projectType ?? ''] ?? '—'
 
   return (
-    <main id="main-content" className="flex-1 bg-[#f8f9fb]" tabIndex={-1}>
+    <main id="main-content" className="flex-1 bg-[#F9FAF2]" tabIndex={-1}>
       <div className="max-w-[860px] mx-auto px-4 sm:px-6 py-5">
 
         {/* Breadcrumb */}
@@ -2202,29 +2202,29 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
         <CreateStepIndicator current="e05" />
 
         {/* Context strip */}
-        <div className="bg-white border border-[#d1d9e0] rounded mb-4 px-4 py-3 grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-2">
+        <div className="bg-white border border-[#d6dfd5] rounded mb-4 px-4 py-3 grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-2">
           <div>
-            <p className="text-[10px] font-semibold text-[#9aa5b4] uppercase tracking-wider">Project</p>
-            <p className="text-xs font-semibold text-[#1a2533] truncate">{e03Data.name || '—'}</p>
+            <p className="text-[10px] font-semibold text-[#8c9f8a] uppercase tracking-wider">Project</p>
+            <p className="text-xs font-semibold text-[#2B2B2B] truncate">{e03Data.name || '—'}</p>
           </div>
           <div>
-            <p className="text-[10px] font-semibold text-[#9aa5b4] uppercase tracking-wider">Type</p>
-            <p className="text-xs text-[#374151]">{ctxType}</p>
+            <p className="text-[10px] font-semibold text-[#8c9f8a] uppercase tracking-wider">Type</p>
+            <p className="text-xs text-[#4A4A4A]">{ctxType}</p>
           </div>
           <div>
-            <p className="text-[10px] font-semibold text-[#9aa5b4] uppercase tracking-wider">Industry</p>
-            <p className="text-xs text-[#374151] truncate">{ctxIndustry}</p>
+            <p className="text-[10px] font-semibold text-[#8c9f8a] uppercase tracking-wider">Industry</p>
+            <p className="text-xs text-[#4A4A4A] truncate">{ctxIndustry}</p>
           </div>
           <div>
-            <p className="text-[10px] font-semibold text-[#9aa5b4] uppercase tracking-wider">Nature</p>
-            <p className="text-xs text-[#374151]">{ctxNature}</p>
+            <p className="text-[10px] font-semibold text-[#8c9f8a] uppercase tracking-wider">Nature</p>
+            <p className="text-xs text-[#4A4A4A]">{ctxNature}</p>
           </div>
         </div>
 
         {/* Section header */}
         <div className="mb-4">
-          <p className="text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider">Business Discovery · Project Scale &amp; Operations</p>
-          <h1 className="text-lg font-bold text-[#1a2533] mt-0.5">{SCALE_SUBSECTIONS[sub - 1].label}</h1>
+          <p className="text-xs font-semibold text-[#555C56] uppercase tracking-wider">Business Discovery · Project Scale &amp; Operations</p>
+          <h1 className="text-lg font-bold text-[#2B2B2B] mt-0.5">{SCALE_SUBSECTIONS[sub - 1].label}</h1>
         </div>
 
         {/* Subsection nav */}
@@ -2238,18 +2238,18 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
         )}
 
         {/* Form card */}
-        <div className="bg-white border border-[#d1d9e0] rounded shadow-sm p-6 space-y-6">
+        <div className="bg-white border border-[#d6dfd5] rounded shadow-sm p-6 space-y-6">
 
           {/* ══════ 1. INVESTMENT ══════ */}
           {sub === 1 && (
             <section aria-labelledby="inv-heading">
-              <h2 id="inv-heading" className="text-xs font-semibold text-[#1a3a5c] uppercase tracking-wider mb-1 pb-2 border-b border-[#e8edf2]">Project Investment</h2>
-              <p className="text-xs text-[#6b7a8d] mb-5">Provide the estimated capital investment for this project. Approximate values can be updated later.</p>
+              <h2 id="inv-heading" className="text-xs font-semibold text-[#355E3B] uppercase tracking-wider mb-1 pb-2 border-b border-[#e3ebe1]">Project Investment</h2>
+              <p className="text-xs text-[#555C56] mb-5">Provide the estimated capital investment for this project. Approximate values can be updated later.</p>
               <div className="space-y-5">
                 <CurrencyInput label="Estimated Total Project Investment" value={data.totalInvestment} onChange={v => onChange({ totalInvestment: v })} placeholder="e.g. 400000000" />
 
                 <div>
-                  <p className="text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider mb-3">Investment Breakdown <span className="normal-case font-normal">(enter estimated values where available)</span></p>
+                  <p className="text-xs font-semibold text-[#555C56] uppercase tracking-wider mb-3">Investment Breakdown <span className="normal-case font-normal">(enter estimated values where available)</span></p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <CurrencyInput label="Land" value={data.investmentLand} onChange={v => onChange({ investmentLand: v })} />
                     <CurrencyInput label="Building / Construction" value={data.investmentBuilding} onChange={v => onChange({ investmentBuilding: v })} />
@@ -2259,9 +2259,9 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
                 </div>
 
                 {breakdownTotal > 0 && (
-                  <div className="flex items-center justify-between px-3 py-2 bg-[#f0f4f8] border border-[#c8d6e4] rounded text-xs">
-                    <span className="text-[#4a5568]">Calculated from breakdown</span>
-                    <span className="font-semibold text-[#1a2533]">{formatInrDisplay(String(breakdownTotal))}</span>
+                  <div className="flex items-center justify-between px-3 py-2 bg-[#F9FAF2] border border-[#d6dfd5] rounded text-xs">
+                    <span className="text-[#4A4A4A]">Calculated from breakdown</span>
+                    <span className="font-semibold text-[#2B2B2B]">{formatInrDisplay(String(breakdownTotal))}</span>
                   </div>
                 )}
 
@@ -2270,9 +2270,9 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
                 )}
 
                 {data.classification === 'not-sure' && (
-                  <div className="flex items-start gap-2 p-2.5 bg-[#f0f4f8] border border-[#c8d6e4] rounded">
-                    <span className="text-[#6b7a8d] shrink-0 mt-0.5"><Icon.Info /></span>
-                    <p className="text-xs text-[#4a5568]">Investment values will be used as one of the inputs when EKATMA evaluates your project classification later.</p>
+                  <div className="flex items-start gap-2 p-2.5 bg-[#F9FAF2] border border-[#d6dfd5] rounded">
+                    <span className="text-[#555C56] shrink-0 mt-0.5"><Icon.Info /></span>
+                    <p className="text-xs text-[#4A4A4A]">Investment values will be used as one of the inputs when EKATMA evaluates your project classification later.</p>
                   </div>
                 )}
               </div>
@@ -2282,21 +2282,21 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
           {/* ══════ 2. EMPLOYMENT ══════ */}
           {sub === 2 && (
             <section aria-labelledby="emp-heading">
-              <h2 id="emp-heading" className="text-xs font-semibold text-[#1a3a5c] uppercase tracking-wider mb-4 pb-2 border-b border-[#e8edf2]">Employment</h2>
+              <h2 id="emp-heading" className="text-xs font-semibold text-[#355E3B] uppercase tracking-wider mb-4 pb-2 border-b border-[#e3ebe1]">Employment</h2>
               <div className="space-y-5">
                 {(isExisting || isExpansion) && (
                   <div>
-                    <p className="text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider mb-2">Current Workforce</p>
+                    <p className="text-xs font-semibold text-[#555C56] uppercase tracking-wider mb-2">Current Workforce</p>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                       <div>
-                        <label className="block text-xs font-medium text-[#374151] mb-1">Total</label>
+                        <label className="block text-xs font-medium text-[#4A4A4A] mb-1">Total</label>
                         <input type="text" inputMode="numeric" value={data.workforceCurrentTotal}
                           onChange={e => onChange({ workforceCurrentTotal: e.target.value.replace(/\D/g, '') })}
                           className={inputCls()} placeholder="0" />
                       </div>
                     </div>
                     {isExpansion && data.workforceCurrentTotal && (
-                      <p className="mt-1.5 text-xs text-[#6b7a8d] bg-[#f8f9fb] border border-[#e8edf2] rounded px-2 py-1">
+                      <p className="mt-1.5 text-xs text-[#555C56] bg-[#F9FAF2] border border-[#e3ebe1] rounded px-2 py-1">
                         Current value will be preserved. Enter proposed values below.
                       </p>
                     )}
@@ -2304,7 +2304,7 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
                 )}
 
                 <div>
-                  <p className="text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider mb-2">
+                  <p className="text-xs font-semibold text-[#555C56] uppercase tracking-wider mb-2">
                     {isExpansion ? 'Expected Workforce After Project' : 'Expected Workforce'}
                   </p>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -2315,7 +2315,7 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
                       { key: 'workforceOtherCount', label: 'Other' },
                     ].map(f => (
                       <div key={f.key}>
-                        <label className="block text-xs font-medium text-[#374151] mb-1">{f.label}</label>
+                        <label className="block text-xs font-medium text-[#4A4A4A] mb-1">{f.label}</label>
                         <input type="text" inputMode="numeric" value={(data as unknown as Record<string, string>)[f.key]}
                           onChange={e => onChange({ [f.key]: e.target.value.replace(/\D/g, '') } as Partial<E05Data>)}
                           className={inputCls()} placeholder="0" />
@@ -2328,9 +2328,9 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
                     </div>
                   )}
                   {isExpansion && data.workforceCurrentTotal && data.workforceTotal && (
-                    <div className="mt-3 flex items-center gap-2 text-xs text-[#4a5568] bg-[#f0f4f8] border border-[#c8d6e4] rounded px-3 py-2">
+                    <div className="mt-3 flex items-center gap-2 text-xs text-[#4A4A4A] bg-[#F9FAF2] border border-[#d6dfd5] rounded px-3 py-2">
                       <span>Change:</span>
-                      <span className="font-semibold text-[#1a3a5c]">
+                      <span className="font-semibold text-[#355E3B]">
                         {(parseFloat(data.workforceTotal) - parseFloat(data.workforceCurrentTotal)) >= 0 ? '+' : ''}{parseFloat(data.workforceTotal) - parseFloat(data.workforceCurrentTotal)} persons
                       </span>
                     </div>
@@ -2343,15 +2343,15 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
           {/* ══════ 3. PRODUCTION ══════ */}
           {sub === 3 && (
             <section aria-labelledby="prod-heading">
-              <h2 id="prod-heading" className="text-xs font-semibold text-[#1a3a5c] uppercase tracking-wider mb-4 pb-2 border-b border-[#e8edf2]">Production Details</h2>
+              <h2 id="prod-heading" className="text-xs font-semibold text-[#355E3B] uppercase tracking-wider mb-4 pb-2 border-b border-[#e3ebe1]">Production Details</h2>
               {!isMfg ? (
                 <div className="py-6 text-center">
-                  <p className="text-sm text-[#6b7a8d]">Production / Manufacturing</p>
-                  <p className="text-xs text-[#9aa5b4] mt-1 max-w-xs mx-auto">Not applicable based on your selected business nature and activities. Continuing to Building details.</p>
+                  <p className="text-sm text-[#555C56]">Production / Manufacturing</p>
+                  <p className="text-xs text-[#8c9f8a] mt-1 max-w-xs mx-auto">Not applicable based on your selected business nature and activities. Continuing to Building details.</p>
                 </div>
               ) : (
                 <div className="space-y-6">
-                  <p className="text-xs text-[#6b7a8d]">Provide the expected production capacity for the products manufactured or processed.</p>
+                  <p className="text-xs text-[#555C56]">Provide the expected production capacity for the products manufactured or processed.</p>
 
                   {/* Process reuse */}
                   {data.processType && (
@@ -2360,31 +2360,31 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
 
                   {/* Production capacity rows */}
                   <div>
-                    <p className="text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider mb-3">Production Capacity</p>
+                    <p className="text-xs font-semibold text-[#555C56] uppercase tracking-wider mb-3">Production Capacity</p>
                     {data.productionCapacities.length === 0 && data.products.length > 0 && (
-                      <p className="text-xs text-[#9aa5b4] mb-3">Products from earlier: {data.products.map(p => p.name).join(', ')}</p>
+                      <p className="text-xs text-[#8c9f8a] mb-3">Products from earlier: {data.products.map(p => p.name).join(', ')}</p>
                     )}
                     <div className="space-y-3">
                       {data.productionCapacities.map((row, i) => (
-                        <div key={i} className="border border-[#d1d9e0] rounded p-3 bg-[#fafbfc] space-y-3">
+                        <div key={i} className="border border-[#d6dfd5] rounded p-3 bg-[#fafbfc] space-y-3">
                           <div className="flex items-center justify-between">
-                            <p className="text-xs font-medium text-[#374151]">Product {i + 1}</p>
-                            <button onClick={() => removeProductionRow(i)} className="text-xs text-[#9aa5b4] hover:text-red-500 transition-colors">Remove</button>
+                            <p className="text-xs font-medium text-[#4A4A4A]">Product {i + 1}</p>
+                            <button onClick={() => removeProductionRow(i)} className="text-xs text-[#8c9f8a] hover:text-red-500 transition-colors">Remove</button>
                           </div>
                           <div>
-                            <label className="block text-xs font-medium text-[#374151] mb-1">Product / Item Name</label>
+                            <label className="block text-xs font-medium text-[#4A4A4A] mb-1">Product / Item Name</label>
                             <input type="text" value={row.productName} onChange={e => updateProductionRow(i, { productName: e.target.value })}
                               list={`prod-list-${i}`} placeholder="Select or type product name" className={inputCls()} />
                             <datalist id={`prod-list-${i}`}>{data.products.map(p => <option key={p.id} value={p.name} />)}</datalist>
                           </div>
                           <div className="grid grid-cols-2 gap-3">
                             <div>
-                              <label className="block text-xs font-medium text-[#374151] mb-1">Capacity</label>
+                              <label className="block text-xs font-medium text-[#4A4A4A] mb-1">Capacity</label>
                               <input type="text" inputMode="numeric" value={row.capacity} onChange={e => updateProductionRow(i, { capacity: e.target.value.replace(/[^0-9.]/g, '') })}
                                 placeholder="e.g. 100" className={inputCls()} />
                             </div>
                             <div>
-                              <label className="block text-xs font-medium text-[#374151] mb-1">Unit</label>
+                              <label className="block text-xs font-medium text-[#4A4A4A] mb-1">Unit</label>
                               <select value={row.unit} onChange={e => updateProductionRow(i, { unit: e.target.value })} className={inputCls()}>
                                 <option value="">Select unit…</option>
                                 {PRODUCTION_UNITS.map(u => <option key={u} value={u}>{u}</option>)}
@@ -2396,8 +2396,8 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
                               placeholder="Specify unit" className={inputCls()} />
                           )}
                           {isExpansion && (
-                            <div className="pt-1 border-t border-[#e8edf2]">
-                              <label className="block text-xs font-medium text-[#374151] mb-1">Current Capacity (for comparison)</label>
+                            <div className="pt-1 border-t border-[#e3ebe1]">
+                              <label className="block text-xs font-medium text-[#4A4A4A] mb-1">Current Capacity (for comparison)</label>
                               <input type="text" inputMode="numeric" placeholder="e.g. 50" className={inputCls()} />
                             </div>
                           )}
@@ -2405,22 +2405,22 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
                       ))}
                     </div>
                     <button onClick={addProductionRow}
-                      className="mt-3 flex items-center gap-1.5 text-sm text-[#1a56db] hover:text-[#1a3a5c] transition-colors font-medium">
+                      className="mt-3 flex items-center gap-1.5 text-sm text-[#6DAE7C] hover:text-[#355E3B] transition-colors font-medium">
                       <span className="text-lg leading-none">+</span> Add Production Capacity
                     </button>
                   </div>
 
                   {/* Shifts */}
                   <div>
-                    <p className="text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider mb-2">Shifts &amp; Hours</p>
+                    <p className="text-xs font-semibold text-[#555C56] uppercase tracking-wider mb-2">Shifts &amp; Hours</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                       <div>
-                        <p className="text-sm font-medium text-[#1a2533] mb-2">Number of Shifts</p>
+                        <p className="text-sm font-medium text-[#2B2B2B] mb-2">Number of Shifts</p>
                         <div className="flex flex-wrap gap-2">
                           {['1', '2', '3', 'other'].map(s => (
                             <label key={s} className={`flex items-center gap-2 px-4 py-2 rounded border cursor-pointer text-sm transition-colors
-                              ${data.shifts === s ? 'border-[#1a3a5c] bg-[#ebf3ff] text-[#1a3a5c] font-medium' : 'border-[#d1d9e0] bg-white text-[#374151] hover:border-[#a0b4cc]'}`}>
-                              <input type="radio" name="shifts" value={s} checked={data.shifts === s} onChange={() => onChange({ shifts: s })} className="accent-[#1a3a5c]" />
+                              ${data.shifts === s ? 'border-[#355E3B] bg-[#edf5ef] text-[#355E3B] font-medium' : 'border-[#d6dfd5] bg-white text-[#4A4A4A] hover:border-[#a0b4cc]'}`}>
+                              <input type="radio" name="shifts" value={s} checked={data.shifts === s} onChange={() => onChange({ shifts: s })} className="accent-[#355E3B]" />
                               {s === 'other' ? 'Other' : s}
                             </label>
                           ))}
@@ -2431,7 +2431,7 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
                         )}
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-[#1a2533] mb-2">Operating Hours / Day</label>
+                        <label className="block text-sm font-medium text-[#2B2B2B] mb-2">Operating Hours / Day</label>
                         <div className="relative">
                           <input type="text" inputMode="numeric" value={data.operatingHoursPerDay}
                             onChange={e => {
@@ -2439,19 +2439,19 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
                               if (!v || parseInt(v) <= 24) onChange({ operatingHoursPerDay: v })
                             }}
                             placeholder="e.g. 16" className={inputCls()} />
-                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#9aa5b4]">hrs</span>
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#8c9f8a]">hrs</span>
                         </div>
-                        <p className="mt-0.5 text-xs text-[#9aa5b4]">0–24 hours</p>
+                        <p className="mt-0.5 text-xs text-[#8c9f8a]">0–24 hours</p>
                       </div>
                     </div>
                   </div>
 
                   {/* Additional process notes */}
                   <div>
-                    <label className="block text-xs font-medium text-[#374151] mb-1">Additional Process Details <span className="font-normal text-[#9aa5b4]">(optional)</span></label>
+                    <label className="block text-xs font-medium text-[#4A4A4A] mb-1">Additional Process Details <span className="font-normal text-[#8c9f8a]">(optional)</span></label>
                     <textarea value={data.processDetailsExtra} onChange={e => onChange({ processDetailsExtra: e.target.value })}
                       rows={2} placeholder="Any additional notes about the manufacturing or production process…"
-                      className="w-full border border-[#c8d6e4] rounded px-3 py-2 text-sm text-[#1a2533] focus:outline-none focus:ring-2 focus:ring-[#1a56db] focus:border-transparent bg-white resize-none" />
+                      className="w-full border border-[#d6dfd5] rounded px-3 py-2 text-sm text-[#2B2B2B] focus:outline-none focus:ring-2 focus:ring-[#6DAE7C] focus:border-transparent bg-white resize-none" />
                   </div>
                 </div>
               )}
@@ -2461,11 +2461,11 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
           {/* ══════ 4. BUILDING ══════ */}
           {sub === 4 && (
             <section aria-labelledby="bld-heading">
-              <h2 id="bld-heading" className="text-xs font-semibold text-[#1a3a5c] uppercase tracking-wider mb-4 pb-2 border-b border-[#e8edf2]">Building / Construction</h2>
+              <h2 id="bld-heading" className="text-xs font-semibold text-[#355E3B] uppercase tracking-wider mb-4 pb-2 border-b border-[#e3ebe1]">Building / Construction</h2>
               <div className="space-y-5">
                 {/* Reuse construction from E04 */}
                 <div>
-                  <p className="text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider mb-2">Construction / Premises</p>
+                  <p className="text-xs font-semibold text-[#555C56] uppercase tracking-wider mb-2">Construction / Premises</p>
                   {e04Data.construction && e04Data.construction !== 'not-sure' ? (
                     <ReusedAnswerBlock
                       label="Construction / Premises"
@@ -2481,9 +2481,9 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
                         { val: 'not-sure', label: 'Not Sure' },
                       ].map(o => (
                         <label key={o.val} className={`flex items-center gap-3 px-4 py-2.5 rounded border cursor-pointer text-sm transition-colors
-                          ${e04Data.construction === o.val ? 'border-[#1a3a5c] bg-[#ebf3ff] text-[#1a3a5c] font-medium' : 'border-[#d1d9e0] bg-white text-[#374151] hover:border-[#a0b4cc]'}`}>
+                          ${e04Data.construction === o.val ? 'border-[#355E3B] bg-[#edf5ef] text-[#355E3B] font-medium' : 'border-[#d6dfd5] bg-white text-[#4A4A4A] hover:border-[#a0b4cc]'}`}>
                           <input type="radio" name="constructionEdit" value={o.val} checked={e04Data.construction === o.val}
-                            onChange={() => setE04Data({ construction: o.val as E04Data['construction'] })} className="accent-[#1a3a5c]" />
+                            onChange={() => setE04Data({ construction: o.val as E04Data['construction'] })} className="accent-[#355E3B]" />
                           {o.label}
                         </label>
                       ))}
@@ -2493,8 +2493,8 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
 
                 {/* New / modification building details */}
                 {(e04Data.construction === 'new' || e04Data.construction === 'modification') && (
-                  <div className="border border-[#c8d6e4] rounded p-4 bg-[#f8fbff] space-y-4">
-                    <p className="text-sm font-semibold text-[#1a3a5c]">
+                  <div className="border border-[#d6dfd5] rounded p-4 bg-[#f8fbff] space-y-4">
+                    <p className="text-sm font-semibold text-[#355E3B]">
                       {e04Data.construction === 'modification' ? 'Current → Proposed Building Details' : 'Building Details'}
                     </p>
 
@@ -2503,7 +2503,7 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
                       <ReusedAnswerBlock label="Plot Area (sq.m)" value={`${plotAreaSource.val} sq.m`} source={plotAreaSource.src} />
                     ) : (
                       <div>
-                        <label className="block text-xs font-medium text-[#374151] mb-1">Plot Area (sq.m)</label>
+                        <label className="block text-xs font-medium text-[#4A4A4A] mb-1">Plot Area (sq.m)</label>
                         <input type="text" inputMode="numeric" placeholder="e.g. 4800" className={inputCls()} />
                       </div>
                     )}
@@ -2518,19 +2518,19 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
                     ) : (
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-xs font-medium text-[#374151] mb-1">Built-Up Area (sq.m)</label>
+                          <label className="block text-xs font-medium text-[#4A4A4A] mb-1">Built-Up Area (sq.m)</label>
                           <input type="text" inputMode="numeric" value={data.buildingBuiltUpArea} onChange={e => onChange({ buildingBuiltUpArea: e.target.value.replace(/[^0-9.]/g, '') })} placeholder="e.g. 2500" className={inputCls()} />
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-[#374151] mb-1">Number of Floors</label>
+                          <label className="block text-xs font-medium text-[#4A4A4A] mb-1">Number of Floors</label>
                           <input type="text" inputMode="numeric" value={data.buildingFloors} onChange={e => onChange({ buildingFloors: e.target.value.replace(/\D/g, '') })} placeholder="e.g. 3" className={inputCls()} />
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-[#374151] mb-1">Building Height (m)</label>
+                          <label className="block text-xs font-medium text-[#4A4A4A] mb-1">Building Height (m)</label>
                           <input type="text" inputMode="numeric" value={data.buildingHeight} onChange={e => onChange({ buildingHeight: e.target.value.replace(/[^0-9.]/g, '') })} placeholder="e.g. 15" className={inputCls()} />
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-[#374151] mb-1">Occupancy</label>
+                          <label className="block text-xs font-medium text-[#4A4A4A] mb-1">Occupancy</label>
                           <select value={data.buildingOccupancy} onChange={e => onChange({ buildingOccupancy: e.target.value })} className={inputCls()}>
                             <option value="">Select occupancy…</option>
                             {OCCUPANCY_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
@@ -2541,12 +2541,12 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
 
                     {/* Construction status */}
                     <div>
-                      <p className="text-xs font-medium text-[#374151] mb-2">Construction Status</p>
+                      <p className="text-xs font-medium text-[#4A4A4A] mb-2">Construction Status</p>
                       <div className="flex flex-wrap gap-2">
                         {['Not Started', 'Planning', 'Under Construction', 'Completed'].map(s => (
                           <label key={s} className={`flex items-center gap-2 px-3 py-2 rounded border cursor-pointer text-sm transition-colors
-                            ${data.buildingConstructionStatus === s ? 'border-[#1a3a5c] bg-[#ebf3ff] text-[#1a3a5c] font-medium' : 'border-[#d1d9e0] bg-white text-[#374151] hover:border-[#a0b4cc]'}`}>
-                            <input type="radio" name="bldStatus" value={s} checked={data.buildingConstructionStatus === s} onChange={() => onChange({ buildingConstructionStatus: s })} className="accent-[#1a3a5c]" />
+                            ${data.buildingConstructionStatus === s ? 'border-[#355E3B] bg-[#edf5ef] text-[#355E3B] font-medium' : 'border-[#d6dfd5] bg-white text-[#4A4A4A] hover:border-[#a0b4cc]'}`}>
+                            <input type="radio" name="bldStatus" value={s} checked={data.buildingConstructionStatus === s} onChange={() => onChange({ buildingConstructionStatus: s })} className="accent-[#355E3B]" />
                             {s}
                           </label>
                         ))}
@@ -2556,25 +2556,25 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
                 )}
 
                 {e04Data.construction === 'existing' && (
-                  <p className="text-xs text-[#6b7a8d] bg-[#f8f9fb] border border-[#d1d9e0] rounded px-3 py-2">
+                  <p className="text-xs text-[#555C56] bg-[#F9FAF2] border border-[#d6dfd5] rounded px-3 py-2">
                     No new construction planned. Detailed building branch is not applicable for existing premises with no modification.
                   </p>
                 )}
 
                 {/* Building risk flags — always shown */}
                 <div>
-                  <p className="text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider mb-2">Building / Premises Features</p>
-                  <p className="text-sm text-[#374151] mb-3">Will the building / premises include any of the following?</p>
+                  <p className="text-xs font-semibold text-[#555C56] uppercase tracking-wider mb-2">Building / Premises Features</p>
+                  <p className="text-sm text-[#4A4A4A] mb-3">Will the building / premises include any of the following?</p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {BUILDING_RISK_FLAGS.map(f => (
                       <label key={f} className={`flex items-center gap-3 px-3 py-2.5 rounded border cursor-pointer text-sm transition-colors
-                        ${data.buildingRiskFlags.includes(f) ? 'border-[#1a3a5c] bg-[#ebf3ff] text-[#1a3a5c]' : 'border-[#d1d9e0] bg-white text-[#374151] hover:border-[#a0b4cc]'}`}>
-                        <input type="checkbox" checked={data.buildingRiskFlags.includes(f)} onChange={() => toggleFlag(f)} className="accent-[#1a3a5c] shrink-0" />
+                        ${data.buildingRiskFlags.includes(f) ? 'border-[#355E3B] bg-[#edf5ef] text-[#355E3B]' : 'border-[#d6dfd5] bg-white text-[#4A4A4A] hover:border-[#a0b4cc]'}`}>
+                        <input type="checkbox" checked={data.buildingRiskFlags.includes(f)} onChange={() => toggleFlag(f)} className="accent-[#355E3B] shrink-0" />
                         {f}
                       </label>
                     ))}
                   </div>
-                  <p className="mt-2 text-xs text-[#9aa5b4]">Selecting "None" clears other selections. These flags inform later regulatory routing.</p>
+                  <p className="mt-2 text-xs text-[#8c9f8a]">Selecting "None" clears other selections. These flags inform later regulatory routing.</p>
                 </div>
               </div>
             </section>
@@ -2583,7 +2583,7 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
           {/* ══════ 5. POWER ══════ */}
           {sub === 5 && (
             <section aria-labelledby="pwr-heading">
-              <h2 id="pwr-heading" className="text-xs font-semibold text-[#1a3a5c] uppercase tracking-wider mb-4 pb-2 border-b border-[#e8edf2]">Power</h2>
+              <h2 id="pwr-heading" className="text-xs font-semibold text-[#355E3B] uppercase tracking-wider mb-4 pb-2 border-b border-[#e3ebe1]">Power</h2>
               <div className="space-y-5">
                 {/* Reuse power from E04 */}
                 <div>
@@ -2591,20 +2591,20 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
                     <ReusedAnswerBlock label="Power Required" value={{ yes: 'Yes', no: 'No' }[e04Data.power] ?? e04Data.power} source="Basic Requirements" />
                   ) : (
                     <div>
-                      <p className="text-sm font-semibold text-[#1a2533] mb-2">Is power required?</p>
+                      <p className="text-sm font-semibold text-[#2B2B2B] mb-2">Is power required?</p>
                       <YesNoNotSure name="powerEdit" value={e04Data.power} onChange={v => setE04Data({ power: v as E04Data['power'] })} />
                     </div>
                   )}
                 </div>
 
                 {e04Data.power === 'no' && (
-                  <p className="text-xs text-[#6b7a8d] bg-[#f8f9fb] border border-[#d1d9e0] rounded px-3 py-2">Power details are not applicable for this project.</p>
+                  <p className="text-xs text-[#555C56] bg-[#F9FAF2] border border-[#d6dfd5] rounded px-3 py-2">Power details are not applicable for this project.</p>
                 )}
 
                 {(e04Data.power === 'yes') && (
                   <>
                     <div>
-                      <label className="block text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider mb-2">Estimated Connected Load</label>
+                      <label className="block text-xs font-semibold text-[#555C56] uppercase tracking-wider mb-2">Estimated Connected Load</label>
                       <div className="flex gap-2">
                         <div className="flex-1">
                           <input type="text" inputMode="numeric" value={data.connectedLoad}
@@ -2622,13 +2622,13 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
                     </div>
 
                     <div>
-                      <p className="text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider mb-2">Expected Supply Type</p>
+                      <p className="text-xs font-semibold text-[#555C56] uppercase tracking-wider mb-2">Expected Supply Type</p>
                       <div className="flex flex-wrap gap-2">
                         {[{ val: 'lt', label: 'Low Tension' }, { val: 'ht', label: 'High Tension' }, { val: 'not-sure', label: 'Not Sure' }].map(o => (
                           <label key={o.val} className={`flex items-center gap-2 px-4 py-2.5 rounded border cursor-pointer text-sm transition-colors
-                            ${data.supplyType === o.val ? 'border-[#1a3a5c] bg-[#ebf3ff] text-[#1a3a5c] font-medium' : 'border-[#d1d9e0] bg-white text-[#374151] hover:border-[#a0b4cc]'}`}>
+                            ${data.supplyType === o.val ? 'border-[#355E3B] bg-[#edf5ef] text-[#355E3B] font-medium' : 'border-[#d6dfd5] bg-white text-[#4A4A4A] hover:border-[#a0b4cc]'}`}>
                             <input type="radio" name="supplyType" value={o.val} checked={data.supplyType === o.val}
-                              onChange={() => onChange({ supplyType: o.val as E05Data['supplyType'] })} className="accent-[#1a3a5c]" />
+                              onChange={() => onChange({ supplyType: o.val as E05Data['supplyType'] })} className="accent-[#355E3B]" />
                             {o.label}
                           </label>
                         ))}
@@ -2637,17 +2637,17 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
 
                     {data.supplyType === 'ht' && (
                       <div>
-                        <p className="text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider mb-2">HT Infrastructure Expected</p>
+                        <p className="text-xs font-semibold text-[#555C56] uppercase tracking-wider mb-2">HT Infrastructure Expected</p>
                         <div className="flex flex-col gap-2">
                           {['HT Connection', 'Dedicated Substation', 'Both', 'Not Sure'].map(o => (
                             <label key={o} className={`flex items-center gap-3 px-4 py-2.5 rounded border cursor-pointer text-sm transition-colors
-                              ${data.htInfrastructure === o ? 'border-[#1a3a5c] bg-[#ebf3ff] text-[#1a3a5c] font-medium' : 'border-[#d1d9e0] bg-white text-[#374151] hover:border-[#a0b4cc]'}`}>
-                              <input type="radio" name="htInfra" value={o} checked={data.htInfrastructure === o} onChange={() => onChange({ htInfrastructure: o })} className="accent-[#1a3a5c]" />
+                              ${data.htInfrastructure === o ? 'border-[#355E3B] bg-[#edf5ef] text-[#355E3B] font-medium' : 'border-[#d6dfd5] bg-white text-[#4A4A4A] hover:border-[#a0b4cc]'}`}>
+                              <input type="radio" name="htInfra" value={o} checked={data.htInfrastructure === o} onChange={() => onChange({ htInfrastructure: o })} className="accent-[#355E3B]" />
                               {o}
                             </label>
                           ))}
                         </div>
-                        <p className="mt-2 text-xs text-[#9aa5b4]">HT infrastructure information will be used in regulatory routing. No approval is generated here.</p>
+                        <p className="mt-2 text-xs text-[#8c9f8a]">HT infrastructure information will be used in regulatory routing. No approval is generated here.</p>
                       </div>
                     )}
 
@@ -2658,7 +2658,7 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
                 )}
 
                 {e04Data.power === 'not-sure' && (
-                  <p className="text-xs text-[#6b7a8d] bg-amber-50 border border-amber-200 rounded px-3 py-2">
+                  <p className="text-xs text-[#555C56] bg-amber-50 border border-amber-200 rounded px-3 py-2">
                     Power requirement: Needs Verification. Detailed power fields will be available once requirement is confirmed.
                   </p>
                 )}
@@ -2669,40 +2669,40 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
           {/* ══════ 6. WATER ══════ */}
           {sub === 6 && (
             <section aria-labelledby="wat-heading">
-              <h2 id="wat-heading" className="text-xs font-semibold text-[#1a3a5c] uppercase tracking-wider mb-4 pb-2 border-b border-[#e8edf2]">Water</h2>
+              <h2 id="wat-heading" className="text-xs font-semibold text-[#355E3B] uppercase tracking-wider mb-4 pb-2 border-b border-[#e3ebe1]">Water</h2>
               <div className="space-y-5">
                 {e04Data.water && e04Data.water !== 'not-sure' ? (
                   <ReusedAnswerBlock label="Water Required" value={{ yes: 'Yes', no: 'No' }[e04Data.water] ?? e04Data.water} source="Basic Requirements" />
                 ) : (
                   <div>
-                    <p className="text-sm font-semibold text-[#1a2533] mb-2">Is water required?</p>
+                    <p className="text-sm font-semibold text-[#2B2B2B] mb-2">Is water required?</p>
                     <YesNoNotSure name="waterEdit" value={e04Data.water} onChange={v => setE04Data({ water: v as E04Data['water'] })} />
                   </div>
                 )}
 
                 {e04Data.water === 'no' && (
-                  <p className="text-xs text-[#6b7a8d] bg-[#f8f9fb] border border-[#d1d9e0] rounded px-3 py-2">Water details are not applicable for this project.</p>
+                  <p className="text-xs text-[#555C56] bg-[#F9FAF2] border border-[#d6dfd5] rounded px-3 py-2">Water details are not applicable for this project.</p>
                 )}
 
                 {e04Data.water === 'yes' && (
                   <>
                     <div>
-                      <label className="block text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider mb-2">Daily Water Requirement</label>
+                      <label className="block text-xs font-semibold text-[#555C56] uppercase tracking-wider mb-2">Daily Water Requirement</label>
                       <div className="flex gap-2 items-center">
                         <input type="text" inputMode="numeric" value={data.dailyWaterRequirement}
                           onChange={e => onChange({ dailyWaterRequirement: e.target.value.replace(/[^0-9.]/g, '') })}
                           placeholder="e.g. 80" className={`${inputCls()} max-w-[160px]`} />
-                        <span className="text-sm text-[#6b7a8d]">KL/day</span>
+                        <span className="text-sm text-[#555C56]">KL/day</span>
                       </div>
                     </div>
 
                     <div>
-                      <p className="text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider mb-2">Primary Water Source</p>
+                      <p className="text-xs font-semibold text-[#555C56] uppercase tracking-wider mb-2">Primary Water Source</p>
                       <div className="flex flex-col gap-2">
                         {WATER_SOURCE_OPTIONS.map(o => (
                           <label key={o} className={`flex items-center gap-3 px-4 py-2.5 rounded border cursor-pointer text-sm transition-colors
-                            ${data.waterSource === o ? 'border-[#1a3a5c] bg-[#ebf3ff] text-[#1a3a5c] font-medium' : 'border-[#d1d9e0] bg-white text-[#374151] hover:border-[#a0b4cc]'}`}>
-                            <input type="radio" name="waterSource" value={o} checked={data.waterSource === o} onChange={() => onChange({ waterSource: o, waterSourceOther: '' })} className="accent-[#1a3a5c]" />
+                            ${data.waterSource === o ? 'border-[#355E3B] bg-[#edf5ef] text-[#355E3B] font-medium' : 'border-[#d6dfd5] bg-white text-[#4A4A4A] hover:border-[#a0b4cc]'}`}>
+                            <input type="radio" name="waterSource" value={o} checked={data.waterSource === o} onChange={() => onChange({ waterSource: o, waterSourceOther: '' })} className="accent-[#355E3B]" />
                             {o}
                           </label>
                         ))}
@@ -2716,7 +2716,7 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
                           placeholder="Source description (optional)" className={`${inputCls()} mt-2`} />
                       )}
                       {data.waterSource === 'Groundwater' && (
-                        <p className="mt-2 text-xs text-[#6b7a8d] bg-[#f8f9fb] border border-[#d1d9e0] rounded px-3 py-2">
+                        <p className="mt-2 text-xs text-[#555C56] bg-[#F9FAF2] border border-[#d6dfd5] rounded px-3 py-2">
                           Groundwater-related regulatory requirements will be evaluated later.
                         </p>
                       )}
@@ -2728,7 +2728,7 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
                 )}
 
                 {e04Data.water === 'not-sure' && (
-                  <p className="text-xs text-[#6b7a8d] bg-amber-50 border border-amber-200 rounded px-3 py-2">
+                  <p className="text-xs text-[#555C56] bg-amber-50 border border-amber-200 rounded px-3 py-2">
                     Water requirement: Needs Verification. Detailed water fields will be available once requirement is confirmed.
                   </p>
                 )}
@@ -2741,11 +2741,11 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
             const showWw = isMfg || e04Data.water === 'yes' || data.buildingRiskFlags.some(f => ['Industrial Machinery', 'Hazardous Material'].includes(f))
             return (
               <section aria-labelledby="ww-heading">
-                <h2 id="ww-heading" className="text-xs font-semibold text-[#1a3a5c] uppercase tracking-wider mb-4 pb-2 border-b border-[#e8edf2]">Wastewater</h2>
+                <h2 id="ww-heading" className="text-xs font-semibold text-[#355E3B] uppercase tracking-wider mb-4 pb-2 border-b border-[#e3ebe1]">Wastewater</h2>
                 {!showWw ? (
                   <div className="py-5 text-center">
-                    <p className="text-sm text-[#6b7a8d]">Wastewater</p>
-                    <p className="text-xs text-[#9aa5b4] mt-1 max-w-xs mx-auto">Not required based on selected business nature and activities.</p>
+                    <p className="text-sm text-[#555C56]">Wastewater</p>
+                    <p className="text-xs text-[#8c9f8a] mt-1 max-w-xs mx-auto">Not required based on selected business nature and activities.</p>
                   </div>
                 ) : (
                   <div className="space-y-5">
@@ -2754,7 +2754,7 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
                     </QuestionBlock>
 
                     {data.generatesWastewater === 'no' && (
-                      <p className="text-xs text-[#6b7a8d] bg-[#f8f9fb] border border-[#d1d9e0] rounded px-3 py-2">Wastewater details are not applicable.</p>
+                      <p className="text-xs text-[#555C56] bg-[#F9FAF2] border border-[#d6dfd5] rounded px-3 py-2">Wastewater details are not applicable.</p>
                     )}
 
                     {data.generatesWastewater === 'yes' && (
@@ -2763,8 +2763,8 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
                           <div className="flex flex-col gap-2">
                             {[{ val: 'domestic', label: 'Domestic Sewage' }, { val: 'industrial', label: 'Industrial Effluent' }, { val: 'both', label: 'Both' }].map(o => (
                               <label key={o.val} className={`flex items-center gap-3 px-4 py-2.5 rounded border cursor-pointer text-sm transition-colors
-                                ${data.wastewaterType === o.val ? 'border-[#1a3a5c] bg-[#ebf3ff] text-[#1a3a5c] font-medium' : 'border-[#d1d9e0] bg-white text-[#374151] hover:border-[#a0b4cc]'}`}>
-                                <input type="radio" name="wwType" value={o.val} checked={data.wastewaterType === o.val} onChange={() => onChange({ wastewaterType: o.val as E05Data['wastewaterType'] })} className="accent-[#1a3a5c]" />
+                                ${data.wastewaterType === o.val ? 'border-[#355E3B] bg-[#edf5ef] text-[#355E3B] font-medium' : 'border-[#d6dfd5] bg-white text-[#4A4A4A] hover:border-[#a0b4cc]'}`}>
+                                <input type="radio" name="wwType" value={o.val} checked={data.wastewaterType === o.val} onChange={() => onChange({ wastewaterType: o.val as E05Data['wastewaterType'] })} className="accent-[#355E3B]" />
                                 {o.label}
                               </label>
                             ))}
@@ -2772,23 +2772,23 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
                         </QuestionBlock>
 
                         {(data.wastewaterType === 'industrial' || data.wastewaterType === 'both') && (
-                          <div className="border border-[#c8d6e4] rounded p-4 bg-[#f8fbff] space-y-4">
-                            <p className="text-sm font-semibold text-[#1a3a5c]">Industrial Wastewater Details</p>
+                          <div className="border border-[#d6dfd5] rounded p-4 bg-[#f8fbff] space-y-4">
+                            <p className="text-sm font-semibold text-[#355E3B]">Industrial Wastewater Details</p>
                             <div className="flex gap-2 items-center">
                               <input type="text" inputMode="numeric" value={data.industrialEffluentQuantity}
                                 onChange={e => onChange({ industrialEffluentQuantity: e.target.value.replace(/[^0-9.]/g, '') })}
                                 placeholder="e.g. 45" className={`${inputCls()} max-w-[160px]`} />
-                              <span className="text-sm text-[#6b7a8d]">KL/day (estimated)</span>
+                              <span className="text-sm text-[#555C56]">KL/day (estimated)</span>
                             </div>
 
                             <div>
-                              <p className="text-xs font-medium text-[#374151] mb-2">Is treatment planned?</p>
+                              <p className="text-xs font-medium text-[#4A4A4A] mb-2">Is treatment planned?</p>
                               <div className="flex flex-wrap gap-2">
                                 {[{ val: 'yes', label: 'Yes' }, { val: 'no', label: 'No' }, { val: 'not-decided', label: 'Not Decided' }].map(o => (
                                   <label key={o.val} className={`flex items-center gap-2 px-4 py-2 rounded border cursor-pointer text-sm transition-colors
-                                    ${data.treatmentPlanned === o.val ? 'border-[#1a3a5c] bg-[#ebf3ff] text-[#1a3a5c] font-medium' : 'border-[#d1d9e0] bg-white text-[#374151] hover:border-[#a0b4cc]'}`}>
+                                    ${data.treatmentPlanned === o.val ? 'border-[#355E3B] bg-[#edf5ef] text-[#355E3B] font-medium' : 'border-[#d6dfd5] bg-white text-[#4A4A4A] hover:border-[#a0b4cc]'}`}>
                                     <input type="radio" name="treatmentPlanned" value={o.val} checked={data.treatmentPlanned === o.val}
-                                      onChange={() => onChange({ treatmentPlanned: o.val as E05Data['treatmentPlanned'] })} className="accent-[#1a3a5c]" />
+                                      onChange={() => onChange({ treatmentPlanned: o.val as E05Data['treatmentPlanned'] })} className="accent-[#355E3B]" />
                                     {o.label}
                                   </label>
                                 ))}
@@ -2798,12 +2798,12 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
                             {data.treatmentPlanned === 'yes' && (
                               <>
                                 <div>
-                                  <label className="block text-xs font-medium text-[#374151] mb-1">Treatment System</label>
+                                  <label className="block text-xs font-medium text-[#4A4A4A] mb-1">Treatment System</label>
                                   <div className="flex flex-wrap gap-2">
                                     {['ETP', 'STP', 'Combined Treatment', 'Other'].map(s => (
                                       <label key={s} className={`flex items-center gap-2 px-3 py-2 rounded border cursor-pointer text-sm transition-colors
-                                        ${data.treatmentSystem === s ? 'border-[#1a3a5c] bg-[#ebf3ff] text-[#1a3a5c] font-medium' : 'border-[#d1d9e0] bg-white text-[#374151] hover:border-[#a0b4cc]'}`}>
-                                        <input type="radio" name="treatSys" value={s} checked={data.treatmentSystem === s} onChange={() => onChange({ treatmentSystem: s })} className="accent-[#1a3a5c]" />
+                                        ${data.treatmentSystem === s ? 'border-[#355E3B] bg-[#edf5ef] text-[#355E3B] font-medium' : 'border-[#d6dfd5] bg-white text-[#4A4A4A] hover:border-[#a0b4cc]'}`}>
+                                        <input type="radio" name="treatSys" value={s} checked={data.treatmentSystem === s} onChange={() => onChange({ treatmentSystem: s })} className="accent-[#355E3B]" />
                                         {s}
                                       </label>
                                     ))}
@@ -2813,7 +2813,7 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
                                   <input type="text" inputMode="numeric" value={data.treatmentCapacity}
                                     onChange={e => onChange({ treatmentCapacity: e.target.value.replace(/[^0-9.]/g, '') })}
                                     placeholder="Treatment capacity" className={`${inputCls()} max-w-[160px]`} />
-                                  <span className="text-sm text-[#6b7a8d]">KL/day</span>
+                                  <span className="text-sm text-[#555C56]">KL/day</span>
                                 </div>
                                 {wwConsistency && (
                                   <ConsistencyWarning message={`Treatment capacity (${data.treatmentCapacity} KL/day) is lower than the stated industrial wastewater quantity (${data.industrialEffluentQuantity} KL/day). Please review.`} />
@@ -2837,25 +2837,25 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
           {/* ══════ 8. DRAINAGE ══════ */}
           {sub === 8 && (
             <section aria-labelledby="drn-heading">
-              <h2 id="drn-heading" className="text-xs font-semibold text-[#1a3a5c] uppercase tracking-wider mb-4 pb-2 border-b border-[#e8edf2]">Drainage</h2>
+              <h2 id="drn-heading" className="text-xs font-semibold text-[#355E3B] uppercase tracking-wider mb-4 pb-2 border-b border-[#e3ebe1]">Drainage</h2>
               <div className="space-y-5">
                 <QuestionBlock question="Will drainage infrastructure be required?">
                   <YesNoNotSure name="reqDrainage" value={data.requiresDrainage} onChange={v => onChange({ requiresDrainage: v as E05Data['requiresDrainage'] })} />
                 </QuestionBlock>
 
                 {data.requiresDrainage === 'no' && (
-                  <p className="text-xs text-[#6b7a8d] bg-[#f8f9fb] border border-[#d1d9e0] rounded px-3 py-2">Drainage details are not applicable.</p>
+                  <p className="text-xs text-[#555C56] bg-[#F9FAF2] border border-[#d6dfd5] rounded px-3 py-2">Drainage details are not applicable.</p>
                 )}
 
                 {data.requiresDrainage === 'yes' && (
                   <div className="space-y-4">
                     <div>
-                      <p className="text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider mb-2">Type of Drainage Required</p>
+                      <p className="text-xs font-semibold text-[#555C56] uppercase tracking-wider mb-2">Type of Drainage Required</p>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         {DRAINAGE_TYPE_OPTIONS.map(t => (
                           <label key={t} className={`flex items-center gap-3 px-4 py-2.5 rounded border cursor-pointer text-sm transition-colors
-                            ${data.drainageTypes.includes(t) ? 'border-[#1a3a5c] bg-[#ebf3ff] text-[#1a3a5c]' : 'border-[#d1d9e0] bg-white text-[#374151] hover:border-[#a0b4cc]'}`}>
-                            <input type="checkbox" checked={data.drainageTypes.includes(t)} onChange={() => toggleDrainage(t)} className="accent-[#1a3a5c] shrink-0" />
+                            ${data.drainageTypes.includes(t) ? 'border-[#355E3B] bg-[#edf5ef] text-[#355E3B]' : 'border-[#d6dfd5] bg-white text-[#4A4A4A] hover:border-[#a0b4cc]'}`}>
+                            <input type="checkbox" checked={data.drainageTypes.includes(t)} onChange={() => toggleDrainage(t)} className="accent-[#355E3B] shrink-0" />
                             {t}
                           </label>
                         ))}
@@ -2874,9 +2874,9 @@ export function E05ScalePage({ e03Data, e04Data, setE04Data, data, onChange, onB
                       <ConsistencyWarning message="Domestic sewage is indicated. Consider whether sewage drainage is also required." />
                     )}
 
-                    <div className="flex items-start gap-2 p-2.5 bg-[#f0f4f8] border border-[#c8d6e4] rounded">
-                      <span className="text-[#6b7a8d] shrink-0 mt-0.5"><Icon.Info /></span>
-                      <p className="text-xs text-[#4a5568]">
+                    <div className="flex items-start gap-2 p-2.5 bg-[#F9FAF2] border border-[#d6dfd5] rounded">
+                      <span className="text-[#555C56] shrink-0 mt-0.5"><Icon.Info /></span>
+                      <p className="text-xs text-[#4A4A4A]">
                         Drainage types are kept separate from wastewater generation. Selection here indicates required infrastructure, not treatment or discharge approvals.
                       </p>
                     </div>
@@ -2928,9 +2928,9 @@ const LOGISTICS_MODES = ['Road', 'Rail', 'Port', 'Air', 'Other']
 function RepeatableSection({ title, addLabel, onAdd, children }: { title?: string; addLabel: string; onAdd: () => void; children: React.ReactNode }) {
   return (
     <div>
-      {title && <p className="text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider mb-3">{title}</p>}
+      {title && <p className="text-xs font-semibold text-[#555C56] uppercase tracking-wider mb-3">{title}</p>}
       <div className="space-y-3">{children}</div>
-      <button onClick={onAdd} className="mt-3 flex items-center gap-1.5 text-sm text-[#1a56db] hover:text-[#1a3a5c] transition-colors font-medium">
+      <button onClick={onAdd} className="mt-3 flex items-center gap-1.5 text-sm text-[#6DAE7C] hover:text-[#355E3B] transition-colors font-medium">
         <span className="text-lg leading-none">+</span> {addLabel}
       </button>
     </div>
@@ -2939,10 +2939,10 @@ function RepeatableSection({ title, addLabel, onAdd, children }: { title?: strin
 
 function RepeatableRow({ index, onRemove, children }: { index: number; onRemove: () => void; children: React.ReactNode }) {
   return (
-    <div className="border border-[#d1d9e0] rounded p-3 bg-[#fafbfc] space-y-3">
+    <div className="border border-[#d6dfd5] rounded p-3 bg-[#fafbfc] space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-medium text-[#374151]">Record {index + 1}</p>
-        <button onClick={onRemove} className="text-xs text-[#9aa5b4] hover:text-red-500 transition-colors">Remove</button>
+        <p className="text-xs font-medium text-[#4A4A4A]">Record {index + 1}</p>
+        <button onClick={onRemove} className="text-xs text-[#8c9f8a] hover:text-red-500 transition-colors">Remove</button>
       </div>
       {children}
     </div>
@@ -2959,8 +2959,8 @@ function MultiCheckGroup({ options, values, onChange, cols = 2 }: { options: str
     <div className={`grid grid-cols-1 sm:grid-cols-${cols} gap-2`}>
       {options.map(o => (
         <label key={o} className={`flex items-center gap-3 px-3 py-2.5 rounded border cursor-pointer text-sm transition-colors
-          ${values.includes(o) ? 'border-[#1a3a5c] bg-[#ebf3ff] text-[#1a3a5c]' : 'border-[#d1d9e0] bg-white text-[#374151] hover:border-[#a0b4cc]'}`}>
-          <input type="checkbox" checked={values.includes(o)} onChange={() => toggle(o)} className="accent-[#1a3a5c] shrink-0" />
+          ${values.includes(o) ? 'border-[#355E3B] bg-[#edf5ef] text-[#355E3B]' : 'border-[#d6dfd5] bg-white text-[#4A4A4A] hover:border-[#a0b4cc]'}`}>
+          <input type="checkbox" checked={values.includes(o)} onChange={() => toggle(o)} className="accent-[#355E3B] shrink-0" />
           {o}
         </label>
       ))}
@@ -2971,8 +2971,8 @@ function MultiCheckGroup({ options, values, onChange, cols = 2 }: { options: str
 function SmallInput({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
   return (
     <div>
-      <label className="block text-xs font-medium text-[#374151] mb-1">{label}</label>
-      <input type="text" value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder ?? ''} className="w-full border border-[#c8d6e4] rounded px-3 py-2 text-sm text-[#1a2533] focus:outline-none focus:ring-2 focus:ring-[#1a56db] focus:border-transparent bg-white" />
+      <label className="block text-xs font-medium text-[#4A4A4A] mb-1">{label}</label>
+      <input type="text" value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder ?? ''} className="w-full border border-[#d6dfd5] rounded px-3 py-2 text-sm text-[#2B2B2B] focus:outline-none focus:ring-2 focus:ring-[#6DAE7C] focus:border-transparent bg-white" />
     </div>
   )
 }
@@ -2982,8 +2982,8 @@ function SimpleRadio({ name, options, value, onChange }: { name: string; options
     <div className="flex flex-wrap gap-2">
       {options.map(o => (
         <label key={o.val} className={`flex items-center gap-2 px-4 py-2.5 rounded border cursor-pointer text-sm transition-colors
-          ${value === o.val ? 'border-[#1a3a5c] bg-[#ebf3ff] text-[#1a3a5c] font-medium' : 'border-[#d1d9e0] bg-white text-[#374151] hover:border-[#a0b4cc]'}`}>
-          <input type="radio" name={name} value={o.val} checked={value === o.val} onChange={() => onChange(o.val)} className="accent-[#1a3a5c]" />
+          ${value === o.val ? 'border-[#355E3B] bg-[#edf5ef] text-[#355E3B] font-medium' : 'border-[#d6dfd5] bg-white text-[#4A4A4A] hover:border-[#a0b4cc]'}`}>
+          <input type="radio" name={name} value={o.val} checked={value === o.val} onChange={() => onChange(o.val)} className="accent-[#355E3B]" />
           {o.label}
         </label>
       ))}
@@ -3025,7 +3025,7 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
     const changeKeys = keyMap[key] ?? [key]
     return !changeKeys.some(k => expansionChangeAreas.includes(k))
   }
-  const inputCls = 'w-full border border-[#c8d6e4] rounded px-3 py-2 text-sm text-[#1a2533] focus:outline-none focus:ring-2 focus:ring-[#1a56db] focus:border-transparent bg-white'
+  const inputCls = 'w-full border border-[#d6dfd5] rounded px-3 py-2 text-sm text-[#2B2B2B] focus:outline-none focus:ring-2 focus:ring-[#6DAE7C] focus:border-transparent bg-white'
 
   function handleSaveExit() { setSaved(true); setTimeout(() => setSaved(false), 2000); onSaveExit() }
   function handleBack() { if (sub > 1) setSub(sub - 1); else onBack() }
@@ -3092,7 +3092,7 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
   function removeDoc(i: number) { onChange({ docRecords: data.docRecords.filter((_, idx) => idx !== i) }) }
 
   return (
-    <main id="main-content" className="flex-1 bg-[#f8f9fb]" tabIndex={-1}>
+    <main id="main-content" className="flex-1 bg-[#F9FAF2]" tabIndex={-1}>
       <div className="max-w-[860px] mx-auto px-4 sm:px-6 py-5">
         <div className="mb-4">
           <Breadcrumb items={[{ label: 'Home', href: '#' }, { label: 'My Businesses', href: '#' }, { label: 'Create Business / Project', href: '#' }, { label: 'Business Discovery' }]} />
@@ -3100,16 +3100,16 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
         <CreateStepIndicator current="e05" />
 
         {/* Context strip */}
-        <div className="bg-white border border-[#d1d9e0] rounded mb-4 px-4 py-3 grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-2">
-          <div><p className="text-[10px] font-semibold text-[#9aa5b4] uppercase tracking-wider">Project</p><p className="text-xs font-semibold text-[#1a2533] truncate">{e03Data.name || '—'}</p></div>
-          <div><p className="text-[10px] font-semibold text-[#9aa5b4] uppercase tracking-wider">Industry</p><p className="text-xs text-[#374151] truncate">{data.industry || '—'}</p></div>
-          <div><p className="text-[10px] font-semibold text-[#9aa5b4] uppercase tracking-wider">Stage</p><p className="text-xs text-[#374151]">{data.projectStage || '—'}</p></div>
-          <div><p className="text-[10px] font-semibold text-[#9aa5b4] uppercase tracking-wider">Nature</p><p className="text-xs text-[#374151]">{e04Data.businessNature || '—'}</p></div>
+        <div className="bg-white border border-[#d6dfd5] rounded mb-4 px-4 py-3 grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-2">
+          <div><p className="text-[10px] font-semibold text-[#8c9f8a] uppercase tracking-wider">Project</p><p className="text-xs font-semibold text-[#2B2B2B] truncate">{e03Data.name || '—'}</p></div>
+          <div><p className="text-[10px] font-semibold text-[#8c9f8a] uppercase tracking-wider">Industry</p><p className="text-xs text-[#4A4A4A] truncate">{data.industry || '—'}</p></div>
+          <div><p className="text-[10px] font-semibold text-[#8c9f8a] uppercase tracking-wider">Stage</p><p className="text-xs text-[#4A4A4A]">{data.projectStage || '—'}</p></div>
+          <div><p className="text-[10px] font-semibold text-[#8c9f8a] uppercase tracking-wider">Nature</p><p className="text-xs text-[#4A4A4A]">{e04Data.businessNature || '—'}</p></div>
         </div>
 
         <div className="mb-4">
-          <p className="text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider">Business Discovery · Final Section</p>
-          <h1 className="text-lg font-bold text-[#1a2533] mt-0.5">{ENV_SUBSECTIONS[sub - 1].label}</h1>
+          <p className="text-xs font-semibold text-[#555C56] uppercase tracking-wider">Business Discovery · Final Section</p>
+          <h1 className="text-lg font-bold text-[#2B2B2B] mt-0.5">{ENV_SUBSECTIONS[sub - 1].label}</h1>
         </div>
 
         <SubsectionNav subsections={ENV_SUBSECTIONS} current={sub} onGo={setSub} />
@@ -3121,12 +3121,12 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
           </div>
         )}
 
-        <div className="bg-white border border-[#d1d9e0] rounded shadow-sm p-6 space-y-6">
+        <div className="bg-white border border-[#d6dfd5] rounded shadow-sm p-6 space-y-6">
 
           {/* ══ 1. ENVIRONMENT ══ */}
           {sub === 1 && (
             <section aria-labelledby="env-h">
-              <h2 id="env-h" className="text-xs font-semibold text-[#1a3a5c] uppercase tracking-wider mb-4 pb-2 border-b border-[#e8edf2]">Environmental Characteristics</h2>
+              <h2 id="env-h" className="text-xs font-semibold text-[#355E3B] uppercase tracking-wider mb-4 pb-2 border-b border-[#e3ebe1]">Environmental Characteristics</h2>
               <div className="space-y-5">
                 <QuestionBlock question="Does the project involve potentially significant environmental activity?">
                   <SimpleRadio name="envTrigger" value={data.envTrigger}
@@ -3136,7 +3136,7 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
 
                 {(data.envTrigger === 'yes' || data.envTrigger === 'unknown') && (
                   <div>
-                    <p className="text-sm font-medium text-[#1a2533] mb-2">
+                    <p className="text-sm font-medium text-[#2B2B2B] mb-2">
                       {data.envTrigger === 'unknown'
                         ? 'Select any characteristics you know apply. EKATMA will use your Business Profile to evaluate regulatory applicability.'
                         : 'Which of the following characteristics apply?'}
@@ -3148,10 +3148,10 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
                         placeholder="Describe environmental characteristic" className={`${inputCls} mt-2`} />
                     )}
                     {derivedEnvChars.length > 0 && (
-                      <div className="mt-3 p-2.5 bg-[#f0f4f8] border border-[#c8d6e4] rounded">
-                        <p className="text-xs font-medium text-[#4a5568] mb-1">Already identified from earlier sections:</p>
+                      <div className="mt-3 p-2.5 bg-[#F9FAF2] border border-[#d6dfd5] rounded">
+                        <p className="text-xs font-medium text-[#4A4A4A] mb-1">Already identified from earlier sections:</p>
                         {derivedEnvChars.map(c => (
-                          <p key={c} className="text-xs text-[#1a56db]">✓ {c}</p>
+                          <p key={c} className="text-xs text-[#6DAE7C]">✓ {c}</p>
                         ))}
                       </div>
                     )}
@@ -3159,14 +3159,14 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
                 )}
 
                 {data.envTrigger === 'no' && (
-                  <p className="text-xs text-[#6b7a8d] bg-[#f8f9fb] border border-[#d1d9e0] rounded px-3 py-2">
+                  <p className="text-xs text-[#555C56] bg-[#F9FAF2] border border-[#d6dfd5] rounded px-3 py-2">
                     No significant environmental activity indicated. Your Business DNA will still be evaluated by the regulatory rule engine.
                   </p>
                 )}
 
-                <div className="p-3 bg-[#f0f4f8] border border-[#c8d6e4] rounded flex items-start gap-2">
-                  <span className="text-[#6b7a8d] shrink-0 mt-0.5"><Icon.Info /></span>
-                  <p className="text-xs text-[#4a5568]">Environmental Clearance and MPCB Consent to Establish are separate regulatory requirements. They will be evaluated separately by the regulatory engine — no determination is made here.</p>
+                <div className="p-3 bg-[#F9FAF2] border border-[#d6dfd5] rounded flex items-start gap-2">
+                  <span className="text-[#555C56] shrink-0 mt-0.5"><Icon.Info /></span>
+                  <p className="text-xs text-[#4A4A4A]">Environmental Clearance and MPCB Consent to Establish are separate regulatory requirements. They will be evaluated separately by the regulatory engine — no determination is made here.</p>
                 </div>
               </div>
             </section>
@@ -3175,20 +3175,20 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
           {/* ══ 2. AIR & EMISSIONS ══ */}
           {sub === 2 && (
             <section aria-labelledby="air-h">
-              <h2 id="air-h" className="text-xs font-semibold text-[#1a3a5c] uppercase tracking-wider mb-4 pb-2 border-b border-[#e8edf2]">Air &amp; Emissions</h2>
+              <h2 id="air-h" className="text-xs font-semibold text-[#355E3B] uppercase tracking-wider mb-4 pb-2 border-b border-[#e3ebe1]">Air &amp; Emissions</h2>
               <div className="space-y-5">
                 <QuestionBlock question="Will your process generate air emissions?">
                   <YesNoNotSure name="airEmissions" value={data.airEmissions} onChange={v => onChange({ airEmissions: v as E05Data['airEmissions'] })} />
                 </QuestionBlock>
 
                 {data.airEmissions === 'no' && (
-                  <p className="text-xs text-[#6b7a8d] bg-[#f8f9fb] border border-[#d1d9e0] rounded px-3 py-2">Air emission details are not applicable.</p>
+                  <p className="text-xs text-[#555C56] bg-[#F9FAF2] border border-[#d6dfd5] rounded px-3 py-2">Air emission details are not applicable.</p>
                 )}
 
                 {data.airEmissions === 'yes' && (
                   <>
                     <div>
-                      <p className="text-sm font-medium text-[#1a2533] mb-2">Sources of air emissions</p>
+                      <p className="text-sm font-medium text-[#2B2B2B] mb-2">Sources of air emissions</p>
                       <MultiCheckGroup options={AIR_SOURCES} values={data.airEmissionSources}
                         onChange={v => onChange({ airEmissionSources: v })} />
                       {data.airEmissionSources.includes('Other') && (
@@ -3208,14 +3208,14 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
           {/* ══ 3. HAZARDOUS MATERIALS ══ */}
           {sub === 3 && (
             <section aria-labelledby="hazmat-h">
-              <h2 id="hazmat-h" className="text-xs font-semibold text-[#1a3a5c] uppercase tracking-wider mb-4 pb-2 border-b border-[#e8edf2]">Hazardous Materials</h2>
+              <h2 id="hazmat-h" className="text-xs font-semibold text-[#355E3B] uppercase tracking-wider mb-4 pb-2 border-b border-[#e3ebe1]">Hazardous Materials</h2>
               <div className="space-y-5">
                 <QuestionBlock question="Will the project manufacture, use, store or handle hazardous materials?">
                   <YesNoNotSure name="hazMatYN" value={data.hazMatYN} onChange={v => onChange({ hazMatYN: v as E05Data['hazMatYN'] })} />
                 </QuestionBlock>
 
                 {data.hazMatYN === 'no' && (
-                  <p className="text-xs text-[#6b7a8d] bg-[#f8f9fb] border border-[#d1d9e0] rounded px-3 py-2">Hazardous material inventory is not applicable.</p>
+                  <p className="text-xs text-[#555C56] bg-[#F9FAF2] border border-[#d6dfd5] rounded px-3 py-2">Hazardous material inventory is not applicable.</p>
                 )}
 
                 {data.hazMatYN === 'yes' && (
@@ -3230,7 +3230,7 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
                           <div className="sm:col-span-2"><SmallInput label="Storage Method" value={m.storageMethod} onChange={v => updateHazMat(i, { storageMethod: v })} placeholder="e.g. Dedicated chemical store, drums" /></div>
                         </div>
                         <div>
-                          <p className="text-xs font-medium text-[#374151] mb-2">Hazard Type(s)</p>
+                          <p className="text-xs font-medium text-[#4A4A4A] mb-2">Hazard Type(s)</p>
                           <MultiCheckGroup options={HAZARD_TYPES} values={m.hazardTypes} onChange={v => updateHazMat(i, { hazardTypes: v })} />
                           {m.hazardTypes.includes('Other') && (
                             <input type="text" value={m.hazardOther} onChange={e => updateHazMat(i, { hazardOther: e.target.value })}
@@ -3240,7 +3240,7 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
                       </RepeatableRow>
                     ))}
                     {data.hazMaterials.length === 0 && (
-                      <p className="text-xs text-[#9aa5b4] italic">No materials added yet.</p>
+                      <p className="text-xs text-[#8c9f8a] italic">No materials added yet.</p>
                     )}
                   </RepeatableSection>
                 )}
@@ -3251,15 +3251,15 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
           {/* ══ 4. WASTE ══ */}
           {sub === 4 && (
             <section aria-labelledby="waste-h">
-              <h2 id="waste-h" className="text-xs font-semibold text-[#1a3a5c] uppercase tracking-wider mb-4 pb-2 border-b border-[#e8edf2]">Waste</h2>
+              <h2 id="waste-h" className="text-xs font-semibold text-[#355E3B] uppercase tracking-wider mb-4 pb-2 border-b border-[#e3ebe1]">Waste</h2>
               <div className="space-y-7">
                 {/* Hazardous Waste */}
                 <div>
-                  <p className="text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider mb-3">Hazardous Waste</p>
+                  <p className="text-xs font-semibold text-[#555C56] uppercase tracking-wider mb-3">Hazardous Waste</p>
                   <QuestionBlock question="Will the project generate hazardous waste?">
                     <YesNoNotSure name="hazWasteYN" value={data.hazWasteYN} onChange={v => onChange({ hazWasteYN: v as E05Data['hazWasteYN'] })} />
                   </QuestionBlock>
-                  {data.hazWasteYN === 'no' && <p className="mt-2 text-xs text-[#6b7a8d] bg-[#f8f9fb] border border-[#d1d9e0] rounded px-3 py-2">Not applicable.</p>}
+                  {data.hazWasteYN === 'no' && <p className="mt-2 text-xs text-[#555C56] bg-[#F9FAF2] border border-[#d6dfd5] rounded px-3 py-2">Not applicable.</p>}
                   {data.hazWasteYN === 'yes' && (
                     <div className="mt-3">
                       <RepeatableSection addLabel="Add Waste Type" onAdd={addHazWaste}>
@@ -3274,23 +3274,23 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
                             </div>
                           </RepeatableRow>
                         ))}
-                        {data.hazWastes.length === 0 && <p className="text-xs text-[#9aa5b4] italic">No waste records yet.</p>}
+                        {data.hazWastes.length === 0 && <p className="text-xs text-[#8c9f8a] italic">No waste records yet.</p>}
                       </RepeatableSection>
                     </div>
                   )}
                 </div>
 
-                <div className="border-t border-[#e8edf2]" />
+                <div className="border-t border-[#e3ebe1]" />
 
                 {/* General Solid Waste */}
                 <div>
-                  <p className="text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider mb-3">General Solid Waste</p>
+                  <p className="text-xs font-semibold text-[#555C56] uppercase tracking-wider mb-3">General Solid Waste</p>
                   <QuestionBlock question="Will the project generate significant solid waste?">
                     <SimpleRadio name="solidWasteYN" value={data.solidWasteYN}
                       options={[{ val: 'yes', label: 'Yes' }, { val: 'no', label: 'No' }]}
                       onChange={v => onChange({ solidWasteYN: v as E05Data['solidWasteYN'] })} />
                   </QuestionBlock>
-                  {data.solidWasteYN === 'no' && <p className="mt-2 text-xs text-[#6b7a8d] bg-[#f8f9fb] border border-[#d1d9e0] rounded px-3 py-2">Not applicable.</p>}
+                  {data.solidWasteYN === 'no' && <p className="mt-2 text-xs text-[#555C56] bg-[#F9FAF2] border border-[#d6dfd5] rounded px-3 py-2">Not applicable.</p>}
                   {data.solidWasteYN === 'yes' && (
                     <div className="mt-3">
                       <RepeatableSection addLabel="Add Waste Entry" onAdd={addSolidWaste}>
@@ -3305,7 +3305,7 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
                             </div>
                           </RepeatableRow>
                         ))}
-                        {data.solidWastes.length === 0 && <p className="text-xs text-[#9aa5b4] italic">No waste records yet.</p>}
+                        {data.solidWastes.length === 0 && <p className="text-xs text-[#8c9f8a] italic">No waste records yet.</p>}
                       </RepeatableSection>
                     </div>
                   )}
@@ -3317,18 +3317,18 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
           {/* ══ 5. EQUIPMENT ══ */}
           {sub === 5 && (
             <section aria-labelledby="equip-h">
-              <h2 id="equip-h" className="text-xs font-semibold text-[#1a3a5c] uppercase tracking-wider mb-4 pb-2 border-b border-[#e8edf2]">Equipment</h2>
+              <h2 id="equip-h" className="text-xs font-semibold text-[#355E3B] uppercase tracking-wider mb-4 pb-2 border-b border-[#e3ebe1]">Equipment</h2>
               <div className="space-y-7">
 
                 {/* Boiler */}
                 <div>
-                  <p className="text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider mb-3">Boiler</p>
+                  <p className="text-xs font-semibold text-[#555C56] uppercase tracking-wider mb-3">Boiler</p>
                   <QuestionBlock question="Will the project use a boiler?">
                     <SimpleRadio name="boilerYN" value={data.boilerYN}
                       options={[{ val: 'yes', label: 'Yes' }, { val: 'no', label: 'No' }]}
                       onChange={v => onChange({ boilerYN: v as E05Data['boilerYN'] })} />
                   </QuestionBlock>
-                  {data.boilerYN === 'no' && <p className="mt-2 text-xs text-[#6b7a8d] bg-[#f8f9fb] border border-[#d1d9e0] rounded px-3 py-2">Boiler details not applicable.</p>}
+                  {data.boilerYN === 'no' && <p className="mt-2 text-xs text-[#555C56] bg-[#F9FAF2] border border-[#d6dfd5] rounded px-3 py-2">Boiler details not applicable.</p>}
                   {data.boilerYN === 'yes' && (
                     <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
                       <SmallInput label="Capacity" value={data.boilerCapacity} onChange={v => onChange({ boilerCapacity: v })} placeholder="e.g. 5 TPH" />
@@ -3342,15 +3342,15 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
                   )}
                 </div>
 
-                <div className="border-t border-[#e8edf2]" />
+                <div className="border-t border-[#e3ebe1]" />
 
                 {/* Pressure Vessel */}
                 <div>
-                  <p className="text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider mb-3">Pressure Vessels / Pressurised Equipment</p>
+                  <p className="text-xs font-semibold text-[#555C56] uppercase tracking-wider mb-3">Pressure Vessels / Pressurised Equipment</p>
                   <QuestionBlock question="Will the project use pressure vessels or other pressurised equipment?">
                     <YesNoNotSure name="pressureYN" value={data.pressureVesselYN} onChange={v => onChange({ pressureVesselYN: v as E05Data['pressureVesselYN'] })} />
                   </QuestionBlock>
-                  {data.pressureVesselYN === 'no' && <p className="mt-2 text-xs text-[#6b7a8d] bg-[#f8f9fb] border border-[#d1d9e0] rounded px-3 py-2">Not applicable.</p>}
+                  {data.pressureVesselYN === 'no' && <p className="mt-2 text-xs text-[#555C56] bg-[#F9FAF2] border border-[#d6dfd5] rounded px-3 py-2">Not applicable.</p>}
                   {data.pressureVesselYN === 'yes' && (
                     <div className="mt-3">
                       <RepeatableSection addLabel="Add Equipment" onAdd={addPressure}>
@@ -3363,21 +3363,21 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
                             </div>
                           </RepeatableRow>
                         ))}
-                        {data.pressureEquipment.length === 0 && <p className="text-xs text-[#9aa5b4] italic">No equipment records yet.</p>}
+                        {data.pressureEquipment.length === 0 && <p className="text-xs text-[#8c9f8a] italic">No equipment records yet.</p>}
                       </RepeatableSection>
                     </div>
                   )}
                 </div>
 
-                <div className="border-t border-[#e8edf2]" />
+                <div className="border-t border-[#e3ebe1]" />
 
                 {/* Dangerous Machinery */}
                 <div>
-                  <p className="text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider mb-3">Dangerous / High-Risk Machinery</p>
+                  <p className="text-xs font-semibold text-[#555C56] uppercase tracking-wider mb-3">Dangerous / High-Risk Machinery</p>
                   <QuestionBlock question="Will the project use dangerous or high-risk machinery?">
                     <YesNoNotSure name="dangerMachYN" value={data.dangerousMachineryYN} onChange={v => onChange({ dangerousMachineryYN: v as E05Data['dangerousMachineryYN'] })} />
                   </QuestionBlock>
-                  {data.dangerousMachineryYN === 'no' && <p className="mt-2 text-xs text-[#6b7a8d] bg-[#f8f9fb] border border-[#d1d9e0] rounded px-3 py-2">Not applicable.</p>}
+                  {data.dangerousMachineryYN === 'no' && <p className="mt-2 text-xs text-[#555C56] bg-[#F9FAF2] border border-[#d6dfd5] rounded px-3 py-2">Not applicable.</p>}
                   {data.dangerousMachineryYN === 'yes' && (
                     <div className="mt-3">
                       <RepeatableSection addLabel="Add Machinery" onAdd={addMachinery}>
@@ -3390,7 +3390,7 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
                             </div>
                           </RepeatableRow>
                         ))}
-                        {data.dangerousMachineryItems.length === 0 && <p className="text-xs text-[#9aa5b4] italic">No machinery records yet.</p>}
+                        {data.dangerousMachineryItems.length === 0 && <p className="text-xs text-[#8c9f8a] italic">No machinery records yet.</p>}
                       </RepeatableSection>
                     </div>
                   )}
@@ -3402,22 +3402,22 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
           {/* ══ 6. FACTORY & FIRE ══ */}
           {sub === 6 && (
             <section aria-labelledby="ff-h">
-              <h2 id="ff-h" className="text-xs font-semibold text-[#1a3a5c] uppercase tracking-wider mb-4 pb-2 border-b border-[#e8edf2]">Factory &amp; Fire</h2>
+              <h2 id="ff-h" className="text-xs font-semibold text-[#355E3B] uppercase tracking-wider mb-4 pb-2 border-b border-[#e3ebe1]">Factory &amp; Fire</h2>
               <div className="space-y-7">
                 {/* Factory */}
                 <div>
-                  <p className="text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider mb-3">Factory / Industrial Establishment</p>
+                  <p className="text-xs font-semibold text-[#555C56] uppercase tracking-wider mb-3">Factory / Industrial Establishment</p>
                   {!isMfg ? (
-                    <p className="text-xs text-[#6b7a8d] bg-[#f8f9fb] border border-[#d1d9e0] rounded px-3 py-2">Factory branch not applicable for non-manufacturing activities.</p>
+                    <p className="text-xs text-[#555C56] bg-[#F9FAF2] border border-[#d6dfd5] rounded px-3 py-2">Factory branch not applicable for non-manufacturing activities.</p>
                   ) : (
                     <>
                       <QuestionBlock question="Will the premises function as a factory / industrial establishment?">
                         <YesNoNotSure name="factoryYN" value={data.factoryYN} onChange={v => onChange({ factoryYN: v as E05Data['factoryYN'] })} />
                       </QuestionBlock>
                       {data.factoryYN === 'yes' && (
-                        <div className="mt-3 p-3 bg-[#f0f4f8] border border-[#c8d6e4] rounded">
-                          <p className="text-xs font-medium text-[#4a5568] mb-1">Factory context inputs (reused from Business DNA):</p>
-                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-1 text-xs text-[#374151]">
+                        <div className="mt-3 p-3 bg-[#F9FAF2] border border-[#d6dfd5] rounded">
+                          <p className="text-xs font-medium text-[#4A4A4A] mb-1">Factory context inputs (reused from Business DNA):</p>
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-1 text-xs text-[#4A4A4A]">
                             {data.workforceTotal && <span>Workforce: {data.workforceTotal}</span>}
                             {data.shifts && <span>Shifts: {data.shifts}</span>}
                             {data.operatingHoursPerDay && <span>Hrs/Day: {data.operatingHoursPerDay}</span>}
@@ -3425,7 +3425,7 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
                             {data.pressureVesselYN && <span>Pressure Vessels: {data.pressureVesselYN}</span>}
                             {data.hazMatYN && <span>Hazardous Mat: {data.hazMatYN}</span>}
                           </div>
-                          <p className="mt-2 text-xs text-[#9aa5b4]">Factory / DISH applicability will be evaluated by the regulatory rule engine.</p>
+                          <p className="mt-2 text-xs text-[#8c9f8a]">Factory / DISH applicability will be evaluated by the regulatory rule engine.</p>
                         </div>
                       )}
                       {data.factoryYN === 'not-sure' && (
@@ -3435,20 +3435,20 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
                   )}
                 </div>
 
-                <div className="border-t border-[#e8edf2]" />
+                <div className="border-t border-[#e3ebe1]" />
 
                 {/* Fire */}
                 <div>
-                  <p className="text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider mb-3">Fire &amp; Occupancy Characteristics</p>
-                  <p className="text-sm text-[#374151] mb-3">Does the project / building involve any of the following?</p>
+                  <p className="text-xs font-semibold text-[#555C56] uppercase tracking-wider mb-3">Fire &amp; Occupancy Characteristics</p>
+                  <p className="text-sm text-[#4A4A4A] mb-3">Does the project / building involve any of the following?</p>
                   {effectiveFireFlags.filter(f => f !== 'None').length > 0 && (
-                    <div className="mb-3 p-2.5 bg-[#f0f4f8] border border-[#c8d6e4] rounded">
-                      <p className="text-xs font-medium text-[#4a5568] mb-1">Already identified from Building section:</p>
-                      {effectiveFireFlags.filter(f => f !== 'None').map(f => <p key={f} className="text-xs text-[#1a56db]">✓ {f}</p>)}
+                    <div className="mb-3 p-2.5 bg-[#F9FAF2] border border-[#d6dfd5] rounded">
+                      <p className="text-xs font-medium text-[#4A4A4A] mb-1">Already identified from Building section:</p>
+                      {effectiveFireFlags.filter(f => f !== 'None').map(f => <p key={f} className="text-xs text-[#6DAE7C]">✓ {f}</p>)}
                     </div>
                   )}
                   <MultiCheckGroup options={FIRE_FLAGS_LIST} values={data.fireFlags} onChange={v => onChange({ fireFlags: v })} />
-                  <p className="mt-2 text-xs text-[#9aa5b4]">Selecting "None" clears other selections. These factual characteristics inform later regulatory routing. No Fire NOC applicability is determined here.</p>
+                  <p className="mt-2 text-xs text-[#8c9f8a]">Selecting "None" clears other selections. These factual characteristics inform later regulatory routing. No Fire NOC applicability is determined here.</p>
                 </div>
               </div>
             </section>
@@ -3457,11 +3457,11 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
           {/* ══ 7. STORAGE & WAREHOUSE ══ */}
           {sub === 7 && (
             <section aria-labelledby="store-h">
-              <h2 id="store-h" className="text-xs font-semibold text-[#1a3a5c] uppercase tracking-wider mb-4 pb-2 border-b border-[#e8edf2]">Storage &amp; Warehouse</h2>
+              <h2 id="store-h" className="text-xs font-semibold text-[#355E3B] uppercase tracking-wider mb-4 pb-2 border-b border-[#e3ebe1]">Storage &amp; Warehouse</h2>
               <div className="space-y-7">
                 <div>
-                  <p className="text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider mb-3">Storage</p>
-                  <p className="text-sm text-[#374151] mb-3">What will the project store?</p>
+                  <p className="text-xs font-semibold text-[#555C56] uppercase tracking-wider mb-3">Storage</p>
+                  <p className="text-sm text-[#4A4A4A] mb-3">What will the project store?</p>
                   <MultiCheckGroup options={STORAGE_CATEGORIES} values={data.storageCategories}
                     onChange={v => { onChange({ storageCategories: v }); if (v.includes('None')) onChange({ storageItems: [] }) }} />
                   {hazMatInStorage && (
@@ -3469,13 +3469,13 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
                   )}
                   {data.storageCategories.length > 0 && !data.storageCategories.includes('None') && (
                     <div className="mt-4">
-                      <p className="text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider mb-3">Storage Details</p>
+                      <p className="text-xs font-semibold text-[#555C56] uppercase tracking-wider mb-3">Storage Details</p>
                       <RepeatableSection addLabel="Add Storage Item" onAdd={() => addStorageItem('')}>
                         {data.storageItems.map((s, i) => (
                           <RepeatableRow key={i} index={i} onRemove={() => removeStorageItem(i)}>
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                               <div>
-                                <label className="block text-xs font-medium text-[#374151] mb-1">Category</label>
+                                <label className="block text-xs font-medium text-[#4A4A4A] mb-1">Category</label>
                                 <select value={s.category} onChange={e => updateStorageItem(i, { category: e.target.value })} className={inputCls}>
                                   <option value="">Select…</option>
                                   {STORAGE_CATEGORIES.filter(c => c !== 'None').map(c => <option key={c} value={c}>{c}</option>)}
@@ -3490,29 +3490,29 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
                             </div>
                           </RepeatableRow>
                         ))}
-                        {data.storageItems.length === 0 && <p className="text-xs text-[#9aa5b4] italic">No storage records added.</p>}
+                        {data.storageItems.length === 0 && <p className="text-xs text-[#8c9f8a] italic">No storage records added.</p>}
                       </RepeatableSection>
                     </div>
                   )}
                 </div>
 
-                <div className="border-t border-[#e8edf2]" />
+                <div className="border-t border-[#e3ebe1]" />
 
                 {/* Warehouse */}
                 <div>
-                  <p className="text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider mb-3">Warehouse</p>
+                  <p className="text-xs font-semibold text-[#555C56] uppercase tracking-wider mb-3">Warehouse</p>
                   <QuestionBlock question="Will you operate a warehouse?">
                     <SimpleRadio name="warehouseYN" value={data.warehouseYN}
                       options={[{ val: 'yes', label: 'Yes' }, { val: 'no', label: 'No' }]}
                       onChange={v => onChange({ warehouseYN: v as E05Data['warehouseYN'] })} />
                   </QuestionBlock>
-                  {data.warehouseYN === 'no' && <p className="mt-2 text-xs text-[#6b7a8d] bg-[#f8f9fb] border border-[#d1d9e0] rounded px-3 py-2">Warehouse details not applicable.</p>}
+                  {data.warehouseYN === 'no' && <p className="mt-2 text-xs text-[#555C56] bg-[#F9FAF2] border border-[#d6dfd5] rounded px-3 py-2">Warehouse details not applicable.</p>}
                   {data.warehouseYN === 'yes' && (
                     <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <SmallInput label="Warehouse Area (sq.m)" value={data.warehouseArea} onChange={v => onChange({ warehouseArea: v.replace(/[^0-9.]/g, '') })} placeholder="e.g. 1000" />
                       <SmallInput label="Material Stored" value={data.warehouseMaterial} onChange={v => onChange({ warehouseMaterial: v })} placeholder="e.g. Finished goods" />
                       <div>
-                        <p className="text-xs font-medium text-[#374151] mb-1">Hazardous / Flammable Material?</p>
+                        <p className="text-xs font-medium text-[#4A4A4A] mb-1">Hazardous / Flammable Material?</p>
                         <SimpleRadio name="warehouseHaz" value={data.warehouseHazardous}
                           options={[{ val: 'yes', label: 'Yes' }, { val: 'no', label: 'No' }]}
                           onChange={v => onChange({ warehouseHazardous: v as E05Data['warehouseHazardous'] })} />
@@ -3530,7 +3530,7 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
           {/* ══ 8. TRADE & LOGISTICS ══ */}
           {sub === 8 && (
             <section aria-labelledby="trade-h">
-              <h2 id="trade-h" className="text-xs font-semibold text-[#1a3a5c] uppercase tracking-wider mb-4 pb-2 border-b border-[#e8edf2]">Trade &amp; Logistics</h2>
+              <h2 id="trade-h" className="text-xs font-semibold text-[#355E3B] uppercase tracking-wider mb-4 pb-2 border-b border-[#e3ebe1]">Trade &amp; Logistics</h2>
               <div className="space-y-6">
                 <QuestionBlock question="Will the business import or export?">
                   <SimpleRadio name="importExport" value={data.importExport}
@@ -3540,36 +3540,36 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
 
                 {(data.importExport === 'import' || data.importExport === 'both') && (
                   <div>
-                    <p className="text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider mb-2">Major Imported Inputs</p>
+                    <p className="text-xs font-semibold text-[#555C56] uppercase tracking-wider mb-2">Major Imported Inputs</p>
                     <RepeatableSection addLabel="Add Import Input" onAdd={addImport}>
                       {data.importedInputs.map((imp, i) => (
-                        <div key={i} className="border border-[#d1d9e0] rounded p-3 bg-[#fafbfc] grid grid-cols-2 gap-3">
+                        <div key={i} className="border border-[#d6dfd5] rounded p-3 bg-[#fafbfc] grid grid-cols-2 gap-3">
                           <div className="flex justify-between col-span-2 items-center">
-                            <p className="text-xs font-medium text-[#374151]">Input {i + 1}</p>
-                            <button onClick={() => onChange({ importedInputs: data.importedInputs.filter((_, idx) => idx !== i) })} className="text-xs text-[#9aa5b4] hover:text-red-500">Remove</button>
+                            <p className="text-xs font-medium text-[#4A4A4A]">Input {i + 1}</p>
+                            <button onClick={() => onChange({ importedInputs: data.importedInputs.filter((_, idx) => idx !== i) })} className="text-xs text-[#8c9f8a] hover:text-red-500">Remove</button>
                           </div>
                           <SmallInput label="Material / Input" value={imp.material} onChange={v => onChange({ importedInputs: data.importedInputs.map((r, idx) => idx === i ? { ...r, material: v } : r) })} />
                           <SmallInput label="Description (optional)" value={imp.description} onChange={v => onChange({ importedInputs: data.importedInputs.map((r, idx) => idx === i ? { ...r, description: v } : r) })} />
                         </div>
                       ))}
-                      {data.importedInputs.length === 0 && <p className="text-xs text-[#9aa5b4] italic">No inputs added yet.</p>}
+                      {data.importedInputs.length === 0 && <p className="text-xs text-[#8c9f8a] italic">No inputs added yet.</p>}
                     </RepeatableSection>
                   </div>
                 )}
 
                 {(data.importExport === 'export' || data.importExport === 'both') && (
                   <div>
-                    <p className="text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider mb-2">Major Exported Products</p>
-                    {data.products.length > 0 && <p className="text-xs text-[#9aa5b4] mb-2">Existing products: {data.products.map(p => p.name).join(', ')}</p>}
+                    <p className="text-xs font-semibold text-[#555C56] uppercase tracking-wider mb-2">Major Exported Products</p>
+                    {data.products.length > 0 && <p className="text-xs text-[#8c9f8a] mb-2">Existing products: {data.products.map(p => p.name).join(', ')}</p>}
                     <RepeatableSection addLabel="Add Exported Product" onAdd={addExport}>
                       {data.exportedProducts.map((exp, i) => (
-                        <div key={i} className="border border-[#d1d9e0] rounded p-3 bg-[#fafbfc] grid grid-cols-2 gap-3">
+                        <div key={i} className="border border-[#d6dfd5] rounded p-3 bg-[#fafbfc] grid grid-cols-2 gap-3">
                           <div className="flex justify-between col-span-2 items-center">
-                            <p className="text-xs font-medium text-[#374151]">Product {i + 1}</p>
-                            <button onClick={() => onChange({ exportedProducts: data.exportedProducts.filter((_, idx) => idx !== i) })} className="text-xs text-[#9aa5b4] hover:text-red-500">Remove</button>
+                            <p className="text-xs font-medium text-[#4A4A4A]">Product {i + 1}</p>
+                            <button onClick={() => onChange({ exportedProducts: data.exportedProducts.filter((_, idx) => idx !== i) })} className="text-xs text-[#8c9f8a] hover:text-red-500">Remove</button>
                           </div>
                           <div>
-                            <label className="block text-xs font-medium text-[#374151] mb-1">Product</label>
+                            <label className="block text-xs font-medium text-[#4A4A4A] mb-1">Product</label>
                             <input type="text" value={exp.product} onChange={e => onChange({ exportedProducts: data.exportedProducts.map((r, idx) => idx === i ? { ...r, product: e.target.value } : r) })}
                               list="prod-export-list" className={inputCls} />
                             <datalist id="prod-export-list">{data.products.map(p => <option key={p.id} value={p.name} />)}</datalist>
@@ -3577,16 +3577,16 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
                           <SmallInput label="Description (optional)" value={exp.description} onChange={v => onChange({ exportedProducts: data.exportedProducts.map((r, idx) => idx === i ? { ...r, description: v } : r) })} />
                         </div>
                       ))}
-                      {data.exportedProducts.length === 0 && <p className="text-xs text-[#9aa5b4] italic">No products added yet.</p>}
+                      {data.exportedProducts.length === 0 && <p className="text-xs text-[#8c9f8a] italic">No products added yet.</p>}
                     </RepeatableSection>
                   </div>
                 )}
 
                 {data.importExport === 'neither' && (
-                  <p className="text-xs text-[#6b7a8d] bg-[#f8f9fb] border border-[#d1d9e0] rounded px-3 py-2">Import / Export details not applicable.</p>
+                  <p className="text-xs text-[#555C56] bg-[#F9FAF2] border border-[#d6dfd5] rounded px-3 py-2">Import / Export details not applicable.</p>
                 )}
 
-                <div className="border-t border-[#e8edf2]" />
+                <div className="border-t border-[#e3ebe1]" />
 
                 <QuestionBlock question="Will the project involve significant logistics movement?">
                   <SimpleRadio name="logisticsYN" value={data.logisticsYN}
@@ -3594,11 +3594,11 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
                     onChange={v => onChange({ logisticsYN: v as E05Data['logisticsYN'] })} />
                 </QuestionBlock>
 
-                {data.logisticsYN === 'no' && <p className="text-xs text-[#6b7a8d] bg-[#f8f9fb] border border-[#d1d9e0] rounded px-3 py-2">Logistics details not applicable.</p>}
+                {data.logisticsYN === 'no' && <p className="text-xs text-[#555C56] bg-[#F9FAF2] border border-[#d6dfd5] rounded px-3 py-2">Logistics details not applicable.</p>}
                 {data.logisticsYN === 'yes' && (
                   <div className="space-y-4">
                     <div>
-                      <p className="text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider mb-2">Transport Modes</p>
+                      <p className="text-xs font-semibold text-[#555C56] uppercase tracking-wider mb-2">Transport Modes</p>
                       <MultiCheckGroup options={LOGISTICS_MODES} values={data.logisticsModes} onChange={v => onChange({ logisticsModes: v })} />
                       {data.logisticsModes.includes('Other') && (
                         <input type="text" value={data.logisticsModeOther} onChange={e => onChange({ logisticsModeOther: e.target.value })}
@@ -3606,12 +3606,12 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
                       )}
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-[#374151] mb-1">Approximate Daily Vehicle Movement <span className="font-normal text-[#9aa5b4]">(optional)</span></label>
+                      <label className="block text-xs font-medium text-[#4A4A4A] mb-1">Approximate Daily Vehicle Movement <span className="font-normal text-[#8c9f8a]">(optional)</span></label>
                       <div className="flex gap-2 items-center">
                         <input type="text" inputMode="numeric" value={data.vehicleMovementPerDay}
                           onChange={e => onChange({ vehicleMovementPerDay: e.target.value.replace(/\D/g, '') })}
                           placeholder="e.g. 20" className={`${inputCls} max-w-[140px]`} />
-                        <span className="text-sm text-[#6b7a8d]">vehicles/day</span>
+                        <span className="text-sm text-[#555C56]">vehicles/day</span>
                       </div>
                     </div>
                   </div>
@@ -3623,11 +3623,11 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
           {/* ══ 9. EXISTING REGULATORY ══ */}
           {sub === 9 && (
             <section aria-labelledby="reg-h">
-              <h2 id="reg-h" className="text-xs font-semibold text-[#1a3a5c] uppercase tracking-wider mb-4 pb-2 border-b border-[#e8edf2]">Existing Regulatory Context</h2>
+              <h2 id="reg-h" className="text-xs font-semibold text-[#355E3B] uppercase tracking-wider mb-4 pb-2 border-b border-[#e3ebe1]">Existing Regulatory Context</h2>
               <div className="space-y-7">
                 {/* Existing Approvals */}
                 <div>
-                  <p className="text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider mb-3">Existing Approvals</p>
+                  <p className="text-xs font-semibold text-[#555C56] uppercase tracking-wider mb-3">Existing Approvals</p>
                   {e04Data.existingApprovals && e04Data.existingApprovals !== 'not-sure' ? (
                     <ReusedAnswerBlock label="Existing Approvals / Licences / NOCs"
                       value={{ yes: 'Yes', no: 'No', 'not-sure': 'Not Sure' }[e04Data.existingApprovals] ?? e04Data.existingApprovals}
@@ -3640,7 +3640,7 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
                   )}
 
                   {e04Data.existingApprovals === 'no' && (
-                    <p className="mt-2 text-xs text-[#6b7a8d] bg-[#f8f9fb] border border-[#d1d9e0] rounded px-3 py-2">No existing approval records to capture.</p>
+                    <p className="mt-2 text-xs text-[#555C56] bg-[#F9FAF2] border border-[#d6dfd5] rounded px-3 py-2">No existing approval records to capture.</p>
                   )}
                   {e04Data.existingApprovals === 'not-sure' && (
                     <p className="mt-2 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded px-3 py-2">Needs Verification — you can add records if any approvals are identified.</p>
@@ -3655,7 +3655,7 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
                               <SmallInput label="Approval / Licence / NOC" value={a.approvalType} onChange={v => updateApproval(i, { approvalType: v })} placeholder="e.g. Consent to Establish" />
                               <SmallInput label="Licence / Certificate Number" value={a.licenceNumber} onChange={v => updateApproval(i, { licenceNumber: v })} />
                               <div>
-                                <label className="block text-xs font-medium text-[#374151] mb-1">Status</label>
+                                <label className="block text-xs font-medium text-[#4A4A4A] mb-1">Status</label>
                                 <select value={a.status} onChange={e => updateApproval(i, { status: e.target.value })} className={inputCls}>
                                   <option value="">Select…</option>
                                   {APPROVAL_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
@@ -3664,29 +3664,29 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
                               <SmallInput label="Issue Date" value={a.issueDate} onChange={v => updateApproval(i, { issueDate: v })} placeholder="DD/MM/YYYY" />
                               <SmallInput label="Expiry Date (or N/A)" value={a.expiryDate} onChange={v => updateApproval(i, { expiryDate: v })} placeholder="DD/MM/YYYY or N/A" />
                             </div>
-                            <p className="text-xs text-[#9aa5b4]">Certificate upload is optional — manage documents in the Document Centre after project creation.</p>
+                            <p className="text-xs text-[#8c9f8a]">Certificate upload is optional — manage documents in the Document Centre after project creation.</p>
                           </RepeatableRow>
                         ))}
-                        {data.existingApprovalRows.length === 0 && <p className="text-xs text-[#9aa5b4] italic">No approval records added yet.</p>}
+                        {data.existingApprovalRows.length === 0 && <p className="text-xs text-[#8c9f8a] italic">No approval records added yet.</p>}
                       </RepeatableSection>
                     </div>
                   )}
                 </div>
 
-                <div className="border-t border-[#e8edf2]" />
+                <div className="border-t border-[#e3ebe1]" />
 
                 {/* Existing Applications */}
                 <div>
-                  <p className="text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider mb-3">Existing Applications In Progress</p>
+                  <p className="text-xs font-semibold text-[#555C56] uppercase tracking-wider mb-3">Existing Applications In Progress</p>
                   {!isExpansionOrExisting && e03Data.projectType === 'new' ? (
-                    <p className="text-xs text-[#6b7a8d] bg-[#f8f9fb] border border-[#d1d9e0] rounded px-3 py-2">Typically not applicable for a completely new business with no previous applications. Add records below if any apply.</p>
+                    <p className="text-xs text-[#555C56] bg-[#F9FAF2] border border-[#d6dfd5] rounded px-3 py-2">Typically not applicable for a completely new business with no previous applications. Add records below if any apply.</p>
                   ) : null}
                   <QuestionBlock question="Do you currently have any regulatory applications in progress?">
                     <SimpleRadio name="existingAppYN" value={data.existingApplicationYN}
                       options={[{ val: 'yes', label: 'Yes' }, { val: 'no', label: 'No' }]}
                       onChange={v => onChange({ existingApplicationYN: v as E05Data['existingApplicationYN'] })} />
                   </QuestionBlock>
-                  {data.existingApplicationYN === 'no' && <p className="mt-2 text-xs text-[#6b7a8d] bg-[#f8f9fb] border border-[#d1d9e0] rounded px-3 py-2">No in-progress application records to capture.</p>}
+                  {data.existingApplicationYN === 'no' && <p className="mt-2 text-xs text-[#555C56] bg-[#F9FAF2] border border-[#d6dfd5] rounded px-3 py-2">No in-progress application records to capture.</p>}
                   {data.existingApplicationYN === 'yes' && (
                     <div className="mt-3">
                       <RepeatableSection addLabel="Add Existing Application" onAdd={addApplication} title="Application Records">
@@ -3701,7 +3701,7 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
                             </div>
                           </RepeatableRow>
                         ))}
-                        {data.existingApplicationRows.length === 0 && <p className="text-xs text-[#9aa5b4] italic">No application records added yet.</p>}
+                        {data.existingApplicationRows.length === 0 && <p className="text-xs text-[#8c9f8a] italic">No application records added yet.</p>}
                       </RepeatableSection>
                     </div>
                   )}
@@ -3713,27 +3713,27 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
           {/* ══ 10. ATTRIBUTES & DOCUMENTS ══ */}
           {sub === 10 && (
             <section aria-labelledby="attr-h">
-              <h2 id="attr-h" className="text-xs font-semibold text-[#1a3a5c] uppercase tracking-wider mb-4 pb-2 border-b border-[#e8edf2]">Incentive Attributes &amp; Documents</h2>
+              <h2 id="attr-h" className="text-xs font-semibold text-[#355E3B] uppercase tracking-wider mb-4 pb-2 border-b border-[#e3ebe1]">Incentive Attributes &amp; Documents</h2>
               <div className="space-y-7">
                 {/* Incentive Attributes */}
                 <div>
-                  <p className="text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider mb-3">Incentive Attributes</p>
-                  <p className="text-xs text-[#6b7a8d] mb-3">Select any characteristics that apply beyond what's already captured. The incentive engine will use your full Business Profile — sector, location, classification, investment, and employment are already known.</p>
+                  <p className="text-xs font-semibold text-[#555C56] uppercase tracking-wider mb-3">Incentive Attributes</p>
+                  <p className="text-xs text-[#555C56] mb-3">Select any characteristics that apply beyond what's already captured. The incentive engine will use your full Business Profile — sector, location, classification, investment, and employment are already known.</p>
 
                   {/* Show reused classification */}
                   {data.classification === 'msme' && (
-                    <div className="mb-3 p-2.5 bg-[#f0f4f8] border border-[#c8d6e4] rounded">
-                      <p className="text-xs text-[#4a5568]">✓ MSME — reused from classification</p>
+                    <div className="mb-3 p-2.5 bg-[#F9FAF2] border border-[#d6dfd5] rounded">
+                      <p className="text-xs text-[#4A4A4A]">✓ MSME — reused from classification</p>
                     </div>
                   )}
                   {(data.importExport === 'export' || data.importExport === 'both') && (
-                    <div className="mb-3 p-2.5 bg-[#f0f4f8] border border-[#c8d6e4] rounded">
-                      <p className="text-xs text-[#4a5568]">✓ Export Oriented — reused from Trade section</p>
+                    <div className="mb-3 p-2.5 bg-[#F9FAF2] border border-[#d6dfd5] rounded">
+                      <p className="text-xs text-[#4A4A4A]">✓ Export Oriented — reused from Trade section</p>
                     </div>
                   )}
                   {data.activities.some(a => a.toLowerCase().includes('r&d') || a.toLowerCase().includes('research')) && (
-                    <div className="mb-3 p-2.5 bg-[#f0f4f8] border border-[#c8d6e4] rounded">
-                      <p className="text-xs text-[#4a5568]">✓ R&D — reused from Activities section</p>
+                    <div className="mb-3 p-2.5 bg-[#F9FAF2] border border-[#d6dfd5] rounded">
+                      <p className="text-xs text-[#4A4A4A]">✓ R&D — reused from Activities section</p>
                     </div>
                   )}
 
@@ -3743,14 +3743,14 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
                     if (o === 'R&D Intensive' && data.activities.some(a => a.toLowerCase().includes('r&d'))) return false
                     return true
                   })} values={data.incentiveAttributes} onChange={v => onChange({ incentiveAttributes: v })} />
-                  <p className="mt-2 text-xs text-[#9aa5b4]">Incentive scheme eligibility will be evaluated later — no conclusions are generated here.</p>
+                  <p className="mt-2 text-xs text-[#8c9f8a]">Incentive scheme eligibility will be evaluated later — no conclusions are generated here.</p>
                 </div>
 
-                <div className="border-t border-[#e8edf2]" />
+                <div className="border-t border-[#e3ebe1]" />
 
                 {/* Documents */}
                 <div>
-                  <p className="text-xs font-semibold text-[#6b7a8d] uppercase tracking-wider mb-3">Project Documents</p>
+                  <p className="text-xs font-semibold text-[#555C56] uppercase tracking-wider mb-3">Project Documents</p>
                   <QuestionBlock question="Do you already have project documents?">
                     <SimpleRadio name="docAvailability" value={data.docAvailability}
                       options={[{ val: 'yes', label: 'Yes' }, { val: 'some', label: 'Some' }, { val: 'no', label: 'No' }]}
@@ -3758,18 +3758,18 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
                   </QuestionBlock>
 
                   {data.docAvailability === 'no' && (
-                    <p className="mt-2 text-xs text-[#6b7a8d] bg-[#f8f9fb] border border-[#d1d9e0] rounded px-3 py-2">You can add documents later from the Document Centre. No documents are required to complete Business Discovery.</p>
+                    <p className="mt-2 text-xs text-[#555C56] bg-[#F9FAF2] border border-[#d6dfd5] rounded px-3 py-2">You can add documents later from the Document Centre. No documents are required to complete Business Discovery.</p>
                   )}
 
                   {(data.docAvailability === 'yes' || data.docAvailability === 'some') && (
                     <div className="mt-3">
-                      <p className="text-xs text-[#6b7a8d] mb-3">This is optional. You can manage and reuse project documents later from the Document Centre.</p>
+                      <p className="text-xs text-[#555C56] mb-3">This is optional. You can manage and reuse project documents later from the Document Centre.</p>
                       <RepeatableSection addLabel="Add Available Document" onAdd={addDoc} title="Available Documents">
                         {data.docRecords.map((d, i) => (
                           <RepeatableRow key={i} index={i} onRemove={() => removeDoc(i)}>
                             <div className="grid grid-cols-2 gap-3">
                               <div>
-                                <label className="block text-xs font-medium text-[#374151] mb-1">Category</label>
+                                <label className="block text-xs font-medium text-[#4A4A4A] mb-1">Category</label>
                                 <select value={d.category} onChange={e => updateDoc(i, { category: e.target.value })} className={inputCls}>
                                   <option value="">Select…</option>
                                   {DOC_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
@@ -3777,10 +3777,10 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
                               </div>
                               <SmallInput label="Document Name" value={d.documentName} onChange={v => updateDoc(i, { documentName: v })} placeholder="e.g. Project Report" />
                             </div>
-                            <p className="text-xs text-[#9aa5b4]">Upload is optional at this stage — use the Document Centre later.</p>
+                            <p className="text-xs text-[#8c9f8a]">Upload is optional at this stage — use the Document Centre later.</p>
                           </RepeatableRow>
                         ))}
-                        {data.docRecords.length === 0 && <p className="text-xs text-[#9aa5b4] italic">No documents added yet.</p>}
+                        {data.docRecords.length === 0 && <p className="text-xs text-[#8c9f8a] italic">No documents added yet.</p>}
                       </RepeatableSection>
                     </div>
                   )}
@@ -3788,8 +3788,8 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
 
                 {/* E05 Completion message */}
                 <div className="p-4 bg-[#edf4ff] border border-[#b8d0f5] rounded">
-                  <p className="text-sm font-semibold text-[#1a3a5c] mb-1">Business Discovery Complete</p>
-                  <p className="text-xs text-[#4a5568]">Review your information before EKATMA generates your personalised regulatory journey. You can update any section before confirming your Business Profile.</p>
+                  <p className="text-sm font-semibold text-[#355E3B] mb-1">Business Discovery Complete</p>
+                  <p className="text-xs text-[#4A4A4A]">Review your information before EKATMA generates your personalised regulatory journey. You can update any section before confirming your Business Profile.</p>
                 </div>
               </div>
             </section>
@@ -3798,20 +3798,20 @@ export function E05EnvSafetyPage({ e03Data, e04Data, setE04Data, data, onChange,
 
         {/* Action bar */}
         <div className="mt-4 flex items-center gap-3">
-          <button onClick={handleBack} className="border border-[#d1d9e0] text-[#374151] text-sm font-medium px-5 py-2.5 rounded hover:bg-[#f0f4f8] transition-colors">
+          <button onClick={handleBack} className="border border-[#d6dfd5] text-[#4A4A4A] text-sm font-medium px-5 py-2.5 rounded hover:bg-[#F9FAF2] transition-colors">
             Back
           </button>
-          <button onClick={handleSaveExit} className="border border-[#d1d9e0] text-[#374151] text-sm font-medium px-5 py-2.5 rounded hover:bg-[#f0f4f8] transition-colors">
+          <button onClick={handleSaveExit} className="border border-[#d6dfd5] text-[#4A4A4A] text-sm font-medium px-5 py-2.5 rounded hover:bg-[#F9FAF2] transition-colors">
             Save &amp; Exit
           </button>
           {saved && <span className="text-xs text-[#22c55e] font-medium">Draft Saved</span>}
           <div className="flex-1" />
           {sub < 10 ? (
-            <button onClick={handleContinue} className="bg-[#1a3a5c] text-white text-sm font-semibold px-6 py-2.5 rounded hover:bg-[#0f2540] transition-colors">
+            <button onClick={handleContinue} className="bg-[#355E3B] text-white text-sm font-semibold px-6 py-2.5 rounded hover:bg-[#27472c] transition-colors">
               Continue
             </button>
           ) : (
-            <button onClick={onReviewProfile} className="bg-[#1a56db] text-white text-sm font-semibold px-6 py-2.5 rounded hover:bg-[#1a3a5c] transition-colors flex items-center gap-2">
+            <button onClick={onReviewProfile} className="bg-[#6DAE7C] text-white text-sm font-semibold px-6 py-2.5 rounded hover:bg-[#355E3B] transition-colors flex items-center gap-2">
               Review Business Profile →
             </button>
           )}
@@ -3827,9 +3827,9 @@ type DnaGroup = 'self-declared' | 'needs-input' | 'not-applicable' | 'needs-veri
 function GroupBadge({ group }: { group: DnaGroup }) {
   const cfg: Record<DnaGroup, { label: string; cls: string }> = {
     'self-declared':      { label: 'What I told EKATMA',  cls: 'bg-[#f0fdf4] text-[#166534] border-[#bbf7d0]' },
-    'needs-input':        { label: 'Needs your input',   cls: 'bg-[#fffbeb] text-[#92400e] border-[#fde68a]' },
-    'not-applicable':     { label: 'Does not apply',     cls: 'bg-[#f8f9fb] text-[#6b7a8d] border-[#d1d9e0]' },
-    'needs-verification': { label: 'Still needs verification', cls: 'bg-[#ebf3ff] text-[#1a3a5c] border-[#b8d0f5]' },
+    'needs-input':        { label: 'Needs your input',   cls: 'bg-[#fdf8e6] text-[#7a5807] border-[#fae69e]' },
+    'not-applicable':     { label: 'Does not apply',     cls: 'bg-[#F9FAF2] text-[#555C56] border-[#d6dfd5]' },
+    'needs-verification': { label: 'Still needs verification', cls: 'bg-[#edf5ef] text-[#355E3B] border-[#b8d0f5]' },
     'verified':           { label: 'EKATMA verified',    cls: 'bg-[#f0fdf4] text-[#166534] border-[#86efac]' },
   }
   const { label, cls } = cfg[group]
@@ -3851,31 +3851,31 @@ function ReviewFieldRow({ label, value, isNA = false, note, source }: { label: s
     <details className="group/field">
       <summary className="grid cursor-pointer list-none gap-2 py-3 md:grid-cols-[minmax(130px,0.9fr)_minmax(180px,1.3fr)_minmax(150px,1fr)_auto_18px] md:items-start">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-wider text-[#8B97A6] md:hidden">Field</p>
-          <p className="text-xs font-semibold text-[#374151]">{label}</p>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-[#555C56] md:hidden">Field</p>
+          <p className="text-xs font-semibold text-[#4A4A4A]">{label}</p>
         </div>
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-wider text-[#8B97A6] md:hidden">Current value</p>
-          <p className={`text-sm font-medium ${isNA ? 'italic text-[#8B97A6]' : 'text-[#20242A]'}`}>{isNA ? 'Not applicable' : value}</p>
-          {note ? <p className="mt-0.5 text-[11px] text-[#8B97A6]">{note}</p> : null}
+          <p className="text-[10px] font-bold uppercase tracking-wider text-[#555C56] md:hidden">Current value</p>
+          <p className={`text-sm font-medium ${isNA ? 'italic text-[#555C56]' : 'text-[#2B2B2B]'}`}>{isNA ? 'Not applicable' : value}</p>
+          {note ? <p className="mt-0.5 text-[11px] text-[#555C56]">{note}</p> : null}
         </div>
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-wider text-[#8B97A6] md:hidden">Source</p>
-          <p className="text-xs text-[#5C6470]">Source: {fieldSource}</p>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-[#555C56] md:hidden">Source</p>
+          <p className="text-xs text-[#555C56]">Source: {fieldSource}</p>
         </div>
         <div>
-          <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-[#8B97A6] md:hidden">Verification state</p>
+          <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-[#555C56] md:hidden">Verification state</p>
           <GroupBadge group={group} />
         </div>
         <span className="mt-1 text-[#7A8696] transition-transform group-open/field:rotate-180" aria-hidden="true"><Icon.ChevronDown /></span>
       </summary>
-      <div className="mb-2 rounded border border-[#E1E7ED] bg-[#F8FAFC] px-3 py-3">
+      <div className="mb-2 rounded border border-[#E1E7ED] bg-[#F9FAF2] px-3 py-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-[#8B97A6]">Provenance</p>
-            <p className="mt-1 text-xs text-[#5C6470]">Recorded from {fieldSource} · <GroupBadge group={group} /></p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-[#555C56]">Provenance</p>
+            <p className="mt-1 text-xs text-[#555C56]">Recorded from {fieldSource} · <GroupBadge group={group} /></p>
           </div>
-          {editAction ? <button type="button" onClick={editAction} className="rounded border border-[#B8C6D4] bg-white px-3 py-2 text-xs font-semibold text-[#17365D] hover:bg-[#F0F5FA]">Edit this field</button> : null}
+          {editAction ? <button type="button" onClick={editAction} className="rounded border border-[#B8C6D4] bg-white px-3 py-2 text-xs font-semibold text-[#355E3B] hover:bg-[#edf5ef]">Edit this field</button> : null}
         </div>
       </div>
     </details>
@@ -3889,27 +3889,27 @@ function ReviewSection({ title, group, children, onEdit, defaultOpen = false }: 
   const pageEdit = useContext(ReviewEditContext)
   const editAction = onEdit ?? pageEdit
   return (
-    <div className="border border-[#e8edf2] rounded overflow-hidden">
+    <div className="border border-[#e3ebe1] rounded overflow-hidden">
       <button
         type="button"
-        className="w-full flex items-center gap-3 px-4 py-3 bg-[#f8f9fb] hover:bg-[#f0f4f8] transition-colors text-left"
+        className="w-full flex items-center gap-3 px-4 py-3 bg-[#F9FAF2] hover:bg-[#F9FAF2] transition-colors text-left"
         onClick={() => setOpen(o => !o)}
         aria-expanded={open}
       >
-        <span className={`text-sm font-semibold text-[#1a2533] flex-1`}>{title}</span>
+        <span className={`text-sm font-semibold text-[#2B2B2B] flex-1`}>{title}</span>
         <GroupBadge group={group} />
-        <svg className={`w-4 h-4 text-[#9aa5b4] shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6"/></svg>
+        <svg className={`w-4 h-4 text-[#8c9f8a] shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6"/></svg>
       </button>
       {open && (
         <ReviewGroupContext.Provider value={group}>
-          <div className="px-4 py-3 bg-white divide-y divide-[#f0f4f8]">
+          <div className="px-4 py-3 bg-white divide-y divide-[#F9FAF2]">
             <div className="hidden gap-2 pb-2 md:grid md:grid-cols-[minmax(130px,0.9fr)_minmax(180px,1.3fr)_minmax(150px,1fr)_auto_18px]">
-              {['Field', 'Current value', 'Source', 'Verification state', ''].map((label, index) => <p key={`${label}-${index}`} className="text-[10px] font-bold uppercase tracking-wider text-[#8B97A6]">{label}</p>)}
+              {['Field', 'Current value', 'Source', 'Verification state', ''].map((label, index) => <p key={`${label}-${index}`} className="text-[10px] font-bold uppercase tracking-wider text-[#555C56]">{label}</p>)}
             </div>
             {children}
             {editAction && (
             <div className="pt-3 mt-1">
-              <button type="button" onClick={editAction} className="inline-flex items-center rounded border border-[#B8C6D4] bg-white px-3 py-2 text-xs font-semibold text-[#17365D] hover:bg-[#F0F5FA]">Edit this information</button>
+              <button type="button" onClick={editAction} className="inline-flex items-center rounded border border-[#B8C6D4] bg-white px-3 py-2 text-xs font-semibold text-[#355E3B] hover:bg-[#edf5ef]">Edit this information</button>
             </div>
             )}
           </div>
@@ -4067,9 +4067,9 @@ export function BusinessProfileReviewPage({ e03Data, e04Data, e05Data, expansion
 
   const groupConfig: Record<Group, { label: string; color: string; icon: React.ReactNode; bg: string }> = {
     'self-declared':      { label: 'Self-declared',      color: 'text-[#22c55e]', bg: 'bg-white', icon: <Icon.CheckCircle /> },
-    'needs-input':        { label: 'Needs your input',   color: 'text-[#f59e0b]', bg: 'bg-[#fffbeb]', icon: <Icon.AlertCircle /> },
-    'not-applicable':     { label: 'Not applicable',      color: 'text-[#9aa5b4]', bg: 'bg-[#f8f9fb]', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg> },
-    'needs-verification': { label: 'Needs verification', color: 'text-[#1a56db]', bg: 'bg-[#ebf3ff]', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> },
+    'needs-input':        { label: 'Needs your input',   color: 'text-[#D4A017]', bg: 'bg-[#fdf8e6]', icon: <Icon.AlertCircle /> },
+    'not-applicable':     { label: 'Not applicable',      color: 'text-[#8c9f8a]', bg: 'bg-[#F9FAF2]', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg> },
+    'needs-verification': { label: 'Needs verification', color: 'text-[#6DAE7C]', bg: 'bg-[#edf5ef]', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> },
   }
 
   const needsInput = sections.filter(s => s.group === 'needs-input')
@@ -4086,23 +4086,23 @@ export function BusinessProfileReviewPage({ e03Data, e04Data, e05Data, expansion
   // ── Generating state ────────────────────────────────────────────────────────
   if (generating) {
     return (
-      <main id="main-content" className="flex-1 bg-[#f8f9fb]" tabIndex={-1}>
+      <main id="main-content" className="flex-1 bg-[#F9FAF2]" tabIndex={-1}>
         <div className="max-w-[800px] mx-auto px-6 py-12">
-          <div className="bg-white border border-[#d1d9e0] rounded shadow-sm p-10 text-center">
-            <div className="w-12 h-12 rounded-full bg-[#edf4ff] border border-[#b8d0f5] flex items-center justify-center text-[#1a56db] mx-auto mb-5">
+          <div className="bg-white border border-[#d6dfd5] rounded shadow-sm p-10 text-center">
+            <div className="w-12 h-12 rounded-full bg-[#edf4ff] border border-[#b8d0f5] flex items-center justify-center text-[#6DAE7C] mx-auto mb-5">
               <Icon.Layers />
             </div>
-            <h2 className="text-base font-bold text-[#1a2533] mb-1">Confirming Business Profile</h2>
-            <p className="text-sm text-[#6b7a8d] mb-8">EKATMA is evaluating your Business DNA and generating your personalised regulatory journey.</p>
+            <h2 className="text-base font-bold text-[#2B2B2B] mb-1">Confirming Business Profile</h2>
+            <p className="text-sm text-[#555C56] mb-8">EKATMA is evaluating your Business DNA and generating your personalised regulatory journey.</p>
             <div className="space-y-3 max-w-xs mx-auto text-left">
               {GENERATION_STEPS.map((step, i) => (
                 <div key={step} className="flex items-center gap-3">
                   {generationStep > i
                     ? <span className="text-[#22c55e] shrink-0"><Icon.CheckCircle /></span>
                     : generationStep === i
-                    ? <span className="shrink-0 w-4 h-4 border-2 border-[#1a56db] border-t-transparent rounded-full animate-spin" />
-                    : <span className="w-4 h-4 border border-[#d1d9e0] rounded-full shrink-0" />}
-                  <span className={`text-sm ${generationStep > i ? 'text-[#374151]' : generationStep === i ? 'text-[#1a56db] font-medium' : 'text-[#9aa5b4]'}`}>{step}</span>
+                    ? <span className="shrink-0 w-4 h-4 border-2 border-[#6DAE7C] border-t-transparent rounded-full animate-spin" />
+                    : <span className="w-4 h-4 border border-[#d6dfd5] rounded-full shrink-0" />}
+                  <span className={`text-sm ${generationStep > i ? 'text-[#4A4A4A]' : generationStep === i ? 'text-[#6DAE7C] font-medium' : 'text-[#8c9f8a]'}`}>{step}</span>
                 </div>
               ))}
             </div>
@@ -4130,11 +4130,11 @@ export function BusinessProfileReviewPage({ e03Data, e04Data, e05Data, expansion
               { label: 'Factory (Factories Act)', st: 'Applicable', cls: 'text-[#166534] bg-[#f0fdf4] border-[#bbf7d0]' },
               { label: 'MPCB Consent to Establish', st: 'Applicable', cls: 'text-[#166534] bg-[#f0fdf4] border-[#bbf7d0]' },
               { label: 'Boiler Registration', st: 'Applicable', cls: 'text-[#166534] bg-[#f0fdf4] border-[#bbf7d0]' },
-              { label: 'Environmental Clearance', st: 'Needs Verification', cls: 'text-[#1a3a5c] bg-[#ebf3ff] border-[#b8d0f5]' },
-              { label: 'SEZ Status', st: 'Not Applicable', cls: 'text-[#6b7a8d] bg-[#f8f9fb] border-[#d1d9e0]' },
+              { label: 'Environmental Clearance', st: 'Needs Verification', cls: 'text-[#355E3B] bg-[#edf5ef] border-[#b8d0f5]' },
+              { label: 'SEZ Status', st: 'Not Applicable', cls: 'text-[#555C56] bg-[#F9FAF2] border-[#d6dfd5]' },
             ].map(r => (
               <div key={r.label} className="flex items-center justify-between gap-2">
-                <span className="text-xs text-[#374151]">{r.label}</span>
+                <span className="text-xs text-[#4A4A4A]">{r.label}</span>
                 <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded border ${r.cls}`}>{r.st}</span>
               </div>
             ))}
@@ -4154,7 +4154,7 @@ export function BusinessProfileReviewPage({ e03Data, e04Data, e05Data, expansion
     ]
 
     return (
-      <main id="main-content" className="flex-1 bg-[#f8f9fb]" tabIndex={-1}>
+      <main id="main-content" className="flex-1 bg-[#F9FAF2]" tabIndex={-1}>
         <div className="max-w-[800px] mx-auto px-6 py-5">
           <div className="mb-4">
             <Breadcrumb items={[{ label: 'Home', href: '#' }, { label: 'My Businesses', href: '#' }, { label: 'Business Profile Review' }]} />
@@ -4163,18 +4163,18 @@ export function BusinessProfileReviewPage({ e03Data, e04Data, e05Data, expansion
             <span className="text-[#22c55e] shrink-0 mt-0.5"><Icon.CheckCircle /></span>
             <div>
               <p className="text-sm font-bold text-[#166534]">Business Profile Confirmed</p>
-              <p className="text-xs text-[#374151] mt-0.5">Business DNA Version 1 · Confirmed in this browser tab · Self-declared by entrepreneur</p>
+              <p className="text-xs text-[#4A4A4A] mt-0.5">Business DNA Version 1 · Confirmed in this browser tab · Self-declared by entrepreneur</p>
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {outputs.map(o => (
-              <div key={o.num} className="bg-white border border-[#d1d9e0] rounded shadow-sm p-5">
-                <p className="text-[10px] font-bold text-[#9aa5b4] uppercase tracking-wider mb-1">{o.num}</p>
-                <h3 className="text-sm font-bold text-[#1a2533] mb-1">{o.title}</h3>
+              <div key={o.num} className="bg-white border border-[#d6dfd5] rounded shadow-sm p-5">
+                <p className="text-[10px] font-bold text-[#8c9f8a] uppercase tracking-wider mb-1">{o.num}</p>
+                <h3 className="text-sm font-bold text-[#2B2B2B] mb-1">{o.title}</h3>
                 <p className={`text-xs font-semibold mb-2 flex items-center gap-1 ${o.statusCls}`}>
                   <Icon.CheckCircle /> {o.status}
                 </p>
-                <p className="text-xs text-[#6b7a8d] mb-3">{o.desc}</p>
+                <p className="text-xs text-[#555C56] mb-3">{o.desc}</p>
                 {o.sub}
                 {o.cta && (
                   <div className="mt-3">
@@ -4182,18 +4182,18 @@ export function BusinessProfileReviewPage({ e03Data, e04Data, e05Data, expansion
                       type="button"
                       onClick={o.onCta}
                       disabled={!o.onCta}
-                      className={`text-xs font-semibold px-3 py-1.5 rounded border transition-colors ${o.onCta ? 'border-[#1a56db] text-[#1a56db] hover:bg-[#ebf3ff]' : 'border-[#d1d9e0] text-[#9aa5b4] cursor-not-allowed'}`}
+                      className={`text-xs font-semibold px-3 py-1.5 rounded border transition-colors ${o.onCta ? 'border-[#6DAE7C] text-[#6DAE7C] hover:bg-[#edf5ef]' : 'border-[#d6dfd5] text-[#8c9f8a] cursor-not-allowed'}`}
                     >
                       {o.cta} →
                     </button>
-                    {!o.onCta && <p className="mt-2 text-xs text-[#6b7a8d]">Available when this project has a registered business identity.</p>}
+                    {!o.onCta && <p className="mt-2 text-xs text-[#555C56]">Available when this project has a registered business identity.</p>}
                   </div>
                 )}
               </div>
             ))}
           </div>
           <div className="mt-5">
-            <button onClick={onBack} className="border border-[#d1d9e0] text-[#374151] text-sm font-medium px-5 py-2.5 rounded hover:bg-[#f0f4f8] transition-colors">
+            <button onClick={onBack} className="border border-[#d6dfd5] text-[#4A4A4A] text-sm font-medium px-5 py-2.5 rounded hover:bg-[#F9FAF2] transition-colors">
               Back to Business Discovery
             </button>
           </div>
@@ -4204,15 +4204,15 @@ export function BusinessProfileReviewPage({ e03Data, e04Data, e05Data, expansion
 
   // ── Main Review UI ─────────────────────────────────────────────────────────
   return (
-    <main id="main-content" className="flex-1 bg-[#f8f9fb]" tabIndex={-1}>
+    <main id="main-content" className="flex-1 bg-[#F9FAF2]" tabIndex={-1}>
       <div className="max-w-[820px] mx-auto px-6 py-5">
-        <div className="mb-4 pb-4 border-b border-[#d1d9e0]">
-          <h1 className="text-2xl font-bold text-[#1a3a5c]">Review Business Profile</h1>
-          <p className="text-sm text-[#6b7a8d] mt-1">Review the information collected for this project before EKATMA evaluates the applicable regulatory requirements.</p>
+        <div className="mb-4 pb-4 border-b border-[#d6dfd5]">
+          <h1 className="text-xl font-bold text-[#355E3B]">Review Business Profile</h1>
+          <p className="text-sm text-[#555C56] mt-1">Review the information collected for this project before EKATMA evaluates the applicable regulatory requirements.</p>
         </div>
 
         {/* Project context strip */}
-        <div className="mb-5 grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 bg-white border border-[#d1d9e0] rounded shadow-sm">
+        <div className="mb-5 grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 bg-white border border-[#d6dfd5] rounded shadow-sm">
           {[
             { label: 'Project', value: e03Data.name || '—' },
             { label: 'Project Type', value: ({ new: 'New Business / Project', existing: 'Existing Business', expansion: 'Expansion', modification: 'Modification / Diversification' } as Record<string, string>)[e03Data.projectType] ?? '—' },
@@ -4222,8 +4222,8 @@ export function BusinessProfileReviewPage({ e03Data, e04Data, e05Data, expansion
             { label: 'Business DNA Version', value: 'Draft Version 1' },
           ].map(f => (
             <div key={f.label}>
-              <p className="text-[10px] font-semibold text-[#9aa5b4] uppercase tracking-wider">{f.label}</p>
-              <p className="text-sm font-semibold text-[#1a2533] mt-0.5 truncate">{f.value}</p>
+              <p className="text-[10px] font-semibold text-[#8c9f8a] uppercase tracking-wider">{f.label}</p>
+              <p className="text-sm font-semibold text-[#2B2B2B] mt-0.5 truncate">{f.value}</p>
             </div>
           ))}
         </div>
@@ -4231,12 +4231,12 @@ export function BusinessProfileReviewPage({ e03Data, e04Data, e05Data, expansion
         {/* Profile state summary */}
         <div className="mb-5 flex flex-wrap gap-3">
           {[
-            { label: 'Needs Your Input', count: needsInput.length, cls: 'border-[#fde68a] bg-[#fffbeb] text-[#92400e]' },
-            { label: 'What Still Needs Verification', count: needsVerification.length, cls: 'border-[#b8d0f5] bg-[#ebf3ff] text-[#1a3a5c]' },
+            { label: 'Needs Your Input', count: needsInput.length, cls: 'border-[#fae69e] bg-[#fdf8e6] text-[#7a5807]' },
+            { label: 'What Still Needs Verification', count: needsVerification.length, cls: 'border-[#b8d0f5] bg-[#edf5ef] text-[#355E3B]' },
             { label: 'What I Told EKATMA', count: isExpansion ? 0 : selfDeclared.length, cls: 'border-[#bbf7d0] bg-[#f0fdf4] text-[#166534]' },
             { label: 'What EKATMA Verified', count: 0, cls: 'border-[#86efac] bg-[#f0fdf4] text-[#166534]' },
-            { label: 'What Came From an Existing Record', count: isExpansion ? selfDeclared.length : 0, cls: 'border-[#b8d0f5] bg-[#f5f8fb] text-[#17365D]' },
-            { label: 'What Does Not Apply', count: notApplicable.length, cls: 'border-[#d1d9e0] bg-[#f8f9fb] text-[#6b7a8d]' },
+            { label: 'What Came From an Existing Record', count: isExpansion ? selfDeclared.length : 0, cls: 'border-[#b8d0f5] bg-[#f5f8fb] text-[#355E3B]' },
+            { label: 'What Does Not Apply', count: notApplicable.length, cls: 'border-[#d6dfd5] bg-[#F9FAF2] text-[#555C56]' },
           ].map(g => (
             <div key={g.label} className={`flex items-center gap-2 px-3 py-2 border rounded ${g.cls}`}>
               <span className="text-lg font-bold">{g.count}</span>
@@ -4245,7 +4245,7 @@ export function BusinessProfileReviewPage({ e03Data, e04Data, e05Data, expansion
           ))}
         </div>
 
-        <div className="mb-4 flex items-start gap-2 rounded border border-[#F8D4B0] bg-[#FDF4EB] px-4 py-3 text-sm text-[#92400E]">
+        <div className="mb-4 flex items-start gap-2 rounded border border-[#F8D4B0] bg-[#FDF4EB] px-4 py-3 text-sm text-[#7a5807]">
           <span className="mt-0.5 shrink-0"><Icon.Warning /></span>
           <p className="font-medium">Changing this information may change the approvals identified for your project.</p>
         </div>
@@ -4293,7 +4293,7 @@ export function BusinessProfileReviewPage({ e03Data, e04Data, e05Data, expansion
           <ReviewSection title="5. Products / Services" group={e05Data.products.length > 0 ? 'self-declared' : 'needs-input'}>
             {e05Data.products.length > 0
               ? e05Data.products.map((p, i) => <ReviewFieldRow key={p.id} label={`Product ${i + 1}`} value={p.name} note={p.description || undefined} />)
-              : <p className="text-xs text-[#9aa5b4] italic py-1">No products entered yet.</p>}
+              : <p className="text-xs text-[#8c9f8a] italic py-1">No products entered yet.</p>}
             <ReviewFieldRow label="Process Type" value={e05Data.processType} />
           </ReviewSection>
 
@@ -4335,7 +4335,7 @@ export function BusinessProfileReviewPage({ e03Data, e04Data, e05Data, expansion
                 <ReviewFieldRow label="Land-Use" value={e05Data.landUseClassification} />
               </>
             ) : (
-              <p className="text-xs text-[#9aa5b4] italic py-1">MIDC status not confirmed. Land details will be refined after verification.</p>
+              <p className="text-xs text-[#8c9f8a] italic py-1">MIDC status not confirmed. Land details will be refined after verification.</p>
             )}
             <ReviewFieldRow label="Land Possession" value={e04Data.landStatus} source="Basic Requirements" />
           </ReviewSection>
@@ -4365,7 +4365,7 @@ export function BusinessProfileReviewPage({ e03Data, e04Data, e05Data, expansion
               ? e05Data.productionCapacities.map((p, i) => (
                   <ReviewFieldRow key={i} label={`Product ${i + 1}`} value={`${p.productName}: ${p.capacity} ${p.unit}`} />
                 ))
-              : <p className="text-xs text-[#9aa5b4] italic py-1">No production capacities entered.</p>}
+              : <p className="text-xs text-[#8c9f8a] italic py-1">No production capacities entered.</p>}
             {isMfg && <ReviewFieldRow label="Shifts" value={e05Data.shifts} />}
             {isMfg && <ReviewFieldRow label="Operating Hours/Day" value={e05Data.operatingHoursPerDay} />}
           </ReviewSection>
@@ -4474,9 +4474,9 @@ export function BusinessProfileReviewPage({ e03Data, e04Data, e05Data, expansion
             {e05Data.envCharacteristics.length > 0 && <ReviewFieldRow label="Characteristics" value={e05Data.envCharacteristics.join(', ')} />}
             {(e05Data.envTrigger === 'yes' || e05Data.envTrigger === 'unknown') && (
               <div className="py-1.5">
-                <span className="text-xs text-[#6b7a8d]">Environmental Clearance: </span>
-                <span className="text-xs font-semibold text-[#1a3a5c]">Needs Verification</span>
-                <p className="text-xs text-[#9aa5b4] mt-0.5">Applicability will be determined using validated regulatory rules.</p>
+                <span className="text-xs text-[#555C56]">Environmental Clearance: </span>
+                <span className="text-xs font-semibold text-[#355E3B]">Needs Verification</span>
+                <p className="text-xs text-[#8c9f8a] mt-0.5">Applicability will be determined using validated regulatory rules.</p>
               </div>
             )}
           </ReviewSection>
@@ -4532,7 +4532,7 @@ export function BusinessProfileReviewPage({ e03Data, e04Data, e05Data, expansion
               <ReviewFieldRow key={i} label={`Machinery ${i + 1}`} value={`${m.machineryType} × ${m.count}`} note={m.capacityRating} />
             ))}
             {e05Data.pressureEquipment.length === 0 && e05Data.dangerousMachineryItems.length === 0 && (
-              <p className="text-xs text-[#9aa5b4] italic py-1">No equipment records entered.</p>
+              <p className="text-xs text-[#8c9f8a] italic py-1">No equipment records entered.</p>
             )}
           </ReviewSection>
 
@@ -4540,7 +4540,7 @@ export function BusinessProfileReviewPage({ e03Data, e04Data, e05Data, expansion
           <ReviewSection title="24. Storage" group={e05Data.storageCategories.length > 0 ? 'self-declared' : 'needs-input'}>
             {e05Data.storageCategories.length > 0
               ? <ReviewFieldRow label="Storage Categories" value={e05Data.storageCategories.join(', ')} />
-              : <p className="text-xs text-[#9aa5b4] italic py-1">No storage categories selected.</p>}
+              : <p className="text-xs text-[#8c9f8a] italic py-1">No storage categories selected.</p>}
             {e05Data.storageItems.map((s, i) => (
               <ReviewFieldRow key={i} label={`Storage ${i + 1}`} value={`${s.category}: ${s.material} — ${s.maxQuantity} ${s.unit}`} />
             ))}
@@ -4590,7 +4590,7 @@ export function BusinessProfileReviewPage({ e03Data, e04Data, e05Data, expansion
           }>
             <ReviewFieldRow label="Existing Approvals" value={e04Data.existingApprovals} source="Basic Requirements" />
             {e04Data.existingApprovals === 'no'
-              ? <p className="text-xs text-[#6b7a8d] py-1">No Existing Approvals Declared</p>
+              ? <p className="text-xs text-[#555C56] py-1">No Existing Approvals Declared</p>
               : e05Data.existingApprovalRows.map((r, i) => (
                   <ReviewFieldRow key={i} label={`${r.department}`} value={`${r.approvalType} — ${r.licenceNumber}`} note={r.status} />
                 ))}
@@ -4605,14 +4605,14 @@ export function BusinessProfileReviewPage({ e03Data, e04Data, e05Data, expansion
             {e05Data.existingApplicationRows.map((r, i) => (
               <ReviewFieldRow key={i} label={r.department} value={`${r.service} — ${r.applicationId}`} note={r.currentStatus} />
             ))}
-            {e05Data.existingApplicationRows.length === 0 && <p className="text-xs text-[#9aa5b4] italic py-1">No application records entered.</p>}
+            {e05Data.existingApplicationRows.length === 0 && <p className="text-xs text-[#8c9f8a] italic py-1">No application records entered.</p>}
           </ReviewSection>
 
           {/* 30. Incentive Attributes */}
           <ReviewSection title="30. Incentive Attributes" group={e05Data.incentiveAttributes.length > 0 ? 'self-declared' : 'needs-input'}>
             {e05Data.incentiveAttributes.length > 0
               ? <ReviewFieldRow label="Attributes" value={e05Data.incentiveAttributes.join(', ')} />
-              : <p className="text-xs text-[#9aa5b4] italic py-1">No incentive attributes selected.</p>}
+              : <p className="text-xs text-[#8c9f8a] italic py-1">No incentive attributes selected.</p>}
           </ReviewSection>
 
           {/* 31. Document Availability */}
@@ -4627,20 +4627,20 @@ export function BusinessProfileReviewPage({ e03Data, e04Data, e05Data, expansion
         </ReviewSourceContext.Provider>
 
         {/* Action bar */}
-        <div className="flex flex-wrap items-center gap-3 py-4 border-t border-[#d1d9e0]">
-          <button onClick={onBack} className="border border-[#d1d9e0] text-[#374151] text-sm font-medium px-5 py-2.5 rounded hover:bg-[#f0f4f8] transition-colors">
+        <div className="flex flex-wrap items-center gap-3 py-4 border-t border-[#d6dfd5]">
+          <button onClick={onBack} className="border border-[#d6dfd5] text-[#4A4A4A] text-sm font-medium px-5 py-2.5 rounded hover:bg-[#F9FAF2] transition-colors">
             Back
           </button>
-          <button onClick={() => openAssistant({ origin: 'inline', mode: 'entity', context: inlineContext(pageContext, { pageType: 'business-dna-review', pageTitle: 'Business Profile Review', label: 'Business Profile Review' }) })} className="border border-[#d1d9e0] text-[#374151] text-sm font-medium px-5 py-2.5 rounded hover:bg-[#f0f4f8] transition-colors flex items-center gap-2">
+          <button onClick={() => openAssistant({ origin: 'inline', mode: 'entity', context: inlineContext(pageContext, { pageType: 'business-dna-review', pageTitle: 'Business Profile Review', label: 'Business Profile Review' }) })} className="border border-[#d6dfd5] text-[#4A4A4A] text-sm font-medium px-5 py-2.5 rounded hover:bg-[#F9FAF2] transition-colors flex items-center gap-2">
             <Icon.Help /> Ask Assistant
           </button>
           <div className="flex-1" />
           {needsInput.length > 0 && (
-            <p className="text-xs text-[#f59e0b] font-medium">{needsInput.length} section{needsInput.length !== 1 ? 's' : ''} need your input before confirming.</p>
+            <p className="text-xs text-[#D4A017] font-medium">{needsInput.length} section{needsInput.length !== 1 ? 's' : ''} need your input before confirming.</p>
           )}
           <button
             onClick={() => setConfirmModal(true)}
-            className={`text-white text-sm font-semibold px-6 py-2.5 rounded transition-colors ${needsInput.length === 0 ? 'bg-[#1a56db] hover:bg-[#1a3a5c]' : 'bg-[#9aa5b4] cursor-not-allowed'}`}
+            className={`text-white text-sm font-semibold px-6 py-2.5 rounded transition-colors ${needsInput.length === 0 ? 'bg-[#6DAE7C] hover:bg-[#355E3B]' : 'bg-[#8c9f8a] cursor-not-allowed'}`}
             disabled={needsInput.length > 0}
           >
             Confirm Profile →
@@ -4651,13 +4651,13 @@ export function BusinessProfileReviewPage({ e03Data, e04Data, e05Data, expansion
       {/* Confirm Profile Modal */}
       {confirmModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" role="dialog" aria-modal="true">
-          <div className="bg-white border border-[#d1d9e0] rounded-lg shadow-xl max-w-sm w-full mx-4 p-6">
-            <h3 className="text-base font-bold text-[#1a2533] mb-2">Confirm Business Profile?</h3>
-            <p className="text-sm text-[#6b7a8d] mb-4">EKATMA will use this Business Profile to evaluate regulatory applicability and generate your personalised regulatory journey.</p>
-            <p className="text-xs text-[#9aa5b4] mb-5">Confirmation creates Business DNA Version 1. This does not constitute department verification.</p>
+          <div className="bg-white border border-[#d6dfd5] rounded-lg shadow-xl max-w-sm w-full mx-4 p-6">
+            <h3 className="text-base font-bold text-[#2B2B2B] mb-2">Confirm Business Profile?</h3>
+            <p className="text-sm text-[#555C56] mb-4">EKATMA will use this Business Profile to evaluate regulatory applicability and generate your personalised regulatory journey.</p>
+            <p className="text-xs text-[#8c9f8a] mb-5">Confirmation creates Business DNA Version 1. This does not constitute department verification.</p>
             <div className="flex gap-3 justify-end">
-              <button onClick={() => setConfirmModal(false)} className="px-4 py-2 text-sm border border-[#d1d9e0] text-[#374151] rounded hover:bg-[#f0f4f8]">Cancel</button>
-              <button onClick={handleConfirm} className="px-4 py-2 text-sm bg-[#1a56db] text-white rounded hover:bg-[#1a3a5c] font-medium">Confirm Profile</button>
+              <button onClick={() => setConfirmModal(false)} className="px-4 py-2 text-sm border border-[#d6dfd5] text-[#4A4A4A] rounded hover:bg-[#F9FAF2]">Cancel</button>
+              <button onClick={handleConfirm} className="px-4 py-2 text-sm bg-[#6DAE7C] text-white rounded hover:bg-[#355E3B] font-medium">Confirm Profile</button>
             </div>
           </div>
         </div>
@@ -4667,19 +4667,19 @@ export function BusinessProfileReviewPage({ e03Data, e04Data, e05Data, expansion
       {assistantOpen && (
         <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-label="EKATMA Assistant">
           <div className="absolute inset-0 bg-black/30" onClick={() => setAssistantOpen(false)} />
-          <div className="relative bg-white w-80 max-w-full h-full shadow-2xl flex flex-col border-l border-[#d1d9e0]">
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-[#e8edf2] bg-[#f8f9fb]">
-              <div className="w-7 h-7 rounded-full bg-[#1a3a5c] flex items-center justify-center">
+          <div className="relative bg-white w-80 max-w-full h-full shadow-2xl flex flex-col border-l border-[#d6dfd5]">
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-[#e3ebe1] bg-[#F9FAF2]">
+              <div className="w-7 h-7 rounded-full bg-[#355E3B] flex items-center justify-center">
                 <Icon.Help />
               </div>
               <div className="flex-1">
-                <p className="text-xs font-bold text-[#1a2533]">EKATMA Regulatory Assistant</p>
-                <p className="text-[10px] text-[#6b7a8d]">Business Profile Review context</p>
+                <p className="text-xs font-bold text-[#2B2B2B]">EKATMA Regulatory Assistant</p>
+                <p className="text-[10px] text-[#555C56]">Business Profile Review context</p>
               </div>
-              <button onClick={() => setAssistantOpen(false)} className="text-[#9aa5b4] hover:text-[#374151] text-lg leading-none">✕</button>
+              <button onClick={() => setAssistantOpen(false)} className="text-[#8c9f8a] hover:text-[#4A4A4A] text-lg leading-none">✕</button>
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
-              <p className="text-xs text-[#6b7a8d] italic">The EKATMA Assistant can explain fields, terminology, and relevant government rules. It does not change your Business DNA or determine regulatory outcomes.</p>
+              <p className="text-xs text-[#555C56] italic">The EKATMA Assistant can explain fields, terminology, and relevant government rules. It does not change your Business DNA or determine regulatory outcomes.</p>
               <div className="space-y-2">
                 {[
                   'Why is this information required?',
@@ -4687,14 +4687,14 @@ export function BusinessProfileReviewPage({ e03Data, e04Data, e05Data, expansion
                   'Which document supports this field?',
                   'Explain in Marathi.',
                 ].map(q => (
-                  <button key={q} className="w-full text-left text-xs px-3 py-2.5 border border-[#d1d9e0] rounded hover:bg-[#f0f4f8] text-[#374151]">{q}</button>
+                  <button key={q} className="w-full text-left text-xs px-3 py-2.5 border border-[#d6dfd5] rounded hover:bg-[#F9FAF2] text-[#4A4A4A]">{q}</button>
                 ))}
               </div>
             </div>
-            <div className="p-4 border-t border-[#e8edf2]">
+            <div className="p-4 border-t border-[#e3ebe1]">
               <div className="flex gap-2">
-                <input className="flex-1 text-sm border border-[#d1d9e0] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1a56db]" placeholder="Ask a question…" />
-                <button className="px-3 py-2 bg-[#1a3a5c] text-white text-sm rounded hover:bg-[#0f2540]">Send</button>
+                <input className="flex-1 text-sm border border-[#d6dfd5] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#6DAE7C]" placeholder="Ask a question…" />
+                <button className="px-3 py-2 bg-[#355E3B] text-white text-sm rounded hover:bg-[#27472c]">Send</button>
               </div>
             </div>
           </div>

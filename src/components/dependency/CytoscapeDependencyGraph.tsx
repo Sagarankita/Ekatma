@@ -149,7 +149,7 @@ export function CytoscapeDependencyGraph({
             style: {
               label: 'data(displayLabel)',
               content: 'data(displayLabel)',
-              color: '#1a2533',
+              color: '#2B2B2B',
               shape: 'round-rectangle',
               width: 220,
               height: 70,
@@ -182,8 +182,8 @@ export function CytoscapeDependencyGraph({
           {
             selector: 'node.status-current, node.node-current',
             style: {
-              'background-color': '#0f2540',
-              'border-color': '#2563eb',
+              'background-color': '#27472c',
+              'border-color': '#6DAE7C',
               'border-width': 3,
               color: '#ffffff',
             },
@@ -191,8 +191,8 @@ export function CytoscapeDependencyGraph({
           {
             selector: 'node.status-ready',
             style: {
-              'background-color': '#eff6ff',
-              'border-color': '#2563eb',
+              'background-color': '#edf5ef',
+              'border-color': '#6DAE7C',
               'border-width': 2,
               color: '#1e3a8a',
             },
@@ -233,7 +233,7 @@ export function CytoscapeDependencyGraph({
             selector: 'node.selected-node',
             style: {
               'border-width': 4,
-              'border-color': '#1a56db',
+              'border-color': '#6DAE7C',
               'z-index': 100,
             },
           },
@@ -251,14 +251,14 @@ export function CytoscapeDependencyGraph({
               'font-size': 9,
               'font-weight': 600,
               'min-zoomed-font-size': 0, // Never hide edge labels!
-              color: '#334155',
+              color: '#3A3E39',
               'text-opacity': 1,
               'text-rotation': 'autorotate',
               'text-background-opacity': 0.95,
               'text-background-color': '#ffffff',
               'text-background-padding': '3px',
               'text-background-shape': 'roundrectangle',
-              'text-border-color': '#cbd5e1',
+              'text-border-color': '#c8d4c7',
               'text-border-width': 1,
               'text-border-opacity': 1,
               'transition-property': 'opacity, width, line-color, target-arrow-color',
@@ -268,8 +268,8 @@ export function CytoscapeDependencyGraph({
           {
             selector: 'edge.edge-prerequisite',
             style: {
-              'line-color': '#64748b',
-              'target-arrow-color': '#64748b',
+              'line-color': '#555C56',
+              'target-arrow-color': '#555C56',
               'line-style': 'solid',
             },
           },
@@ -285,8 +285,8 @@ export function CytoscapeDependencyGraph({
           {
             selector: 'edge.edge-parallel',
             style: {
-              'line-color': '#2563eb',
-              'target-arrow-color': '#2563eb',
+              'line-color': '#6DAE7C',
+              'target-arrow-color': '#6DAE7C',
               'line-style': 'dotted',
               'line-dash-pattern': [3, 3],
             },
@@ -294,8 +294,8 @@ export function CytoscapeDependencyGraph({
           {
             selector: 'edge.edge-downstream',
             style: {
-              'line-color': '#475569',
-              'target-arrow-color': '#475569',
+              'line-color': '#4A4A4A',
+              'target-arrow-color': '#4A4A4A',
               'line-style': 'solid',
             },
           },
@@ -303,8 +303,8 @@ export function CytoscapeDependencyGraph({
             selector: 'edge.selected-edge',
             style: {
               width: 3.5,
-              'line-color': '#1a56db',
-              'target-arrow-color': '#1a56db',
+              'line-color': '#6DAE7C',
+              'target-arrow-color': '#6DAE7C',
               'z-index': 100,
             },
           },
@@ -516,17 +516,17 @@ export function CytoscapeDependencyGraph({
   }, [nodes, onSelectNode, onSelectEdge]);
 
   return (
-    <div className="relative flex-1 w-full h-full min-h-[500px] bg-[#f8f9fb] overflow-hidden select-none">
+    <div className="relative flex-1 w-full h-full min-h-[500px] bg-[#F9FAF2] overflow-hidden select-none">
       {/* Cytoscape canvas mount */}
       <div ref={containerRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
 
       {/* Floating Canvas Controls */}
-      <div className="absolute bottom-4 right-4 z-10 flex items-center gap-1 rounded border border-[#d1d9e0] bg-white p-1 shadow-sm">
+      <div className="absolute bottom-4 right-4 z-10 flex items-center gap-1 rounded border border-[#d6dfd5] bg-white p-1 shadow-sm">
         <button
           onClick={handleZoomIn}
           title="Zoom In"
           aria-label="Zoom In"
-          className="flex h-7 w-7 items-center justify-center rounded text-xs font-bold text-[#1a2533] hover:bg-[#ebf3ff] hover:text-[#1a56db]"
+          className="flex h-7 w-7 items-center justify-center rounded text-xs font-bold text-[#2B2B2B] hover:bg-[#edf5ef] hover:text-[#6DAE7C]"
         >
           +
         </button>
@@ -534,39 +534,39 @@ export function CytoscapeDependencyGraph({
           onClick={handleZoomOut}
           title="Zoom Out"
           aria-label="Zoom Out"
-          className="flex h-7 w-7 items-center justify-center rounded text-xs font-bold text-[#1a2533] hover:bg-[#ebf3ff] hover:text-[#1a56db]"
+          className="flex h-7 w-7 items-center justify-center rounded text-xs font-bold text-[#2B2B2B] hover:bg-[#edf5ef] hover:text-[#6DAE7C]"
         >
           −
         </button>
-        <div className="h-4 w-px bg-[#d1d9e0]" />
+        <div className="h-4 w-px bg-[#d6dfd5]" />
         <button
           onClick={handleFit}
           title="Fit to Screen"
-          className="px-2.5 py-1 text-[11px] font-semibold text-[#1a2533] hover:bg-[#ebf3ff] hover:text-[#1a56db] rounded"
+          className="px-2.5 py-1 text-[11px] font-semibold text-[#2B2B2B] hover:bg-[#edf5ef] hover:text-[#6DAE7C] rounded"
         >
           Fit
         </button>
         <button
           onClick={handleResetLayout}
           title="Reset Layout & Selection"
-          className="px-2.5 py-1 text-[11px] font-semibold text-[#1a2533] hover:bg-[#ebf3ff] hover:text-[#1a56db] rounded"
+          className="px-2.5 py-1 text-[11px] font-semibold text-[#2B2B2B] hover:bg-[#edf5ef] hover:text-[#6DAE7C] rounded"
         >
           Reset
         </button>
       </div>
 
       {/* Canvas Status & Legend Footer */}
-      <div className="absolute bottom-4 left-4 z-10 hidden md:flex items-center gap-4 rounded border border-[#d1d9e0] bg-white/95 px-3 py-1.5 text-[10px] text-[#4b5563] shadow-sm">
+      <div className="absolute bottom-4 left-4 z-10 hidden md:flex items-center gap-4 rounded border border-[#d6dfd5] bg-white/95 px-3 py-1.5 text-[10px] text-[#4A4A4A] shadow-sm">
         <div className="flex items-center gap-1.5">
           <span className="inline-block h-2 w-2 rounded-full bg-[#10b981]" />
           <span>Completed</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="inline-block h-2 w-2 rounded-full bg-[#1a3a5c]" />
+          <span className="inline-block h-2 w-2 rounded-full bg-[#355E3B]" />
           <span>Current MIDC</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="inline-block h-2 w-2 rounded-full bg-[#2563eb]" />
+          <span className="inline-block h-2 w-2 rounded-full bg-[#6DAE7C]" />
           <span>Ready</span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -577,7 +577,7 @@ export function CytoscapeDependencyGraph({
           <span className="inline-block h-2 w-2 rounded-full bg-[#dc2626]" />
           <span>Blocked</span>
         </div>
-        <div className="h-3 w-px bg-[#d1d9e0]" />
+        <div className="h-3 w-px bg-[#d6dfd5]" />
         <span className="italic">Dashed = External Dept · Solid = MIDC Controlled</span>
       </div>
     </div>

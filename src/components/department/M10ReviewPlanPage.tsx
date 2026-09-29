@@ -463,7 +463,7 @@ export function M10ReviewPlanPage({
   ]);
 
   return (
-    <div className="flex-1 bg-[#f8f9fb] overflow-y-auto">
+    <div className="flex-1 bg-[#F9FAF2] overflow-y-auto">
       {/* ── Evidence Detail Drawer ────────────────────────────────────────── */}
       {selectedEvidence && (
         <div
@@ -473,13 +473,13 @@ export function M10ReviewPlanPage({
           aria-label={`Evidence: ${selectedEvidence.title}`}
         >
           <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]" onClick={() => setSelectedEvidence(null)} />
-          <div className="relative bg-white w-full max-w-lg h-full overflow-y-auto shadow-2xl flex flex-col border-l border-[#d1d9e0]">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-[#d1d9e0] bg-[#f8f9fb] shrink-0">
+          <div className="relative bg-white w-full max-w-lg h-full overflow-y-auto shadow-2xl flex flex-col border-l border-[#d6dfd5]">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[#d6dfd5] bg-[#F9FAF2] shrink-0">
               <div>
-                <span className="text-[10px] font-bold text-[#1a56db] uppercase tracking-wider">
+                <span className="text-[10px] font-bold text-[#6DAE7C] uppercase tracking-wider">
                   {selectedEvidence.category}
                 </span>
-                <h3 className="text-sm font-bold text-[#1a2533] mt-0.5">{selectedEvidence.title}</h3>
+                <h3 className="text-sm font-bold text-[#2B2B2B] mt-0.5">{selectedEvidence.title}</h3>
               </div>
               <button
                 type="button"
@@ -496,7 +496,7 @@ export function M10ReviewPlanPage({
                 <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
                   Finding Summary:
                 </span>
-                <p className="text-slate-800 leading-relaxed bg-[#f8fafc] p-3 rounded-lg border border-[#e2e8f0]">
+                <p className="text-slate-800 leading-relaxed bg-[#F9FAF2] p-3 rounded-lg border border-[#e3ebe1]">
                   {selectedEvidence.summary}
                 </p>
               </div>
@@ -505,7 +505,7 @@ export function M10ReviewPlanPage({
                 <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-2">
                   Evaluated Data Points:
                 </span>
-                <div className="border border-[#e2e8f0] rounded-lg divide-y divide-[#e2e8f0] overflow-hidden">
+                <div className="border border-[#e3ebe1] rounded-lg divide-y divide-[#e3ebe1] overflow-hidden">
                   {selectedEvidence.points.map((pt, idx) => (
                     <div key={idx} className="flex items-center justify-between px-3.5 py-2.5 bg-white">
                       <span className="text-slate-600 font-medium">{pt.label}</span>
@@ -529,22 +529,21 @@ export function M10ReviewPlanPage({
                     Supporting Document Reference:
                   </span>
                   <div className="p-3 bg-blue-50/70 border border-blue-200 rounded-lg text-blue-950 font-medium flex items-center gap-2">
-                    <span>📄</span>
                     <span>{selectedEvidence.docRef}</span>
                   </div>
                 </div>
               )}
 
-              <div className="pt-2 border-t border-[#e2e8f0] text-[11px] text-slate-500 italic">
+              <div className="pt-2 border-t border-[#e3ebe1] text-[11px] text-slate-500 italic">
                 System-extracted evidence provided to assist officer review. Statutory compliance is determined exclusively by the authorized officer.
               </div>
             </div>
 
-            <div className="p-4 border-t border-[#d1d9e0] bg-[#f8fafc] flex items-center justify-between gap-3 shrink-0">
+            <div className="p-4 border-t border-[#d6dfd5] bg-[#F9FAF2] flex items-center justify-between gap-3 shrink-0">
               <button
                 type="button"
                 onClick={() => setSelectedEvidence(null)}
-                className="px-4 py-2 border border-[#cbd5e1] text-slate-700 text-xs font-semibold rounded hover:bg-slate-100 transition-colors"
+                className="px-4 py-2 border border-[#c8d4c7] text-slate-700 text-xs font-semibold rounded hover:bg-slate-100 transition-colors"
               >
                 Close Drawer
               </button>
@@ -556,7 +555,7 @@ export function M10ReviewPlanPage({
                     setSelectedEvidence(null);
                     action?.();
                   }}
-                  className="px-4 py-2 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540] transition-colors shadow-xs"
+                  className="px-4 py-2 bg-[#355E3B] text-white text-xs font-bold rounded hover:bg-[#27472c] transition-colors shadow-xs"
                 >
                   {selectedEvidence.actionLabel || 'Inspect in Detail →'}
                 </button>
@@ -575,13 +574,13 @@ export function M10ReviewPlanPage({
           aria-label="Review depth explanation"
         >
           <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]" onClick={() => setShowReviewDepthDrawer(false)} />
-          <div className="relative bg-white w-full max-w-lg h-full overflow-y-auto shadow-2xl flex flex-col border-l border-[#d1d9e0]">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-[#d1d9e0] bg-[#f8f9fb] shrink-0">
+          <div className="relative bg-white w-full max-w-lg h-full overflow-y-auto shadow-2xl flex flex-col border-l border-[#d6dfd5]">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[#d6dfd5] bg-[#F9FAF2] shrink-0">
               <div>
-                <span className="text-[10px] font-bold text-[#1a56db] uppercase tracking-wider">
+                <span className="text-[10px] font-bold text-[#6DAE7C] uppercase tracking-wider">
                   Scrutiny Depth Basis
                 </span>
-                <h3 className="text-sm font-bold text-[#1a2533] mt-0.5">Why Enhanced Review?</h3>
+                <h3 className="text-sm font-bold text-[#2B2B2B] mt-0.5">Why Enhanced Review?</h3>
               </div>
               <button
                 type="button"
@@ -609,7 +608,7 @@ export function M10ReviewPlanPage({
                 </span>
                 <div className="space-y-2">
                   {SCRUTINY_FACTORS.map((factor) => (
-                    <div key={factor.id} className="p-3 bg-[#f8fafc] border border-[#e2e8f0] rounded-lg">
+                    <div key={factor.id} className="p-3 bg-[#F9FAF2] border border-[#e3ebe1] rounded-lg">
                       <div className="flex items-center justify-between">
                         <span className="font-semibold text-slate-900">{factor.name}</span>
                         <span
@@ -654,11 +653,11 @@ export function M10ReviewPlanPage({
               </div>
             </div>
 
-            <div className="p-4 border-t border-[#d1d9e0] bg-[#f8fafc] flex justify-end shrink-0">
+            <div className="p-4 border-t border-[#d6dfd5] bg-[#F9FAF2] flex justify-end shrink-0">
               <button
                 type="button"
                 onClick={() => setShowReviewDepthDrawer(false)}
-                className="px-4 py-2 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540] transition-colors"
+                className="px-4 py-2 bg-[#355E3B] text-white text-xs font-bold rounded hover:bg-[#27472c] transition-colors"
               >
                 Done
               </button>
@@ -676,13 +675,13 @@ export function M10ReviewPlanPage({
           aria-label="Routing logic detail"
         >
           <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]" onClick={() => setShowRoutingLogicDrawer(false)} />
-          <div className="relative bg-white w-full max-w-md h-full overflow-y-auto shadow-xl flex flex-col border-l border-[#d1d9e0]">
-            <div className="flex items-center justify-between px-5 py-3 border-b border-[#d1d9e0] bg-[#f8f9fb] shrink-0">
+          <div className="relative bg-white w-full max-w-md h-full overflow-y-auto shadow-xl flex flex-col border-l border-[#d6dfd5]">
+            <div className="flex items-center justify-between px-5 py-3 border-b border-[#d6dfd5] bg-[#F9FAF2] shrink-0">
               <div>
                 <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
                   Administrative Audit & Logic
                 </p>
-                <h3 className="text-sm font-bold text-[#1a2533]">Configured Scrutiny Route Rule</h3>
+                <h3 className="text-sm font-bold text-[#2B2B2B]">Configured Scrutiny Route Rule</h3>
               </div>
               <button
                 type="button"
@@ -695,7 +694,7 @@ export function M10ReviewPlanPage({
             <div className="p-5 space-y-4 text-xs flex-1">
               <div>
                 <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold mb-1">Route Produced</p>
-                <span className="inline-flex items-center px-2.5 py-1 rounded bg-[#1a3a5c] text-white text-[11px] font-bold">
+                <span className="inline-flex items-center px-2.5 py-1 rounded bg-[#355E3B] text-white text-[11px] font-bold">
                   ENHANCED REVIEW
                 </span>
               </div>
@@ -749,16 +748,16 @@ export function M10ReviewPlanPage({
                 </div>
                 <div>
                   <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold mb-1">Result</p>
-                  <p className="font-semibold text-[#1a3a5c]">Enhanced Review</p>
+                  <p className="font-semibold text-[#355E3B]">Enhanced Review</p>
                 </div>
               </div>
-              <div className="pt-2 border-t border-[#d1d9e0]">
+              <div className="pt-2 border-t border-[#d6dfd5]">
                 <p className="text-[10px] text-slate-500 italic">
                   System-applied configured routing rule. This is not an AI decision or statutory legal finding. Route determines scrutiny depth only.
                 </p>
               </div>
             </div>
-            <div className="p-4 border-t border-[#d1d9e0] bg-[#f8fafc] flex justify-end shrink-0">
+            <div className="p-4 border-t border-[#d6dfd5] bg-[#F9FAF2] flex justify-end shrink-0">
               <button
                 type="button"
                 onClick={() => setShowRoutingLogicDrawer(false)}
@@ -794,12 +793,12 @@ export function M10ReviewPlanPage({
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-2.5 flex-wrap">
-              <h1 className="text-xl font-bold text-[#1a2533]">Review Plan</h1>
-              <span className="text-[11px] font-semibold text-[#1a56db] bg-blue-50 border border-blue-200 px-2 py-0.5 rounded">
+              <h1 className="text-xl font-bold text-[#355E3B]">Review Plan</h1>
+              <span className="text-[11px] font-semibold text-[#355E3B] bg-[#edf5ef] border border-[#a1cba9] px-2 py-0.5 rounded">
                 Generated from automated pre-check + Business DNA + configured regulatory rules
               </span>
             </div>
-            <p className="text-xs text-[#4b5563] mt-1">
+            <p className="text-xs text-[#555C56] mt-1">
               See why this application was routed for review and what needs to be checked.
             </p>
           </div>
@@ -809,7 +808,7 @@ export function M10ReviewPlanPage({
               <button
                 type="button"
                 onClick={onBackToPrecheck}
-                className="px-3 py-1.5 border border-[#cbd5e1] text-xs font-semibold text-[#1a3a5c] bg-white hover:bg-slate-50 rounded transition-colors"
+                className="px-3 py-1.5 border border-[#c8d4c7] text-xs font-semibold text-[#355E3B] bg-white hover:bg-slate-50 rounded transition-colors"
               >
                 ← Automated Pre-check
               </button>
@@ -818,7 +817,7 @@ export function M10ReviewPlanPage({
               <button
                 type="button"
                 onClick={onOpenDetailedRoute}
-                className="px-3 py-1.5 border border-[#1a3a5c] text-xs font-bold text-[#1a3a5c] bg-white hover:bg-slate-50 rounded transition-colors flex items-center gap-1"
+                className="px-3 py-1.5 border border-[#355E3B] text-xs font-bold text-[#355E3B] bg-white hover:bg-slate-50 rounded transition-colors flex items-center gap-1"
               >
                 <span>Detailed Route Plan</span>
                 <span aria-hidden="true">↗</span>
@@ -835,11 +834,11 @@ export function M10ReviewPlanPage({
         </div>
 
         {/* 3. Compact Application Context Strip */}
-        <div className="bg-white border border-[#d1d9e0] rounded-xl p-4 shadow-xs">
+        <div className="bg-white border border-[#d6dfd5] rounded-xl p-4 shadow-xs">
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-xs">
             <div>
               <span className="text-[10px] text-slate-500 uppercase font-semibold block">Application ID:</span>
-              <span className="font-mono font-bold text-[#1a3a5c]">MIDC-APP-2026-00418</span>
+              <span className="font-mono font-bold text-[#355E3B]">MIDC-APP-2026-00418</span>
             </div>
             <div>
               <span className="text-[10px] text-slate-500 uppercase font-semibold block">Business:</span>
@@ -871,7 +870,7 @@ export function M10ReviewPlanPage({
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-sm font-bold text-[#1a2533] uppercase tracking-wider">
+                <h2 className="text-sm font-bold text-[#2B2B2B] uppercase tracking-wider">
                   Review Flow Architecture
                 </h2>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-900 border border-blue-200">
@@ -887,7 +886,6 @@ export function M10ReviewPlanPage({
                 Concurrent Execution:
               </span>
               <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 border border-blue-200 rounded-full text-xs font-semibold text-blue-900">
-                <span>⚡</span>
                 <span>Parallel Review Streams Active</span>
               </span>
             </div>
@@ -901,10 +899,10 @@ export function M10ReviewPlanPage({
         </div>
 
         {/* 5. Your Review Tasks (Action-focused Section) */}
-        <div className="bg-white border-2 border-[#1a3a5c] rounded-xl p-5 shadow-xs">
+        <div className="bg-white border-2 border-[#355E3B] rounded-xl p-5 shadow-xs">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <h2 className="text-sm font-bold text-[#1a2533] uppercase tracking-wider">Your Review Tasks</h2>
+              <h2 className="text-sm font-bold text-[#2B2B2B] uppercase tracking-wider">Your Review Tasks</h2>
               <p className="text-xs text-slate-500 mt-0.5">
                 High-priority scrutiny items requiring officer action for this application.
               </p>
@@ -915,7 +913,7 @@ export function M10ReviewPlanPage({
           </div>
 
           <div className="space-y-2.5">
-            <div className="p-3.5 bg-[#f8fafc] border border-blue-200 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="p-3.5 bg-[#F9FAF2] border border-blue-200 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-blue-600" />
@@ -931,13 +929,13 @@ export function M10ReviewPlanPage({
               <button
                 type="button"
                 onClick={handleOpenBuilding}
-                className="px-4 py-2 bg-[#1a3a5c] hover:bg-[#0f2540] text-white text-xs font-bold rounded transition-colors shrink-0 shadow-xs"
+                className="px-4 py-2 bg-[#355E3B] hover:bg-[#27472c] text-white text-xs font-bold rounded transition-colors shrink-0 shadow-xs"
               >
                 Open Building Review →
               </button>
             </div>
 
-            <div className="p-3.5 bg-[#f8fafc] border border-amber-200 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="p-3.5 bg-[#F9FAF2] border border-amber-200 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-amber-500" />
@@ -959,7 +957,7 @@ export function M10ReviewPlanPage({
               </button>
             </div>
 
-            <div className="p-3.5 bg-[#f8fafc] border border-purple-200 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="p-3.5 bg-[#F9FAF2] border border-purple-200 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-purple-600" />
@@ -985,11 +983,11 @@ export function M10ReviewPlanPage({
 
         {/* 10. Review Depth & Inspection Status (Sections 12 & 13) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-white border border-[#d1d9e0] rounded-xl p-4 shadow-xs flex flex-col justify-between">
+          <div className="bg-white border border-[#d6dfd5] rounded-xl p-4 shadow-xs flex flex-col justify-between">
             <div>
               <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Review Depth</span>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-bold text-[#1a3a5c]">Enhanced Review</span>
+                <span className="text-sm font-bold text-[#355E3B]">Enhanced Review</span>
                 <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-900 border border-blue-200">
                   Active Depth
                 </span>
@@ -1003,14 +1001,14 @@ export function M10ReviewPlanPage({
               <button
                 type="button"
                 onClick={() => setShowReviewDepthDrawer(true)}
-                className="text-xs font-bold text-[#1a56db] hover:underline"
+                className="text-xs font-bold text-[#6DAE7C] hover:underline"
               >
                 Why this review depth? →
               </button>
             </div>
           </div>
 
-          <div className="bg-white border border-[#d1d9e0] rounded-xl p-4 shadow-xs flex flex-col justify-between">
+          <div className="bg-white border border-[#d6dfd5] rounded-xl p-4 shadow-xs flex flex-col justify-between">
             <div>
               <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
                 Inspection Requirement
@@ -1031,7 +1029,7 @@ export function M10ReviewPlanPage({
                 <button
                   type="button"
                   onClick={onOpenInspections}
-                  className="text-xs font-bold text-[#1a56db] hover:underline"
+                  className="text-xs font-bold text-[#6DAE7C] hover:underline"
                 >
                   View Inspection Plan →
                 </button>
@@ -1041,9 +1039,9 @@ export function M10ReviewPlanPage({
         </div>
 
         {/* 11. Evidence Behind the Review Plan (Section 14) */}
-        <div className="bg-white border border-[#d1d9e0] rounded-xl p-5 shadow-xs">
+        <div className="bg-white border border-[#d6dfd5] rounded-xl p-5 shadow-xs">
           <div className="mb-3">
-            <h2 className="text-sm font-bold text-[#1a2533] uppercase tracking-wider">
+            <h2 className="text-sm font-bold text-[#2B2B2B] uppercase tracking-wider">
               Evidence Behind the Review Plan
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
@@ -1052,7 +1050,7 @@ export function M10ReviewPlanPage({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
-            <div className="p-3 bg-[#f8fafc] border border-[#e2e8f0] rounded-lg flex flex-col justify-between">
+            <div className="p-3 bg-[#F9FAF2] border border-[#e3ebe1] rounded-lg flex flex-col justify-between">
               <div>
                 <span className="font-bold text-slate-900 block mb-1">Pre-check Findings</span>
                 <p className="text-slate-500 text-[11px]">30 automated checks (21 verified, 8 warnings).</p>
@@ -1060,13 +1058,13 @@ export function M10ReviewPlanPage({
               <button
                 type="button"
                 onClick={() => setSelectedEvidence(EVIDENCE_STORE['precheck-evidence'])}
-                className="text-[11px] text-[#1a56db] hover:underline font-bold mt-3 text-left"
+                className="text-[11px] text-[#6DAE7C] hover:underline font-bold mt-3 text-left"
               >
                 View evidence →
               </button>
             </div>
 
-            <div className="p-3 bg-[#f8fafc] border border-[#e2e8f0] rounded-lg flex flex-col justify-between">
+            <div className="p-3 bg-[#F9FAF2] border border-[#e3ebe1] rounded-lg flex flex-col justify-between">
               <div>
                 <span className="font-bold text-slate-900 block mb-1">Business DNA</span>
                 <p className="text-slate-500 text-[11px]">Manufacturing, Plot P-104, Red Category.</p>
@@ -1074,13 +1072,13 @@ export function M10ReviewPlanPage({
               <button
                 type="button"
                 onClick={() => setSelectedEvidence(EVIDENCE_STORE['new-construction'])}
-                className="text-[11px] text-[#1a56db] hover:underline font-bold mt-3 text-left"
+                className="text-[11px] text-[#6DAE7C] hover:underline font-bold mt-3 text-left"
               >
                 View evidence →
               </button>
             </div>
 
-            <div className="p-3 bg-[#f8fafc] border border-[#e2e8f0] rounded-lg flex flex-col justify-between">
+            <div className="p-3 bg-[#F9FAF2] border border-[#e3ebe1] rounded-lg flex flex-col justify-between">
               <div>
                 <span className="font-bold text-slate-900 block mb-1">Consistency</span>
                 <p className="text-slate-500 text-[11px]">Plot area mismatch (4,800 vs 4,200 sq.m).</p>
@@ -1088,13 +1086,13 @@ export function M10ReviewPlanPage({
               <button
                 type="button"
                 onClick={() => setSelectedEvidence(EVIDENCE_STORE['crossform-mismatch'])}
-                className="text-[11px] text-[#1a56db] hover:underline font-bold mt-3 text-left"
+                className="text-[11px] text-[#6DAE7C] hover:underline font-bold mt-3 text-left"
               >
                 View evidence →
               </button>
             </div>
 
-            <div className="p-3 bg-[#f8fafc] border border-[#e2e8f0] rounded-lg flex flex-col justify-between">
+            <div className="p-3 bg-[#F9FAF2] border border-[#e3ebe1] rounded-lg flex flex-col justify-between">
               <div>
                 <span className="font-bold text-slate-900 block mb-1">Dependencies</span>
                 <p className="text-slate-500 text-[11px]">MPCB Consent & Fire NOC clearances.</p>
@@ -1102,13 +1100,13 @@ export function M10ReviewPlanPage({
               <button
                 type="button"
                 onClick={() => setSelectedEvidence(EVIDENCE_STORE['external-prereq'])}
-                className="text-[11px] text-[#1a56db] hover:underline font-bold mt-3 text-left"
+                className="text-[11px] text-[#6DAE7C] hover:underline font-bold mt-3 text-left"
               >
                 View evidence →
               </button>
             </div>
 
-            <div className="p-3 bg-[#f8fafc] border border-[#e2e8f0] rounded-lg flex flex-col justify-between">
+            <div className="p-3 bg-[#F9FAF2] border border-[#e3ebe1] rounded-lg flex flex-col justify-between">
               <div>
                 <span className="font-bold text-slate-900 block mb-1">Changes</span>
                 <p className="text-slate-500 text-[11px]">Investment & capacity resubmission deltas.</p>
@@ -1116,7 +1114,7 @@ export function M10ReviewPlanPage({
               <button
                 type="button"
                 onClick={() => setSelectedEvidence(EVIDENCE_STORE['changes-evidence'])}
-                className="text-[11px] text-[#1a56db] hover:underline font-bold mt-3 text-left"
+                className="text-[11px] text-[#6DAE7C] hover:underline font-bold mt-3 text-left"
               >
                 View evidence →
               </button>
@@ -1125,10 +1123,9 @@ export function M10ReviewPlanPage({
         </div>
 
         {/* 12. Collapsed Audit & Route Observation (Section 16 & 22) */}
-        <div className="bg-white border border-[#d1d9e0] rounded-xl p-4 shadow-xs space-y-3">
+        <div className="bg-white border border-[#d6dfd5] rounded-xl p-4 shadow-xs space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
             <div className="flex items-center gap-2 text-slate-600">
-              <span aria-hidden="true">📋</span>
               <span>
                 Route evaluation recorded in audit history. Route version: MIDC Scrutiny Config v1.2 · Evaluated: 23 Sep 2026, 10:42.
               </span>
@@ -1138,7 +1135,7 @@ export function M10ReviewPlanPage({
               <button
                 type="button"
                 onClick={() => setShowObservationInput((v) => !v)}
-                className="text-xs text-[#1a56db] hover:underline font-semibold"
+                className="text-xs text-[#6DAE7C] hover:underline font-semibold"
               >
                 {showObservationInput ? 'Hide observation' : '+ Add route observation'}
               </button>
@@ -1149,7 +1146,7 @@ export function M10ReviewPlanPage({
                   if (onOpenDetailedRoute) onOpenDetailedRoute();
                   else setShowRoutingLogicDrawer(true);
                 }}
-                className="text-xs text-[#1a3a5c] hover:underline font-bold"
+                className="text-xs text-[#355E3B] hover:underline font-bold"
               >
                 View routing details →
               </button>
@@ -1166,7 +1163,7 @@ export function M10ReviewPlanPage({
                 onChange={(e) => setOfficerObservation(e.target.value)}
                 rows={2}
                 placeholder="Record observation notes on configured route or factor justifications for subsequent desks..."
-                className="w-full text-xs p-2.5 border border-[#cbd5e1] rounded bg-white text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#1a56db]"
+                className="w-full text-xs p-2.5 border border-[#c8d4c7] rounded bg-white text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#6DAE7C]"
               />
               <div className="flex justify-end gap-2">
                 <button
@@ -1177,7 +1174,7 @@ export function M10ReviewPlanPage({
                       setShowObservationInput(false);
                     }
                   }}
-                  className="px-3 py-1 bg-[#1a3a5c] text-white text-xs font-semibold rounded hover:bg-[#0f2540]"
+                  className="px-3 py-1 bg-[#355E3B] text-white text-xs font-semibold rounded hover:bg-[#27472c]"
                 >
                   Save Note
                 </button>
@@ -1194,10 +1191,10 @@ export function M10ReviewPlanPage({
         </div>
 
         {/* 13. Next Action CTA Footer Bar (Section 17 & Final CTA) */}
-        <div className="bg-white border-2 border-[#1a3a5c] rounded-xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+        <div className="bg-white border-2 border-[#355E3B] rounded-xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-[#1a3a5c] uppercase tracking-wider">
+              <span className="text-xs font-bold text-[#355E3B] uppercase tracking-wider">
                 Next Review Workstream
               </span>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-900 border border-blue-200">
@@ -1213,7 +1210,7 @@ export function M10ReviewPlanPage({
             <button
               type="button"
               onClick={handleOpenBuilding}
-              className="px-4 py-2 border border-[#cbd5e1] text-[#1a3a5c] hover:bg-slate-50 text-xs font-bold rounded transition-colors"
+              className="px-4 py-2 border border-[#c8d4c7] text-[#355E3B] hover:bg-slate-50 text-xs font-bold rounded transition-colors"
             >
               Open Building / Planning Review →
             </button>

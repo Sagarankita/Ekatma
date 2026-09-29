@@ -61,7 +61,7 @@ export function CalculatorReviewScreen() {
   const handleCalculate = () => router.push(ENTREPRENEUR_ROUTES.incentivePortfolio(businessId));
 
   return (
-    <main id="main-content" className="flex-1 bg-[#f8f9fb]" tabIndex={-1}>
+    <main id="main-content" className="flex-1 bg-[#F9FAF2]" tabIndex={-1}>
       <IncentiveWorkspaceHeader
         businessId={businessId}
         title="Review Before Calculation"
@@ -71,23 +71,23 @@ export function CalculatorReviewScreen() {
       />
 
       <div className="max-w-[900px] mx-auto px-6 py-5 space-y-4">
-        <div className="bg-[#f0f9ff] border border-[#93c5fd] px-4 py-3 text-xs text-[#1e3a5c]">
+        <div className="bg-[#f0f9ff] border border-[#a1cba9] px-4 py-3 text-xs text-[#1e3a5c]">
           <strong>Indicative estimate only.</strong> The calculation engine will apply current policy rules to these inputs. Final eligibility and admissible amounts are subject to departmental verification and policy conditions.
         </div>
 
         {sections.map(sec => (
-          <div key={sec.title} className="bg-white border border-[#e2e8f0]">
-            <div className="px-5 py-2.5 bg-[#f8f9fb] border-b border-[#e8edf2] flex items-center justify-between">
-              <p className="text-xs font-bold text-[#1a3a5c] uppercase tracking-wider">{sec.title}</p>
-              <button onClick={handleBack} className="text-xs text-[#1a56db] hover:underline">Edit</button>
+          <div key={sec.title} className="bg-white border border-[#e3ebe1]">
+            <div className="px-5 py-2.5 bg-[#F9FAF2] border-b border-[#e3ebe1] flex items-center justify-between">
+              <p className="text-xs font-bold text-[#355E3B] uppercase tracking-wider">{sec.title}</p>
+              <button onClick={handleBack} className="text-xs text-[#6DAE7C] hover:underline">Edit</button>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
-                <tbody className="divide-y divide-[#f8f9fb]">
+                <tbody className="divide-y divide-[#F9FAF2]">
                   {sec.rows.map(r => (
-                    <tr key={r.label} className="hover:bg-[#f8f9fb]">
-                      <td className="px-5 py-2.5 text-[#6b7a8d] w-[240px]">{r.label}</td>
-                      <td className="px-5 py-2.5 font-semibold text-[#1a2533]">{r.value}</td>
+                    <tr key={r.label} className="hover:bg-[#F9FAF2]">
+                      <td className="px-5 py-2.5 text-[#555C56] w-[240px]">{r.label}</td>
+                      <td className="px-5 py-2.5 font-semibold text-[#2B2B2B]">{r.value}</td>
                       <td className="px-5 py-2.5"><SourceBadge source={r.source} /></td>
                     </tr>
                   ))}
@@ -98,8 +98,8 @@ export function CalculatorReviewScreen() {
         ))}
 
         <div className="flex items-center justify-between pt-2">
-          <button onClick={handleBack} className="text-xs border border-[#d1d9e0] text-[#475569] px-4 py-2 hover:bg-[#f1f5f9] transition-colors">Edit Information</button>
-          <button onClick={handleCalculate} className="bg-[#1a3a5c] text-white text-sm font-bold px-8 py-3 hover:bg-[#0f2540] transition-colors">
+          <button onClick={handleBack} className="text-xs border border-[#d6dfd5] text-[#4A4A4A] px-4 py-2 hover:bg-[#F9FAF2] transition-colors">Edit Information</button>
+          <button onClick={handleCalculate} className="bg-[#355E3B] text-white text-sm font-bold px-8 py-3 hover:bg-[#27472c] transition-colors">
             Calculate Incentive Opportunities →
           </button>
         </div>

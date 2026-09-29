@@ -71,12 +71,12 @@ export function QueryResponseScreen({
 
   if (!query || query.queryId !== queryId) {
     return (
-      <main id="main-content" className="flex-1 bg-[#f8f9fb] flex items-center justify-center min-h-[60vh]" tabIndex={-1}>
+      <main id="main-content" className="flex-1 bg-[#F9FAF2] flex items-center justify-center min-h-[60vh]" tabIndex={-1}>
         <div className="max-w-[900px] mx-auto px-6 py-12 text-center">
-          <p className="text-[#6b7a8d]">Query not found.</p>
+          <p className="text-[#555C56]">Query not found.</p>
           <Link
             href={ENTREPRENEUR_ROUTES.application(project.id, applicationId)}
-            className="mt-4 inline-block text-sm text-[#1a56db] hover:underline"
+            className="mt-4 inline-block text-sm text-[#6DAE7C] hover:underline"
           >
             ← Back to Application Detail
           </Link>
@@ -144,26 +144,26 @@ export function QueryResponseScreen({
   // ─── POST-SUBMISSION STATE ──────────────────────────────────────────────────
   if (submitted) {
     return (
-      <main id="main-content" className="flex-1 bg-[#f8f9fb]" tabIndex={-1}>
+      <main id="main-content" className="flex-1 bg-[#F9FAF2]" tabIndex={-1}>
         {/* Top Header */}
-        <div className="bg-white border-b border-[#d1d9e0] px-6 py-4">
+        <div className="bg-white border-b border-[#d6dfd5] px-6 py-4">
           <div className="max-w-[1000px] mx-auto">
-            <nav className="text-xs text-[#6b7a8d] mb-2 flex items-center gap-1.5" aria-label="Breadcrumb">
-              <Link href={ENTREPRENEUR_ROUTES.business(project.id)} className="hover:text-[#1a3a5c] hover:underline">
+            <nav className="text-xs text-[#555C56] mb-2 flex items-center gap-1.5" aria-label="Breadcrumb">
+              <Link href={ENTREPRENEUR_ROUTES.business(project.id)} className="hover:text-[#355E3B] hover:underline">
                 Dashboard
               </Link>
               <span>›</span>
-              <Link href={ENTREPRENEUR_ROUTES.applications(project.id)} className="hover:text-[#1a3a5c] hover:underline">
+              <Link href={ENTREPRENEUR_ROUTES.applications(project.id)} className="hover:text-[#355E3B] hover:underline">
                 Applications
               </Link>
               <span>›</span>
-              <Link href={ENTREPRENEUR_ROUTES.application(project.id, query.appId)} className="hover:text-[#1a3a5c] hover:underline">
+              <Link href={ENTREPRENEUR_ROUTES.application(project.id, query.appId)} className="hover:text-[#355E3B] hover:underline">
                 {query.appId}
               </Link>
               <span>›</span>
-              <span className="text-[#1a3a5c] font-medium font-mono">Response Submitted</span>
+              <span className="text-[#355E3B] font-medium font-mono">Response Submitted</span>
             </nav>
-            <h1 className="text-xl font-bold text-[#1a3a5c]">Consolidated Query Response Submitted</h1>
+            <h1 className="text-xl font-bold text-[#355E3B]">Consolidated Query Response Submitted</h1>
           </div>
         </div>
 
@@ -187,74 +187,74 @@ export function QueryResponseScreen({
           </div>
 
           {/* Submission Details Card */}
-          <section aria-label="Submission Confirmation" className="bg-white border border-[#e2e8f0] rounded-lg p-5 shadow-2xs space-y-4">
-            <h3 className="text-xs font-bold text-[#1a3a5c] uppercase tracking-wider border-b border-[#f1f5f9] pb-3">
+          <section aria-label="Submission Confirmation" className="bg-white border border-[#e3ebe1] rounded-lg p-5 shadow-2xs space-y-4">
+            <h3 className="text-xs font-bold text-[#355E3B] uppercase tracking-wider border-b border-[#F9FAF2] pb-3">
               Submission Confirmation Record
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
-              <div className="bg-[#f8f9fb] p-3 rounded border border-[#f1f5f9]">
-                <span className="text-[#64748b] block font-medium">Notice Reference</span>
-                <span className="font-mono font-bold text-[#1a3a5c] text-sm mt-0.5 block">{query.queryId}</span>
-                <span className="text-[10px] text-[#94a3b8] mt-0.5 block">Deficiency Memo</span>
+              <div className="bg-[#F9FAF2] p-3 rounded border border-[#F9FAF2]">
+                <span className="text-[#555C56] block font-medium">Notice Reference</span>
+                <span className="font-mono font-bold text-[#355E3B] text-sm mt-0.5 block">{query.queryId}</span>
+                <span className="text-[10px] text-[#9ab098] mt-0.5 block">Deficiency Memo</span>
               </div>
 
-              <div className="bg-[#f8f9fb] p-3 rounded border border-[#f1f5f9]">
-                <span className="text-[#64748b] block font-medium">Affected Application</span>
-                <span className="font-mono font-bold text-[#1a3a5c] text-sm mt-0.5 block">{query.appId}</span>
-                <span className="text-[10px] text-[#64748b] mt-0.5 block">{query.service} ({query.dept})</span>
+              <div className="bg-[#F9FAF2] p-3 rounded border border-[#F9FAF2]">
+                <span className="text-[#555C56] block font-medium">Affected Application</span>
+                <span className="font-mono font-bold text-[#355E3B] text-sm mt-0.5 block">{query.appId}</span>
+                <span className="text-[10px] text-[#555C56] mt-0.5 block">{query.service} ({query.dept})</span>
               </div>
 
-              <div className="bg-[#f8f9fb] p-3 rounded border border-[#f1f5f9]">
-                <span className="text-[#64748b] block font-medium">Submission Timestamp</span>
+              <div className="bg-[#F9FAF2] p-3 rounded border border-[#F9FAF2]">
+                <span className="text-[#555C56] block font-medium">Submission Timestamp</span>
                 <span className="font-semibold text-[#1e293b] text-sm mt-0.5 block">{submittedTimestamp}</span>
                 <span className="text-[10px] text-[#15803d] mt-0.5 block font-medium">e-Signed &amp; Verified</span>
               </div>
 
-              <div className="bg-[#f8f9fb] p-3 rounded border border-[#f1f5f9]">
-                <span className="text-[#64748b] block font-medium">Resolved Deficiencies</span>
+              <div className="bg-[#F9FAF2] p-3 rounded border border-[#F9FAF2]">
+                <span className="text-[#555C56] block font-medium">Resolved Deficiencies</span>
                 <span className="font-bold text-[#15803d] text-sm mt-0.5 block">{query.deficiencies.length} of {query.deficiencies.length} Resolved</span>
-                <span className="text-[10px] text-[#94a3b8] mt-0.5 block">Ready for Delta Review</span>
+                <span className="text-[10px] text-[#9ab098] mt-0.5 block">Ready for Delta Review</span>
               </div>
             </div>
           </section>
 
           {/* WHAT HAPPENS NEXT */}
-          <section aria-label="What Happens Next" className="bg-white border border-[#e2e8f0] rounded-lg p-5 shadow-2xs space-y-4">
-            <div className="flex items-center gap-2 border-b border-[#f1f5f9] pb-3">
-              <Clock className="w-4 h-4 text-[#1a56db]" />
-              <h3 className="text-sm font-bold text-[#1a3a5c] uppercase tracking-wider">
+          <section aria-label="What Happens Next" className="bg-white border border-[#e3ebe1] rounded-lg p-5 shadow-2xs space-y-4">
+            <div className="flex items-center gap-2 border-b border-[#F9FAF2] pb-3">
+              <Clock className="w-4 h-4 text-[#6DAE7C]" />
+              <h3 className="text-sm font-bold text-[#355E3B] uppercase tracking-wider">
                 What Happens Next?
               </h3>
             </div>
 
-            <ol className="relative pl-6 space-y-4 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-[#e2e8f0] text-xs">
+            <ol className="relative pl-6 space-y-4 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-[#e3ebe1] text-xs">
               <li className="relative">
                 <div className="absolute -left-6 top-0.5 w-4 h-4 rounded-full bg-[#15803d] text-white flex items-center justify-center text-[10px] font-bold">
                   ✓
                 </div>
-                <h4 className="font-bold text-[#1a3a5c]">1. Statutory SLA Clock Resumed</h4>
-                <p className="text-[#475569] mt-0.5 leading-relaxed">
+                <h4 className="font-bold text-[#355E3B]">1. Statutory SLA Clock Resumed</h4>
+                <p className="text-[#4A4A4A] mt-0.5 leading-relaxed">
                   The statutory 30-day clock paused under the Maharashtra RTS Act is un-paused immediately upon receipt of your response.
                 </p>
               </li>
 
               <li className="relative">
-                <div className="absolute -left-6 top-0.5 w-4 h-4 rounded-full bg-[#1a56db] text-white flex items-center justify-center text-[10px] font-bold">
+                <div className="absolute -left-6 top-0.5 w-4 h-4 rounded-full bg-[#6DAE7C] text-white flex items-center justify-center text-[10px] font-bold">
                   2
                 </div>
-                <h4 className="font-bold text-[#1a3a5c]">2. Delta Review by {query.dept} Technical Officer</h4>
-                <p className="text-[#475569] mt-0.5 leading-relaxed">
+                <h4 className="font-bold text-[#355E3B]">2. Delta Review by {query.dept} Technical Officer</h4>
+                <p className="text-[#4A4A4A] mt-0.5 leading-relaxed">
                   The officer will re-scrutinize strictly the <strong>3 modified items</strong> and supporting drawings. Your 42 other pre-verified parameters remain locked and approved.
                 </p>
               </li>
 
               <li className="relative">
-                <div className="absolute -left-6 top-0.5 w-4 h-4 rounded-full bg-[#cbd5e1] text-[#475569] flex items-center justify-center text-[10px] font-bold">
+                <div className="absolute -left-6 top-0.5 w-4 h-4 rounded-full bg-[#c8d4c7] text-[#4A4A4A] flex items-center justify-center text-[10px] font-bold">
                   3
                 </div>
-                <h4 className="font-bold text-[#1a3a5c]">3. Consent Committee Determination</h4>
-                <p className="text-[#475569] mt-0.5 leading-relaxed">
+                <h4 className="font-bold text-[#355E3B]">3. Consent Committee Determination</h4>
+                <p className="text-[#4A4A4A] mt-0.5 leading-relaxed">
                   Once technical scrutiny verifies the revised water balance and hazardous waste protocol, the file will be placed before the Regional Committee for formal Consent grant.
                 </p>
               </li>
@@ -265,14 +265,14 @@ export function QueryResponseScreen({
           <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
             <Link
               href={ENTREPRENEUR_ROUTES.application(project.id, query.appId)}
-              className="text-xs border border-[#cbd5e1] text-[#475569] hover:bg-[#f1f5f9] px-4 py-2.5 rounded-md font-semibold transition-colors"
+              className="text-xs border border-[#c8d4c7] text-[#4A4A4A] hover:bg-[#F9FAF2] px-4 py-2.5 rounded-md font-semibold transition-colors"
             >
               ← Back to Application Cockpit
             </Link>
 
             <Link
               href={ENTREPRENEUR_ROUTES.applicationResubmission(project.id, query.appId, 'APP-2026-MPCB-00412-R2')}
-              className="text-xs bg-[#1a3a5c] text-white hover:bg-[#0f2338] px-5 py-2.5 rounded-md font-semibold transition-colors shadow-xs flex items-center gap-1.5"
+              className="text-xs bg-[#355E3B] text-white hover:bg-[#0f2338] px-5 py-2.5 rounded-md font-semibold transition-colors shadow-xs flex items-center gap-1.5"
             >
               Review Delta Resubmission →
             </Link>
@@ -284,38 +284,38 @@ export function QueryResponseScreen({
 
   // ─── QUERY RESPONSE FORM VIEW ───────────────────────────────────────────────
   return (
-    <main id="main-content" className="flex-1 bg-[#f8f9fb]" tabIndex={-1}>
+    <main id="main-content" className="flex-1 bg-[#F9FAF2]" tabIndex={-1}>
       {/* ─── Breadcrumb & Top Bar ────────────────────────────────────────── */}
-      <div className="bg-white border-b border-[#d1d9e0] px-6 py-4">
+      <div className="bg-white border-b border-[#d6dfd5] px-6 py-4">
         <div className="max-w-[1000px] mx-auto">
-          <nav className="text-xs text-[#6b7a8d] mb-2 flex items-center gap-1.5" aria-label="Breadcrumb">
-            <Link href={ENTREPRENEUR_ROUTES.business(project.id)} className="hover:text-[#1a3a5c] hover:underline">
+          <nav className="text-xs text-[#555C56] mb-2 flex items-center gap-1.5" aria-label="Breadcrumb">
+            <Link href={ENTREPRENEUR_ROUTES.business(project.id)} className="hover:text-[#355E3B] hover:underline">
               Dashboard
             </Link>
             <span>›</span>
-            <Link href={ENTREPRENEUR_ROUTES.applications(project.id)} className="hover:text-[#1a3a5c] hover:underline">
+            <Link href={ENTREPRENEUR_ROUTES.applications(project.id)} className="hover:text-[#355E3B] hover:underline">
               Applications Tracker
             </Link>
             <span>›</span>
-            <Link href={ENTREPRENEUR_ROUTES.application(project.id, query.appId)} className="hover:text-[#1a3a5c] hover:underline">
+            <Link href={ENTREPRENEUR_ROUTES.application(project.id, query.appId)} className="hover:text-[#355E3B] hover:underline">
               {query.appId}
             </Link>
             <span>›</span>
-            <span className="text-[#1a3a5c] font-medium font-mono">Query Response</span>
+            <span className="text-[#355E3B] font-medium font-mono">Query Response</span>
           </nav>
 
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold px-2 py-0.5 rounded border border-[#cbd5e1] bg-[#f8f9fb] text-[#1e293b]">
+                <span className="text-xs font-bold px-2 py-0.5 rounded border border-[#c8d4c7] bg-[#F9FAF2] text-[#1e293b]">
                   {query.dept}
                 </span>
-                <h1 className="text-xl font-bold text-[#1a3a5c]">Consolidated Deficiency Memo — {query.queryId}</h1>
+                <h1 className="text-xl font-bold text-[#355E3B]">Consolidated Deficiency Memo — {query.queryId}</h1>
                 <span className="text-xs bg-[#fee2e2] text-[#b91c1c] border border-[#fca5a5] font-semibold px-2 py-0.5 rounded">
                   Action Required
                 </span>
               </div>
-              <p className="text-xs text-[#6b7a8d] mt-1">
+              <p className="text-xs text-[#555C56] mt-1">
                 Affected Application: <strong className="font-mono text-[#1e293b]">{query.appId}</strong> · {query.service} · Government of Maharashtra
               </p>
             </div>
@@ -324,16 +324,16 @@ export function QueryResponseScreen({
               <button
                 type="button"
                 onClick={handleSimulateUploadAll}
-                className="text-xs border border-[#1a56db] text-[#1a56db] bg-[#eff6ff] hover:bg-[#dbeafe] px-3 py-1.5 rounded font-medium flex items-center gap-1 transition-colors"
+                className="text-xs border border-[#6DAE7C] text-[#6DAE7C] bg-[#edf5ef] hover:bg-[#edf5ef] px-3 py-1.5 rounded font-medium flex items-center gap-1 transition-colors"
                 title="Fill all answers and attach all required drawings in 1 click for testing"
               >
-                <Sparkles className="w-3.5 h-3.5 text-[#1a56db]" />
-                ⚡ Auto-Fill &amp; Attach All
+                <Sparkles className="w-3.5 h-3.5 text-[#6DAE7C]" />
+                Auto-Fill &amp; Attach All
               </button>
 
               <Link
                 href={ENTREPRENEUR_ROUTES.application(project.id, query.appId)}
-                className="text-xs border border-[#cbd5e1] text-[#475569] hover:bg-[#f1f5f9] px-3 py-1.5 rounded transition-colors font-medium"
+                className="text-xs border border-[#c8d4c7] text-[#4A4A4A] hover:bg-[#F9FAF2] px-3 py-1.5 rounded transition-colors font-medium"
               >
                 ← Back to Application
               </Link>
@@ -348,7 +348,7 @@ export function QueryResponseScreen({
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#fef2f2] pb-3">
             <div className="flex items-center gap-2">
               <AlertTriangle className="w-5 h-5 text-[#b91c1c]" />
-              <h2 className="text-sm font-bold text-[#1a3a5c] uppercase tracking-wider">
+              <h2 className="text-sm font-bold text-[#355E3B] uppercase tracking-wider">
                 Notice Summary &amp; Statutory Resolution Requirements
               </h2>
             </div>
@@ -368,52 +368,52 @@ export function QueryResponseScreen({
               <span className="text-[10px] font-bold text-[#b91c1c] uppercase tracking-wider block">
                 1. What Needs To Be Fixed?
               </span>
-              <p className="font-bold text-[#1a3a5c] mt-1">3 Technical Discrepancies</p>
-              <p className="text-[11px] text-[#64748b] mt-0.5 leading-snug">
+              <p className="font-bold text-[#355E3B] mt-1">3 Technical Discrepancies</p>
+              <p className="text-[11px] text-[#555C56] mt-0.5 leading-snug">
                 Water balance, ETP sizing, and missing hazardous waste plan.
               </p>
             </div>
 
             {/* 2. Why */}
-            <div className="bg-[#f8f9fb] p-3 rounded border border-[#f1f5f9]">
-              <span className="text-[10px] font-bold text-[#64748b] uppercase tracking-wider block">
+            <div className="bg-[#F9FAF2] p-3 rounded border border-[#F9FAF2]">
+              <span className="text-[10px] font-bold text-[#555C56] uppercase tracking-wider block">
                 2. Why?
               </span>
-              <p className="font-bold text-[#1a3a5c] mt-1">Calculation Conflicts</p>
-              <p className="text-[11px] text-[#64748b] mt-0.5 leading-snug">
+              <p className="font-bold text-[#355E3B] mt-1">Calculation Conflicts</p>
+              <p className="text-[11px] text-[#555C56] mt-0.5 leading-snug">
                 Form-I declared 50 KL/day while the DPR water balance proved 65 KL/day.
               </p>
             </div>
 
             {/* 3. What evidence is needed */}
-            <div className="bg-[#f8f9fb] p-3 rounded border border-[#f1f5f9]">
-              <span className="text-[10px] font-bold text-[#64748b] uppercase tracking-wider block">
+            <div className="bg-[#F9FAF2] p-3 rounded border border-[#F9FAF2]">
+              <span className="text-[10px] font-bold text-[#555C56] uppercase tracking-wider block">
                 3. Evidence Needed?
               </span>
-              <p className="font-bold text-[#1a3a5c] mt-1">3 Certified Documents</p>
-              <p className="text-[11px] text-[#64748b] mt-0.5 leading-snug">
+              <p className="font-bold text-[#355E3B] mt-1">3 Certified Documents</p>
+              <p className="text-[11px] text-[#555C56] mt-0.5 leading-snug">
                 Revised chart, ETP drawings, and waste management protocol.
               </p>
             </div>
 
             {/* 4. What do I need to submit */}
-            <div className="bg-[#f8f9fb] p-3 rounded border border-[#f1f5f9]">
-              <span className="text-[10px] font-bold text-[#64748b] uppercase tracking-wider block">
+            <div className="bg-[#F9FAF2] p-3 rounded border border-[#F9FAF2]">
+              <span className="text-[10px] font-bold text-[#555C56] uppercase tracking-wider block">
                 4. What To Submit?
               </span>
-              <p className="font-bold text-[#1a3a5c] mt-1">Response &amp; Files</p>
-              <p className="text-[11px] text-[#64748b] mt-0.5 leading-snug">
+              <p className="font-bold text-[#355E3B] mt-1">Response &amp; Files</p>
+              <p className="text-[11px] text-[#555C56] mt-0.5 leading-snug">
                 Enter explanations below and attach updated drawings.
               </p>
             </div>
 
             {/* 5. When */}
-            <div className="bg-[#fffbeb] p-3 rounded border border-[#fde68a]">
-              <span className="text-[10px] font-bold text-[#92400e] uppercase tracking-wider block">
+            <div className="bg-[#fdf8e6] p-3 rounded border border-[#fae69e]">
+              <span className="text-[10px] font-bold text-[#7a5807] uppercase tracking-wider block">
                 5. When?
               </span>
-              <p className="font-bold text-[#92400e] mt-1">{query.responseDeadline}</p>
-              <p className="text-[11px] text-[#92400e] mt-0.5 leading-snug">
+              <p className="font-bold text-[#7a5807] mt-1">{query.responseDeadline}</p>
+              <p className="text-[11px] text-[#7a5807] mt-0.5 leading-snug">
                 Strict deadline to avoid deemed rejection under RTS Act.
               </p>
             </div>
@@ -421,10 +421,10 @@ export function QueryResponseScreen({
         </section>
 
         {/* ─── Resolution Progress Bar & Save Actions ──────────────────────── */}
-        <div className="bg-white border border-[#e2e8f0] rounded-lg p-4 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="bg-white border border-[#e3ebe1] rounded-lg p-4 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <h3 className="text-xs font-bold text-[#1a3a5c] uppercase tracking-wider">
+              <h3 className="text-xs font-bold text-[#355E3B] uppercase tracking-wider">
                 Deficiency Resolution Status: {completedCount} of {query.deficiencies.length} Complete
               </h3>
               {isReadyToSubmit ? (
@@ -438,7 +438,7 @@ export function QueryResponseScreen({
               )}
             </div>
             {/* Progress Bar */}
-            <div className="w-64 bg-[#e2e8f0] h-1.5 rounded-full overflow-hidden">
+            <div className="w-64 bg-[#e3ebe1] h-1.5 rounded-full overflow-hidden">
               <div
                 className="h-full bg-[#15803d] transition-all duration-300"
                 style={{ width: `${(completedCount / query.deficiencies.length) * 100}%` }}
@@ -457,9 +457,9 @@ export function QueryResponseScreen({
             <button
               type="button"
               onClick={handleSaveDraft}
-              className="text-xs border border-[#cbd5e1] text-[#1a3a5c] hover:bg-[#f1f5f9] px-3.5 py-1.5 rounded font-semibold transition-colors flex items-center gap-1.5"
+              className="text-xs border border-[#c8d4c7] text-[#355E3B] hover:bg-[#F9FAF2] px-3.5 py-1.5 rounded font-semibold transition-colors flex items-center gap-1.5"
             >
-              <Save className="w-3.5 h-3.5 text-[#64748b]" />
+              <Save className="w-3.5 h-3.5 text-[#555C56]" />
               Save Response Draft
             </button>
           </div>
@@ -476,20 +476,20 @@ export function QueryResponseScreen({
               <article
                 key={def.id}
                 className={`bg-white border rounded-lg overflow-hidden shadow-2xs transition-all ${
-                  isResolved ? 'border-[#86efac]' : 'border-[#e2e8f0]'
+                  isResolved ? 'border-[#86efac]' : 'border-[#e3ebe1]'
                 }`}
               >
                 {/* Card Header */}
                 <div
                   className={`px-5 py-3 border-b flex flex-wrap items-center justify-between gap-3 ${
-                    isResolved ? 'bg-[#f0fdf4] border-[#bbf7d0]' : 'bg-[#f8f9fb] border-[#e2e8f0]'
+                    isResolved ? 'bg-[#f0fdf4] border-[#bbf7d0]' : 'bg-[#F9FAF2] border-[#e3ebe1]'
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
                     <span className="font-mono text-xs font-bold text-[#b91c1c] bg-[#fee2e2] px-2 py-0.5 rounded">
                       {def.id}
                     </span>
-                    <h3 className="text-sm font-bold text-[#1a3a5c]">
+                    <h3 className="text-sm font-bold text-[#355E3B]">
                       {idx + 1}. {def.issue}
                     </h3>
                   </div>
@@ -501,7 +501,7 @@ export function QueryResponseScreen({
                         Ready to Submit
                       </span>
                     ) : (
-                      <span className="text-[10px] font-bold bg-[#fffbeb] text-[#92400e] border border-[#fde68a] px-2 py-0.5 rounded">
+                      <span className="text-[10px] font-bold bg-[#fdf8e6] text-[#7a5807] border border-[#fae69e] px-2 py-0.5 rounded">
                         Action Required
                       </span>
                     )}
@@ -511,11 +511,11 @@ export function QueryResponseScreen({
                 {/* Card Body */}
                 <div className="p-5 space-y-4 text-xs">
                   {/* Explanation (Why this matters) */}
-                  <div className="bg-[#f8f9fb] p-3.5 rounded border border-[#e2e8f0] space-y-1">
-                    <span className="text-[10px] font-bold text-[#64748b] uppercase tracking-wider block">
+                  <div className="bg-[#F9FAF2] p-3.5 rounded border border-[#e3ebe1] space-y-1">
+                    <span className="text-[10px] font-bold text-[#555C56] uppercase tracking-wider block">
                       Why This Needs Correction:
                     </span>
-                    <p className="text-[#334155] text-xs leading-relaxed font-medium">
+                    <p className="text-[#3A3E39] text-xs leading-relaxed font-medium">
                       {def.explanation}
                     </p>
                   </div>
@@ -523,22 +523,22 @@ export function QueryResponseScreen({
                   {/* Required Action & Evidence Grid */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Required Action */}
-                    <div className="border border-[#e2e8f0] rounded p-3 bg-white space-y-1">
-                      <span className="text-[10px] font-bold text-[#1a3a5c] uppercase tracking-wider block">
+                    <div className="border border-[#e3ebe1] rounded p-3 bg-white space-y-1">
+                      <span className="text-[10px] font-bold text-[#355E3B] uppercase tracking-wider block">
                         What You Need to Do:
                       </span>
-                      <p className="text-[#475569] leading-relaxed">
+                      <p className="text-[#4A4A4A] leading-relaxed">
                         {def.requiredAction}
                       </p>
                     </div>
 
                     {/* Evidence Needed */}
-                    <div className="border border-[#e2e8f0] rounded p-3 bg-white space-y-1">
-                      <span className="text-[10px] font-bold text-[#1a3a5c] uppercase tracking-wider block">
+                    <div className="border border-[#e3ebe1] rounded p-3 bg-white space-y-1">
+                      <span className="text-[10px] font-bold text-[#355E3B] uppercase tracking-wider block">
                         Evidence / Document Needed:
                       </span>
-                      <p className="text-[#1a56db] font-semibold flex items-start gap-1.5">
-                        <FileText className="w-4 h-4 text-[#1a56db] shrink-0 mt-0.5" />
+                      <p className="text-[#6DAE7C] font-semibold flex items-start gap-1.5">
+                        <FileText className="w-4 h-4 text-[#6DAE7C] shrink-0 mt-0.5" />
                         <span>{def.evidenceNeeded}</span>
                       </p>
                     </div>
@@ -547,10 +547,10 @@ export function QueryResponseScreen({
                   {/* Entrepreneur Response Field */}
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <label htmlFor={`response-${def.id}`} className="text-[11px] font-bold text-[#1a3a5c] uppercase tracking-wider">
+                      <label htmlFor={`response-${def.id}`} className="text-[11px] font-bold text-[#355E3B] uppercase tracking-wider">
                         Your Clarification / Corrective Action Explanation <span className="text-[#b91c1c]">*</span>
                       </label>
-                      <span className="text-[10px] text-[#94a3b8]">
+                      <span className="text-[10px] text-[#9ab098]">
                         {(responses[def.id] ?? '').length} characters
                       </span>
                     </div>
@@ -561,13 +561,13 @@ export function QueryResponseScreen({
                       value={responses[def.id] ?? ''}
                       onChange={e => setResponses(prev => ({ ...prev, [def.id]: e.target.value }))}
                       placeholder="State the specific changes made, updated figures, and reference the attached document..."
-                      className="w-full text-xs border border-[#cbd5e1] rounded p-3 focus:outline-none focus:ring-1 focus:ring-[#1a56db] bg-white leading-relaxed resize-y"
+                      className="w-full text-xs border border-[#c8d4c7] rounded p-3 focus:outline-none focus:ring-1 focus:ring-[#6DAE7C] bg-white leading-relaxed resize-y"
                     />
                   </div>
 
                   {/* Upload Control */}
-                  <div className="border border-[#e2e8f0] rounded-lg p-3.5 bg-[#f8f9fb] space-y-2">
-                    <span className="text-[10px] font-bold text-[#64748b] uppercase tracking-wider block">
+                  <div className="border border-[#e3ebe1] rounded-lg p-3.5 bg-[#F9FAF2] space-y-2">
+                    <span className="text-[10px] font-bold text-[#555C56] uppercase tracking-wider block">
                       Upload Required Evidence File <span className="text-[#b91c1c]">*</span>
                     </span>
 
@@ -576,8 +576,8 @@ export function QueryResponseScreen({
                         <div className="flex items-center gap-2.5">
                           <CheckCircle2 className="w-4 h-4 text-[#15803d]" />
                           <div>
-                            <span className="font-semibold text-[#1a3a5c] text-xs block">{currentUpload.name}</span>
-                            <span className="text-[11px] text-[#64748b]">
+                            <span className="font-semibold text-[#355E3B] text-xs block">{currentUpload.name}</span>
+                            <span className="text-[11px] text-[#555C56]">
                               Size: {currentUpload.size} · Uploaded: {currentUpload.timestamp}
                             </span>
                           </div>
@@ -587,11 +587,11 @@ export function QueryResponseScreen({
                           <button
                             type="button"
                             onClick={() => handleSimulateUpload(def)}
-                            className="text-xs text-[#1a56db] hover:underline font-medium"
+                            className="text-xs text-[#6DAE7C] hover:underline font-medium"
                           >
                             Replace
                           </button>
-                          <span className="text-[#cbd5e1]">|</span>
+                          <span className="text-[#c8d4c7]">|</span>
                           <button
                             type="button"
                             onClick={() => handleRemoveUpload(def.id)}
@@ -602,14 +602,14 @@ export function QueryResponseScreen({
                         </div>
                       </div>
                     ) : (
-                      <div className="bg-white border border-dashed border-[#cbd5e1] rounded p-4 text-center space-y-2">
-                        <Upload className="w-6 h-6 text-[#94a3b8] mx-auto" />
+                      <div className="bg-white border border-dashed border-[#c8d4c7] rounded p-4 text-center space-y-2">
+                        <Upload className="w-6 h-6 text-[#9ab098] mx-auto" />
                         <div>
-                          <p className="text-xs text-[#475569] font-medium">
+                          <p className="text-xs text-[#4A4A4A] font-medium">
                             Attach PDF, DWG, or ZIP file (Max 25 MB)
                           </p>
-                          <p className="text-[11px] text-[#94a3b8]">
-                            Suggested file name: <code className="font-mono text-[#1a3a5c]">{def.evidenceDocName ?? `${def.id.toLowerCase()}_evidence.pdf`}</code>
+                          <p className="text-[11px] text-[#9ab098]">
+                            Suggested file name: <code className="font-mono text-[#355E3B]">{def.evidenceDocName ?? `${def.id.toLowerCase()}_evidence.pdf`}</code>
                           </p>
                         </div>
 
@@ -617,15 +617,15 @@ export function QueryResponseScreen({
                           <button
                             type="button"
                             onClick={() => handleSimulateUpload(def)}
-                            className="text-xs bg-[#1a56db] text-white hover:bg-[#1e40af] px-3.5 py-1.5 rounded font-medium shadow-2xs flex items-center gap-1.5"
+                            className="text-xs bg-[#6DAE7C] text-white hover:bg-[#539160] px-3.5 py-1.5 rounded font-medium shadow-2xs flex items-center gap-1.5"
                           >
                             <Sparkles className="w-3.5 h-3.5" />
-                            ⚡ Simulate Upload
+                            Simulate Upload
                           </button>
 
                           <Link
                             href={ENTREPRENEUR_ROUTES.documents(project.id)}
-                            className="text-xs border border-[#cbd5e1] text-[#475569] hover:bg-[#f1f5f9] px-3 py-1.5 rounded font-medium"
+                            className="text-xs border border-[#c8d4c7] text-[#4A4A4A] hover:bg-[#F9FAF2] px-3 py-1.5 rounded font-medium"
                           >
                             Select from Document Centre →
                           </Link>
@@ -642,14 +642,14 @@ export function QueryResponseScreen({
                         onClick={() =>
                           setExpandedLegal(prev => ({ ...prev, [def.id]: !isLegalOpen }))
                         }
-                        className="text-[11px] text-[#64748b] hover:text-[#1a3a5c] flex items-center gap-1 font-medium transition-colors"
+                        className="text-[11px] text-[#555C56] hover:text-[#355E3B] flex items-center gap-1 font-medium transition-colors"
                       >
                         {isLegalOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                         <span>{isLegalOpen ? 'Hide Statutory Reference' : 'View Statutory &amp; Regulatory Basis'}</span>
                       </button>
 
                       {isLegalOpen && (
-                        <div className="mt-2 p-2.5 bg-[#f1f5f9] rounded border border-[#e2e8f0] text-[11px] text-[#475569]">
+                        <div className="mt-2 p-2.5 bg-[#F9FAF2] rounded border border-[#e3ebe1] text-[11px] text-[#4A4A4A]">
                           <strong>Legal Rule Reference:</strong> {def.regulatoryRef}
                         </div>
                       )}
@@ -663,13 +663,13 @@ export function QueryResponseScreen({
 
         {/* ─── Bottom Actions Bar ──────────────────────────────────────────── */}
         <div className={`bg-white border rounded-lg p-5 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
-          isReadyToSubmit ? 'border-[#86efac]' : 'border-[#e2e8f0]'
+          isReadyToSubmit ? 'border-[#86efac]' : 'border-[#e3ebe1]'
         }`}>
           <div>
-            <h3 className="text-xs font-bold text-[#1a3a5c] uppercase tracking-wider">
+            <h3 className="text-xs font-bold text-[#355E3B] uppercase tracking-wider">
               {isReadyToSubmit ? 'All Deficiencies Resolved &amp; Ready for Submission' : 'Complete All Items to Submit'}
             </h3>
-            <p className="text-xs text-[#64748b] mt-0.5">
+            <p className="text-xs text-[#555C56] mt-0.5">
               {isReadyToSubmit
                 ? 'Your responses and supporting evidence files will be transmitted to the scrutiny officer.'
                 : `${query.deficiencies.length - completedCount} items still require response clarification or file attachment.`}
@@ -680,9 +680,9 @@ export function QueryResponseScreen({
             <button
               type="button"
               onClick={handleSaveDraft}
-              className="text-xs border border-[#cbd5e1] text-[#1a3a5c] hover:bg-[#f1f5f9] px-4 py-2 rounded-md font-semibold transition-colors flex items-center gap-1.5"
+              className="text-xs border border-[#c8d4c7] text-[#355E3B] hover:bg-[#F9FAF2] px-4 py-2 rounded-md font-semibold transition-colors flex items-center gap-1.5"
             >
-              <Save className="w-3.5 h-3.5 text-[#64748b]" />
+              <Save className="w-3.5 h-3.5 text-[#555C56]" />
               Save Response Draft
             </button>
 
@@ -699,11 +699,11 @@ export function QueryResponseScreen({
               <button
                 type="button"
                 onClick={handleSimulateUploadAll}
-                className="text-xs bg-[#1a56db] text-white hover:bg-[#1e40af] px-4 py-2.5 rounded-md font-semibold transition-colors shadow-xs flex items-center gap-1.5"
+                className="text-xs bg-[#6DAE7C] text-white hover:bg-[#539160] px-4 py-2.5 rounded-md font-semibold transition-colors shadow-xs flex items-center gap-1.5"
                 title="Fill all responses and files instantly"
               >
                 <Sparkles className="w-3.5 h-3.5" />
-                ⚡ Auto-Resolve All to Submit
+                Auto-Resolve All to Submit
               </button>
             )}
           </div>

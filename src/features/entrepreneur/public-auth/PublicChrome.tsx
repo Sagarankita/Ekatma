@@ -132,8 +132,8 @@ export const Icon = {
 }
 
 // ─── Shared input style ───────────────────────────────────────────────────────
-export const inputBase = "w-full px-3 py-2 text-sm border rounded bg-white focus:outline-none focus:ring-2 focus:ring-[#1a56db] focus:border-[#1a56db] transition-colors placeholder:text-[#9aa5b4]"
-export const inputDefault = `${inputBase} border-[#d1d9e0]`
+export const inputBase = "w-full px-3 py-2 text-sm border rounded bg-white focus:outline-none focus:ring-2 focus:ring-[#6DAE7C] focus:border-[#6DAE7C] transition-colors placeholder:text-[#8c9f8a]"
+export const inputDefault = `${inputBase} border-[#d6dfd5]`
 export const inputError = `${inputBase} border-red-500 focus:ring-red-400`
 
 export function DemoNotice() {
@@ -192,7 +192,7 @@ export function AccessibilityStrip({ lang, setLang, fontSize, setFontSize, highC
   };
 
   return (
-    <div className="bg-[#0f2540] text-white text-xs" role="navigation" aria-label="Accessibility and language options">
+    <div className="bg-[#27472c] text-white text-xs" role="navigation" aria-label="Accessibility and language options">
       {/* Hidden element for Google Translate initialization */}
       <div id="google_translate_element" className="hidden" />
 
@@ -219,15 +219,15 @@ export function AccessibilityStrip({ lang, setLang, fontSize, setFontSize, highC
           </button>
           <span className="text-white/30">|</span>
           <span className="flex items-center gap-0.5">
-            <button onClick={() => setFontSize('sm')} className={`px-1.5 py-0.5 rounded transition-colors text-[10px] ${fontSize === 'sm' ? 'bg-white text-[#0f2540] font-bold' : 'hover:text-white'}`} aria-label="Decrease font size" aria-pressed={fontSize === 'sm'}>A−</button>
-            <button onClick={() => setFontSize('md')} className={`px-1.5 py-0.5 rounded transition-colors text-xs ${fontSize === 'md' ? 'bg-white text-[#0f2540] font-bold' : 'hover:text-white'}`} aria-label="Default font size" aria-pressed={fontSize === 'md'}>A</button>
-            <button onClick={() => setFontSize('lg')} className={`px-1.5 py-0.5 rounded transition-colors text-sm ${fontSize === 'lg' ? 'bg-white text-[#0f2540] font-bold' : 'hover:text-white'}`} aria-label="Increase font size" aria-pressed={fontSize === 'lg'}>A+</button>
+            <button onClick={() => setFontSize('sm')} className={`px-1.5 py-0.5 rounded transition-colors text-[10px] ${fontSize === 'sm' ? 'bg-white text-[#27472c] font-bold' : 'hover:text-white'}`} aria-label="Decrease font size" aria-pressed={fontSize === 'sm'}>A−</button>
+            <button onClick={() => setFontSize('md')} className={`px-1.5 py-0.5 rounded transition-colors text-xs ${fontSize === 'md' ? 'bg-white text-[#27472c] font-bold' : 'hover:text-white'}`} aria-label="Default font size" aria-pressed={fontSize === 'md'}>A</button>
+            <button onClick={() => setFontSize('lg')} className={`px-1.5 py-0.5 rounded transition-colors text-sm ${fontSize === 'lg' ? 'bg-white text-[#27472c] font-bold' : 'hover:text-white'}`} aria-label="Increase font size" aria-pressed={fontSize === 'lg'}>A+</button>
           </span>
           <span className="text-white/30">|</span>
           <button onClick={() => setHighContrast(!highContrast)} className={`px-2 py-0.5 rounded transition-colors ${highContrast ? 'bg-yellow-400 text-black font-semibold' : 'hover:text-white'}`} aria-pressed={highContrast}>High Contrast</button>
           <span className="text-white/30">|</span>
-          <button onClick={() => handleLangChange('en')} className={`px-2 py-0.5 rounded transition-colors ${lang === 'en' ? 'bg-white text-[#0f2540] font-semibold' : 'hover:text-white'}`} aria-pressed={lang === 'en'}>English</button>
-          <button onClick={() => handleLangChange('mr')} className={`px-2 py-0.5 rounded transition-colors ${lang === 'mr' ? 'bg-white text-[#0f2540] font-semibold' : 'hover:text-white'}`} aria-pressed={lang === 'mr'}>मराठी</button>
+          <button onClick={() => handleLangChange('en')} className={`px-2 py-0.5 rounded transition-colors ${lang === 'en' ? 'bg-white text-[#27472c] font-semibold' : 'hover:text-white'}`} aria-pressed={lang === 'en'}>English</button>
+          <button onClick={() => handleLangChange('mr')} className={`px-2 py-0.5 rounded transition-colors ${lang === 'mr' ? 'bg-white text-[#27472c] font-semibold' : 'hover:text-white'}`} aria-pressed={lang === 'mr'}>मराठी</button>
           <span className="text-white/30">|</span>
           <a href="#help-resources" className="px-2 py-0.5 hover:text-white hover:underline transition-colors">Sitemap</a>
         </div>
@@ -267,26 +267,26 @@ export function PortalHeader({
   }, [])
 
   return (
-    <header className="bg-white border-b border-[#d1d9e0] shadow-sm" role="banner">
+    <header className="bg-white border-b border-[#d6dfd5] shadow-sm" role="banner">
       <div className="max-w-[1440px] mx-auto px-3 sm:px-6 flex flex-col xl:flex-row items-center justify-between py-3 gap-3 xl:gap-8">
         {/* Identity block */}
         <div className="flex flex-wrap items-center justify-center xl:justify-start gap-2 sm:gap-6 w-full xl:w-auto min-w-0">
           <div className="flex flex-col items-center gap-0.5 shrink-0">
             <img src="/assets/india-emblem.png" alt="National Emblem of India" className="h-10 sm:h-14 w-auto object-contain" />
-            <span className="text-[9px] text-[#4a5568] font-medium tracking-wide leading-none" style={{ fontFamily: 'Noto Sans Devanagari, sans-serif' }}>सत्यमेव जयते</span>
+            <span className="text-[9px] text-[#4A4A4A] font-medium tracking-wide leading-none" style={{ fontFamily: 'Noto Sans Devanagari, sans-serif' }}>सत्यमेव जयते</span>
           </div>
-          <div className="hidden sm:block w-px h-12 bg-[#d1d9e0]" aria-hidden="true" />
+          <div className="hidden sm:block w-px h-12 bg-[#d6dfd5]" aria-hidden="true" />
           <div className="flex flex-col items-center gap-0.5 shrink-0">
             <img src="/assets/maha-seal.png" alt="Government of Maharashtra seal" className="h-9 sm:h-12 w-auto object-contain" />
-            <span className="text-[9px] text-[#4a5568] font-medium tracking-wide leading-none text-center">Govt. of Maharashtra</span>
+            <span className="text-[9px] text-[#4A4A4A] font-medium tracking-wide leading-none text-center">Govt. of Maharashtra</span>
           </div>
-          <div className="hidden sm:block w-px h-12 bg-[#d1d9e0]" aria-hidden="true" />
+          <div className="hidden sm:block w-px h-12 bg-[#d6dfd5]" aria-hidden="true" />
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <img src="/assets/ekatma-logo.png" alt="Ekatma portal logo" className="h-8 sm:h-10 w-auto object-contain shrink-0" />
             <div className="min-w-0 max-w-[200px] sm:max-w-none">
-              <div className="text-[#1a3a5c] font-bold text-base leading-tight">EKATMA</div>
-              <div className="text-[#4a5568] text-[11px] leading-tight">Maharashtra Industrial Approval & Compliance Portal</div>
-              <div className="text-[#4a5568] text-[10px] leading-tight" style={{ fontFamily: 'Noto Sans Devanagari, sans-serif' }}>महाराष्ट्र औद्योगिक अनुमोदन एवं अनुपालन पोर्टल</div>
+              <div className="text-[#355E3B] font-bold text-base leading-tight">EKATMA</div>
+              <div className="text-[#4A4A4A] text-[11px] leading-tight">Maharashtra Industrial Approval & Compliance Portal</div>
+              <div className="text-[#4A4A4A] text-[10px] leading-tight" style={{ fontFamily: 'Noto Sans Devanagari, sans-serif' }}>महाराष्ट्र औद्योगिक अनुमोदन एवं अनुपालन पोर्टल</div>
             </div>
           </div>
         </div>
@@ -294,31 +294,31 @@ export function PortalHeader({
         {/* Right actions */}
         <div className="flex flex-wrap items-center justify-center xl:justify-end gap-3 w-full xl:w-auto">
           {showSearchAndHelp && (
-            <button aria-label="Regulatory Assistant" onClick={onOpenRegAssistant} className="flex items-center gap-1.5 p-2 rounded hover:bg-[#f0f4f8] text-[#4a5568] hover:text-[#1a3a5c] transition-colors" title="Regulatory Assistant"><Icon.Shield /><span className="hidden lg:inline text-xs font-medium">Regulatory Assistant</span></button>
+            <button aria-label="Regulatory Assistant" onClick={onOpenRegAssistant} className="flex items-center gap-1.5 p-2 rounded hover:bg-[#F9FAF2] text-[#4A4A4A] hover:text-[#355E3B] transition-colors" title="Regulatory Assistant"><Icon.Shield /><span className="hidden lg:inline text-xs font-medium">Regulatory Assistant</span></button>
           )}
           {isLoggedIn && (
-            <button aria-label="Notifications — 3 unread" onClick={onGoToNotifications} className="p-2 rounded hover:bg-[#f0f4f8] text-[#4a5568] hover:text-[#1a3a5c] transition-colors relative">
+            <button aria-label="Notifications — 3 unread" onClick={onGoToNotifications} className="p-2 rounded hover:bg-[#F9FAF2] text-[#4A4A4A] hover:text-[#355E3B] transition-colors relative">
               <Icon.Bell />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" aria-label="New notifications"></span>
             </button>
           )}
           {isLoggedIn ? (
             <div className="flex items-center gap-2">
-              <div className="flex items-center gap-2 pl-2 border-l border-[#d1d9e0]">
-                <div className="w-8 h-8 rounded-full bg-[#1a3a5c] text-white flex items-center justify-center text-sm font-semibold">U</div>
+              <div className="flex items-center gap-2 pl-2 border-l border-[#d6dfd5]">
+                <div className="w-8 h-8 rounded-full bg-[#355E3B] text-white flex items-center justify-center text-sm font-semibold">U</div>
                 <div className="hidden md:block">
-                  <div className="text-sm font-medium text-[#1a2533] leading-none">User Name</div>
-                  <div className="text-[11px] text-[#6b7a8d] leading-none mt-0.5">Industrial User</div>
+                  <div className="text-sm font-medium text-[#2B2B2B] leading-none">User Name</div>
+                  <div className="text-[11px] text-[#555C56] leading-none mt-0.5">Industrial User</div>
                 </div>
               </div>
-              <button onClick={() => setIsLoggedIn(false)} className="p-2 rounded hover:bg-[#f0f4f8] text-[#4a5568] hover:text-[#1a3a5c] transition-colors" aria-label="Log out"><Icon.LogOut /></button>
+              <button onClick={() => setIsLoggedIn(false)} className="p-2 rounded hover:bg-[#F9FAF2] text-[#4A4A4A] hover:text-[#355E3B] transition-colors" aria-label="Log out"><Icon.LogOut /></button>
             </div>
           ) : (
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setDropdownOpen(true)}
                 onMouseEnter={() => setDropdownOpen(true)}
-                className="flex items-center gap-2 bg-[#1a3a5c] text-white text-sm font-medium px-4 py-2 rounded hover:bg-[#0f2540] transition-colors focus:ring-2 focus:ring-[#1a56db] focus:ring-offset-2"
+                className="flex items-center gap-2 bg-[#355E3B] text-white text-sm font-medium px-4 py-2 rounded hover:bg-[#27472c] transition-colors focus:ring-2 focus:ring-[#6DAE7C] focus:ring-offset-2"
                 aria-haspopup="true"
                 aria-expanded={dropdownOpen}
               >
@@ -328,25 +328,25 @@ export function PortalHeader({
               </button>
               {dropdownOpen && (
                 <div
-                  className="absolute right-0 top-full mt-1 w-52 bg-white border border-[#d1d9e0] rounded shadow-lg z-50 py-1"
+                  className="absolute right-0 top-full mt-1 w-52 bg-white border border-[#d6dfd5] rounded shadow-lg z-50 py-1"
                   role="menu"
                   onMouseLeave={() => setDropdownOpen(false)}
                 >
                   <button
                     role="menuitem"
                     onClick={() => { setDropdownOpen(false); onGoToLogin() }}
-                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#1a3a5c] font-medium hover:bg-[#f0f4f8] transition-colors text-left"
+                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#355E3B] font-medium hover:bg-[#F9FAF2] transition-colors text-left"
                   >
-                    <span className="text-[#1a3a5c]"><Icon.Building /></span>
+                    <span className="text-[#355E3B]"><Icon.Building /></span>
                     Industrial Login
                   </button>
-                  <div className="mx-3 border-t border-[#e8edf2]" />
+                  <div className="mx-3 border-t border-[#e3ebe1]" />
                   <a
                     role="menuitem"
                     href="/department/login"
-                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#4a5568] hover:bg-[#f0f4f8] transition-colors text-left"
+                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#355E3B] font-medium hover:bg-[#F9FAF2] transition-colors text-left"
                   >
-                    <span className="text-[#4a5568]"><Icon.Shield /></span>
+                    <span className="text-[#355E3B]"><Icon.Shield /></span>
                     Government Login
                   </a>
                 </div>
@@ -404,7 +404,7 @@ export function Footer() {
   ];
 
   return (
-    <footer className="bg-[#0f2540] text-white mt-auto" role="contentinfo">
+    <footer className="bg-[#27472c] text-white mt-auto" role="contentinfo">
       <div className="max-w-[1440px] mx-auto px-6 py-8">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
           {FOOTER_SECTIONS.map((section) => (
@@ -442,7 +442,7 @@ export function AuthShell({ children, lang, setLang, fontSize, setFontSize, high
   setIsLoggedIn: (v: boolean) => void
 }) {
   return (
-    <div className="flex flex-col min-h-screen bg-[#f8f9fb]">
+    <div className="flex flex-col min-h-screen bg-[#F9FAF2]">
       <AccessibilityStrip lang={lang} setLang={setLang} fontSize={fontSize} setFontSize={setFontSize} highContrast={highContrast} setHighContrast={setHighContrast} />
       <PortalHeader isLoggedIn={false} setIsLoggedIn={setIsLoggedIn} onGoToLogin={onGoToLogin} showSearchAndHelp={false} />
       <DemoNotice />

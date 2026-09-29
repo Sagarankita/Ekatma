@@ -81,7 +81,7 @@ export function ConsistencyScreen({
   };
 
   return (
-    <main id="main-content" className="flex-1 bg-[#F8F9FA] pb-20 font-sans" tabIndex={-1}>
+    <main id="main-content" className="flex-1 bg-[#F9FAF2] pb-20 font-sans" tabIndex={-1}>
       {/* ── 6-STAGE PIPELINE STEPPER ── */}
       <ApplicationWorkflowStepper businessId={project.id} currentStep={4} />
 
@@ -89,30 +89,30 @@ export function ConsistencyScreen({
       <header className="bg-white border-b border-slate-200 px-4 sm:px-8 py-5">
         <div className="max-w-[1280px] mx-auto">
           <nav className="text-xs text-slate-500 mb-2.5 flex items-center gap-1.5" aria-label="Breadcrumb">
-            <Link href={ENTREPRENEUR_ROUTES.business(project.id)} className="hover:text-[#17365D] hover:underline">
+            <Link href={ENTREPRENEUR_ROUTES.business(project.id)} className="hover:text-[#355E3B] hover:underline">
               {project.name}
             </Link>
             <span>›</span>
-            <Link href={ENTREPRENEUR_ROUTES.applications(project.id)} className="hover:text-[#17365D] hover:underline">
+            <Link href={ENTREPRENEUR_ROUTES.applications(project.id)} className="hover:text-[#355E3B] hover:underline">
               Applications
             </Link>
             <span>›</span>
-            <Link href={ENTREPRENEUR_ROUTES.applicationPrevalidation(project.id)} className="hover:text-[#17365D] hover:underline">
+            <Link href={ENTREPRENEUR_ROUTES.applicationPrevalidation(project.id)} className="hover:text-[#355E3B] hover:underline">
               Pre-validation
             </Link>
             <span>›</span>
-            <span className="text-[#17365D] font-bold">Resolve Issues (Cross-Form Consistency)</span>
+            <span className="text-[#355E3B] font-bold">Resolve Issues (Cross-Form Consistency)</span>
           </nav>
 
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-[11px] font-bold uppercase tracking-wider bg-[#17365D]/8 text-[#17365D] border border-[#17365D]/15 px-2.5 py-0.5 rounded-md">
+                <span className="text-[11px] font-bold uppercase tracking-wider bg-[#355E3B]/8 text-[#355E3B] border border-[#355E3B]/15 px-2.5 py-0.5 rounded-md">
                   Stage 4 of 6 · Resolve Issues
                 </span>
                 <span className="text-xs text-slate-500">· Cross-Application Data Harmonization</span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-[#17365D] tracking-tight">
+              <h1 className="text-xl font-bold text-[#355E3B]">
                 Cross-Form Consistency Resolver
               </h1>
               <p className="mt-1 text-sm text-slate-600">Resolve differences between applications and the Master Project Dossier.</p>
@@ -174,7 +174,7 @@ export function ConsistencyScreen({
               <button
                 type="button"
                 onClick={() => discrepancyRows.forEach(r => handleUseMasterValue(r))}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#17365D] hover:bg-[#122b49] text-white text-xs font-bold transition-all shadow-2xs"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#355E3B] hover:bg-[#122b49] text-white text-xs font-bold transition-all shadow-2xs"
               >
                 <Check className="w-3.5 h-3.5" />
                 <span>Use Master Values for All</span>
@@ -341,12 +341,12 @@ export function ConsistencyScreen({
                           value={customInput}
                           onChange={e => setCustomInput(e.target.value)}
                           placeholder={`Enter custom value for ${row.field}…`}
-                          className="flex-1 text-xs px-3.5 py-2 rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#17365D]"
+                          className="flex-1 text-xs px-3.5 py-2 rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#355E3B]"
                         />
                         <button
                           type="button"
                           onClick={() => handleApplyCustomEdit(row)}
-                          className="px-4 py-2 bg-[#17365D] hover:bg-[#122b49] text-white text-xs font-bold rounded-lg transition-colors shadow-2xs"
+                          className="px-4 py-2 bg-[#355E3B] hover:bg-[#122b49] text-white text-xs font-bold rounded-lg transition-colors shadow-2xs"
                         >
                           Apply Value
                         </button>
@@ -374,7 +374,7 @@ export function ConsistencyScreen({
                         className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-2xs ${
                           isResolved && resolution.method === 'master'
                             ? 'bg-emerald-700 text-white'
-                            : 'bg-[#17365D] hover:bg-[#122b49] text-white'
+                            : 'bg-[#355E3B] hover:bg-[#122b49] text-white'
                         }`}
                       >
                         <Check className="w-3.5 h-3.5" />
@@ -395,7 +395,7 @@ export function ConsistencyScreen({
                     {/* 3. Review source */}
                     <Link
                       href={ENTREPRENEUR_ROUTES.documents(project.id)}
-                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#17365D] hover:underline"
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#355E3B] hover:underline"
                     >
                       <Database className="w-3.5 h-3.5" />
                       <span>Review source document in Dossier</span>
@@ -468,7 +468,7 @@ export function ConsistencyScreen({
 
             <Link
               href={ENTREPRENEUR_ROUTES.applicationSubmission(project.id)}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#17365D] hover:bg-[#122b49] text-white text-xs font-bold transition-all shadow-2xs"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#355E3B] hover:bg-[#122b49] text-white text-xs font-bold transition-all shadow-2xs"
             >
               <span>Proceed to Payment &amp; Submission (Stage 5)</span>
               <ChevronRight className="w-4 h-4" />

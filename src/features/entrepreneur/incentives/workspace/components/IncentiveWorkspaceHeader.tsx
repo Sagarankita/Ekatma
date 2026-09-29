@@ -7,19 +7,19 @@ import { inlineContext } from '@/features/regulatory-assistant/context';
 export function IncentiveStatusBadge({ status }: { status: IncentiveStatus }) {
   const cfg = {
     'strong-match':   { label: 'Strong Match',        cls: 'bg-[#f0fdf4] text-[#166534] border-[#86efac]' },
-    'conditional':    { label: 'Conditional Match',   cls: 'bg-[#fef3c7] text-[#92400e] border-[#fde68a]' },
-    'needs-info':     { label: 'Needs Information',   cls: 'bg-[#f0f9ff] text-[#1e3a5c] border-[#93c5fd]' },
-    'not-applicable': { label: 'Not Applicable',      cls: 'bg-[#f8f9fb] text-[#6b7a8d] border-[#d1d9e0]' },
+    'conditional':    { label: 'Conditional Match',   cls: 'bg-[#fdf8e6] text-[#7a5807] border-[#fae69e]' },
+    'needs-info':     { label: 'Needs Information',   cls: 'bg-[#f0f9ff] text-[#1e3a5c] border-[#a1cba9]' },
+    'not-applicable': { label: 'Not Applicable',      cls: 'bg-[#F9FAF2] text-[#555C56] border-[#d6dfd5]' },
   }[status];
   return <span className={`text-[10px] font-bold px-2 py-0.5 border ${cfg.cls}`}>{cfg.label}</span>;
 }
 
 export function ClaimStatusBadge({ status }: { status: ClaimStatus }) {
   const cfg: Record<ClaimStatus, { label: string; cls: string }> = {
-    preparing:     { label: 'Preparing',      cls: 'bg-[#f0f4f8] text-[#475569] border-[#d1d9e0]' },
+    preparing:     { label: 'Preparing',      cls: 'bg-[#F9FAF2] text-[#4A4A4A] border-[#d6dfd5]' },
     submitted:     { label: 'Submitted',      cls: 'bg-[#ede9fe] text-[#3730a3] border-[#a5b4fc]' },
     'under-review':{ label: 'Under Review',   cls: 'bg-[#ede9fe] text-[#3730a3] border-[#a5b4fc]' },
-    'query-raised':{ label: 'Query Raised',   cls: 'bg-[#fef3c7] text-[#92400e] border-[#fde68a]' },
+    'query-raised':{ label: 'Query Raised',   cls: 'bg-[#fdf8e6] text-[#7a5807] border-[#fae69e]' },
     resubmitted:   { label: 'Resubmitted',    cls: 'bg-[#f0fdf4] text-[#166534] border-[#86efac]' },
     approved:      { label: 'Approved',       cls: 'bg-[#f0fdf4] text-[#166534] border-[#86efac]' },
     received:      { label: 'Benefit Received', cls: 'bg-[#f0fdf4] text-[#166534] border-[#86efac]' },
@@ -34,8 +34,8 @@ export function SourceBadge({ source }: { source: string }) {
   const cls = verified
     ? 'bg-[#f0fdf4] text-[#166534] border-[#86efac]'
     : selfDecl
-      ? 'bg-[#fef3c7] text-[#92400e] border-[#fde68a]'
-      : 'bg-[#f0f4f8] text-[#475569] border-[#d1d9e0]';
+      ? 'bg-[#fdf8e6] text-[#7a5807] border-[#fae69e]'
+      : 'bg-[#F9FAF2] text-[#4A4A4A] border-[#d6dfd5]';
   return <span className={`text-[9px] font-semibold px-1.5 py-0.5 border ${cls}`}>{source}</span>;
 }
 
@@ -61,23 +61,23 @@ export function IncentiveWorkspaceHeader({
   }));
 
   return (
-    <div className="bg-white border-b border-[#d1d9e0] px-6 py-4">
+    <div className="bg-white border-b border-[#d6dfd5] px-6 py-4">
       <div className="max-w-[1320px] mx-auto">
-        <nav aria-label="Breadcrumb" className="text-xs text-[#6b7a8d] mb-2 flex items-center gap-1.5 flex-wrap">
+        <nav aria-label="Breadcrumb" className="text-xs text-[#555C56] mb-2 flex items-center gap-1.5 flex-wrap">
           {breadcrumb.map((crumb, i) => (
             <React.Fragment key={crumb}>
-              {i > 0 && <span className="text-[#d1d9e0]">›</span>}
+              {i > 0 && <span className="text-[#d6dfd5]">›</span>}
               {i < breadcrumb.length - 1
-                ? (breadcrumbHref ? <Link href={breadcrumbHref} className="hover:text-[#1a56db] hover:underline">{crumb}</Link> : <span className="text-[#1a3a5c] font-medium">{crumb}</span>)
-                : <span className="text-[#1a3a5c] font-medium">{crumb}</span>
+                ? (breadcrumbHref ? <Link href={breadcrumbHref} className="hover:text-[#6DAE7C] hover:underline">{crumb}</Link> : <span className="text-[#355E3B] font-medium">{crumb}</span>)
+                : <span className="text-[#355E3B] font-medium">{crumb}</span>
               }
             </React.Fragment>
           ))}
         </nav>
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-xl font-bold text-[#1a3a5c]">{title}</h1>
-            {subtitle && <p className="text-xs text-[#6b7a8d] mt-0.5 max-w-2xl">{subtitle}</p>}
+            <h1 className="text-xl font-bold text-[#355E3B]">{title}</h1>
+            {subtitle && <p className="text-xs text-[#555C56] mt-0.5 max-w-2xl">{subtitle}</p>}
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <button onClick={handleAssistant}

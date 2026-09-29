@@ -37,42 +37,42 @@ export default function DepartmentShell({ children, requireAuth = false }: { chi
   const fontCls = fontSize === 'sm' ? 'text-[13px]' : fontSize === 'lg' ? 'text-[16px]' : 'text-[14px]';
 
   return (
-    <div className={`min-h-screen flex flex-col ${fontCls} ${highContrast ? 'bg-black text-white' : 'bg-[#F8F9FA] text-[#20242A]'}`}>
+    <div className={`min-h-screen flex flex-col ${fontCls} ${highContrast ? 'bg-black text-white' : 'bg-[#F9FAF2] text-[#2B2B2B]'}`}>
       <AccessibilityStrip 
         lang={lang} setLang={setLang} 
         fontSize={fontSize} setFontSize={setFontSize} 
         highContrast={highContrast} setHighContrast={setHighContrast} 
       />
-      <header className="bg-white border-b border-[#d1d9e0] shadow-sm" role="banner">
+      <header className="bg-white border-b border-[#d6dfd5] shadow-sm" role="banner">
         <div className="max-w-[1440px] mx-auto px-6 flex items-center justify-between py-3 gap-8">
           {/* Identity block */}
           <div className="flex items-center gap-6">
             {/* National Emblem */}
             <div className="flex flex-col items-center gap-0.5 shrink-0">
               <img src="/assets/india-emblem.png" alt="National Emblem of India" className="h-14 w-auto object-contain" />
-              <span className="text-[9px] text-[#4a5568] font-medium tracking-wide leading-none" style={{ fontFamily: 'Noto Sans Devanagari, sans-serif' }}>सत्यमेव जयते</span>
+              <span className="text-[9px] text-[#4A4A4A] font-medium tracking-wide leading-none" style={{ fontFamily: 'Noto Sans Devanagari, sans-serif' }}>सत्यमेव जयते</span>
             </div>
-            <div className="w-px h-12 bg-[#d1d9e0]" aria-hidden="true" />
+            <div className="w-px h-12 bg-[#d6dfd5]" aria-hidden="true" />
             {/* Maharashtra Seal */}
             <div className="flex flex-col items-center gap-0.5 shrink-0">
               <img src="/assets/maha-seal.png" alt="Government of Maharashtra seal" className="h-12 w-auto object-contain" />
-              <span className="text-[9px] text-[#4a5568] font-medium tracking-wide leading-none text-center">Govt. of Maharashtra</span>
+              <span className="text-[9px] text-[#4A4A4A] font-medium tracking-wide leading-none text-center">Govt. of Maharashtra</span>
             </div>
-            <div className="w-px h-12 bg-[#d1d9e0]" aria-hidden="true" />
+            <div className="w-px h-12 bg-[#d6dfd5]" aria-hidden="true" />
             {/* EKATMA Portal identity */}
             <div className="flex items-center gap-3">
               <img src="/assets/ekatma-logo.png" alt="Ekatma portal logo" className="h-10 w-auto object-contain" />
               <div>
-                <div className="text-[#1a3a5c] font-bold text-base leading-tight">EKATMA</div>
-                <div className="text-[#4a5568] text-[11px] leading-tight">Maharashtra Industrial Approval & Compliance Portal</div>
-                <div className="text-[#4a5568] text-[10px] leading-tight" style={{ fontFamily: 'Noto Sans Devanagari, sans-serif' }}>महाराष्ट्र औद्योगिक अनुमोदन एवं अनुपालन पोर्टल</div>
+                <div className="text-[#355E3B] font-bold text-base leading-tight">EKATMA</div>
+                <div className="text-[#4A4A4A] text-[11px] leading-tight">Maharashtra Industrial Approval & Compliance Portal</div>
+                <div className="text-[#4A4A4A] text-[10px] leading-tight" style={{ fontFamily: 'Noto Sans Devanagari, sans-serif' }}>महाराष्ट्र औद्योगिक अनुमोदन एवं अनुपालन पोर्टल</div>
               </div>
             </div>
           </div>
 
           {/* Right actions / Portal badge */}
           <div className="flex items-center gap-3">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#ebf3ff] border border-[#bdd4f5] rounded text-[#1a3a5c] text-xs font-medium">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#edf5ef] border border-[#bdd4f5] rounded text-[#355E3B] text-xs font-medium">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
               MIDC Department Portal
             </span>
@@ -82,7 +82,10 @@ export default function DepartmentShell({ children, requireAuth = false }: { chi
       <main className="flex-1 flex flex-col">
         {children}
       </main>
-      <Footer />
+
+      <footer className="bg-[#355E3B] border-t border-[#0F233D] px-6 py-4 text-center text-xs text-white/80">
+        © 2026 Government of Maharashtra. All rights reserved.
+      </footer>
     </div>
   );
 }

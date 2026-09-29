@@ -47,7 +47,7 @@ function PortalShell({ children }: { children: React.ReactNode }) {
       />
       <div className="flex-1 flex overflow-hidden max-w-[1440px] w-full mx-auto">
         <DeptSidebar active={departmentActiveItem(pathname)} setActive={handleNavigate} />
-        <div className="flex-1 overflow-auto bg-white border-l border-[#d1d9e0]">
+        <div className="flex-1 overflow-auto bg-white border-l border-[#d6dfd5]">
           {children}
         </div>
       </div>

@@ -35,10 +35,10 @@ import { CertificatePreviewModal } from '../documents/CertificatePreviewModal';
 function complianceStatusBadge(status: ComplianceStatus) {
   const map: Record<ComplianceStatus, string> = {
     'Compliant': 'border-[#86efac] bg-[#dcfce7] text-[#166534]',
-    'Due Soon': 'border-[#fcd34d] bg-[#fef3c7] text-[#92400e]',
+    'Due Soon': 'border-[#fae69e] bg-[#fdf8e6] text-[#7a5807]',
     'Overdue': 'border-[#fca5a5] bg-[#fee2e2] text-[#b91c1c]',
     'Action Required': 'border-[#fca5a5] bg-[#fee2e2] text-[#b91c1c]',
-    'Under Verification': 'border-[#93c5fd] bg-[#dbeafe] text-[#1e40af]',
+    'Under Verification': 'border-[#a1cba9] bg-[#edf5ef] text-[#539160]',
   };
   return (
     <span className={`text-[10px] font-bold px-2 py-0.5 border rounded-sm uppercase tracking-wide ${map[status] || 'border-slate-200 bg-slate-50 text-slate-700'}`}>
@@ -65,8 +65,8 @@ function decisionStateBadge(state: DecisionState) {
     );
   }
   return (
-    <span className="text-xs font-bold px-2.5 py-1 border border-[#fcd34d] bg-[#fef3c7] text-[#92400e] rounded flex items-center gap-1.5">
-      <RefreshCw className="w-3.5 h-3.5 text-[#92400e]" />
+    <span className="text-xs font-bold px-2.5 py-1 border border-[#fae69e] bg-[#fdf8e6] text-[#7a5807] rounded flex items-center gap-1.5">
+      <RefreshCw className="w-3.5 h-3.5 text-[#7a5807]" />
       CORRECTION REQUIRED
     </span>
   );
@@ -95,12 +95,12 @@ export function DecisionDetailScreen({
 
   if (!dec || (decisionId && dec.decisionId !== decisionId)) {
     return (
-      <main id="main-content" className="flex-1 bg-[#f8f9fb] flex items-center justify-center min-h-[60vh]" tabIndex={-1}>
+      <main id="main-content" className="flex-1 bg-[#F9FAF2] flex items-center justify-center min-h-[60vh]" tabIndex={-1}>
         <div className="max-w-[900px] mx-auto px-6 py-12 text-center">
-          <p className="text-[#6b7a8d]">Decision record not found.</p>
+          <p className="text-[#555C56]">Decision record not found.</p>
           <Link
             href={ENTREPRENEUR_ROUTES.application(project.id, applicationId)}
-            className="mt-4 inline-block text-sm text-[#1a56db] hover:underline"
+            className="mt-4 inline-block text-sm text-[#6DAE7C] hover:underline"
           >
             ← Back to Application Detail
           </Link>
@@ -112,38 +112,38 @@ export function DecisionDetailScreen({
   const isApproved = dec.state === 'approved';
 
   return (
-    <main id="main-content" className="flex-1 bg-[#f8f9fb]" tabIndex={-1}>
+    <main id="main-content" className="flex-1 bg-[#F9FAF2]" tabIndex={-1}>
       {/* Top Breadcrumb Bar */}
-      <div className="bg-white border-b border-[#d1d9e0] px-6 py-4">
+      <div className="bg-white border-b border-[#d6dfd5] px-6 py-4">
         <div className="max-w-[1200px] mx-auto">
-          <nav aria-label="Breadcrumb" className="text-xs text-[#6b7a8d] mb-2 flex items-center gap-1.5">
-            <Link href={ENTREPRENEUR_ROUTES.business(project.id)} className="hover:text-[#1a3a5c] hover:underline">
+          <nav aria-label="Breadcrumb" className="text-xs text-[#555C56] mb-2 flex items-center gap-1.5">
+            <Link href={ENTREPRENEUR_ROUTES.business(project.id)} className="hover:text-[#355E3B] hover:underline">
               Dashboard
             </Link>
             <span>›</span>
-            <Link href={ENTREPRENEUR_ROUTES.applications(project.id)} className="hover:text-[#1a3a5c] hover:underline">
+            <Link href={ENTREPRENEUR_ROUTES.applications(project.id)} className="hover:text-[#355E3B] hover:underline">
               Applications
             </Link>
             <span>›</span>
-            <Link href={ENTREPRENEUR_ROUTES.application(project.id, dec.appId)} className="hover:text-[#1a3a5c] hover:underline">
+            <Link href={ENTREPRENEUR_ROUTES.application(project.id, dec.appId)} className="hover:text-[#355E3B] hover:underline">
               {dec.appId}
             </Link>
             <span>›</span>
-            <span className="text-[#1a3a5c] font-medium">Approval & Compliance Notice</span>
+            <span className="text-[#355E3B] font-medium">Approval & Compliance Notice</span>
           </nav>
 
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <div className="flex items-center gap-2.5 flex-wrap">
-                <span className="font-mono text-xs font-bold text-[#64748b] bg-[#f1f5f9] px-2 py-0.5 border border-[#e2e8f0] rounded">
+                <span className="font-mono text-xs font-bold text-[#555C56] bg-[#F9FAF2] px-2 py-0.5 border border-[#e3ebe1] rounded">
                   {dec.decisionId}
                 </span>
-                <h1 className="text-xl font-bold text-[#1a3a5c]">
+                <h1 className="text-xl font-bold text-[#355E3B]">
                   {isApproved ? 'Statutory Approval Notice' : 'Decision Notice'} — {dec.service}
                 </h1>
                 {decisionStateBadge(dec.state)}
               </div>
-              <p className="text-xs text-[#6b7a8d] mt-1">
+              <p className="text-xs text-[#555C56] mt-1">
                 {dec.dept} · {project.name} · Issued on {dec.decisionDate}
               </p>
             </div>
@@ -151,14 +151,14 @@ export function DecisionDetailScreen({
             <div className="flex items-center gap-2">
               <Link
                 href={ENTREPRENEUR_ROUTES.application(project.id, dec.appId)}
-                className="text-xs border border-[#d1d9e0] text-[#475569] px-3 py-1.5 hover:bg-[#f1f5f9] rounded font-medium"
+                className="text-xs border border-[#d6dfd5] text-[#4A4A4A] px-3 py-1.5 hover:bg-[#F9FAF2] rounded font-medium"
               >
                 ← Back to Application Detail
               </Link>
               {isApproved && (
                 <Link
                   href={ENTREPRENEUR_ROUTES.compliance(project.id)}
-                  className="text-xs bg-[#1a3a5c] text-white hover:bg-[#0f2540] px-3.5 py-1.5 rounded font-semibold transition-colors shadow-2xs"
+                  className="text-xs bg-[#355E3B] text-white hover:bg-[#27472c] px-3.5 py-1.5 rounded font-semibold transition-colors shadow-2xs"
                 >
                   Compliance Dashboard →
                 </Link>
@@ -184,14 +184,14 @@ export function DecisionDetailScreen({
                     <span className="text-[11px] font-bold text-[#15803d] uppercase tracking-wider bg-[#dcfce7] px-2 py-0.5 rounded border border-[#86efac]">
                       Official Order Granted
                     </span>
-                    <span className="font-mono text-xs font-bold text-[#1a3a5c]">
+                    <span className="font-mono text-xs font-bold text-[#355E3B]">
                       Order No: {dec.approvalId}
                     </span>
                   </div>
                   <h2 className="text-lg font-bold text-[#166534]">
                     APPROVAL GRANTED — {dec.service.toUpperCase()}
                   </h2>
-                  <p className="text-xs text-[#334155] leading-relaxed max-w-[780px]">
+                  <p className="text-xs text-[#3A3E39] leading-relaxed max-w-[780px]">
                     The <strong>{dec.dept}</strong> has formally approved application <strong>{dec.appId}</strong>. 
                     The statutory clearance certificate is digitally signed and registered. 
                     Ongoing operational conditions have been automatically enrolled in your <strong>Compliance Ledger</strong> below.
@@ -213,7 +213,7 @@ export function DecisionDetailScreen({
                 )}
                 <Link
                   href={ENTREPRENEUR_ROUTES.document(project.id, dec.certDocId || 'DOC-003')}
-                  className="text-xs text-[#1a56db] hover:underline font-medium"
+                  className="text-xs text-[#6DAE7C] hover:underline font-medium"
                 >
                   Document Centre →
                 </Link>
@@ -226,13 +226,13 @@ export function DecisionDetailScreen({
         {/* THE 6 CORE APPROVAL FACETS                                                */}
         {/* ========================================================================= */}
         {isApproved && (
-          <div className="bg-white border border-[#e2e8f0] rounded-lg p-5 shadow-xs space-y-6">
-            <div className="border-b border-[#e2e8f0] pb-3 flex items-center justify-between">
+          <div className="bg-white border border-[#e3ebe1] rounded-lg p-5 shadow-xs space-y-6">
+            <div className="border-b border-[#e3ebe1] pb-3 flex items-center justify-between">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#64748b]">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#555C56]">
                   Statutory Approval Summary
                 </span>
-                <h3 className="text-sm font-bold text-[#1a3a5c]">Key Approval Parameters & Entitlements</h3>
+                <h3 className="text-sm font-bold text-[#355E3B]">Key Approval Parameters & Entitlements</h3>
               </div>
               <span className="text-xs text-[#15803d] font-semibold flex items-center gap-1">
                 <CheckCircle2 className="w-3.5 h-3.5" /> Legally Enforceable
@@ -241,71 +241,71 @@ export function DecisionDetailScreen({
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 text-xs">
               {/* 1. WHAT WAS APPROVED */}
-              <div className="p-4 border border-[#e2e8f0] bg-[#f8f9fb] rounded space-y-2">
-                <div className="flex items-center gap-2 text-[#1a3a5c] font-bold uppercase tracking-wider text-[10px]">
-                  <Building2 className="w-3.5 h-3.5 text-[#1a56db]" />
+              <div className="p-4 border border-[#e3ebe1] bg-[#F9FAF2] rounded space-y-2">
+                <div className="flex items-center gap-2 text-[#355E3B] font-bold uppercase tracking-wider text-[10px]">
+                  <Building2 className="w-3.5 h-3.5 text-[#6DAE7C]" />
                   <span>1. What Was Approved</span>
                 </div>
-                <p className="font-semibold text-sm text-[#1a3a5c]">
+                <p className="font-semibold text-sm text-[#355E3B]">
                   {dec.whatWasApproved?.service || dec.service}
                 </p>
-                <p className="text-[#475569] leading-relaxed">
+                <p className="text-[#4A4A4A] leading-relaxed">
                   {dec.whatWasApproved?.scope || 'Industrial operating parameters and environmental safeguards approved.'}
                 </p>
-                <p className="text-[11px] text-[#64748b] pt-1 border-t border-[#e2e8f0]">
+                <p className="text-[11px] text-[#555C56] pt-1 border-t border-[#e3ebe1]">
                   Authority: <strong>{dec.whatWasApproved?.authority || dec.dept}</strong>
                 </p>
               </div>
 
               {/* 2. VALIDITY */}
-              <div className="p-4 border border-[#e2e8f0] bg-[#f8f9fb] rounded space-y-2">
-                <div className="flex items-center gap-2 text-[#1a3a5c] font-bold uppercase tracking-wider text-[10px]">
+              <div className="p-4 border border-[#e3ebe1] bg-[#F9FAF2] rounded space-y-2">
+                <div className="flex items-center gap-2 text-[#355E3B] font-bold uppercase tracking-wider text-[10px]">
                   <Calendar className="w-3.5 h-3.5 text-[#166534]" />
                   <span>2. Validity Period</span>
                 </div>
                 <p className="font-semibold text-sm text-[#166534]">
                   {dec.validityPeriod || '5 Years Validity'}
                 </p>
-                <div className="space-y-1 text-[#334155]">
+                <div className="space-y-1 text-[#3A3E39]">
                   <p className="flex justify-between">
-                    <span className="text-[#64748b]">Issue Date:</span>
+                    <span className="text-[#555C56]">Issue Date:</span>
                     <strong className="font-mono">{dec.issueDate}</strong>
                   </p>
                   <p className="flex justify-between">
-                    <span className="text-[#64748b]">Expiry Date:</span>
+                    <span className="text-[#555C56]">Expiry Date:</span>
                     <strong className="font-mono text-[#b91c1c]">{dec.expiryDate}</strong>
                   </p>
                 </div>
-                <p className="text-[11px] text-[#166534] font-semibold pt-1 border-t border-[#e2e8f0]">
+                <p className="text-[11px] text-[#166534] font-semibold pt-1 border-t border-[#e3ebe1]">
                   Status: Active & Valid
                 </p>
               </div>
 
               {/* 3. DOCUMENTS */}
-              <div className="p-4 border border-[#e2e8f0] bg-[#f8f9fb] rounded space-y-2">
-                <div className="flex items-center gap-2 text-[#1a3a5c] font-bold uppercase tracking-wider text-[10px]">
-                  <FileText className="w-3.5 h-3.5 text-[#d97706]" />
+              <div className="p-4 border border-[#e3ebe1] bg-[#F9FAF2] rounded space-y-2">
+                <div className="flex items-center gap-2 text-[#355E3B] font-bold uppercase tracking-wider text-[10px]">
+                  <FileText className="w-3.5 h-3.5 text-[#D4A017]" />
                   <span>3. Issued Documents</span>
                 </div>
-                <p className="font-semibold text-sm text-[#1a3a5c]">
+                <p className="font-semibold text-sm text-[#355E3B]">
                   Approval Certificate {dec.certId}
                 </p>
-                <p className="text-[#475569]">
+                <p className="text-[#4A4A4A]">
                   Certificate record registered under <strong>{dec.certDocId || 'DOC-003'}</strong> in Document Centre with cryptographic QR verification.
                 </p>
-                <div className="pt-1 border-t border-[#e2e8f0] flex items-center gap-3">
+                <div className="pt-1 border-t border-[#e3ebe1] flex items-center gap-3">
                   {certDoc && (
                     <button
                       type="button"
                       onClick={() => setShowCertModal(true)}
-                      className="text-[11px] text-[#1a56db] font-semibold hover:underline"
+                      className="text-[11px] text-[#6DAE7C] font-semibold hover:underline"
                     >
                       Preview with QR →
                     </button>
                   )}
                   <Link
                     href={ENTREPRENEUR_ROUTES.document(project.id, dec.certDocId || 'DOC-003')}
-                    className="text-[11px] text-[#64748b] hover:text-[#1a3a5c] hover:underline"
+                    className="text-[11px] text-[#555C56] hover:text-[#355E3B] hover:underline"
                   >
                     Document Centre
                   </Link>
@@ -313,32 +313,32 @@ export function DecisionDetailScreen({
               </div>
 
               {/* 4. CONDITIONS */}
-              <div className="p-4 border border-[#e2e8f0] bg-[#f8f9fb] rounded space-y-2 lg:col-span-2">
-                <div className="flex items-center gap-2 text-[#1a3a5c] font-bold uppercase tracking-wider text-[10px]">
-                  <ShieldCheck className="w-3.5 h-3.5 text-[#1e40af]" />
+              <div className="p-4 border border-[#e3ebe1] bg-[#F9FAF2] rounded space-y-2 lg:col-span-2">
+                <div className="flex items-center gap-2 text-[#355E3B] font-bold uppercase tracking-wider text-[10px]">
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#539160]" />
                   <span>4. Statutory & Special Conditions</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                   <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#64748b] block mb-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#555C56] block mb-1">
                       General Conditions ({dec.conditions?.length ?? 0})
                     </span>
                     <ul className="space-y-1">
                       {dec.conditions?.slice(0, 3).map((c, i) => (
-                        <li key={i} className="text-[#334155] flex items-start gap-1.5 text-[11px]">
-                          <span className="text-[#94a3b8] font-mono shrink-0">•</span>
+                        <li key={i} className="text-[#3A3E39] flex items-start gap-1.5 text-[11px]">
+                          <span className="text-[#9ab098] font-mono shrink-0">•</span>
                           <span className="line-clamp-2">{c}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
                   <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#92400e] block mb-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#7a5807] block mb-1">
                       Special Directives ({dec.specialConditions?.length ?? 0})
                     </span>
                     <ul className="space-y-1">
                       {dec.specialConditions?.map((c, i) => (
-                        <li key={i} className="text-[#92400e] flex items-start gap-1.5 text-[11px] bg-[#fffbeb] p-1.5 rounded border border-[#fef08a]">
+                        <li key={i} className="text-[#7a5807] flex items-start gap-1.5 text-[11px] bg-[#fdf8e6] p-1.5 rounded border border-[#fae69e]">
                           <span className="font-bold shrink-0">!</span>
                           <span className="line-clamp-2">{c}</span>
                         </li>
@@ -349,18 +349,18 @@ export function DecisionDetailScreen({
               </div>
 
               {/* 5. RENEWAL REQUIREMENTS */}
-              <div className="p-4 border border-[#e2e8f0] bg-[#f8f9fb] rounded space-y-2">
-                <div className="flex items-center gap-2 text-[#1a3a5c] font-bold uppercase tracking-wider text-[10px]">
+              <div className="p-4 border border-[#e3ebe1] bg-[#F9FAF2] rounded space-y-2">
+                <div className="flex items-center gap-2 text-[#355E3B] font-bold uppercase tracking-wider text-[10px]">
                   <RefreshCw className="w-3.5 h-3.5 text-[#9333ea]" />
                   <span>5. Renewal Requirements</span>
                 </div>
-                <p className="font-semibold text-sm text-[#1a3a5c]">
+                <p className="font-semibold text-sm text-[#355E3B]">
                   {dec.renewalRequirements?.frequency || 'Every 5 Years'}
                 </p>
-                <p className="text-[#475569] text-[11px] leading-relaxed">
+                <p className="text-[#4A4A4A] text-[11px] leading-relaxed">
                   {dec.renewalRequirements?.renewalDeadline || 'Submit renewal at least 120 days prior to expiry.'}
                 </p>
-                <p className="text-[10px] text-[#9333ea] font-semibold pt-1 border-t border-[#e2e8f0]">
+                <p className="text-[10px] text-[#9333ea] font-semibold pt-1 border-t border-[#e3ebe1]">
                   Renewal Cutoff: {dec.renewalRequirements?.cutoffDate || '11 Jun 2031'}
                 </p>
               </div>
@@ -384,23 +384,23 @@ export function DecisionDetailScreen({
         {/* NEW COMPLIANCE OBLIGATIONS SECTION                                        */}
         {/* ========================================================================= */}
         {isApproved && (
-          <section className="bg-white border border-[#e2e8f0] rounded-lg p-5 shadow-xs space-y-5">
-            <div className="border-b border-[#e2e8f0] pb-3 flex flex-wrap items-center justify-between gap-2">
+          <section className="bg-white border border-[#e3ebe1] rounded-lg p-5 shadow-xs space-y-5">
+            <div className="border-b border-[#e3ebe1] pb-3 flex flex-wrap items-center justify-between gap-2">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#1e40af] bg-[#eff6ff] px-2 py-0.5 rounded border border-[#bfdbfe]">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#539160] bg-[#edf5ef] px-2 py-0.5 rounded border border-[#c5e2cb]">
                   Automatic Operational Enrollment
                 </span>
-                <h3 className="text-base font-bold text-[#1a3a5c] mt-1">
+                <h3 className="text-base font-bold text-[#355E3B] mt-1">
                   NEW COMPLIANCE OBLIGATIONS
                 </h3>
-                <p className="text-xs text-[#64748b] mt-0.5">
+                <p className="text-xs text-[#555C56] mt-0.5">
                   The following {generatedObligations.length} ongoing statutory obligations were generated directly from Order No. <strong>{dec.approvalId}</strong>.
                 </p>
               </div>
 
               <Link
                 href={ENTREPRENEUR_ROUTES.compliance(project.id)}
-                className="text-xs bg-[#1a3a5c] text-white hover:bg-[#0f2540] px-3.5 py-1.5 rounded font-semibold transition-colors shadow-2xs inline-flex items-center gap-1.5"
+                className="text-xs bg-[#355E3B] text-white hover:bg-[#27472c] px-3.5 py-1.5 rounded font-semibold transition-colors shadow-2xs inline-flex items-center gap-1.5"
               >
                 <span>Open Compliance Dashboard</span>
                 <span>→</span>
@@ -408,75 +408,75 @@ export function DecisionDetailScreen({
             </div>
 
             {/* Structured Table / Cards of Obligations */}
-            <div className="overflow-x-auto border border-[#e2e8f0] rounded">
+            <div className="overflow-x-auto border border-[#e3ebe1] rounded">
               <table className="w-full text-xs border-collapse">
                 <thead>
-                  <tr className="bg-[#f8f9fb] border-b border-[#e2e8f0]">
-                    <th className="text-left px-4 py-3 text-[10px] font-bold text-[#64748b] uppercase tracking-wider border-r border-[#e8edf2]">
+                  <tr className="bg-[#F9FAF2] border-b border-[#e3ebe1]">
+                    <th className="text-left px-4 py-3 text-[10px] font-bold text-[#555C56] uppercase tracking-wider border-r border-[#e3ebe1]">
                       Obligation
                     </th>
-                    <th className="text-left px-4 py-3 text-[10px] font-bold text-[#64748b] uppercase tracking-wider border-r border-[#e8edf2]">
+                    <th className="text-left px-4 py-3 text-[10px] font-bold text-[#555C56] uppercase tracking-wider border-r border-[#e3ebe1]">
                       Due Date
                     </th>
-                    <th className="text-left px-4 py-3 text-[10px] font-bold text-[#64748b] uppercase tracking-wider border-r border-[#e8edf2]">
+                    <th className="text-left px-4 py-3 text-[10px] font-bold text-[#555C56] uppercase tracking-wider border-r border-[#e3ebe1]">
                       Frequency
                     </th>
-                    <th className="text-left px-4 py-3 text-[10px] font-bold text-[#64748b] uppercase tracking-wider border-r border-[#e8edf2]">
+                    <th className="text-left px-4 py-3 text-[10px] font-bold text-[#555C56] uppercase tracking-wider border-r border-[#e3ebe1]">
                       Source Approval
                     </th>
-                    <th className="text-left px-4 py-3 text-[10px] font-bold text-[#64748b] uppercase tracking-wider border-r border-[#e8edf2]">
+                    <th className="text-left px-4 py-3 text-[10px] font-bold text-[#555C56] uppercase tracking-wider border-r border-[#e3ebe1]">
                       Required Action
                     </th>
-                    <th className="text-left px-4 py-3 text-[10px] font-bold text-[#64748b] uppercase tracking-wider border-r border-[#e8edf2]">
+                    <th className="text-left px-4 py-3 text-[10px] font-bold text-[#555C56] uppercase tracking-wider border-r border-[#e3ebe1]">
                       Status
                     </th>
-                    <th className="text-right px-4 py-3 text-[10px] font-bold text-[#64748b] uppercase tracking-wider">
+                    <th className="text-right px-4 py-3 text-[10px] font-bold text-[#555C56] uppercase tracking-wider">
                       Management
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#f1f5f9]">
+                <tbody className="divide-y divide-[#F9FAF2]">
                   {generatedObligations.map(obl => (
-                    <tr key={obl.id} className="hover:bg-[#f8f9fb] transition-colors">
+                    <tr key={obl.id} className="hover:bg-[#F9FAF2] transition-colors">
                       {/* Obligation */}
-                      <td className="px-4 py-3.5 border-r border-[#f1f5f9]">
+                      <td className="px-4 py-3.5 border-r border-[#F9FAF2]">
                         <div className="space-y-0.5">
-                          <span className="font-mono text-[10px] font-bold text-[#64748b] bg-[#f1f5f9] px-1.5 py-0.2 border border-[#e2e8f0] rounded inline-block">
+                          <span className="font-mono text-[10px] font-bold text-[#555C56] bg-[#F9FAF2] px-1.5 py-0.2 border border-[#e3ebe1] rounded inline-block">
                             {obl.id}
                           </span>
-                          <p className="font-semibold text-[#1a3a5c] text-xs">{obl.name}</p>
-                          <span className="text-[11px] text-[#64748b]">{obl.category}</span>
+                          <p className="font-semibold text-[#355E3B] text-xs">{obl.name}</p>
+                          <span className="text-[11px] text-[#555C56]">{obl.category}</span>
                         </div>
                       </td>
 
                       {/* Due date */}
-                      <td className="px-4 py-3.5 whitespace-nowrap border-r border-[#f1f5f9]">
-                        <span className="font-bold text-[#1a3a5c] block">{obl.dueDate}</span>
-                        <span className="text-[10px] text-[#64748b]">Statutory Deadline</span>
+                      <td className="px-4 py-3.5 whitespace-nowrap border-r border-[#F9FAF2]">
+                        <span className="font-bold text-[#355E3B] block">{obl.dueDate}</span>
+                        <span className="text-[10px] text-[#555C56]">Statutory Deadline</span>
                       </td>
 
                       {/* Frequency */}
-                      <td className="px-4 py-3.5 text-[#475569] border-r border-[#f1f5f9] min-w-[130px]">
+                      <td className="px-4 py-3.5 text-[#4A4A4A] border-r border-[#F9FAF2] min-w-[130px]">
                         {obl.frequency}
                       </td>
 
                       {/* Source approval */}
-                      <td className="px-4 py-3.5 border-r border-[#f1f5f9] min-w-[140px]">
+                      <td className="px-4 py-3.5 border-r border-[#F9FAF2] min-w-[140px]">
                         <div className="space-y-0.5">
-                          <span className="font-mono text-[11px] font-semibold text-[#1e40af] block">
+                          <span className="font-mono text-[11px] font-semibold text-[#539160] block">
                             {obl.sourceApprovalId}
                           </span>
-                          <span className="text-[10px] text-[#64748b] block">{obl.sourceCondition}</span>
+                          <span className="text-[10px] text-[#555C56] block">{obl.sourceCondition}</span>
                         </div>
                       </td>
 
                       {/* Required action */}
-                      <td className="px-4 py-3.5 text-[#334155] border-r border-[#f1f5f9] min-w-[200px]">
+                      <td className="px-4 py-3.5 text-[#3A3E39] border-r border-[#F9FAF2] min-w-[200px]">
                         <p className="text-xs leading-relaxed">{obl.actionRequired || obl.description}</p>
                       </td>
 
                       {/* Status */}
-                      <td className="px-4 py-3.5 whitespace-nowrap border-r border-[#f1f5f9]">
+                      <td className="px-4 py-3.5 whitespace-nowrap border-r border-[#F9FAF2]">
                         {complianceStatusBadge(obl.status)}
                       </td>
 
@@ -484,7 +484,7 @@ export function DecisionDetailScreen({
                       <td className="px-4 py-3.5 text-right whitespace-nowrap">
                         <Link
                           href={ENTREPRENEUR_ROUTES.complianceDetail(project.id, obl.id)}
-                          className="text-xs font-semibold text-[#1a56db] hover:underline inline-flex items-center gap-1"
+                          className="text-xs font-semibold text-[#6DAE7C] hover:underline inline-flex items-center gap-1"
                         >
                           <span>Manage</span>
                           <span>→</span>
@@ -499,14 +499,13 @@ export function DecisionDetailScreen({
             {/* ===================================================================== */}
             {/* ARCHITECTURAL BOUNDARY HANDOFF BANNER                                 */}
             {/* ===================================================================== */}
-            <div className="p-4 bg-[#f8fafc] border border-[#cbd5e1] rounded-lg flex flex-wrap items-center justify-between gap-4 text-xs">
+            <div className="p-4 bg-[#F9FAF2] border border-[#c8d4c7] rounded-lg flex flex-wrap items-center justify-between gap-4 text-xs">
               <div className="flex items-center gap-3">
-                <span className="text-xl">📋</span>
                 <div className="space-y-0.5">
-                  <p className="font-bold text-[#0f172a] text-xs uppercase tracking-wide">
+                  <p className="font-bold text-[#2B2B2B] text-xs uppercase tracking-wide">
                     The Approval page summarizes. The Compliance page manages.
                   </p>
-                  <p className="text-[#475569] leading-relaxed">
+                  <p className="text-[#4A4A4A] leading-relaxed">
                     This page provides your permanent record of granted rights and conditions. 
                     To upload test certificates, file periodic returns, manage monitoring logs, and track deadlines on your calendar, 
                     use the dedicated <strong>Compliance Dashboard</strong>.
@@ -516,7 +515,7 @@ export function DecisionDetailScreen({
 
               <Link
                 href={ENTREPRENEUR_ROUTES.compliance(project.id)}
-                className="bg-[#1a3a5c] text-white hover:bg-[#0f2540] px-4 py-2 rounded font-semibold transition-colors shrink-0 shadow-xs"
+                className="bg-[#355E3B] text-white hover:bg-[#27472c] px-4 py-2 rounded font-semibold transition-colors shrink-0 shadow-xs"
               >
                 Go to Compliance Dashboard →
               </Link>
@@ -528,17 +527,17 @@ export function DecisionDetailScreen({
         {/* DOWNSTREAM UNLOCKED DEPENDENCIES & RIPPLE EFFECT                          */}
         {/* ========================================================================= */}
         {isApproved && dec.downstreamUnlocked && dec.downstreamUnlocked.length > 0 && (
-          <div className="bg-white border border-[#e2e8f0] rounded-lg p-5 shadow-xs space-y-4">
-            <div className="border-b border-[#f1f5f9] pb-3 flex items-center justify-between">
+          <div className="bg-white border border-[#e3ebe1] rounded-lg p-5 shadow-xs space-y-4">
+            <div className="border-b border-[#F9FAF2] pb-3 flex items-center justify-between">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#64748b]">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#555C56]">
                   Single Window Dependency Ripple
                 </span>
-                <h3 className="text-sm font-bold text-[#1a3a5c]">Downstream Approvals Unlocked by this Grant</h3>
+                <h3 className="text-sm font-bold text-[#355E3B]">Downstream Approvals Unlocked by this Grant</h3>
               </div>
               <Link
                 href={ENTREPRENEUR_ROUTES.dependencies(project.id)}
-                className="text-xs text-[#1a56db] font-semibold hover:underline"
+                className="text-xs text-[#6DAE7C] font-semibold hover:underline"
               >
                 View in Dependency Graph →
               </Link>
@@ -546,13 +545,13 @@ export function DecisionDetailScreen({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               {dec.downstreamUnlocked.map((d, i) => (
-                <div key={i} className="p-3 border border-[#e2e8f0] bg-[#f8f9fb] rounded text-xs space-y-1">
+                <div key={i} className="p-3 border border-[#e3ebe1] bg-[#F9FAF2] rounded text-xs space-y-1">
                   <div className="flex items-center gap-1.5 text-[#15803d] font-bold text-[10px]">
                     <Check className="w-3 h-3 text-[#166534]" />
                     <span>Unlocked</span>
                   </div>
-                  <p className="font-semibold text-[#1a3a5c]">{d.label}</p>
-                  <p className="text-[11px] text-[#475569]">{d.status}</p>
+                  <p className="font-semibold text-[#355E3B]">{d.label}</p>
+                  <p className="text-[11px] text-[#4A4A4A]">{d.status}</p>
                 </div>
               ))}
             </div>
@@ -560,25 +559,25 @@ export function DecisionDetailScreen({
         )}
 
         {/* Version History */}
-        <div className="bg-white border border-[#e2e8f0] rounded-lg p-5 shadow-xs space-y-3">
-          <h3 className="text-xs font-bold text-[#1a3a5c] uppercase tracking-wider border-b border-[#f1f5f9] pb-2">
+        <div className="bg-white border border-[#e3ebe1] rounded-lg p-5 shadow-xs space-y-3">
+          <h3 className="text-xs font-bold text-[#355E3B] uppercase tracking-wider border-b border-[#F9FAF2] pb-2">
             Decision Version & Scrutiny Audit
           </h3>
-          <div className="divide-y divide-[#f1f5f9]">
+          <div className="divide-y divide-[#F9FAF2]">
             {dec.versionHistory?.map((v, i) => (
               <div key={i} className="py-2.5 text-xs flex items-start justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2">
-                    <p className="font-semibold text-[#1a3a5c]">{v.version}</p>
+                    <p className="font-semibold text-[#355E3B]">{v.version}</p>
                     {i === 0 && (
-                      <span className="text-[9px] font-bold border border-[#93c5fd] bg-[#dbeafe] text-[#1e40af] px-1.5 py-0.2 rounded">
+                      <span className="text-[9px] font-bold border border-[#a1cba9] bg-[#edf5ef] text-[#539160] px-1.5 py-0.2 rounded">
                         Current
                       </span>
                     )}
                   </div>
-                  <p className="text-[#475569] mt-0.5">{v.note}</p>
+                  <p className="text-[#4A4A4A] mt-0.5">{v.note}</p>
                 </div>
-                <span className="font-mono text-[#94a3b8] text-[11px] shrink-0">{v.date}</span>
+                <span className="font-mono text-[#9ab098] text-[11px] shrink-0">{v.date}</span>
               </div>
             ))}
           </div>

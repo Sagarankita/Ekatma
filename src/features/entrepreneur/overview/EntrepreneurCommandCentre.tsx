@@ -37,28 +37,28 @@ function SectionHeader({ title, count, href, linkLabel }: {
   return (
     <div className="flex items-center justify-between gap-3 border-b border-slate-200 px-5 py-3.5">
       <div className="flex items-center gap-2">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-[#17365D]">{title}</h2>
+        <h2 className="text-sm font-bold uppercase tracking-wider text-[#355E3B]">{title}</h2>
         {typeof count === 'number' ? (
-          <span className="rounded-full bg-[#EEF2F6] px-2 py-0.5 text-[11px] font-bold text-[#5C6470]">{count}</span>
+          <span className="rounded-full bg-[#edf5ef] px-2 py-0.5 text-[11px] font-bold text-[#555C56]">{count}</span>
         ) : null}
       </div>
       {href && linkLabel ? (
-        <Link href={href} className="text-xs font-semibold text-[#245B8A] hover:underline">{linkLabel}</Link>
+        <Link href={href} className="text-xs font-semibold text-[#3d7a4d] hover:underline">{linkLabel}</Link>
       ) : null}
     </div>
   )
 }
 
 function EmptyState({ children }: { children: ReactNode }) {
-  return <p className="px-5 py-7 text-sm text-[#5C6470]">{children}</p>
+  return <p className="px-5 py-7 text-sm text-[#555C56]">{children}</p>
 }
 
 function ApplicationStatus({ application }: { application: TrackerApp }) {
   const classes: Record<TrackerApp['statusType'], string> = {
-    active: 'border-[#B8D5E5] bg-[#EBF3FA] text-[#17365D]',
+    active: 'border-[#B8D5E5] bg-[#edf5ef] text-[#355E3B]',
     action: 'border-[#F8D4B0] bg-[#FDF4EB] text-[#C46A15]',
     approved: 'border-[#B8E3CA] bg-[#EBF7F0] text-[#2F7D4F]',
-    waiting: 'border-[#D9DFE5] bg-[#F1F3F5] text-[#5C6470]',
+    waiting: 'border-[#D9DFE5] bg-[#F1F3F5] text-[#555C56]',
     'over-sla': 'border-[#F8C4C4] bg-[#FDF2F2] text-[#9B2C2C]',
   }
   return <span className={`rounded border px-2 py-0.5 text-[11px] font-semibold ${classes[application.statusType]}`}>{application.status}</span>
@@ -68,14 +68,14 @@ function RegulatoryBadge({ value }: { value: RegulatoryChangeVerification | Regu
   const classes: Record<RegulatoryChangeVerification | RegulatoryChangeImpact, string> = {
     Validated: 'border-[#B8E3CA] bg-[#EBF7F0] text-[#2F7D4F]',
     'Needs Verification': 'border-[#F8D4B0] bg-[#FDF4EB] text-[#C46A15]',
-    'Under Review': 'border-[#B8D5E5] bg-[#EBF3FA] text-[#17365D]',
-    'No action': 'border-[#D9DFE5] bg-[#F1F3F5] text-[#5C6470]',
+    'Under Review': 'border-[#B8D5E5] bg-[#edf5ef] text-[#355E3B]',
+    'No action': 'border-[#D9DFE5] bg-[#F1F3F5] text-[#555C56]',
     'Review recommended': 'border-[#F8D4B0] bg-[#FDF4EB] text-[#C46A15]',
     'New document': 'border-[#F8D4B0] bg-[#FDF4EB] text-[#C46A15]',
     'Application affected': 'border-[#F8C4C4] bg-[#FDF2F2] text-[#9B2C2C]',
     'Renewal affected': 'border-[#F8D4B0] bg-[#FDF4EB] text-[#C46A15]',
     'Compliance affected': 'border-[#F8C4C4] bg-[#FDF2F2] text-[#9B2C2C]',
-    'New requirement potentially triggered': 'border-[#B8D5E5] bg-[#EBF3FA] text-[#17365D]',
+    'New requirement potentially triggered': 'border-[#B8D5E5] bg-[#edf5ef] text-[#355E3B]',
   }
   return <span className={`rounded border px-1.5 py-0.5 text-[10px] font-semibold ${classes[value]}`}>{value}</span>
 }
@@ -178,16 +178,16 @@ export function EntrepreneurCommandCentre({ project }: { project: BusinessProjec
   ].slice(0, 5)
 
   return (
-    <main id="main-content" data-testid="e00-command-centre" className="min-h-full flex-1 bg-[#F8F9FA]" tabIndex={-1}>
+    <main id="main-content" data-testid="e00-command-centre" className="min-h-full flex-1 bg-[#F9FAF2]" tabIndex={-1}>
       <header className="border-b border-slate-200 bg-white" aria-label="Business and project overview header">
         <div className="mx-auto flex max-w-[1180px] flex-wrap items-center justify-between gap-3 px-4 py-5 sm:px-6">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-[#17365D]">Overview</h1>
-            <p className="mt-1 text-sm text-[#5C6470]">See what needs attention, what is being processed and what comes next.</p>
+            <h1 className="text-xl font-bold text-[#355E3B]">Overview</h1>
+            <p className="mt-1 text-sm text-[#555C56]">See what needs attention, what is being processed and what comes next.</p>
           </div>
           <div className="flex items-center gap-2" aria-label="Current business status">
-            <span className="rounded-md border border-slate-200 bg-[#F8F9FA] px-2.5 py-1 text-xs font-semibold text-[#20242A]">{project.stage}</span>
-            <span className="rounded-md border border-slate-200 bg-[#F8F9FA] px-2.5 py-1 text-xs font-semibold text-[#20242A]">{project.journeyState}</span>
+            <span className="rounded-md border border-slate-200 bg-[#F9FAF2] px-2.5 py-1 text-xs font-semibold text-[#2B2B2B]">{project.stage}</span>
+            <span className="rounded-md border border-slate-200 bg-[#F9FAF2] px-2.5 py-1 text-xs font-semibold text-[#2B2B2B]">{project.journeyState}</span>
           </div>
         </div>
       </header>
@@ -195,27 +195,27 @@ export function EntrepreneurCommandCentre({ project }: { project: BusinessProjec
       <div className="mx-auto max-w-[1180px] space-y-5 px-4 py-6 sm:px-6">
         <section id="action-required" className="overflow-hidden rounded-xl border border-[#F8D4B0] bg-white shadow-xs" aria-labelledby="overview-actions-heading">
           <div className="flex items-center gap-2 border-b border-[#F8D4B0] bg-[#FDF4EB] px-5 py-3.5">
-            <span className="h-2 w-2 rounded-full bg-[#E68A2E]" aria-hidden="true" />
+            <span className="h-2 w-2 rounded-full bg-[#D4A017]" aria-hidden="true" />
             <h2 id="overview-actions-heading" className="text-sm font-bold uppercase tracking-wider text-[#9A4F0C]">Action Required</h2>
-            <span className="rounded-full bg-[#E68A2E] px-2 py-0.5 text-[11px] font-bold text-white">{actions.length}</span>
+            <span className="rounded-full bg-[#D4A017] px-2 py-0.5 text-[11px] font-bold text-white">{actions.length}</span>
           </div>
           {actions.length ? (
             <div className="divide-y divide-slate-100">
               {actions.slice(0, 5).map((action, index) => (
                 <div key={action.id} className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex min-w-0 items-start gap-3">
-                    <span className={`mt-0.5 shrink-0 ${action.urgent ? 'text-[#C46A15]' : 'text-[#5C6470]'}`}>{action.icon}</span>
+                    <span className={`mt-0.5 shrink-0 ${action.urgent ? 'text-[#C46A15]' : 'text-[#555C56]'}`}>{action.icon}</span>
                     <div>
-                      <p className="text-sm font-bold leading-snug text-[#20242A]">{action.title}</p>
-                      <p className="mt-1 text-xs text-[#5C6470]">{action.detail}</p>
+                      <p className="text-sm font-bold leading-snug text-[#2B2B2B]">{action.title}</p>
+                      <p className="mt-1 text-xs text-[#555C56]">{action.detail}</p>
                     </div>
                   </div>
-                  <Link href={action.href} className={`shrink-0 rounded px-4 py-2 text-center text-sm font-semibold transition-colors ${index === 0 ? 'bg-[#17365D] text-white hover:bg-[#0F2540]' : 'border border-[#B8C6D4] bg-white text-[#17365D] hover:bg-[#F0F5FA]'}`}>
+                  <Link href={action.href} className={`shrink-0 rounded px-4 py-2 text-center text-sm font-semibold transition-colors ${index === 0 ? 'bg-[#355E3B] text-white hover:bg-[#27472c]' : 'border border-[#B8C6D4] bg-white text-[#355E3B] hover:bg-[#edf5ef]'}`}>
                     {action.label}
                   </Link>
                 </div>
               ))}
-              {actions.length > 5 ? <p className="px-5 py-3 text-xs text-[#5C6470]">{actions.length - 5} more items require attention in their relevant sections.</p> : null}
+              {actions.length > 5 ? <p className="px-5 py-3 text-xs text-[#555C56]">{actions.length - 5} more items require attention in their relevant sections.</p> : null}
             </div>
           ) : <EmptyState>No action is required from you right now.</EmptyState>}
         </section>
@@ -228,8 +228,8 @@ export function EntrepreneurCommandCentre({ project }: { project: BusinessProjec
                 {inProgress.map(application => (
                   <Link key={application.appId} href={ENTREPRENEUR_ROUTES.application(project.id, application.appId)} className="flex items-center justify-between gap-4 px-5 py-4 transition-colors hover:bg-[#F5F8FB]">
                     <div className="min-w-0">
-                      <p className="text-sm font-bold text-[#20242A]">{application.service}</p>
-                      <p className="mt-1 text-xs text-[#5C6470]">{application.dept} · {application.currentDesk} · {application.appId}</p>
+                      <p className="text-sm font-bold text-[#2B2B2B]">{application.service}</p>
+                      <p className="mt-1 text-xs text-[#555C56]">{application.dept} · {application.currentDesk} · {application.appId}</p>
                     </div>
                     <ApplicationStatus application={application} />
                   </Link>
@@ -245,10 +245,10 @@ export function EntrepreneurCommandCentre({ project }: { project: BusinessProjec
                 {upcoming.map(item => (
                   <Link key={item.id} href={item.href} className="block px-5 py-4 transition-colors hover:bg-[#F5F8FB]">
                     <div className="flex items-start justify-between gap-3">
-                      <p className="text-sm font-bold leading-snug text-[#20242A]">{item.title}</p>
-                      {item.meta ? <span className="shrink-0 rounded border border-slate-200 bg-[#F8F9FA] px-1.5 py-0.5 text-[10px] font-bold text-[#5C6470]">{item.meta}</span> : null}
+                      <p className="text-sm font-bold leading-snug text-[#2B2B2B]">{item.title}</p>
+                      {item.meta ? <span className="shrink-0 rounded border border-slate-200 bg-[#F9FAF2] px-1.5 py-0.5 text-[10px] font-bold text-[#555C56]">{item.meta}</span> : null}
                     </div>
-                    <p className="mt-1 text-xs text-[#5C6470]">{item.detail}</p>
+                    <p className="mt-1 text-xs text-[#555C56]">{item.detail}</p>
                   </Link>
                 ))}
               </div>
@@ -263,8 +263,8 @@ export function EntrepreneurCommandCentre({ project }: { project: BusinessProjec
               <div className="divide-y divide-slate-100">
                 {recentActivity.map(item => (
                   <Link key={item.id} href={item.href} className="block px-5 py-4 transition-colors hover:bg-[#F5F8FB]">
-                    <p className="text-sm font-semibold text-[#20242A]">{item.title}</p>
-                    <p className="mt-1 text-xs text-[#5C6470]">{item.detail}</p>
+                    <p className="text-sm font-semibold text-[#2B2B2B]">{item.title}</p>
+                    <p className="mt-1 text-xs text-[#555C56]">{item.detail}</p>
                   </Link>
                 ))}
               </div>
@@ -277,12 +277,12 @@ export function EntrepreneurCommandCentre({ project }: { project: BusinessProjec
               <div className="divide-y divide-slate-100">
                 {relevantChanges.slice(0, 4).map(change => (
                   <Link key={change.id} href={ENTREPRENEUR_ROUTES.regulatoryChanges(project.id)} className="block px-5 py-4 transition-colors hover:bg-[#F5F8FB]">
-                    <p className="text-sm font-bold leading-snug text-[#20242A]">{change.title}</p>
+                    <p className="text-sm font-bold leading-snug text-[#2B2B2B]">{change.title}</p>
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       <RegulatoryBadge value={change.verification} />
                       <RegulatoryBadge value={change.impactCategory} />
                     </div>
-                    <p className="mt-2 text-xs text-[#5C6470]">Effective {change.effectiveDate} · {change.department}</p>
+                    <p className="mt-2 text-xs text-[#555C56]">Effective {change.effectiveDate} · {change.department}</p>
                   </Link>
                 ))}
               </div>

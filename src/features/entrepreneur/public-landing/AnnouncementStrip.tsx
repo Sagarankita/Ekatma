@@ -13,11 +13,11 @@ export function AnnouncementStrip() {
   const [isPaused, setIsPaused] = useState(false);
 
   return (
-    <div className="bg-[#17365D]/5 border-y border-[#17365D]/10 py-2.5 px-4 sm:px-8 overflow-hidden">
+    <div className="bg-[#355E3B]/5 border-y border-[#355E3B]/10 py-2.5 px-4 sm:px-8 overflow-hidden">
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center gap-3">
         {/* Badge */}
-        <div className="flex items-center gap-2 shrink-0 bg-[#17365D] text-white text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded">
-          <span className="w-2 h-2 rounded-full bg-[#E68A2E] animate-pulse" />
+        <div className="flex items-center gap-2 shrink-0 bg-[#355E3B] text-white text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded">
+          <span className="w-2 h-2 rounded-full bg-[#D4A017] animate-pulse" />
           <span>Latest Updates</span>
         </div>
 
@@ -28,7 +28,7 @@ export function AnnouncementStrip() {
           onMouseLeave={() => setIsPaused(false)}
         >
           <div
-            className={`flex items-center gap-8 whitespace-nowrap text-xs text-[#20242A] transition-all ${
+            className={`flex items-center gap-8 whitespace-nowrap text-xs text-[#2B2B2B] transition-all ${
               isPaused ? '' : 'animate-marquee'
             }`}
           >
@@ -36,9 +36,9 @@ export function AnnouncementStrip() {
               <a
                 key={item.id}
                 href={item.link}
-                className="inline-flex items-center gap-2 hover:text-[#245B8A] transition-colors group"
+                className="inline-flex items-center gap-2 hover:text-[#3d7a4d] transition-colors group"
               >
-                <span className="font-semibold text-[#245B8A] bg-[#245B8A]/10 px-1.5 py-0.5 rounded text-[10px]">
+                <span className="font-semibold text-[#3d7a4d] bg-[#3d7a4d]/10 px-1.5 py-0.5 rounded text-[10px]">
                   [{item.type}]
                 </span>
                 <span className="group-hover:underline">{item.text}</span>
