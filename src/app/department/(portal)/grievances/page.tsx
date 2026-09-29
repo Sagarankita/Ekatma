@@ -15,6 +15,7 @@ export default function Page() {
       onOpenSLA={() => router.push(ROUTES.department.sla)}
       onOpenQuery={appId => router.push(ROUTES.department.applicationTab(appId, 'queries', 'grievances'))}
       onOpenInspection={(appId) => router.push(ROUTES.department.applicationTab(appId, 'inspections', 'grievances'))}
+      onOpenRegAssistant={() => router.push(ROUTES.department.regAssistant)}
     
     />
   );

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { AccessibilityStrip } from '@/features/entrepreneur/public-auth/PublicChrome';
+import { AccessibilityStrip, Footer } from '@/features/entrepreneur/public-auth/PublicChrome';
 
 export default function DepartmentShell({ children, requireAuth = false }: { children: React.ReactNode, requireAuth?: boolean }) {
   const [lang, setLang] = useState<'en' | 'mr'>('en');
@@ -82,9 +82,7 @@ export default function DepartmentShell({ children, requireAuth = false }: { chi
       <main className="flex-1 flex flex-col">
         {children}
       </main>
-      <footer className="bg-[#17365D] border-t border-[#0F233D] px-6 py-4 text-center text-xs text-white/80">
-        © 2026 Government of Maharashtra. All rights reserved.
-      </footer>
+      <Footer />
     </div>
   );
 }

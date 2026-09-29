@@ -22,6 +22,36 @@ const VERIFIED_EMAIL_KEY = 'entrepreneur_demo_verified_email'
 const REGISTERED_EMAIL_KEY = 'entrepreneur_demo_registered_email'
 const AUTH_KEY = 'entrepreneur_demo_auth'
 
+function LandingScrollProgress() {
+  const [progress, setProgress] = useState(0)
+
+  useEffect(() => {
+    let frame = 0
+    const updateProgress = () => {
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(() => {
+        const scrollable = document.documentElement.scrollHeight - window.innerHeight
+        setProgress(scrollable > 0 ? Math.min(100, Math.max(0, (window.scrollY / scrollable) * 100)) : 0)
+      })
+    }
+
+    updateProgress()
+    window.addEventListener('scroll', updateProgress, { passive: true })
+    window.addEventListener('resize', updateProgress)
+    return () => {
+      cancelAnimationFrame(frame)
+      window.removeEventListener('scroll', updateProgress)
+      window.removeEventListener('resize', updateProgress)
+    }
+  }, [])
+
+  return (
+    <div className="sticky top-0 z-40 h-1.5 w-full overflow-hidden bg-slate-200/80 shadow-sm" role="progressbar" aria-label="Landing page reading progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress)}>
+      <div className="h-full origin-left transition-transform duration-150 ease-out" style={{ transform: `scaleX(${progress / 100})`, background: 'linear-gradient(90deg, #f59e0b 0%, #fbbf72 22%, #fff7ed 38%, #ffffff 50%, #ecfdf5 62%, #86d6a3 78%, #16a34a 100%)' }} />
+    </div>
+  )
+}
+
 function PublicFrame({ children, auth = false, isLanding = false }: { children: React.ReactNode; auth?: boolean; isLanding?: boolean }) {
   const router = useRouter()
   const { fontSizeClass, contrastClass, ...sharedProps } = useDisplayPreferences()
@@ -35,6 +65,7 @@ function PublicFrame({ children, auth = false, isLanding = false }: { children: 
         <>
           <AccessibilityStrip {...sharedProps} />
           <PortalHeader isLoggedIn={false} setIsLoggedIn={() => {}} onGoToLogin={() => router.push(ENTREPRENEUR_ROUTES.login())} showSearchAndHelp={!isLanding} />
+          {isLanding && <LandingScrollProgress />}
           {!isLanding && <DemoNotice />}
           {children}
           <Footer />

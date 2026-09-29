@@ -6,6 +6,8 @@ import { CytoscapeDependencyGraph, DepEdge, M17_DEFAULT_EDGES } from '@/componen
 import { M10ReviewPlanPage, M10ReviewPlanPageProps } from '@/components/department/M10ReviewPlanPage';
 import { EmbeddedDocumentOcrViewer } from '@/components/department/EmbeddedDocumentOcrViewer';
 import { DocumentOcrInsightsPage } from '@/components/department/DocumentOcrInsightsPage';
+import { OfficerRegulatoryAssistantPage } from '@/components/department/OfficerRegulatoryAssistantPage';
+import { M31GrievanceWorkspace } from '@/components/department/M31GrievanceWorkspace';
 import {
   InspectionRecordsPage,
   InspectionWorkspacePage,
@@ -14347,7 +14349,7 @@ export function M30SLADashboard({ onOpenApp, onOpenGrievance }: { onOpenApp: (ap
 
 
 
-export function M31GrievancePage({ onBack, onOpenApp, onOpenSLA, onOpenQuery, onOpenInspection }: {
+function LegacyM31GrievancePage({ onBack, onOpenApp, onOpenSLA, onOpenQuery, onOpenInspection }: {
   onBack: () => void; onOpenApp: (applicationId: string) => void; onOpenSLA: () => void
   onOpenQuery: (applicationId: string) => void; onOpenInspection: (applicationId: string, inspectionId: string) => void
 }) {
@@ -14533,6 +14535,17 @@ export function M31GrievancePage({ onBack, onOpenApp, onOpenSLA, onOpenQuery, on
   )
 }
 
+export function M31GrievancePage({ onBack, onOpenApp, onOpenSLA, onOpenQuery, onOpenInspection, onOpenRegAssistant }: {
+  onBack: () => void
+  onOpenApp: (applicationId: string) => void
+  onOpenSLA: () => void
+  onOpenQuery: (applicationId: string) => void
+  onOpenInspection: (applicationId: string, inspectionId: string) => void
+  onOpenRegAssistant?: () => void
+}) {
+  return <M31GrievanceWorkspace onBack={onBack} onOpenApp={onOpenApp} onOpenSLA={onOpenSLA} onOpenQuery={onOpenQuery} onOpenInspection={onOpenInspection} onOpenRegAssistant={onOpenRegAssistant} />
+}
+
 // ─── M39 Notification Drawer ──────────────────────────────────────────────────
 
 
@@ -14631,7 +14644,7 @@ export function M39NotificationDrawer({ open, onClose, onNavigate }: {
 
 
 
-export function M32RegRAGPage({ onBack, onOpenRegChange, applicationContext }: { onBack: () => void; onOpenRegChange?: () => void; applicationContext?: { id: string; business: string; service: string; dnaVersion: string } }) {
+function LegacyM32RegRAGPage({ onBack, onOpenRegChange, applicationContext }: { onBack: () => void; onOpenRegChange?: () => void; applicationContext?: { id: string; business: string; service: string; dnaVersion: string } }) {
   const [input, setInput] = useState('')
   const [lang, setLang] = useState<'en'|'mr'>('en')
   const [selectedSrc, setSelectedSrc] = useState<typeof M32_SOURCES[0]>(M32_SOURCES[0])
@@ -14753,6 +14766,27 @@ export function M32RegRAGPage({ onBack, onOpenRegChange, applicationContext }: {
       </div>
     </div>
   )
+}
+
+/**
+ * Officer-facing regulatory research workspace. The legacy implementation is
+ * retained above so its provider and source-backed behavior remain available
+ * while the department route uses the structured officer experience.
+ */
+export function M32RegRAGPage({ onBack, onOpenRegChange, applicationContext }: {
+  onBack: () => void
+  onOpenRegChange?: () => void
+  applicationContext?: {
+    id: string
+    business: string
+    service: string
+    dnaVersion: string
+    location?: string
+    state?: string
+    desk?: string
+  }
+}) {
+  return <OfficerRegulatoryAssistantPage onBack={onBack} onOpenRegChange={onOpenRegChange} applicationContext={applicationContext} />
 }
 
 // ─── M33 Regulatory Change Centre ────────────────────────────────────────────
