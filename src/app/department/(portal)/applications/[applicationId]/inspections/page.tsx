@@ -1,6 +1,6 @@
 'use client';
 
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { InspectionRecordsPage } from '@/components/department/InspectionExperience';
 import { ApplicationId } from '@/domain/ids';
 import { ROUTES } from '@/lib/routes';
@@ -9,6 +9,7 @@ import { getWorkflowRecord } from '@/data/fixtures/workflow-records';
 export default function Page() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const appId = (params.applicationId as string) as ApplicationId;
 
   return (
@@ -22,7 +23,9 @@ export default function Page() {
       onOpenDecision={(targetAppId) => {
         router.push(ROUTES.department.applicationDecisionWorkspace(targetAppId || appId));
       }}
-      onBack={() => router.push(ROUTES.department.application(appId))}
+      onBack={() => searchParams.get('from') === 'scrutiny-workflow'
+        ? router.push(`${ROUTES.department.applicationScrutinyWorkflow(appId)}?stage=inspection`)
+        : router.push(ROUTES.department.application(appId))}
     />
   );
 }

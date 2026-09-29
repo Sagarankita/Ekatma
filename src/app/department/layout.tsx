@@ -9,7 +9,9 @@ export const metadata: Metadata = {
   description: 'Government of Maharashtra Single Window Portal - Department Interface',
   manifest: '/department/manifest.json',
   icons: {
-    apple: '/department/icons/apple-touch-icon.png',
+    icon: '/assets/ekatma-logo.png',
+    shortcut: '/assets/ekatma-logo.png',
+    apple: '/assets/ekatma-logo.png',
   },
 };
 

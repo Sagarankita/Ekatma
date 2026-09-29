@@ -100,6 +100,7 @@ export interface M10ReviewPlanPageProps {
   applicationId?: string;
   onBackToOverview: () => void;
   onBackToPrecheck?: () => void;
+  onBackToScrutinyWorkflow?: () => void;
   onOpenDna?: () => void;
   onOpenTimeline?: () => void;
   onOpenScrutinyWorkflow?: () => void;
@@ -129,6 +130,7 @@ export function M10ReviewPlanPage({
   applicationId,
   onBackToOverview,
   onBackToPrecheck,
+  onBackToScrutinyWorkflow,
   onOpenDna,
   onOpenTimeline,
   onOpenScrutinyWorkflow,
@@ -808,6 +810,15 @@ export function M10ReviewPlanPage({
           </div>
 
           <div className="flex items-center gap-2 shrink-0 flex-wrap">
+            {onBackToScrutinyWorkflow && (
+              <button
+                type="button"
+                onClick={onBackToScrutinyWorkflow}
+                className="px-3 py-1.5 border border-[#c8d4c7] text-xs font-bold text-[#355E3B] bg-white hover:bg-slate-50 rounded transition-colors"
+              >
+                ← Back to Scrutiny Workflow
+              </button>
+            )}
             {onBackToPrecheck && (
               <button
                 type="button"

@@ -14,11 +14,13 @@ export default function Page() {
     <GuidedScrutinyWorkflow
       applicationId={appId}
       initialStageKey="land"
-      onBack={() => router.push(ROUTES.department.scrutiny)}
+      backLabel="Back to Scrutiny Workflow"
+      onBack={() => router.push(`${ROUTES.department.applicationScrutinyWorkflow(appId)}?stage=land`)}
       onOpenOverview={() => router.push(ROUTES.department.application(appId))}
       onOpenPrecheck={() => router.push(ROUTES.department.applicationPrecheck(appId))}
       onOpenRoute={() => router.push(ROUTES.department.applicationScrutinyRoute(appId))}
       onOpenLandWorkbench={() => router.push(ROUTES.department.applicationScrutinyWorkbench(appId))}
+      onOpenDocReview={(docId) => router.push(`${ROUTES.department.applicationDocument(appId, docId)}?from=scrutiny-workflow&stage=land`)}
       onOpenBuildingScrutiny={() => router.push(ROUTES.department.applicationBuildingScrutiny(appId))}
       onOpenWaterScrutiny={() => router.push(ROUTES.department.applicationWaterScrutiny(appId))}
       onOpenConsistency={() => router.push(ROUTES.department.applicationConsistency(appId))}

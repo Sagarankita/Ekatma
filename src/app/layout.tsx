@@ -18,6 +18,11 @@ const notoSansDevanagari = Noto_Sans_Devanagari({
 export const metadata = {
   title: "EKATMA Portal",
   description: "Government of Maharashtra industrial and entrepreneurship portal",
+  icons: {
+    icon: '/assets/ekatma-logo.png',
+    shortcut: '/assets/ekatma-logo.png',
+    apple: '/assets/ekatma-logo.png',
+  },
 };
 
 export default function RootLayout({

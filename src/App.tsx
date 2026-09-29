@@ -5138,6 +5138,7 @@ export function M09PreCheckPage({
   onOpenTimeline,
   onOpenScrutinyRoute,
   onOpenScrutinyWorkflow,
+  onBackToScrutinyWorkflow,
   onOpenDocReview,
   onOpenParamDetail,
   onOpenConsistency,
@@ -5150,6 +5151,7 @@ export function M09PreCheckPage({
   onOpenTimeline?: () => void
   onOpenScrutinyRoute?: () => void
   onOpenScrutinyWorkflow?: () => void
+  onBackToScrutinyWorkflow?: () => void
   onOpenDocReview?: (id: string) => void
   onOpenParamDetail?: (id: string) => void
   onOpenConsistency?: () => void
@@ -5174,6 +5176,7 @@ export function M09PreCheckPage({
   const [activeCheck, setActiveCheck] = useState<PreCheck | null>(null)
   const [showVerifiedChecks, setShowVerifiedChecks] = useState(false)
   const [showAllCategories, setShowAllCategories] = useState(false)
+  const [precheckApproved, setPrecheckApproved] = useState(false)
   const [notification, setNotification] = useState<string | null>(null)
 
   // Track officer reviews in component state
@@ -5214,7 +5217,9 @@ export function M09PreCheckPage({
 
   const handleProceedToScrutinyPhase = () => {
     if (isSahyadri) setDemoStep('INITIAL_SCRUTINY')
-    if (onOpenScrutinyWorkflow) {
+    if (onBackToScrutinyWorkflow) {
+      onBackToScrutinyWorkflow()
+    } else if (onOpenScrutinyWorkflow) {
       onOpenScrutinyWorkflow()
     } else if (onOpenScrutinyRoute) {
       onOpenScrutinyRoute()
@@ -5273,7 +5278,7 @@ export function M09PreCheckPage({
             onClick={handleProceedToScrutinyPhase}
             className="px-4 py-2 bg-[#355E3B] text-white text-xs font-bold rounded hover:bg-[#27472c] transition-colors shadow-xs flex items-center gap-1.5 self-start sm:self-auto"
           >
-            Scrutiny Workflow (Review Plan) →
+            {onBackToScrutinyWorkflow ? '← Back to Pre-check node' : 'Scrutiny Workflow (Review Plan) →'}
           </button>
         </div>
 
@@ -5553,11 +5558,26 @@ export function M09PreCheckPage({
               </button>
             )}
 
+            {onBackToScrutinyWorkflow && (
+              <button
+                onClick={onBackToScrutinyWorkflow}
+                className="px-4 py-2 border border-[#c8d4c7] text-[#355E3B] bg-white text-xs font-bold rounded hover:bg-[#F9FAF2] transition-colors"
+              >
+                ← Back to Pre-check node
+              </button>
+            )}
             <button
-              onClick={handleProceedToScrutinyPhase}
+              onClick={() => {
+                setOfficerReviews(previous => ({
+                  ...previous,
+                  ...Object.fromEntries(priorityChecks.map(check => [check.id, 'valid' as OfficerReviewState])),
+                }))
+                setPrecheckApproved(true)
+                showNotice('Automated Pre-check approved. Return to the workflow to complete this phase.')
+              }}
               className="px-5 py-2 bg-[#065f46] text-white text-xs font-bold rounded hover:bg-[#044e3a] transition-colors shadow-xs flex items-center gap-1.5"
             >
-              Continue to Review Plan →
+              {precheckApproved ? 'Approved ✓' : 'Approve Pre-check'}
             </button>
           </div>
         </div>
@@ -5671,6 +5691,7 @@ export function M10LegacyDetailedRoutePage({
   onBackToOverview,
   onBackToPrecheck,
   onBackToReviewPlan,
+  onBackToScrutinyWorkflow,
   onOpenDna,
   onOpenTimeline,
   onOpenScrutinyWorkbench,
@@ -5679,6 +5700,7 @@ export function M10LegacyDetailedRoutePage({
   onBackToOverview: () => void;
   onBackToPrecheck?: () => void;
   onBackToReviewPlan?: () => void;
+  onBackToScrutinyWorkflow?: () => void;
   onOpenDna?: () => void;
   onOpenTimeline?: () => void;
   onOpenScrutinyWorkbench?: () => void;
@@ -5757,6 +5779,11 @@ export function M10LegacyDetailedRoutePage({
             <p className="text-sm text-[#2B2B2B] mt-0.5">How this application was routed for scrutiny and why.</p>
           </div>
           <div className="flex items-center gap-3">
+            {onBackToScrutinyWorkflow && (
+              <button onClick={onBackToScrutinyWorkflow} className="px-3 py-1.5 border border-[#c8d4c7] rounded text-xs font-bold text-[#355E3B] hover:bg-white">
+                ← Back to Scrutiny Workflow
+              </button>
+            )}
             {onBackToReviewPlan && (
               <button onClick={onBackToReviewPlan} className="text-xs font-bold text-[#6DAE7C] hover:underline">
                 ← Review Plan
@@ -9248,6 +9275,7 @@ export interface GuidedScrutinyWorkflowProps {
   initialApp?: ScrutinyApp
   initialStageKey?: string
   onBack?: () => void
+  backLabel?: string
   onOpenOverview?: (appId: string) => void
   onOpenPrecheck?: () => void
   onOpenRoute?: () => void
@@ -9285,6 +9313,7 @@ export function GuidedScrutinyWorkflow({
   initialApp,
   initialStageKey,
   onBack,
+  backLabel = 'Back to My Scrutiny Work',
   onOpenOverview,
   onOpenPrecheck,
   onOpenRoute,
@@ -9304,11 +9333,9 @@ export function GuidedScrutinyWorkflow({
   const isSahyadri = isSahyadriDemoApplication(app.appId)
   const { setStep: setDemoStep } = useSahyadriDemoState()
 
-  const [activePhaseKey, setActivePhaseKey] = useState<string>(
-    initialStageKey ?? (
-      app.modules.find(m => m.status === 'In Review' || m.status === 'Issues Found' || m.status === 'Query Required')?.id ?? 'building'
-    )
-  )
+  // The guided workflow always starts at the machine-assisted pre-check unless
+  // a detail route explicitly asks to open a particular checkpoint.
+  const [activePhaseKey, setActivePhaseKey] = useState<string>(initialStageKey ?? 'precheck')
 
   // Officer action states for interactive decisions
   const [precheckDecisions, setPrecheckDecisions] = useState<Record<string, { action: string; note?: string }>>({
@@ -9328,7 +9355,12 @@ export function GuidedScrutinyWorkflow({
   ])
   const [showDocPreview, setShowDocPreview] = useState(false)
   const [siteInspectionScheduled, setSiteInspectionScheduled] = useState(false)
-  const [completedPhases, setCompletedPhases] = useState<Set<string>>(() => new Set(['route']))
+  const [completedPhases, setCompletedPhases] = useState<Set<string>>(() => {
+    const order = ['precheck', 'route', 'land', 'building', 'water', 'consistency', 'dependency', 'query', 'delta', 'inspection']
+    const target = initialStageKey ?? 'precheck'
+    const index = Math.max(0, order.indexOf(target))
+    return new Set(order.slice(0, index))
+  })
   const [scrutinyCompleted, setScrutinyCompleted] = useState(false)
   const [buildingDecisions, setBuildingDecisions] = useState<Record<'built_up' | 'setback', 'accepted' | 'query' | null>>({ built_up: null, setback: null })
   const [notification, setNotification] = useState<string | null>(null)
@@ -9413,18 +9445,18 @@ export function GuidedScrutinyWorkflow({
     }
   ]
 
-  const completedOr = (key: string, fallback: string) => completedPhases.has(key) ? 'completed' : fallback
+  const completedOr = (key: string) => completedPhases.has(key) ? 'completed' : 'pending'
   const checkpoints = [
-    { id: 'phase-1', key: 'precheck', num: 1, name: 'Pre-check', status: completedOr('precheck', Object.keys(precheckDecisions).length >= 8 ? 'completed' : 'attention') },
-    { id: 'phase-2', key: 'route', num: 2, name: 'Review Plan', status: completedOr('route', 'completed') },
-    { id: 'phase-3', key: 'land', num: 3, name: 'Land / Plot', status: completedOr('land', landStatuses.plot_area === 'Valid' ? 'completed' : 'attention') },
-    { id: 'phase-4', key: 'building', num: 4, name: 'Building / Planning', status: completedOr('building', 'current') },
-    { id: 'phase-5', key: 'water', num: 5, name: 'Water / Utility', status: completedOr('water', 'not-applicable') },
-    { id: 'phase-6', key: 'consistency', num: 6, name: 'Consistency', status: completedOr('consistency', consistencyDecision ? 'completed' : 'attention') },
-    { id: 'phase-7', key: 'dependency', num: 7, name: 'Dependencies', status: completedOr('dependency', 'attention') },
-    { id: 'phase-8', key: 'query', num: 8, name: 'Query', status: completedOr('query', draftedQueries.length > 0 ? 'attention' : 'upcoming') },
-    { id: 'phase-9', key: 'delta', num: 9, name: 'Delta', status: completedOr('delta', app.resubmitted ? 'attention' : 'not-applicable') },
-    { id: 'phase-10', key: 'inspection', num: 10, name: 'Inspection', status: completedOr('inspection', siteInspectionScheduled ? 'completed' : 'attention') },
+    { id: 'phase-1', key: 'precheck', num: 1, name: 'Pre-check', status: completedOr('precheck') },
+    { id: 'phase-2', key: 'route', num: 2, name: 'Review Plan', status: completedOr('route') },
+    { id: 'phase-3', key: 'land', num: 3, name: 'Land / Plot', status: completedOr('land') },
+    { id: 'phase-4', key: 'building', num: 4, name: 'Building / Planning', status: completedOr('building') },
+    { id: 'phase-5', key: 'water', num: 5, name: 'Water / Utility', status: completedOr('water') },
+    { id: 'phase-6', key: 'consistency', num: 6, name: 'Consistency', status: completedOr('consistency') },
+    { id: 'phase-7', key: 'dependency', num: 7, name: 'Dependencies', status: completedOr('dependency') },
+    { id: 'phase-8', key: 'query', num: 8, name: 'Query', status: completedOr('query') },
+    { id: 'phase-9', key: 'delta', num: 9, name: 'Delta', status: completedOr('delta') },
+    { id: 'phase-10', key: 'inspection', num: 10, name: 'Inspection', status: completedOr('inspection') },
   ]
 
   const currentPhaseIndex = Math.max(0, checkpoints.findIndex(c => c.key === activePhaseKey))
@@ -9458,19 +9490,9 @@ export function GuidedScrutinyWorkflow({
     if (isSahyadri) {
       if (activePhaseKey === 'precheck') setDemoStep('INITIAL_SCRUTINY')
       else if (['route', 'land', 'building', 'water', 'consistency', 'dependency'].includes(activePhaseKey)) setDemoStep('TECHNICAL_SCRUTINY')
-      else if (activePhaseKey === 'query') {
-        setDemoStep('QUERY_RAISED')
-        onOpenQueryBuilder?.()
-        return
-      } else if (activePhaseKey === 'delta') {
-        setDemoStep('INSPECTION_PENDING')
-        onOpenInspectionPlanning?.()
-        return
-      } else if (activePhaseKey === 'inspection') {
-        setDemoStep('FINAL_DECISION')
-        onOpenDecisionWorkspace?.()
-        return
-      }
+      else if (activePhaseKey === 'query') setDemoStep('QUERY_RAISED')
+      else if (activePhaseKey === 'delta') setDemoStep('INSPECTION_PENDING')
+      else if (activePhaseKey === 'inspection') setDemoStep('FINAL_DECISION')
     }
     const nextPhase = checkpoints[currentPhaseIndex + 1]
     if (nextPhase) setActivePhaseKey(nextPhase.key)
@@ -9504,7 +9526,7 @@ export function GuidedScrutinyWorkflow({
                 onClick={onBack}
                 className="px-3.5 py-1.5 text-xs font-bold border border-[#d6dfd5] text-[#355E3B] rounded hover:bg-[#F9FAF2] transition-colors flex items-center gap-1.5 shadow-sm"
               >
-                ← Back to My Scrutiny Work
+                ← {backLabel}
               </button>
             )}
             <div className="h-6 w-px bg-[#d6dfd5] hidden sm:block" />
@@ -9565,42 +9587,34 @@ export function GuidedScrutinyWorkflow({
               let badgeClasses = 'text-[9px] font-bold uppercase tracking-wider mt-0.5'
 
               if (isCurrent) {
-                circleClasses += ' bg-[#6DAE7C] text-white ring-4 ring-blue-100 scale-110 shadow-sm'
+                circleClasses += ' bg-amber-500 text-white ring-4 ring-amber-100 scale-110 shadow-sm'
                 circleContent = cp.num
-                labelColor = 'text-[#6DAE7C] font-bold'
-                statusBadge = 'Active'
-                badgeClasses += ' text-[#6DAE7C]'
+                labelColor = 'text-amber-900 font-bold'
+                statusBadge = 'Current'
+                badgeClasses += ' text-amber-700'
               } else if (cp.status === 'completed') {
                 circleClasses += ' bg-emerald-600 text-white'
                 circleContent = '✓'
                 labelColor = 'text-[#2B2B2B] font-semibold'
                 statusBadge = 'Completed'
                 badgeClasses += ' text-emerald-700'
-              } else if (cp.status === 'attention') {
-                circleClasses += ' bg-amber-500 text-white ring-2 ring-amber-200'
-                circleContent = '!'
-                labelColor = 'text-amber-900 font-semibold'
-                statusBadge = 'Attention'
-                badgeClasses += ' text-amber-700'
-              } else if (cp.status === 'not-applicable') {
-                circleClasses += ' border-2 border-dashed border-[#c8d4c7] bg-[#F9FAF2] text-[#9ab098]'
-                circleContent = '-'
-                labelColor = 'text-[#9ab098] line-through'
-                statusBadge = 'N/A'
-                badgeClasses += ' text-[#9ab098]'
               } else {
-                circleClasses += ' bg-[#e3ebe1] text-[#555C56]'
+                circleClasses += ' bg-amber-100 text-amber-800 border-2 border-amber-300'
                 circleContent = cp.num
-                labelColor = 'text-[#555C56]'
-                statusBadge = 'Upcoming'
-                badgeClasses += ' text-[#9ab098]'
+                labelColor = 'text-amber-900 font-semibold'
+                statusBadge = 'Pending'
+                badgeClasses += ' text-amber-700'
               }
 
               return (
                 <button
                   key={cp.key}
+                  disabled={!isCurrent && cp.status !== 'completed'}
                   onClick={() => setActivePhaseKey(cp.key)}
-                  className="flex-1 flex flex-col items-center group cursor-pointer focus:outline-none px-1 text-center"
+                  className={`flex-1 flex flex-col items-center group focus:outline-none px-1 text-center ${
+                    isCurrent || cp.status === 'completed' ? 'cursor-pointer' : 'cursor-default'
+                  }`}
+                  aria-label={`${cp.name}: ${statusBadge}`}
                 >
                   <div className={circleClasses}>{circleContent}</div>
                   <span className={`text-xs mt-2 transition-colors ${labelColor} group-hover:text-[#6DAE7C]`}>
@@ -9749,14 +9763,8 @@ export function GuidedScrutinyWorkflow({
 
             <div className="flex items-center justify-between pt-2">
               <span className="text-xs text-[#555C56]">
-                Machine-assisted review completed. Officer judgment recorded on flagged criteria.
+                Review the findings above, then use the phase action below to complete Pre-check.
               </span>
-              <button
-                onClick={() => setActivePhaseKey('route')}
-                className="px-4 py-2 bg-[#355E3B] text-white text-xs font-bold rounded hover:bg-[#27472c] transition-colors shadow-xs flex items-center gap-1.5"
-              >
-                Continue to Review Plan →
-              </button>
             </div>
           </div>
         </section>
@@ -10990,7 +10998,7 @@ export function GuidedScrutinyWorkflow({
 
           {currentPhaseIndex < checkpoints.length - 1 ? (
             <button
-              onClick={() => setActivePhaseKey(checkpoints[currentPhaseIndex + 1].key)}
+              onClick={completeCurrentPhase}
               className="px-4 py-2 bg-[#355E3B] text-white text-xs font-bold rounded hover:bg-[#27472c] transition-colors shadow-xs flex items-center gap-1.5"
             >
               Complete {currentPhaseMeta.name} & Next →
@@ -14028,6 +14036,7 @@ function M01Shell({ onLogout, lang, fontSize, highContrast, setLang, setFontSize
 }) {
   const [activeDeptItem, setActiveDeptItem] = useState('dept-home')
   const [appView, setAppView] = useState(false)
+  const [scrutinyReturnStage, setScrutinyReturnStage] = useState<string>('precheck')
   const [appSubPage, setAppSubPage] = useState<'overview'|'dna'|'timeline'|'precheck'|'scrutiny-workflow'|'scrutiny-route'|'scrutiny-workbench'|'param-detail'|'doc-review'|'bldg-scrutiny'|'water-scrutiny'|'consistency'|'dependency-view'|'query-builder'|'query-history'|'delta-rescrutiny'|'inspection-queue'|'inspection-records'|'inspection-planning'|'inspection-workspace'|'observation-reinspection'|'decision-workspace'|'decision-record'|'dependency-update'|'compliance-context'|'amendment-intake'>('overview')
   const [_inspPlanId, setInspPlanId] = useState<string>('INSP-2026-00418')
   const [docReviewId, setDocReviewId] = useState<string>('MIDC-REG-DEED-2024-C14')
@@ -14114,13 +14123,26 @@ function M01Shell({ onLogout, lang, fontSize, highContrast, setLang, setFontSize
           {appView && appSubPage === 'timeline'  && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && <M08TimelinePage onBackToOverview={() => setAppSubPage('overview')} />}
           {appView && appSubPage === 'scrutiny-workflow' && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-decisions' || activeDeptItem === 'dept-queries') && (
             <GuidedScrutinyWorkflow
+              initialStageKey={scrutinyReturnStage}
               onBack={() => setAppSubPage('overview')}
               onOpenOverview={() => setAppSubPage('overview')}
               onOpenPrecheck={() => setAppSubPage('precheck')}
               onOpenRoute={() => setAppSubPage('scrutiny-route')}
               onOpenLandWorkbench={() => setAppSubPage('scrutiny-workbench')}
               onOpenParamDetail={(_id) => setAppSubPage('param-detail')}
-              onOpenDocReview={(id) => { if (id) setDocReviewId(id); setAppSubPage('doc-review') }}
+              onOpenDocReview={(id) => {
+                if (id) setDocReviewId(id)
+                const returnStage = id.includes('WATER') ? 'water'
+                  : id.includes('CONCORDANCE') ? 'consistency'
+                  : id.includes('NOC') ? 'dependency'
+                  : id.includes('FORM-D1') ? 'query'
+                  : id.includes('DIFF') ? 'delta'
+                  : id.includes('INSP') ? 'inspection'
+                  : id.includes('DWG') ? 'building'
+                  : 'land'
+                setScrutinyReturnStage(returnStage)
+                setAppSubPage('doc-review')
+              }}
               onOpenBuildingScrutiny={() => setAppSubPage('bldg-scrutiny')}
               onOpenWaterScrutiny={() => setAppSubPage('water-scrutiny')}
               onOpenConsistency={() => setAppSubPage('consistency')}
@@ -14131,12 +14153,13 @@ function M01Shell({ onLogout, lang, fontSize, highContrast, setLang, setFontSize
               onOpenDecisionWorkspace={() => setAppSubPage('decision-workspace')}
             />
           )}
-          {appView && appSubPage === 'precheck'       && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && <M09PreCheckPage onBackToOverview={() => setAppSubPage('overview')} onOpenDna={() => setAppSubPage('dna')} onOpenTimeline={() => setAppSubPage('timeline')} onOpenScrutinyRoute={() => setAppSubPage('scrutiny-route')} />}
-          {appView && appSubPage === 'scrutiny-route'     && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && <M10ScrutinyRoutePage onBackToOverview={() => setAppSubPage('overview')} onBackToPrecheck={() => setAppSubPage('precheck')} onOpenDna={() => setAppSubPage('dna')} onOpenTimeline={() => setAppSubPage('timeline')} onOpenScrutinyWorkflow={() => setAppSubPage('scrutiny-workflow')} onOpenScrutinyWorkbench={() => setAppSubPage('scrutiny-workbench')} onOpenBuildingScrutiny={() => setAppSubPage('bldg-scrutiny')} onOpenWaterScrutiny={() => setAppSubPage('water-scrutiny')} onOpenConsistency={() => setAppSubPage('consistency')} onOpenDepView={() => setAppSubPage('dependency-view')} onOpenQueryBuilder={() => setAppSubPage('query-builder')} onOpenDelta={() => setAppSubPage('delta-rescrutiny')} onOpenInspections={() => setAppSubPage('inspection-queue')} />}
+          {appView && appSubPage === 'precheck'       && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && <M09PreCheckPage onBackToOverview={() => setAppSubPage('overview')} onBackToScrutinyWorkflow={() => { setScrutinyReturnStage('precheck'); setAppSubPage('scrutiny-workflow') }} onOpenDna={() => setAppSubPage('dna')} onOpenTimeline={() => setAppSubPage('timeline')} onOpenScrutinyRoute={() => setAppSubPage('scrutiny-route')} />}
+          {appView && appSubPage === 'scrutiny-route'     && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && <M10ScrutinyRoutePage onBackToOverview={() => setAppSubPage('overview')} onBackToPrecheck={() => setAppSubPage('precheck')} onBackToScrutinyWorkflow={() => { setScrutinyReturnStage('route'); setAppSubPage('scrutiny-workflow') }} onOpenDna={() => setAppSubPage('dna')} onOpenTimeline={() => setAppSubPage('timeline')} onOpenScrutinyWorkflow={() => { setScrutinyReturnStage('route'); setAppSubPage('scrutiny-workflow') }} onOpenScrutinyWorkbench={() => setAppSubPage('scrutiny-workbench')} onOpenBuildingScrutiny={() => setAppSubPage('bldg-scrutiny')} onOpenWaterScrutiny={() => setAppSubPage('water-scrutiny')} onOpenConsistency={() => setAppSubPage('consistency')} onOpenDepView={() => setAppSubPage('dependency-view')} onOpenQueryBuilder={() => setAppSubPage('query-builder')} onOpenDelta={() => setAppSubPage('delta-rescrutiny')} onOpenInspections={() => setAppSubPage('inspection-queue')} />}
           {appView && (appSubPage === 'scrutiny-workbench' || appSubPage === 'param-detail') && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && (
             <GuidedScrutinyWorkflow
               initialStageKey="land"
-              onBack={() => setAppSubPage('scrutiny-route')}
+              backLabel="Back to Scrutiny Workflow"
+              onBack={() => { setScrutinyReturnStage('land'); setAppSubPage('scrutiny-workflow') }}
               onOpenOverview={() => setAppSubPage('overview')}
               onOpenPrecheck={() => setAppSubPage('precheck')}
               onOpenRoute={() => setAppSubPage('scrutiny-route')}
@@ -14162,7 +14185,8 @@ function M01Shell({ onLogout, lang, fontSize, highContrast, setLang, setFontSize
           {appView && appSubPage === 'bldg-scrutiny' && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && (
             <GuidedScrutinyWorkflow
               initialStageKey="building"
-              onBack={() => setAppSubPage('scrutiny-route')}
+              backLabel="Back to Scrutiny Workflow"
+              onBack={() => { setScrutinyReturnStage('building'); setAppSubPage('scrutiny-workflow') }}
               onOpenOverview={() => setAppSubPage('overview')}
               onOpenPrecheck={() => setAppSubPage('precheck')}
               onOpenRoute={() => setAppSubPage('scrutiny-route')}
@@ -14180,7 +14204,8 @@ function M01Shell({ onLogout, lang, fontSize, highContrast, setLang, setFontSize
           {appView && appSubPage === 'water-scrutiny' && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && (
             <GuidedScrutinyWorkflow
               initialStageKey="water"
-              onBack={() => setAppSubPage('scrutiny-route')}
+              backLabel="Back to Scrutiny Workflow"
+              onBack={() => { setScrutinyReturnStage('water'); setAppSubPage('scrutiny-workflow') }}
               onOpenOverview={() => setAppSubPage('overview')}
               onOpenPrecheck={() => setAppSubPage('precheck')}
               onOpenRoute={() => setAppSubPage('scrutiny-route')}
@@ -14198,7 +14223,8 @@ function M01Shell({ onLogout, lang, fontSize, highContrast, setLang, setFontSize
           {appView && appSubPage === 'consistency' && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && (
             <GuidedScrutinyWorkflow
               initialStageKey="consistency"
-              onBack={() => setAppSubPage('scrutiny-route')}
+              backLabel="Back to Scrutiny Workflow"
+              onBack={() => { setScrutinyReturnStage('consistency'); setAppSubPage('scrutiny-workflow') }}
               onOpenOverview={() => setAppSubPage('overview')}
               onOpenPrecheck={() => setAppSubPage('precheck')}
               onOpenRoute={() => setAppSubPage('scrutiny-route')}
@@ -14216,7 +14242,8 @@ function M01Shell({ onLogout, lang, fontSize, highContrast, setLang, setFontSize
           {appView && appSubPage === 'dependency-view' && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && (
             <GuidedScrutinyWorkflow
               initialStageKey="dependency"
-              onBack={() => setAppSubPage('scrutiny-route')}
+              backLabel="Back to Scrutiny Workflow"
+              onBack={() => { setScrutinyReturnStage('dependency'); setAppSubPage('scrutiny-workflow') }}
               onOpenOverview={() => setAppSubPage('overview')}
               onOpenPrecheck={() => setAppSubPage('precheck')}
               onOpenRoute={() => setAppSubPage('scrutiny-route')}
@@ -14234,7 +14261,8 @@ function M01Shell({ onLogout, lang, fontSize, highContrast, setLang, setFontSize
           {appView && appSubPage === 'query-builder' && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && (
             <GuidedScrutinyWorkflow
               initialStageKey="query"
-              onBack={() => setAppSubPage('scrutiny-route')}
+              backLabel="Back to Scrutiny Workflow"
+              onBack={() => { setScrutinyReturnStage('query'); setAppSubPage('scrutiny-workflow') }}
               onOpenOverview={() => setAppSubPage('overview')}
               onOpenPrecheck={() => setAppSubPage('precheck')}
               onOpenRoute={() => setAppSubPage('scrutiny-route')}
@@ -14253,7 +14281,8 @@ function M01Shell({ onLogout, lang, fontSize, highContrast, setLang, setFontSize
           {appView && appSubPage === 'delta-rescrutiny' && (activeDeptItem === 'dept-queue' || activeDeptItem === 'dept-apps' || activeDeptItem === 'dept-scrutiny' || activeDeptItem === 'dept-queries') && (
             <GuidedScrutinyWorkflow
               initialStageKey="delta"
-              onBack={() => setAppSubPage('scrutiny-route')}
+              backLabel="Back to Scrutiny Workflow"
+              onBack={() => { setScrutinyReturnStage('delta'); setAppSubPage('scrutiny-workflow') }}
               onOpenOverview={() => setAppSubPage('overview')}
               onOpenPrecheck={() => setAppSubPage('precheck')}
               onOpenRoute={() => setAppSubPage('scrutiny-route')}
