@@ -1,8 +1,9 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { M23InspectionWorkspacePage } from '@/App';
+import { InspectionWorkspacePage } from '@/components/department/InspectionExperience';
 import { ApplicationId, InspectionId, createApplicationId, createInspectionId } from '@/domain/ids';
+import { ROUTES } from '@/lib/routes';
 
 export default function Page() {
   const params = useParams();
@@ -12,18 +13,13 @@ export default function Page() {
   const inspId = params.inspectionId ? createInspectionId(params.inspectionId as string) : 'unknown';
   
   return (
-    <M23InspectionWorkspacePage 
-      
-      onBack={() => router.push(`/department/applications/${appId}/inspections/${inspId}/plan`)}
-      onBackToQueue={() => router.push('/department/inspection-queue')}
-      onOpenM24={() => router.push(`/department/applications/${appId}/inspections/${inspId}/observations`)}
-      onOpenDocReview={(id: string) => router.push(`/department/applications/${appId}/document/${id}`)}
-      onOpenDna={() => router.push(`/department/applications/${appId}/dna`)}
-      onOpenDepView={() => router.push(`/department/applications/${appId}/dependency-view`)}
-      onOpenQueryHistory={() => router.push(`/department/applications/${appId}/query-history`)}
-      onOpenDelta={() => router.push(`/department/applications/${appId}/delta-rescrutiny`)}
-      onOpenConsistency={() => router.push(`/department/applications/${appId}/consistency`)}
-    
+    <InspectionWorkspacePage 
+      applicationId={appId}
+      inspectionId={inspId}
+      onBack={() => router.push(ROUTES.department.applicationInspections(appId))}
+      onOpenRecords={() => router.push(ROUTES.department.applicationInspections(appId))}
+      onOpenDocReview={(id: string) => router.push(ROUTES.department.applicationDocument(appId, id))}
+      onOpenDecision={() => router.push(ROUTES.department.applicationDecisionWorkspace(appId))}
     />
   );
 }

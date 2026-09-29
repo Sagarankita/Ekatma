@@ -61,6 +61,9 @@ export function GlobalAssistantDrawer() {
       <div className="shrink-0 border-b border-[#bfdbfe] bg-[#eff6ff] px-4 py-2">
         <p className="text-[10px] font-bold uppercase tracking-wider text-[#1a56db]">Viewing</p>
         <p className="truncate text-xs font-semibold text-[#1a3a5c]">{activeContext.label}</p>
+        {(activeContext.safeMetadata?.businessName || activeContext.safeMetadata?.projectName) && (
+          <p className="truncate text-[10px] font-medium text-[#1a56db]">{[activeContext.safeMetadata?.businessName, activeContext.safeMetadata?.projectName].filter(Boolean).join(' — ')}</p>
+        )}
         <p className="truncate text-[10px] text-[#475569]">
           {activeContext.safeMetadata?.recordTitle
             ? `${activeContext.safeMetadata.recordTitle}${entitySummary ? ` · ${entitySummary}` : ''}`
@@ -77,11 +80,27 @@ export function GlobalAssistantDrawer() {
           ? <div key={message.id} className="flex items-center gap-2 py-1 text-[10px] text-[#6b7a8d]"><span className="h-px flex-1 bg-[#d1d9e0]"/><span>{message.content}</span><span className="h-px flex-1 bg-[#d1d9e0]"/></div>
           : <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[90%] px-3 py-2.5 text-xs leading-relaxed ${message.role === 'user' ? 'rounded-2xl rounded-tr-sm bg-[#1a3a5c] text-white' : 'rounded-2xl rounded-tl-sm border border-[#d1d9e0] bg-white text-[#1a2533]'}`}>
+                {message.role === 'assistant' && <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-[#64748b]">Answer</p>}
                 <p className="whitespace-pre-wrap">{message.content}</p>
                 {message.needsVerification && <div className="mt-2 border border-amber-200 bg-amber-50 p-2 text-[10px] text-amber-800"><strong>Needs Verification.</strong> {message.uncertainty}</div>}
-                {message.citations?.length ? <div className="mt-2 space-y-1 border-t border-[#e8edf2] pt-2">
-                  {message.citations.map((citation, index) => <p key={`${citation.source}-${index}`} className="text-[10px] text-[#6b7a8d]"><strong>Source:</strong> {citation.source}{citation.clause ? ` · ${citation.clause}` : ''}{citation.version ? ` · ${citation.version}` : ''}</p>)}
-                </div> : null}
+                {message.role === 'assistant' && (message.citations?.length || message.relevantRequirement) ? (
+                  <dl className="mt-2 grid gap-2 border-t border-[#e8edf2] pt-2 text-[10px]">
+                    {message.citations?.length ? (
+                      <div>
+                        <dt className="font-bold uppercase tracking-wider text-[#64748b]">Source</dt>
+                        <dd className="mt-0.5 text-[#374151]">{message.citations.map(citation => [citation.source, citation.clause, citation.version].filter(Boolean).join(' · ')).join('; ')}</dd>
+                      </div>
+                    ) : null}
+                    <div>
+                      <dt className="font-bold uppercase tracking-wider text-[#64748b]">Effective date</dt>
+                      <dd className="mt-0.5 text-[#374151]">{message.citations?.map(citation => citation.effectiveDate).filter(Boolean).join('; ') || 'Not provided in the configured source'}</dd>
+                    </div>
+                    <div>
+                      <dt className="font-bold uppercase tracking-wider text-[#64748b]">Relevant requirement</dt>
+                      <dd className="mt-0.5 text-[#374151]">{message.relevantRequirement ?? activeContext.label}</dd>
+                    </div>
+                  </dl>
+                ) : null}
                 {message.role === 'assistant' && (
                   <button
                     type="button"

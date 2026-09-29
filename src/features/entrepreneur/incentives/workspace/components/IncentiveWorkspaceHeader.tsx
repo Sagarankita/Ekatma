@@ -1,6 +1,5 @@
 import React from 'react';
 import Link from 'next/link';
-import { findBusinessProjectById } from '@/features/entrepreneur/businesses/catalog';
 import { IncentiveStatus, ClaimStatus } from '../types';
 import { useRegulatoryAssistant } from '@/features/regulatory-assistant/Provider';
 import { inlineContext } from '@/features/regulatory-assistant/context';
@@ -55,7 +54,6 @@ export function IncentiveWorkspaceHeader({
   breadcrumbHref?: string;
   onOpenRegAssistant?: () => void;
 }) {
-  const business = findBusinessProjectById(businessId);
   const { openAssistant, pageContext } = useRegulatoryAssistant();
   const handleAssistant = onOpenRegAssistant ?? (() => openAssistant({
     origin: 'inline', mode: 'entity',
@@ -65,7 +63,7 @@ export function IncentiveWorkspaceHeader({
   return (
     <div className="bg-white border-b border-[#d1d9e0] px-6 py-4">
       <div className="max-w-[1320px] mx-auto">
-        <nav className="text-xs text-[#6b7a8d] mb-2 flex items-center gap-1.5 flex-wrap">
+        <nav aria-label="Breadcrumb" className="text-xs text-[#6b7a8d] mb-2 flex items-center gap-1.5 flex-wrap">
           {breadcrumb.map((crumb, i) => (
             <React.Fragment key={crumb}>
               {i > 0 && <span className="text-[#d1d9e0]">›</span>}
@@ -90,24 +88,7 @@ export function IncentiveWorkspaceHeader({
               </button>
           </div>
         </div>
-        <div className="mt-3 flex items-center gap-3 flex-wrap">
-          <div className="flex items-center gap-2 text-[11px] text-[#6b7a8d]">
-            <span className="font-semibold text-[#1a3a5c]">{business?.name || businessId}</span>
-            <span className="text-[#d1d9e0]">·</span>
-            <span>{business?.industry || 'Manufacturing'}</span>
-            <span className="text-[#d1d9e0]">·</span>
-            <span>{business?.location || 'Location unavailable'}</span>
-            <span className="text-[#d1d9e0]">·</span>
-            <span>New Unit</span>
-            <span className="text-[#d1d9e0]">·</span>
-            <span className="font-medium text-[#6366f1]">{business?.subtitle || 'MSME'}</span>
-            <span className="text-[#d1d9e0]">·</span>
-            <span className="text-[10px] bg-[#f0f4f8] border border-[#d1d9e0] px-1.5 py-0.5 text-[#6b7a8d]">Business DNA v4</span>
-          </div>
-        </div>
       </div>
     </div>
   );
 }
-
-

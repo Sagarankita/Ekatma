@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useContext } from 'react'
 import Link from 'next/link'
 import { Icon } from '../public-auth/PublicChrome'
 import { SAMPLE_PROJECTS } from '../businesses/catalog'
@@ -436,9 +436,7 @@ export function BasicRequirementsPage({
 
         <div className="mb-5 pb-4 border-b border-[#d1d9e0]">
           <h1 className="text-2xl font-bold text-[#1a3a5c]">Basic Requirements</h1>
-          <p className="text-sm text-[#6b7a8d] mt-1">
-            Tell us only what you already know about your project. You do not need to know which licences, approvals or NOCs are required — EKATMA will determine them from your business details.
-          </p>
+          <p className="mt-1 text-sm text-[#6b7a8d]">Tell us what you know. EKATMA will identify the relevant requirements.</p>
         </div>
 
         <CreateStepIndicator current="e04" />
@@ -3828,30 +3826,59 @@ type DnaGroup = 'self-declared' | 'needs-input' | 'not-applicable' | 'needs-veri
 
 function GroupBadge({ group }: { group: DnaGroup }) {
   const cfg: Record<DnaGroup, { label: string; cls: string }> = {
-    'self-declared':      { label: 'Self-declared',      cls: 'bg-[#f0fdf4] text-[#166534] border-[#bbf7d0]' },
+    'self-declared':      { label: 'What I told EKATMA',  cls: 'bg-[#f0fdf4] text-[#166534] border-[#bbf7d0]' },
     'needs-input':        { label: 'Needs your input',   cls: 'bg-[#fffbeb] text-[#92400e] border-[#fde68a]' },
-    'not-applicable':     { label: 'Not applicable',     cls: 'bg-[#f8f9fb] text-[#6b7a8d] border-[#d1d9e0]' },
-    'needs-verification': { label: 'Needs verification', cls: 'bg-[#ebf3ff] text-[#1a3a5c] border-[#b8d0f5]' },
-    'verified':           { label: 'Verified',           cls: 'bg-[#f0fdf4] text-[#166534] border-[#86efac]' },
+    'not-applicable':     { label: 'Does not apply',     cls: 'bg-[#f8f9fb] text-[#6b7a8d] border-[#d1d9e0]' },
+    'needs-verification': { label: 'Still needs verification', cls: 'bg-[#ebf3ff] text-[#1a3a5c] border-[#b8d0f5]' },
+    'verified':           { label: 'EKATMA verified',    cls: 'bg-[#f0fdf4] text-[#166534] border-[#86efac]' },
   }
   const { label, cls } = cfg[group]
   return <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded border ${cls}`}>{label}</span>
 }
 
-function ReviewFieldRow({ label, value, isNA = false, note }: { label: string; value?: React.ReactNode; isNA?: boolean; note?: string }) {
-  if (isNA) return (
-    <div className="flex items-baseline gap-3 py-1.5">
-      <span className="text-xs text-[#9aa5b4] w-36 shrink-0">{label}</span>
-      <span className="text-xs text-[#9aa5b4] italic">Not applicable</span>
-    </div>
-  )
-  if (!value && value !== 0) return null
+const ReviewGroupContext = React.createContext<DnaGroup>('self-declared')
+const ReviewEditContext = React.createContext<undefined | (() => void)>(undefined)
+const ReviewSourceContext = React.createContext('Business Discovery')
+
+function ReviewFieldRow({ label, value, isNA = false, note, source }: { label: string; value?: React.ReactNode; isNA?: boolean; note?: string; source?: string }) {
+  const sectionGroup = useContext(ReviewGroupContext)
+  const defaultSource = useContext(ReviewSourceContext)
+  const editAction = useContext(ReviewEditContext)
+  const group: DnaGroup = isNA ? 'not-applicable' : sectionGroup
+  const fieldSource = isNA ? 'Business Profile' : (source ?? defaultSource)
+  if (!isNA && !value && value !== 0) return null
   return (
-    <div className="flex items-baseline gap-3 py-1.5">
-      <span className="text-xs text-[#6b7a8d] w-36 shrink-0">{label}</span>
-      <span className="text-sm text-[#1a2533] flex-1">{value}</span>
-      {note && <span className="text-xs text-[#9aa5b4] italic">{note}</span>}
-    </div>
+    <details className="group/field">
+      <summary className="grid cursor-pointer list-none gap-2 py-3 md:grid-cols-[minmax(130px,0.9fr)_minmax(180px,1.3fr)_minmax(150px,1fr)_auto_18px] md:items-start">
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-[#8B97A6] md:hidden">Field</p>
+          <p className="text-xs font-semibold text-[#374151]">{label}</p>
+        </div>
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-[#8B97A6] md:hidden">Current value</p>
+          <p className={`text-sm font-medium ${isNA ? 'italic text-[#8B97A6]' : 'text-[#20242A]'}`}>{isNA ? 'Not applicable' : value}</p>
+          {note ? <p className="mt-0.5 text-[11px] text-[#8B97A6]">{note}</p> : null}
+        </div>
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-[#8B97A6] md:hidden">Source</p>
+          <p className="text-xs text-[#5C6470]">Source: {fieldSource}</p>
+        </div>
+        <div>
+          <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-[#8B97A6] md:hidden">Verification state</p>
+          <GroupBadge group={group} />
+        </div>
+        <span className="mt-1 text-[#7A8696] transition-transform group-open/field:rotate-180" aria-hidden="true"><Icon.ChevronDown /></span>
+      </summary>
+      <div className="mb-2 rounded border border-[#E1E7ED] bg-[#F8FAFC] px-3 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-[#8B97A6]">Provenance</p>
+            <p className="mt-1 text-xs text-[#5C6470]">Recorded from {fieldSource} · <GroupBadge group={group} /></p>
+          </div>
+          {editAction ? <button type="button" onClick={editAction} className="rounded border border-[#B8C6D4] bg-white px-3 py-2 text-xs font-semibold text-[#17365D] hover:bg-[#F0F5FA]">Edit this field</button> : null}
+        </div>
+      </div>
+    </details>
   )
 }
 
@@ -3859,6 +3886,8 @@ function ReviewSection({ title, group, children, onEdit, defaultOpen = false }: 
   title: string; group: DnaGroup; children: React.ReactNode; onEdit?: () => void; defaultOpen?: boolean
 }) {
   const [open, setOpen] = useState(defaultOpen)
+  const pageEdit = useContext(ReviewEditContext)
+  const editAction = onEdit ?? pageEdit
   return (
     <div className="border border-[#e8edf2] rounded overflow-hidden">
       <button
@@ -3872,14 +3901,19 @@ function ReviewSection({ title, group, children, onEdit, defaultOpen = false }: 
         <svg className={`w-4 h-4 text-[#9aa5b4] shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6"/></svg>
       </button>
       {open && (
-        <div className="px-4 py-3 bg-white divide-y divide-[#f8f9fb]">
-          {children}
-          {onEdit && (
-            <div className="pt-3 mt-1">
-              <button type="button" onClick={onEdit} className="text-xs text-[#1a56db] font-medium hover:underline">Edit this section in Business Discovery</button>
+        <ReviewGroupContext.Provider value={group}>
+          <div className="px-4 py-3 bg-white divide-y divide-[#f0f4f8]">
+            <div className="hidden gap-2 pb-2 md:grid md:grid-cols-[minmax(130px,0.9fr)_minmax(180px,1.3fr)_minmax(150px,1fr)_auto_18px]">
+              {['Field', 'Current value', 'Source', 'Verification state', ''].map((label, index) => <p key={`${label}-${index}`} className="text-[10px] font-bold uppercase tracking-wider text-[#8B97A6]">{label}</p>)}
             </div>
-          )}
-        </div>
+            {children}
+            {editAction && (
+            <div className="pt-3 mt-1">
+              <button type="button" onClick={editAction} className="inline-flex items-center rounded border border-[#B8C6D4] bg-white px-3 py-2 text-xs font-semibold text-[#17365D] hover:bg-[#F0F5FA]">Edit this information</button>
+            </div>
+            )}
+          </div>
+        </ReviewGroupContext.Provider>
       )}
     </div>
   )
@@ -4172,9 +4206,6 @@ export function BusinessProfileReviewPage({ e03Data, e04Data, e05Data, expansion
   return (
     <main id="main-content" className="flex-1 bg-[#f8f9fb]" tabIndex={-1}>
       <div className="max-w-[820px] mx-auto px-6 py-5">
-        <div className="mb-4">
-          <Breadcrumb items={[{ label: 'Home', href: '#' }, { label: 'My Businesses', href: '#' }, { label: 'Business Discovery', href: '#' }, { label: 'Review Business Profile' }]} />
-        </div>
         <div className="mb-4 pb-4 border-b border-[#d1d9e0]">
           <h1 className="text-2xl font-bold text-[#1a3a5c]">Review Business Profile</h1>
           <p className="text-sm text-[#6b7a8d] mt-1">Review the information collected for this project before EKATMA evaluates the applicable regulatory requirements.</p>
@@ -4201,9 +4232,11 @@ export function BusinessProfileReviewPage({ e03Data, e04Data, e05Data, expansion
         <div className="mb-5 flex flex-wrap gap-3">
           {[
             { label: 'Needs Your Input', count: needsInput.length, cls: 'border-[#fde68a] bg-[#fffbeb] text-[#92400e]' },
-            { label: 'Needs Verification', count: needsVerification.length, cls: 'border-[#b8d0f5] bg-[#ebf3ff] text-[#1a3a5c]' },
-            { label: 'Self-declared', count: selfDeclared.length, cls: 'border-[#bbf7d0] bg-[#f0fdf4] text-[#166534]' },
-            { label: 'Not Applicable', count: notApplicable.length, cls: 'border-[#d1d9e0] bg-[#f8f9fb] text-[#6b7a8d]' },
+            { label: 'What Still Needs Verification', count: needsVerification.length, cls: 'border-[#b8d0f5] bg-[#ebf3ff] text-[#1a3a5c]' },
+            { label: 'What I Told EKATMA', count: isExpansion ? 0 : selfDeclared.length, cls: 'border-[#bbf7d0] bg-[#f0fdf4] text-[#166534]' },
+            { label: 'What EKATMA Verified', count: 0, cls: 'border-[#86efac] bg-[#f0fdf4] text-[#166534]' },
+            { label: 'What Came From an Existing Record', count: isExpansion ? selfDeclared.length : 0, cls: 'border-[#b8d0f5] bg-[#f5f8fb] text-[#17365D]' },
+            { label: 'What Does Not Apply', count: notApplicable.length, cls: 'border-[#d1d9e0] bg-[#f8f9fb] text-[#6b7a8d]' },
           ].map(g => (
             <div key={g.label} className={`flex items-center gap-2 px-3 py-2 border rounded ${g.cls}`}>
               <span className="text-lg font-bold">{g.count}</span>
@@ -4212,12 +4245,19 @@ export function BusinessProfileReviewPage({ e03Data, e04Data, e05Data, expansion
           ))}
         </div>
 
+        <div className="mb-4 flex items-start gap-2 rounded border border-[#F8D4B0] bg-[#FDF4EB] px-4 py-3 text-sm text-[#92400E]">
+          <span className="mt-0.5 shrink-0"><Icon.Warning /></span>
+          <p className="font-medium">Changing this information may change the approvals identified for your project.</p>
+        </div>
+
         {/* Accordion review sections */}
+        <ReviewSourceContext.Provider value={isExpansion ? 'Existing Business DNA' : 'Business Discovery'}>
+        <ReviewEditContext.Provider value={onBack}>
         <div className="space-y-2 mb-5">
 
           {/* 1. Identity */}
           <ReviewSection title="1. Identity" group={e03Data.name ? 'self-declared' : 'needs-input'} defaultOpen={true}>
-            <ReviewFieldRow label="Business / Project Name" value={e03Data.name || '—'} note="Create Business / Project" />
+            <ReviewFieldRow label="Business / Project Name" value={e03Data.name || '—'} source="Create Business / Project" />
             <ReviewFieldRow label="Project Type" value={({ new: 'New Business / Project', existing: 'Existing Business', expansion: 'Expansion', modification: 'Modification / Diversification' } as Record<string, string>)[e03Data.projectType] ?? '—'} />
             {e03Data.description && <ReviewFieldRow label="Description" value={e03Data.description} />}
           </ReviewSection>
@@ -4244,7 +4284,7 @@ export function BusinessProfileReviewPage({ e03Data, e04Data, e05Data, expansion
 
           {/* 4. Industry & Activities */}
           <ReviewSection title="4. Industry & Activities" group={e05Data.industry ? 'self-declared' : 'needs-input'}>
-            <ReviewFieldRow label="Primary Nature" value={natureLabel[e04Data.businessNature] ?? e04Data.businessNature} note="Basic Requirements" />
+            <ReviewFieldRow label="Primary Nature" value={natureLabel[e04Data.businessNature] ?? e04Data.businessNature} source="Basic Requirements" />
             <ReviewFieldRow label="Industry / Sector" value={e05Data.industry} />
             <ReviewFieldRow label="Activities" value={e05Data.activities.length > 0 ? e05Data.activities.join(', ') : undefined} />
           </ReviewSection>
@@ -4269,7 +4309,7 @@ export function BusinessProfileReviewPage({ e03Data, e04Data, e05Data, expansion
             <ReviewFieldRow label="Taluka" value={e05Data.taluka} />
             <ReviewFieldRow label="Village / City" value={e05Data.village} />
             <ReviewFieldRow label="PIN" value={e05Data.pincode} />
-            <ReviewFieldRow label="MIDC Status" value={e04Data.midc === 'yes' ? 'Yes' : e04Data.midc === 'no' ? 'No' : e04Data.midc === 'not-sure' ? 'Not sure' : '—'} note="Basic Requirements" />
+            <ReviewFieldRow label="MIDC Status" value={e04Data.midc === 'yes' ? 'Yes' : e04Data.midc === 'no' ? 'No' : e04Data.midc === 'not-sure' ? 'Not sure' : '—'} source="Basic Requirements" />
           </ReviewSection>
 
           {/* 8. Land */}
@@ -4297,7 +4337,7 @@ export function BusinessProfileReviewPage({ e03Data, e04Data, e05Data, expansion
             ) : (
               <p className="text-xs text-[#9aa5b4] italic py-1">MIDC status not confirmed. Land details will be refined after verification.</p>
             )}
-            <ReviewFieldRow label="Land Possession" value={e04Data.landStatus} note="Basic Requirements" />
+            <ReviewFieldRow label="Land Possession" value={e04Data.landStatus} source="Basic Requirements" />
           </ReviewSection>
 
           {/* 9. Investment */}
@@ -4341,7 +4381,7 @@ export function BusinessProfileReviewPage({ e03Data, e04Data, e05Data, expansion
             e04Data.construction === 'existing' ? 'not-applicable'
               : e05Data.buildingBuiltUpArea ? 'self-declared' : 'needs-input'
           }>
-            <ReviewFieldRow label="Construction Status" value={e04Data.construction} note="Basic Requirements" />
+            <ReviewFieldRow label="Construction Status" value={e04Data.construction} source="Basic Requirements" />
             {e04Data.construction === 'existing'
               ? <ReviewFieldRow label="New Building Details" isNA={true} />
               : <>
@@ -4359,7 +4399,7 @@ export function BusinessProfileReviewPage({ e03Data, e04Data, e05Data, expansion
               : e04Data.power === 'not-sure' ? 'needs-verification'
               : e05Data.connectedLoad ? 'self-declared' : 'needs-input'
           }>
-            <ReviewFieldRow label="Power Required" value={e04Data.power} note="Basic Requirements" />
+            <ReviewFieldRow label="Power Required" value={e04Data.power} source="Basic Requirements" />
             {e04Data.power === 'no'
               ? <ReviewFieldRow label="Power Details" isNA={true} />
               : <>
@@ -4375,7 +4415,7 @@ export function BusinessProfileReviewPage({ e03Data, e04Data, e05Data, expansion
               : e04Data.water === 'not-sure' ? 'needs-verification'
               : e05Data.dailyWaterRequirement ? 'self-declared' : 'needs-input'
           }>
-            <ReviewFieldRow label="Water Required" value={e04Data.water} note="Basic Requirements" />
+            <ReviewFieldRow label="Water Required" value={e04Data.water} source="Basic Requirements" />
             {e04Data.water === 'no'
               ? <ReviewFieldRow label="Water Details" isNA={true} />
               : <>
@@ -4548,7 +4588,7 @@ export function BusinessProfileReviewPage({ e03Data, e04Data, e05Data, expansion
               : e04Data.existingApprovals === 'not-sure' ? 'needs-verification'
               : e04Data.existingApprovals === 'yes' ? 'self-declared' : 'needs-input'
           }>
-            <ReviewFieldRow label="Existing Approvals" value={e04Data.existingApprovals} note="Basic Requirements" />
+            <ReviewFieldRow label="Existing Approvals" value={e04Data.existingApprovals} source="Basic Requirements" />
             {e04Data.existingApprovals === 'no'
               ? <p className="text-xs text-[#6b7a8d] py-1">No Existing Approvals Declared</p>
               : e05Data.existingApprovalRows.map((r, i) => (
@@ -4583,6 +4623,8 @@ export function BusinessProfileReviewPage({ e03Data, e04Data, e05Data, expansion
             ))}
           </ReviewSection>
         </div>
+        </ReviewEditContext.Provider>
+        </ReviewSourceContext.Provider>
 
         {/* Action bar */}
         <div className="flex flex-wrap items-center gap-3 py-4 border-t border-[#d1d9e0]">

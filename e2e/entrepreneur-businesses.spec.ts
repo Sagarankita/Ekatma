@@ -35,10 +35,11 @@ for (const [id, name] of [
     await login(page);
     await page.getByRole('button', { name: `Open business: ${name}` }).click();
     await expect(page).toHaveURL(new RegExp(`/entrepreneur/businesses/${id}$`));
-    await expect(page.getByRole('heading', { name })).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Current business and project context' }).getByText(name, { exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Overview', exact: true })).toBeVisible();
     await expect(page.locator('header[role="banner"]')).toHaveCount(1);
     await page.reload();
-    await expect(page.getByRole('heading', { name })).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Current business and project context' }).getByText(name, { exact: true })).toBeVisible();
     await page.goBack();
     await expect(page).toHaveURL(/\/entrepreneur\/businesses$/);
     await page.goForward();
@@ -53,7 +54,7 @@ test('business switcher uses the selected canonical BP identity', async ({ page 
   await page.getByRole('button', { name: 'Switch Business' }).click();
   await page.getByRole('button', { name: /Konkan Feeds/ }).click();
   await expect(page).toHaveURL(/\/entrepreneur\/businesses\/BP-002$/);
-  await expect(page.getByRole('heading', { name: 'Konkan Feeds' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Current business and project context' }).getByText('Konkan Feeds', { exact: true })).toBeVisible();
 });
 
 test('unknown and legacy aliases cannot masquerade as canonical businesses', async ({ page }) => {

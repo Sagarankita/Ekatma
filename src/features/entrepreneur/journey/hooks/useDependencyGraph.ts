@@ -24,39 +24,41 @@ export interface GraphNodeData extends Record<string, unknown> {
   department: string;
   stage: string;
   status: 'completed' | 'in-progress' | 'ready' | 'blocked' | 'conditional';
+  statusLabel?: string;
+  isSelected?: boolean;
+  isPrerequisite?: boolean;
+  isDownstream?: boolean;
+  isDeemphasized?: boolean;
+  dependencies: { reqId: string; type: string; reason?: string }[];
+  unlocks: string[];
+  enrichment: ReqEnrichment;
+  subForms: string[];
   formsCount: number;
   completedFormsCount: number;
   completedSubFormIndices: number[];
-  subForms: string[];
-  prerequisitesSummary?: string;
-  unlocksSummary?: string;
-  dependencies: { reqId: string; type: string }[];
-  unlocks: string[];
-  enrichment: ReqEnrichment;
 }
 
-// Map stage key to X position rank order for swimlanes
+// Horizontal stage positioning to reinforce lifecycle milestone progression
 const STAGE_X_OFFSET: Record<string, number> = {
   land: 40,
-  establishment: 360,
-  construction: 680,
-  utilities: 1000,
-  'pre-operation': 1320,
-  compliance: 1640,
-  operations: 1640,
-  growth: 1640,
+  establishment: 350,
+  construction: 660,
+  utilities: 970,
+  'pre-operation': 1280,
+  compliance: 1590,
+  operations: 1590,
+  growth: 1590,
 };
 
-// Compute Dagre Hierarchical Layout
+// Compute Dagre Hierarchical Layout (Left-to-Right DAG workflow)
 function getLayoutedElements(nodes: Node<GraphNodeData>[], edges: Edge[]) {
   const dagreGraph = new dagre.graphlib.Graph();
   dagreGraph.setDefaultEdgeLabel(() => ({}));
 
-  // Graph direction Left-to-Right for DAG swimlane flow
-  dagreGraph.setGraph({ rankdir: 'LR', nodesep: 70, ranksep: 140 });
+  dagreGraph.setGraph({ rankdir: 'LR', nodesep: 45, ranksep: 90 });
 
   nodes.forEach(node => {
-    dagreGraph.setNode(node.id, { width: 260, height: 160 });
+    dagreGraph.setNode(node.id, { width: 230, height: 100 });
   });
 
   edges.forEach(edge => {
@@ -69,7 +71,7 @@ function getLayoutedElements(nodes: Node<GraphNodeData>[], edges: Edge[]) {
     const nodeWithPosition = dagreGraph.node(node.id);
     const stageKey = node.data.stage;
     const customX = STAGE_X_OFFSET[stageKey] ?? (nodeWithPosition ? nodeWithPosition.x : 0);
-    const customY = nodeWithPosition ? nodeWithPosition.y - 80 : 0;
+    const customY = nodeWithPosition ? nodeWithPosition.y - 50 : 0;
 
     return {
       ...node,
@@ -91,13 +93,13 @@ export function useDependencyGraph(projectId: string, initialCteApproved = false
 
   // Sub-form completion tracking: nodeId -> array of completed subform indices
   const [formCompletions, setFormCompletions] = useState<Record<string, number[]>>({
-    'LAND-001': [0, 1, 2, 3], // Land possession is completed by default
+    'LAND-001': [0, 1, 2, 3], // Land possession completed by default
   });
 
   // Base raw nodes from domain engine
   const baseJourneyNodes = useMemo(() => buildJourneyNodes(cteApproved), [cteApproved]);
 
-  // Compute live node statuses based on sub-form completions and parent prerequisite states
+  // Compute live node data based on domain statuses and prerequisite completions
   const computedNodesData = useMemo(() => {
     const nodesMap: Record<string, GraphNodeData> = {};
 
@@ -107,17 +109,21 @@ export function useDependencyGraph(projectId: string, initialCteApproved = false
       const subForms = enrichment.forms.map(f => f.name);
       const completedIndices = formCompletions[req.id] || [];
 
-      // Initial status check
       let status: GraphNodeData['status'] = 'blocked';
+      let statusLabel = 'Pending prerequisite';
 
       if (req.displayState === 'not-applicable' || req.displayState === 'conditional') {
         status = 'conditional';
+        statusLabel = 'Conditional';
       } else if (req.displayState === 'approved' || completedIndices.length >= subForms.length) {
         status = 'completed';
+        statusLabel = 'Completed';
       } else if (completedIndices.length > 0) {
         status = 'in-progress';
+        statusLabel = 'In progress';
       } else if (req.displayState === 'ready') {
         status = 'ready';
+        statusLabel = 'Ready to apply';
       }
 
       nodesMap[req.id] = {
@@ -126,6 +132,7 @@ export function useDependencyGraph(projectId: string, initialCteApproved = false
         department: req.department,
         stage: req.stage,
         status,
+        statusLabel,
         formsCount: subForms.length,
         completedFormsCount: completedIndices.length,
         completedSubFormIndices: completedIndices,
@@ -136,7 +143,7 @@ export function useDependencyGraph(projectId: string, initialCteApproved = false
       };
     });
 
-    // 2. DAG Progression Engine (Loop to resolve prerequisite dependencies according to FEATURE_FLOW.md)
+    // 2. DAG Progression Engine (Prerequisite dependencies resolution)
     let changed = true;
     let iterations = 0;
     while (changed && iterations < 10) {
@@ -155,84 +162,147 @@ export function useDependencyGraph(projectId: string, initialCteApproved = false
 
           if (allPrereqsCompleted && node.status === 'blocked') {
             node.status = node.completedFormsCount > 0 ? 'in-progress' : 'ready';
+            node.statusLabel = node.completedFormsCount > 0 ? 'In progress' : 'Ready to apply';
             changed = true;
           } else if (!allPrereqsCompleted && node.status !== 'blocked') {
             node.status = 'blocked';
+            node.statusLabel = 'Pending prerequisite';
             changed = true;
           }
         } else if (node.status === 'blocked') {
           node.status = 'ready';
+          node.statusLabel = 'Ready to apply';
           changed = true;
         }
       });
     }
 
-    // 3. Summaries for tooltips / node cards
-    Object.values(nodesMap).forEach(node => {
-      const prereqNames = node.dependencies
-        .map(d => nodesMap[d.reqId]?.title)
-        .filter(Boolean);
-      node.prerequisitesSummary = prereqNames.length > 0 ? prereqNames.join(', ') : undefined;
-    });
-
     return Object.values(nodesMap);
   }, [baseJourneyNodes, formCompletions]);
 
-  // Next Recommended Action Node
-  const nextRecommendedNode = useMemo(() => {
-    return computedNodesData.find(n => n.status === 'ready' || n.status === 'in-progress') || computedNodesData[0] || null;
-  }, [computedNodesData]);
+  // Selected node object
+  const selectedNode = useMemo(() => {
+    return computedNodesData.find(n => n.id === selectedNodeId) || null;
+  }, [computedNodesData, selectedNodeId]);
 
-  // Construct React Flow Nodes & Edges
+  // Identify direct prerequisites and downstream of selected node
+  const { prerequisiteIds, downstreamIds } = useMemo(() => {
+    if (!selectedNode) {
+      return { prerequisiteIds: new Set<string>(), downstreamIds: new Set<string>() };
+    }
+
+    // Direct prerequisites: parents of selectedNode
+    const prereqSet = new Set<string>(selectedNode.dependencies.map(d => d.reqId));
+
+    // Direct downstream: nodes that have selectedNode in their dependencies or unlocks
+    const downSet = new Set<string>(selectedNode.unlocks);
+    computedNodesData.forEach(n => {
+      if (n.dependencies.some(d => d.reqId === selectedNode.id)) {
+        downSet.add(n.id);
+      }
+    });
+
+    return { prerequisiteIds: prereqSet, downstreamIds: downSet };
+  }, [selectedNode, computedNodesData]);
+
+  // Construct React Flow Nodes with dependency highlighting & de-emphasis flags
   const rawFlowNodes: Node<GraphNodeData>[] = useMemo(() => {
-    return computedNodesData.map(data => ({
-      id: data.id,
-      type: 'approval',
-      data,
-      position: { x: 0, y: 0 },
-    }));
-  }, [computedNodesData]);
+    return computedNodesData.map(data => {
+      const isSelected = selectedNodeId ? data.id === selectedNodeId : false;
+      const isPrerequisite = selectedNodeId ? prerequisiteIds.has(data.id) : false;
+      const isDownstream = selectedNodeId ? downstreamIds.has(data.id) : false;
+      const isDeemphasized = selectedNodeId
+        ? !isSelected && !isPrerequisite && !isDownstream
+        : false;
 
-  // Smart Edge Highlighting: Dim unrelated edges when a node is selected
+      return {
+        id: data.id,
+        type: 'approval',
+        data: {
+          ...data,
+          isSelected,
+          isPrerequisite,
+          isDownstream,
+          isDeemphasized,
+        },
+        position: { x: 0, y: 0 },
+      };
+    });
+  }, [computedNodesData, selectedNodeId, prerequisiteIds, downstreamIds]);
+
+  // Construct React Flow Edges with clear arrows and dependency highlighting
   const rawFlowEdges: Edge[] = useMemo(() => {
     const edgesList: Edge[] = [];
+
     computedNodesData.forEach(node => {
       node.dependencies.forEach(dep => {
         const isConditional = dep.type === 'conditional';
         const sourceNode = computedNodesData.find(n => n.id === dep.reqId);
         const isSourceCompleted = sourceNode?.status === 'completed';
 
-        // Check if edge is connected to current selected node
-        const isConnected = selectedNodeId
-          ? dep.reqId === selectedNodeId || node.id === selectedNodeId
-          : true;
+        // Check relationship to currently selected node
+        const isIncomingToSelected = selectedNodeId === node.id;
+        const isOutgoingFromSelected = selectedNodeId === dep.reqId;
+        const isDirectlyConnected = isIncomingToSelected || isOutgoingFromSelected;
+
+        let edgeColor = '#64748b';
+        let strokeWidth = 2;
+        let opacity = 0.75;
+        let isAnimated = false;
+
+        if (selectedNodeId) {
+          if (isIncomingToSelected) {
+            // Prerequisite line flowing into selected node
+            edgeColor = '#059669'; // Emerald
+            strokeWidth = 3;
+            opacity = 1;
+            isAnimated = true;
+          } else if (isOutgoingFromSelected) {
+            // Downstream line flowing out of selected node
+            edgeColor = '#2563eb'; // Blue
+            strokeWidth = 3;
+            opacity = 1;
+            isAnimated = true;
+          } else {
+            // Unrelated edge dimmed
+            edgeColor = '#94a3b8';
+            strokeWidth = 1.5;
+            opacity = 0.12;
+          }
+        } else {
+          // Default unselected appearance
+          if (isSourceCompleted) {
+            edgeColor = '#10b981';
+          } else if (isConditional) {
+            edgeColor = '#8b5cf6';
+          }
+        }
 
         edgesList.push({
           id: `${dep.reqId}->${node.id}`,
           source: dep.reqId,
           target: node.id,
-          animated: isConnected && (isSourceCompleted && node.status === 'in-progress'),
+          animated: isAnimated,
           style: {
-            stroke: isConnected
-              ? isSourceCompleted ? '#10b981' : isConditional ? '#f59e0b' : '#2563eb'
-              : '#cbd5e1',
-            strokeWidth: isConnected ? 2.5 : 1,
-            opacity: selectedNodeId ? (isConnected ? 1 : 0.25) : 1,
-            strokeDasharray: isConditional ? '5 5' : undefined,
+            stroke: edgeColor,
+            strokeWidth,
+            opacity,
+            strokeDasharray: isConditional ? '6 4' : undefined,
           },
           markerEnd: {
             type: MarkerType.ArrowClosed,
-            color: isConnected
-              ? isSourceCompleted ? '#10b981' : isConditional ? '#f59e0b' : '#2563eb'
-              : '#cbd5e1',
+            width: 16,
+            height: 16,
+            color: edgeColor,
           },
         });
       });
     });
+
     return edgesList;
   }, [computedNodesData, selectedNodeId]);
 
-  // Layout elements with Dagre
+  // Compute Dagre Layout
   const { nodes: layoutedNodes, edges: layoutedEdges } = useMemo(() => {
     return getLayoutedElements(rawFlowNodes, rawFlowEdges);
   }, [rawFlowNodes, rawFlowEdges]);
@@ -260,7 +330,6 @@ export function useDependencyGraph(projectId: string, initialCteApproved = false
     setSelectedNodeId(node.id);
   }, []);
 
-  // Complete sub-form action in sidebar
   const completeSubFormStep = useCallback((nodeId: string, formIdx: number) => {
     setFormCompletions(prev => {
       const current = prev[nodeId] || [];
@@ -274,10 +343,6 @@ export function useDependencyGraph(projectId: string, initialCteApproved = false
     setFormCompletions({ 'LAND-001': [0, 1, 2, 3] });
   }, []);
 
-  const selectedNode = useMemo(() => {
-    return computedNodesData.find(n => n.id === selectedNodeId) || null;
-  }, [computedNodesData, selectedNodeId]);
-
   // Summary Metrics
   const metrics = useMemo(() => {
     const total = computedNodesData.length;
@@ -288,6 +353,15 @@ export function useDependencyGraph(projectId: string, initialCteApproved = false
     const conditional = computedNodesData.filter(n => n.status === 'conditional').length;
 
     return { total, completed, inProgress, ready, blocked, conditional };
+  }, [computedNodesData]);
+
+  // Next recommended action
+  const nextRecommendedNode = useMemo(() => {
+    return (
+      computedNodesData.find(n => n.status === 'ready' || n.status === 'in-progress') ||
+      computedNodesData[0] ||
+      null
+    );
   }, [computedNodesData]);
 
   return {

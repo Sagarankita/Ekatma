@@ -160,7 +160,7 @@ const REG_MOCK_RESPONSES: RegAssistantMessage[] = [
     source: 'DISH Query Reference: FAC-2026-3371-Q2, Dt. 14 Sep 2026',
     clause: 'Maharashtra Factories Act, 1948 — Rule 44 (Boiler Requirements); IBR 1950 — Regulation 4',
     effectiveDate: 'Query raised: 14 Sep 2026. Response deadline: 30 Sep 2026.',
-    related: 'Upload to: E11 Document Centre → Factory Registration → IBR Certificate. Once uploaded, the query status will update to "Responded."',
+    related: 'Upload to Document Centre → Factory Registration → IBR Certificate. The query status will update to "Responded."',
     needsVerification: false,
   },
   {
@@ -601,11 +601,6 @@ export function E34RegAssistantPage({ lang, context = { entryPoint: 'general' } 
           </div>
           <h1 className="text-base font-semibold text-[#1a2533] mb-2">{t.title}</h1>
           <p className="text-sm text-[#6b7a8d] max-w-sm mx-auto mb-5">{t.intro}</p>
-          <div className="flex flex-wrap gap-3 justify-center text-xs text-[#6b7a8d] mb-6">
-            {['Requirement Detail', 'Document Detail', 'Application', 'Query', 'Compliance', 'Incentive / Scheme', 'Regulatory Change'].map(ep => (
-              <span key={ep} className="bg-[#f0f4f8] border border-[#d1d9e0] rounded px-3 py-1">{ep}</span>
-            ))}
-          </div>
           <button onClick={() => openAssistant({ origin: 'full-page', mode: 'research', context: sharedContext, preset: context.initialQuestion })} className="bg-[#1a3a5c] text-white text-sm font-medium px-5 py-2 rounded hover:bg-[#0f2540] transition-colors">
             {t.open}
           </button>

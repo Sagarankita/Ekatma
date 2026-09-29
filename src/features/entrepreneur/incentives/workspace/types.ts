@@ -1,5 +1,8 @@
+import type { IncentiveBenefit } from '../data';
+
 export type IncentiveStatus = 'strong-match' | 'conditional' | 'needs-info' | 'not-applicable'
 export type ClaimStatus = 'preparing' | 'submitted' | 'under-review' | 'query-raised' | 'resubmitted' | 'approved' | 'received'
+export type IncentiveLifecycleCategory = 'Potentially relevant' | 'Needs verification' | 'Application in progress' | 'Approved' | 'Claim / Disbursement'
 
 export interface IncentiveSchemeDetail {
   id: string
@@ -25,6 +28,12 @@ export interface IncentiveSchemeDetail {
   claimCycle?: string
   nextFilingWindow?: string
   eligibilityConditions?: { text: string; state: 'satisfied' | 'needs-verification' | 'missing' }[]
+  benefits?: IncentiveBenefit[]
+  category?: string
+  matchBasis?: string[]
+  lifecycleStage?: IncentiveLifecycleCategory
+  requiredEvidence?: string[]
+  applicationSteps?: string[]
 }
 
 export interface IncentiveClaimDetail {

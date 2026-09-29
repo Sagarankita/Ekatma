@@ -18,6 +18,8 @@ import {
   type DocReqState,
   type DocVerifState,
 } from './data';
+import { CertificatePreviewModal } from './CertificatePreviewModal';
+import { Award, FileCheck, Check, AlertTriangle, ShieldCheck } from 'lucide-react';
 
 export function DocumentDetailScreen({
   project,
@@ -31,6 +33,7 @@ export function DocumentDetailScreen({
   const [ragOpen, setRagOpen] = useState(false);
   const [ragInput, setRagInput] = useState('');
   const [ragMessages, setRagMessages] = useState<{ role: 'user' | 'assistant'; text: string }[]>([]);
+  const [showCertModal, setShowCertModal] = useState(false);
   const { openAssistant, pageContext } = useRegulatoryAssistant();
 
   const SUGGESTED_PROMPTS = [
@@ -81,15 +84,30 @@ export function DocumentDetailScreen({
       </main>
     );
   }
-  const openDocumentAssistant = () => openAssistant({
-    origin: 'inline', mode: 'entity',
-    context: inlineContext(pageContext, { pageType: 'document-detail', pageTitle: 'Document Detail', label: doc.name, entities: { businessId: project.id, documentId: doc.id }, recordTitle: doc.name }),
-  });
+
+  const isCertificate =
+    Boolean(doc.certificateData) ||
+    doc.verification === 'Government-issued' ||
+    doc.category === 'Previous Approvals' ||
+    doc.name.toLowerCase().includes('certificate');
+
+  const openDocumentAssistant = () =>
+    openAssistant({
+      origin: 'inline',
+      mode: 'entity',
+      context: inlineContext(pageContext, {
+        pageType: 'document-detail',
+        pageTitle: 'Document Detail',
+        label: doc.name,
+        entities: { businessId: project.id, documentId: doc.id },
+        recordTitle: doc.name,
+      }),
+    });
 
   return (
-    <main id="main-content" className="flex-1 bg-[#f8f9fb]" tabIndex={-1}>
-      {/* Header */}
-      <div className="bg-white border-b border-[#d1d9e0] px-6 py-4">
+    <main id="main-content" className="flex-1 bg-[#F8F9FA] pb-16 font-sans" tabIndex={-1}>
+      {/* ── Page Header ── */}
+      <div className="bg-white border-b border-slate-200 px-6 py-4 shadow-xs">
         <div className="max-w-[1100px] mx-auto">
           <nav className="text-xs text-[#6b7a8d] mb-2 flex items-center gap-1.5" aria-label="Breadcrumb">
             <Link href={ENTREPRENEUR_ROUTES.businesses()} className="hover:text-[#1a3a5c] hover:underline">
@@ -115,26 +133,40 @@ export function DocumentDetailScreen({
                 <span className="text-xs text-[#6b7a8d]">{doc.category}</span>
                 {doc.version > 0 && <span className="text-xs text-[#94a3b8]">v{doc.version}</span>}
               </div>
-              <h1 className="text-xl font-bold text-[#1a3a5c]">{doc.name}</h1>
+              <h1 className="text-xl sm:text-2xl font-bold text-[#1a3a5c]">{doc.name}</h1>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
               <Link
                 href={ENTREPRENEUR_ROUTES.documents(project.id)}
-                className="text-sm border border-[#d1d9e0] rounded px-3 py-1.5 text-[#475569] hover:bg-[#f1f5f9]"
+                className="text-sm border border-[#d1d9e0] rounded-lg px-3 py-1.5 text-[#475569] hover:bg-[#f1f5f9] transition-colors"
               >
                 ← Back to Documents
               </Link>
+
+              {/* View Certificate Action if applicable */}
+              {isCertificate && (
+                <button
+                  type="button"
+                  onClick={() => setShowCertModal(true)}
+                  className="text-sm bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg px-3.5 py-1.5 font-bold flex items-center gap-1.5 shadow-xs transition-colors"
+                >
+                  <Award className="w-4 h-4" />
+                  <span>View Certificate</span>
+                </button>
+              )}
+
               {doc.availability === 'Available' || doc.availability === 'Uploaded' ? (
                 <button
                   type="button"
-                  className="text-sm bg-[#1a3a5c] text-white rounded px-3 py-1.5 hover:bg-[#0f2540]"
+                  onClick={() => (isCertificate ? setShowCertModal(true) : null)}
+                  className="text-sm bg-[#17365D] text-white rounded-lg px-3.5 py-1.5 hover:bg-[#245B8A] font-semibold transition-colors"
                 >
-                  View Document
+                  {isCertificate ? 'Preview Document' : 'View File'}
                 </button>
               ) : (
                 <button
                   type="button"
-                  className="text-sm bg-[#1a56db] text-white rounded px-3 py-1.5 hover:bg-[#1e40af]"
+                  className="text-sm bg-[#1a56db] text-white rounded-lg px-3.5 py-1.5 hover:bg-[#1e40af] font-semibold transition-colors"
                 >
                   Upload Document
                 </button>
@@ -154,56 +186,157 @@ export function DocumentDetailScreen({
         </div>
       </div>
 
-      <div className="max-w-[1100px] mx-auto px-6 py-5 grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div className="max-w-[1100px] mx-auto px-4 sm:px-6 py-5 grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Left / Main column */}
-        <div className="lg:col-span-2 space-y-4">
+        <div className="lg:col-span-2 space-y-5">
+          {/* Official Statutory Clearance Banner (If Certificate exists) */}
+          {isCertificate && (
+            <section className="bg-gradient-to-r from-emerald-50/80 to-teal-50/80 border border-emerald-300 rounded-xl p-5 shadow-xs">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded">
+                    Official Statutory Clearance
+                  </span>
+                  <h3 className="text-base font-bold text-emerald-950 mt-1">
+                    {doc.name}
+                  </h3>
+                  <p className="text-xs text-emerald-800 mt-0.5">
+                    {doc.certificateData?.certNumber ? (
+                      <>
+                        Certificate Ref: <strong className="font-mono">{doc.certificateData.certNumber}</strong> · Granted by {doc.certificateData.authority}
+                      </>
+                    ) : (
+                      <>Statutory government certificate issued by {doc.source}</>
+                    )}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setShowCertModal(true)}
+                  className="px-4 py-2 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs transition-colors flex items-center gap-2"
+                >
+                  <Award className="w-4 h-4" />
+                  <span>View Certificate (with e-Pramaan QR)</span>
+                </button>
+              </div>
+            </section>
+          )}
+
+          {/* ── Extracted Document Information (Without OCR Jargon) ── */}
+          {doc.extractedData && (
+            <section className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-200 mb-3 flex-wrap gap-2">
+                <div>
+                  <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <FileCheck className="w-4 h-4 text-blue-600" />
+                    <span>Extracted Document Information</span>
+                  </h2>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Information automatically read from document and cross-checked against your confirmed Business Profile
+                  </p>
+                </div>
+                <span
+                  className={`text-xs font-bold px-2.5 py-1 rounded border ${
+                    doc.extractedData.reviewRequired
+                      ? 'bg-amber-100 text-amber-900 border-amber-300'
+                      : 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                  }`}
+                >
+                  {doc.extractedData.verificationState}
+                </span>
+              </div>
+
+              {doc.extractedData.summary && (
+                <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-700 mb-4 leading-relaxed">
+                  {doc.extractedData.summary}
+                </div>
+              )}
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b border-slate-200 text-slate-500 text-[10px] font-bold uppercase tracking-wider text-left bg-slate-50/50">
+                      <th className="py-2 px-3">Field Name</th>
+                      <th className="py-2 px-3">Extracted Value</th>
+                      <th className="py-2 px-3 text-right">Profile Cross-Reference</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {doc.extractedData.fields.map(f => (
+                      <tr key={f.label} className="hover:bg-slate-50/50">
+                        <td className="py-2.5 px-3 font-medium text-slate-600">{f.label}</td>
+                        <td className="py-2.5 px-3 font-bold text-slate-900">{f.value}</td>
+                        <td className="py-2.5 px-3 text-right">
+                          {f.match ? (
+                            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded inline-flex items-center gap-1">
+                              <Check className="w-3 h-3" /> Confirmed Match
+                            </span>
+                          ) : (
+                            <span className="text-[10px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded inline-flex items-center gap-1">
+                              <AlertTriangle className="w-3 h-3 text-amber-600" /> Review Recommended
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          )}
+
           {/* Document Information */}
-          <section className="bg-white border border-[#e2e8f0] rounded p-4 shadow-sm">
-            <h2 className="text-sm font-bold text-[#1a3a5c] mb-3 border-b border-[#e8edf2] pb-2">Document Information</h2>
-            <div className="space-y-3 text-sm">
+          <section className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
+            <h2 className="text-sm font-bold text-[#1a3a5c] mb-3 border-b border-slate-200 pb-2">
+              Document Purpose & Content
+            </h2>
+            <div className="space-y-3.5 text-xs text-slate-700 leading-relaxed">
               <div>
-                <p className="text-[10px] font-bold text-[#64748b] uppercase tracking-wider mb-1">What is it?</p>
-                <p className="text-[#334155] leading-relaxed">{doc.description}</p>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">What is it?</p>
+                <p>{doc.description}</p>
               </div>
               <div>
-                <p className="text-[10px] font-bold text-[#64748b] uppercase tracking-wider mb-1">Why is it required?</p>
-                <p className="text-[#334155] leading-relaxed">{doc.whyRequired}</p>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Why is it required?</p>
+                <p>{doc.whyRequired}</p>
               </div>
               <div>
-                <p className="text-[10px] font-bold text-[#64748b] uppercase tracking-wider mb-1">What should it contain?</p>
-                <p className="text-[#334155] leading-relaxed">{doc.whatItContains}</p>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">What should it contain?</p>
+                <p>{doc.whatItContains}</p>
               </div>
               <div>
-                <p className="text-[10px] font-bold text-[#64748b] uppercase tracking-wider mb-1">Where is it obtained?</p>
-                <p className="text-[#334155] leading-relaxed">{doc.whereObtained}</p>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Where is it obtained?</p>
+                <p>{doc.whereObtained}</p>
               </div>
             </div>
           </section>
 
           {/* Regulatory source */}
-          <section className="bg-white border border-[#e2e8f0] rounded p-4 shadow-sm">
-            <h2 className="text-sm font-bold text-[#1a3a5c] mb-3 border-b border-[#e8edf2] pb-2">Regulatory Source</h2>
+          <section className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
+            <h2 className="text-sm font-bold text-[#1a3a5c] mb-3 border-b border-slate-200 pb-2">
+              Regulatory Source
+            </h2>
             {doc.grRule ? (
-              <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="grid grid-cols-2 gap-3 text-xs">
                 <div>
-                  <p className="text-[10px] font-bold text-[#64748b] uppercase tracking-wider mb-1">Rule / Act</p>
-                  <p className="text-[#334155]">{doc.grRule}</p>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Rule / Act</p>
+                  <p className="text-slate-800 font-semibold">{doc.grRule}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold text-[#64748b] uppercase tracking-wider mb-1">Clause / Section</p>
-                  <p className="text-[#334155]">{doc.grClause}</p>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Clause / Section</p>
+                  <p className="text-slate-800">{doc.grClause}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold text-[#64748b] uppercase tracking-wider mb-1">Effective Date</p>
-                  <p className="text-[#334155]">{doc.grEffective}</p>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Effective Date</p>
+                  <p className="text-slate-800">{doc.grEffective}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold text-[#64748b] uppercase tracking-wider mb-1">Verified</p>
-                  <p className="text-[#15803d] font-semibold">Verified</p>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Verified</p>
+                  <p className="text-emerald-700 font-semibold">✓ Verified</p>
                 </div>
               </div>
             ) : (
-              <div className="bg-[#fef9c3] border border-[#fde68a] rounded p-3 text-sm text-[#92400e]">
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-900">
                 <span className="font-semibold">Needs Verification</span> — The specific regulatory reference for this
                 document has not been independently confirmed. Do not rely on an unverified source for legal compliance
                 purposes.
@@ -211,80 +344,38 @@ export function DocumentDetailScreen({
             )}
           </section>
 
-          {/* Conditional requirement */}
-          {doc.requirement === 'Conditional' && doc.triggeringCondition && (
-            <section className="bg-[#fef9c3] border border-[#fde68a] rounded p-4 text-sm shadow-sm">
-              <p className="font-semibold text-[#92400e] mb-1">Conditional Requirement</p>
-              <p className="text-[#78350f]">This document is required only when the following condition applies:</p>
-              <p className="mt-1.5 text-[#78350f] font-medium">{doc.triggeringCondition}</p>
-            </section>
-          )}
-
-          {/* Dependency / Generated */}
-          {doc.dependency === 'Generated by prerequisite approval' && (
-            <section className="bg-[#ede9fe] border border-[#c4b5fd] rounded p-4 text-sm shadow-sm">
-              <p className="font-semibold text-[#6d28d9] mb-1">Generated by Prerequisite Approval</p>
-              <p className="text-[#5b21b6]">
-                This document will be automatically added to this repository once the prerequisite approval or decision is
-                received from the relevant department.
-              </p>
-              <div className="flex gap-2 mt-3">
-                <Link
-                  href={ENTREPRENEUR_ROUTES.journey(project.id)}
-                  className="text-xs bg-[#6d28d9] text-white px-3 py-1.5 rounded hover:bg-[#5b21b6]"
-                >
-                  View Regulatory Journey
-                </Link>
-                <Link
-                  href={ENTREPRENEUR_ROUTES.dependencies(project.id)}
-                  className="text-xs border border-[#c4b5fd] text-[#6d28d9] px-3 py-1.5 rounded hover:bg-white"
-                >
-                  View Dependency Graph
-                </Link>
-              </div>
-            </section>
-          )}
-
-          {doc.dependency === 'Inspection-stage only' && (
-            <section className="bg-[#f3e8ff] border border-[#d8b4fe] rounded p-4 text-sm shadow-sm">
-              <p className="font-semibold text-[#7e22ce] mb-1">Inspection-stage Only</p>
-              <p className="text-[#6b21a8]">
-                This document is applicable only at the inspection stage. It is not required to be uploaded during the
-                initial application phase.
-              </p>
-            </section>
-          )}
-
           {/* Service usage table */}
-          <section className="bg-white border border-[#e2e8f0] rounded p-4 shadow-sm">
-            <h2 className="text-sm font-bold text-[#1a3a5c] mb-3 border-b border-[#e8edf2] pb-2">Used By</h2>
+          <section className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
+            <div className="flex items-center justify-between mb-3 border-b border-slate-200 pb-2">
+              <h2 className="text-sm font-bold text-[#1a3a5c]">
+                Applications Using This Document ({doc.usedBy.length})
+              </h2>
+              <span className="text-[10px] font-bold text-purple-800 bg-purple-50 border border-purple-200 px-2 py-0.5 rounded">
+                Shared Across Departments
+              </span>
+            </div>
             {doc.usedBy.length === 0 ? (
-              <p className="text-sm text-[#94a3b8]">This document is not currently linked to any active service.</p>
+              <p className="text-xs text-slate-400">This document is not currently linked to any active service.</p>
             ) : (
               <table className="w-full text-xs border-collapse">
                 <thead>
-                  <tr className="bg-[#f8f9fb] border-b border-[#e2e8f0]">
-                    {['Department', 'Service', 'Requirement'].map(h => (
-                      <th
-                        key={h}
-                        className="text-left px-3 py-2 font-semibold text-[#64748b] uppercase tracking-wider text-[10px]"
-                      >
-                        {h}
-                      </th>
-                    ))}
+                  <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 text-[10px] font-bold uppercase tracking-wider">
+                    <th className="text-left px-3 py-2">Department</th>
+                    <th className="text-left px-3 py-2">Service</th>
+                    <th className="text-left px-3 py-2">Requirement</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-slate-100">
                   {doc.usedBy.map((u, i) => {
                     const reqId = u.dept === 'MPCB' && u.service.includes('Consent to Establish') ? 'EST-001' : null;
                     return (
-                      <tr key={i} className="border-b border-[#f1f5f9]">
-                        <td className="px-3 py-2 font-medium text-[#1a3a5c]">{u.dept}</td>
-                        <td className="px-3 py-2 text-[#334155]">
+                      <tr key={i} className="hover:bg-slate-50/50">
+                        <td className="px-3 py-2.5 font-bold text-[#1a3a5c]">{u.dept}</td>
+                        <td className="px-3 py-2.5 text-slate-800">
                           {reqId ? (
                             <Link
                               href={ENTREPRENEUR_ROUTES.requirement(project.id, reqId)}
-                              className="hover:underline text-[#1a56db]"
+                              className="hover:underline text-[#1a56db] font-semibold"
                             >
                               {u.service}
                             </Link>
@@ -292,7 +383,7 @@ export function DocumentDetailScreen({
                             <span>{u.service}</span>
                           )}
                         </td>
-                        <td className="px-3 py-2">{reqBadge(u.requirement as DocReqState)}</td>
+                        <td className="px-3 py-2.5">{reqBadge(u.requirement as DocReqState)}</td>
                       </tr>
                     );
                   })}
@@ -302,29 +393,31 @@ export function DocumentDetailScreen({
           </section>
 
           {/* Version history */}
-          <section className="bg-white border border-[#e2e8f0] rounded p-4 shadow-sm">
-            <h2 className="text-sm font-bold text-[#1a3a5c] mb-3 border-b border-[#e8edf2] pb-2">Version History</h2>
+          <section className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
+            <h2 className="text-sm font-bold text-[#1a3a5c] mb-3 border-b border-slate-200 pb-2">Version History</h2>
             {doc.versionHistory.length === 0 ? (
-              <p className="text-sm text-[#94a3b8]">No versions uploaded yet.</p>
+              <p className="text-xs text-slate-400">No versions uploaded yet.</p>
             ) : (
               <div className="space-y-2">
                 {doc.versionHistory.map((v, i) => (
                   <div
                     key={v.version}
-                    className={`flex items-center justify-between p-2.5 rounded border ${i === 0 ? 'bg-[#f0f9ff] border-[#bae6fd]' : 'bg-[#f8f9fb] border-[#e2e8f0]'}`}
+                    className={`flex items-center justify-between p-2.5 rounded-lg border text-xs ${
+                      i === 0 ? 'bg-sky-50/50 border-sky-200' : 'bg-slate-50 border-slate-200'
+                    }`}
                   >
-                    <div className="text-sm">
-                      <span className="font-semibold text-[#1a3a5c]">Version {v.version}</span>
+                    <div>
+                      <span className="font-semibold text-slate-900">Version {v.version}</span>
                       {i === 0 && (
-                        <span className="ml-2 text-[10px] bg-[#dbeafe] text-[#1d4ed8] border border-[#93c5fd] px-1.5 py-0.5 rounded font-semibold">
-                          Current
+                        <span className="ml-2 text-[10px] bg-blue-100 text-blue-800 border border-blue-200 px-1.5 py-0.5 rounded font-bold">
+                          Current Active
                         </span>
                       )}
-                      <span className="ml-3 text-xs text-[#6b7a8d]">Uploaded: {v.uploaded}</span>
+                      <span className="ml-3 text-[11px] text-slate-500">Uploaded: {v.uploaded}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       {verifBadge(v.verification as DocVerifState)}
-                      <button type="button" className="text-xs text-[#1a56db] hover:underline">
+                      <button type="button" className="text-xs text-[#1a56db] hover:underline font-semibold">
                         View version
                       </button>
                     </div>
@@ -338,183 +431,54 @@ export function DocumentDetailScreen({
         {/* Right sidebar */}
         <div className="space-y-4">
           {/* Validity card */}
-          <section className="bg-white border border-[#e2e8f0] rounded p-4 shadow-sm">
-            <h2 className="text-sm font-bold text-[#1a3a5c] mb-3 border-b border-[#e8edf2] pb-2">Validity</h2>
-            <div className="space-y-2 text-sm">
+          <section className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs">
+            <h2 className="text-sm font-bold text-[#1a3a5c] mb-3 border-b border-slate-200 pb-2">Validity & Term</h2>
+            <div className="space-y-2.5 text-xs">
               <div className="flex justify-between items-center">
-                <span className="text-[#6b7a8d]">Status</span>
+                <span className="text-slate-500">Status</span>
                 {validityBadge(doc.validity)}
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-[#6b7a8d]">Issue Date</span>
-                <span className="text-[#334155] font-medium">{doc.issueDate}</span>
+                <span className="text-slate-500">Issue Date</span>
+                <span className="text-slate-800 font-semibold">{doc.issueDate}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-[#6b7a8d]">Expiry</span>
-                <span className="text-[#334155] font-medium">{doc.expiryDate}</span>
+                <span className="text-slate-500">Expiry Date</span>
+                <span className="text-slate-800 font-semibold">{doc.expiryDate}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-[#6b7a8d]">Verification</span>
-                {verifBadge(doc.verification)}
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-[#6b7a8d]">Reuse</span>
-                {reuseBadge(doc.reuse)}
+                <span className="text-slate-500">Issuing Source</span>
+                <span className="text-slate-800 font-semibold">{doc.source}</span>
               </div>
             </div>
-            {doc.reuse === 'Reusable' && (
-              <p className="mt-3 text-xs text-[#475569] bg-[#f1f5f9] rounded p-2 leading-relaxed">
-                This document can be reused for applicable services while it remains valid and meets the service-specific
-                requirements.
-              </p>
-            )}
           </section>
 
-          {/* Regulatory Assistant */}
-          <section className="bg-white border border-[#e2e8f0] rounded p-4 shadow-sm">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="w-5 h-5 rounded-full bg-[#1a3a5c] text-white flex items-center justify-center text-xs font-bold">
-                ?
-              </div>
-              <h2 className="text-sm font-bold text-[#1a3a5c]">Regulatory Assistant</h2>
-            </div>
-            <p className="text-xs text-[#6b7a8d] mb-3">Why is this required? What should it contain? Which GR applies?</p>
+          {/* Assistant callout */}
+          <div className="bg-[#17365D] text-white rounded-xl p-4 shadow-xs">
+            <p className="text-xs font-bold mb-1">Need help with this document?</p>
+            <p className="text-[11px] text-slate-300 mb-3 leading-relaxed">
+              Ask about required formats, issuing departments, or regulatory conditions.
+            </p>
             <button
               type="button"
               onClick={openDocumentAssistant}
-              className="w-full text-sm bg-[#1a3a5c] text-white rounded px-3 py-2 hover:bg-[#0f2540] text-center transition-colors"
+              className="w-full text-xs font-bold bg-[#245B8A] hover:bg-[#1E4870] text-white py-2 rounded-lg border border-[#3A75A4] transition-colors"
             >
-              Ask Regulatory Assistant
+              Ask Regulatory Assistant →
             </button>
-          </section>
-
-          {/* Navigate */}
-          <section className="bg-white border border-[#e2e8f0] rounded p-4 shadow-sm">
-            <h2 className="text-sm font-bold text-[#1a3a5c] mb-3 border-b border-[#e8edf2] pb-2">Navigate</h2>
-            <div className="flex flex-col gap-2">
-              <Link
-                href={ENTREPRENEUR_ROUTES.journey(project.id)}
-                className="text-sm text-left border border-[#e2e8f0] rounded px-3 py-2 text-[#334155] hover:bg-[#f1f5f9] hover:border-[#1a56db]"
-              >
-                → Regulatory Journey (E09)
-              </Link>
-              <Link
-                href={ENTREPRENEUR_ROUTES.dependencies(project.id)}
-                className="text-sm text-left border border-[#e2e8f0] rounded px-3 py-2 text-[#334155] hover:bg-[#f1f5f9] hover:border-[#1a56db]"
-              >
-                → Dependency Graph (E13)
-              </Link>
-              <Link
-                href={ENTREPRENEUR_ROUTES.requirement(project.id, 'EST-001')}
-                className="text-sm text-left border border-[#e2e8f0] rounded px-3 py-2 text-[#334155] hover:bg-[#f1f5f9] hover:border-[#1a56db]"
-              >
-                → Requirement Detail (E10)
-              </Link>
-            </div>
-          </section>
+          </div>
         </div>
       </div>
 
-      {/* ── Regulatory Help Drawer ── */}
-      {ragOpen && (
-        <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-label="Regulatory Help">
-          <div className="absolute inset-0 bg-black/30" onClick={() => setRagOpen(false)} />
-          <div className="relative bg-white w-96 max-w-full h-full shadow-2xl flex flex-col border-l border-[#d1d9e0]">
-            {/* Drawer header */}
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-[#e8edf2] bg-[#1a2533]">
-              <div className="w-7 h-7 rounded-full bg-[#1a56db] flex items-center justify-center text-white text-xs font-bold">
-                ?
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold text-white">Regulatory Help</p>
-                <p className="text-[10px] text-[#9aa5b4] truncate">About {doc.name}</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setRagOpen(false)}
-                className="text-[#9aa5b4] hover:text-white text-lg leading-none"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Boundary notice */}
-            <div className="px-4 py-2.5 bg-[#fffbeb] border-b border-[#fde68a]">
-              <p className="text-[10px] text-[#92400e] font-medium">
-                This assistant retrieves and explains regulatory information. It does not grant approval or make statutory
-                decisions.
-              </p>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-4 space-y-3">
-              {ragMessages.length === 0 ? (
-                <>
-                  <p className="text-xs font-semibold text-[#9aa5b4] uppercase tracking-wider">Suggested questions</p>
-                  <div className="space-y-2">
-                    {SUGGESTED_PROMPTS.map(q => (
-                      <button
-                        key={q}
-                        type="button"
-                        onClick={() => handleRagSend(q)}
-                        className="w-full text-left text-xs px-3 py-2.5 border border-[#d1d9e0] rounded hover:bg-[#f0f4f8] text-[#374151] transition-colors"
-                      >
-                        {q}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              ) : (
-                <div className="space-y-3">
-                  {ragMessages.map((m, i) => (
-                    <div
-                      key={i}
-                      className={`p-3 rounded text-xs ${
-                        m.role === 'user'
-                          ? 'bg-[#f8f9fb] border border-[#e8edf2] text-[#1a3a5c]'
-                          : 'bg-white border border-[#d1d9e0] text-[#374151]'
-                      }`}
-                    >
-                      <p className="text-[10px] font-bold text-[#9aa5b4] uppercase tracking-wider mb-1">
-                        {m.role === 'user' ? 'Your Question' : 'Assistant Response'}
-                      </p>
-                      <p className="whitespace-pre-line leading-relaxed">{m.text}</p>
-                    </div>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={() => setRagMessages([])}
-                    className="text-xs text-[#1a56db] hover:underline"
-                  >
-                    ← Clear conversation
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <div className="p-4 border-t border-[#e8edf2]">
-              <form
-                onSubmit={e => {
-                  e.preventDefault();
-                  handleRagSend(ragInput);
-                }}
-                className="flex gap-2"
-              >
-                <input
-                  className="flex-1 text-sm border border-[#d1d9e0] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1a56db]"
-                  placeholder="Ask about this document…"
-                  value={ragInput}
-                  onChange={e => setRagInput(e.target.value)}
-                />
-                <button
-                  type="submit"
-                  className="px-3 py-2 bg-[#1a3a5c] text-white text-sm rounded hover:bg-[#0f2540]"
-                >
-                  Send
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
+      {/* ── Certificate Preview Modal ── */}
+      {showCertModal && (
+        <CertificatePreviewModal
+          doc={doc}
+          businessName={project.name}
+          businessLocation={project.location}
+          projectId={project.id}
+          onClose={() => setShowCertModal(false)}
+        />
       )}
     </main>
   );

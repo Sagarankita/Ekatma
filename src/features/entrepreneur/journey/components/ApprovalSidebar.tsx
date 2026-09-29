@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React from 'react';
+import Link from 'next/link';
 import { ENTREPRENEUR_ROUTES } from '@/lib/routes/entrepreneur';
 import {
   X,
@@ -9,20 +9,21 @@ import {
   Unlock,
   CheckCircle2,
   AlertTriangle,
-  FileText,
-  ChevronDown,
-  ChevronUp,
   ArrowRight,
-  Building2,
   Clock,
+  HelpCircle,
+  CornerDownRight,
+  Focus,
 } from 'lucide-react';
 import type { GraphNodeData } from '../hooks/useDependencyGraph';
+import { STAGES } from '../data';
 
 interface ApprovalSidebarProps {
   selectedNode: GraphNodeData | null;
   allNodes: GraphNodeData[];
   onClose: () => void;
-  onCompleteSubFormStep: (nodeId: string, formIdx: number) => void;
+  onSelectNode: (nodeId: string) => void;
+  onCompleteSubFormStep?: (nodeId: string, formIdx: number) => void;
   projectId: string;
 }
 
@@ -30,276 +31,337 @@ export function ApprovalSidebar({
   selectedNode,
   allNodes,
   onClose,
-  onCompleteSubFormStep,
+  onSelectNode,
   projectId,
 }: ApprovalSidebarProps) {
-  const router = useRouter();
-
-  // Accordion state
-  const [openSection, setOpenSection] = useState<'details' | 'prereqs' | 'unlocks' | null>('details');
-
   if (!selectedNode) return null;
 
-  const { id, title, department, stage, status, subForms, completedSubFormIndices, enrichment, dependencies, unlocks } = selectedNode;
+  const { id, title, department, stage, status, enrichment, dependencies, unlocks } = selectedNode;
 
   const isCompleted = status === 'completed';
   const isInProgress = status === 'in-progress';
   const isReady = status === 'ready';
   const isBlocked = status === 'blocked';
+  const isConditional = status === 'conditional';
+
+  const stageInfo = STAGES.find(s => s.key === stage);
 
   // Find parent prerequisite nodes
   const parentNodes = dependencies
-    .map(dep => allNodes.find(n => n.id === dep.reqId))
-    .filter(Boolean) as GraphNodeData[];
+    .map(dep => {
+      const parent = allNodes.find(n => n.id === dep.reqId);
+      return parent ? { ...parent, depType: dep.type, depReason: dep.reason } : null;
+    })
+    .filter(Boolean) as (GraphNodeData & { depType: string; depReason?: string })[];
 
-  // Missing prerequisite nodes that are keeping this node locked
+  // Find uncompleted parents (keeping this node locked)
   const uncompletedParents = parentNodes.filter(p => p.status !== 'completed');
 
-  // Downstream child nodes unlocked by this node
+  // Find downstream child nodes unlocked by this node
   const childNodes = unlocks
     .map(uid => allNodes.find(n => n.id === uid))
     .filter(Boolean) as GraphNodeData[];
 
+  // Determine "Can proceed?" status & explanation
+  const canProceedConfig = (() => {
+    if (isCompleted) {
+      return {
+        answer: 'Completed',
+        badge: 'Approved & Active',
+        badgeCls: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+        cardCls: 'bg-emerald-50/70 border-emerald-200 text-emerald-950',
+        explanation: 'This clearance has been approved. Conditions are satisfied and active.',
+        Icon: CheckCircle2,
+      };
+    }
+    if (isReady) {
+      return {
+        answer: 'Yes — You can proceed now',
+        badge: 'Ready to Apply',
+        badgeCls: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+        cardCls: 'bg-emerald-50/70 border-emerald-200 text-emerald-950',
+        explanation: 'All prerequisite clearances are completed. You can start and submit this application.',
+        Icon: Unlock,
+      };
+    }
+    if (isInProgress) {
+      return {
+        answer: 'Yes — Application in progress',
+        badge: 'Draft Open',
+        badgeCls: 'bg-blue-100 text-blue-800 border-blue-300',
+        cardCls: 'bg-blue-50/70 border-blue-200 text-blue-950',
+        explanation: 'Your application is currently in draft. You can continue filling details and submit.',
+        Icon: Clock,
+      };
+    }
+    if (isBlocked) {
+      return {
+        answer: 'No — Blocked by prerequisite',
+        badge: 'Waiting for Prerequisite',
+        badgeCls: 'bg-amber-100 text-amber-900 border-amber-300',
+        cardCls: 'bg-amber-50/70 border-amber-200 text-amber-950',
+        explanation: uncompletedParents.length > 0
+          ? `Must obtain approval for ${uncompletedParents[0].title} before this application can be started.`
+          : 'Prerequisites must be resolved before proceeding.',
+        Icon: Lock,
+      };
+    }
+    return {
+      answer: 'Conditional — Verification needed',
+      badge: 'Conditional Rule',
+      badgeCls: 'bg-purple-100 text-purple-800 border-purple-300',
+      cardCls: 'bg-purple-50/70 border-purple-200 text-purple-950',
+      explanation: 'Applies conditionally based on your verified project parameters.',
+      Icon: HelpCircle,
+    };
+  })();
+
+  // Primary action button configuration
+  const primaryActionConfig = (() => {
+    if (isReady) {
+      return {
+        label: 'Start Application →',
+        href: ENTREPRENEUR_ROUTES.newApplication(projectId),
+        cls: 'bg-[#1a56db] hover:bg-[#1542a8] text-white',
+      };
+    }
+    if (isInProgress) {
+      return {
+        label: 'Continue Application →',
+        href: ENTREPRENEUR_ROUTES.newApplication(projectId),
+        cls: 'bg-[#1a56db] hover:bg-[#1542a8] text-white',
+      };
+    }
+    if (isBlocked && uncompletedParents.length > 0) {
+      return {
+        label: `Complete Prerequisite (${uncompletedParents[0].department}) →`,
+        href: ENTREPRENEUR_ROUTES.requirement(projectId, uncompletedParents[0].id),
+        cls: 'bg-amber-700 hover:bg-amber-800 text-white',
+      };
+    }
+    return {
+      label: 'View Requirement Details →',
+      href: ENTREPRENEUR_ROUTES.requirement(projectId, id),
+      cls: 'bg-slate-800 hover:bg-slate-900 text-white',
+    };
+  })();
+
   return (
-    <aside className="w-full lg:w-[450px] shrink-0 bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden sticky top-4 flex flex-col max-h-[calc(100vh-2rem)] z-30 transition-all font-sans">
-      {/* Header Bar */}
-      <div className="bg-slate-900 text-white p-5 flex items-start justify-between gap-3">
-        <div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="text-[10px] font-black uppercase tracking-wider text-blue-300 bg-blue-950 px-2 py-0.5 rounded border border-blue-800 flex items-center gap-1">
-              <Building2 className="w-3 h-3" />
+    <aside className="w-full lg:w-[420px] shrink-0 bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden sticky top-4 flex flex-col max-h-[calc(100vh-2rem)] z-30 transition-all font-sans">
+      {/* ── 1. REQUIREMENT HEADER ── */}
+      <div className="bg-[#17365D] text-white p-5 flex items-start justify-between gap-3">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+            <span className="text-[10px] font-black uppercase tracking-wider text-[#B8D5E5] bg-[#245B8A] px-2 py-0.5 rounded border border-[#3A75A4]">
               {department}
             </span>
-            <span className="text-xs text-slate-400 font-mono">{id}</span>
+            <span className="text-[10px] font-semibold text-slate-300">
+              Stage {stageInfo?.num ?? '00'} · {stageInfo?.label ?? stage}
+            </span>
           </div>
-          <h2 className="text-base font-bold leading-snug text-white">{title}</h2>
-
-          {/* Status Badge */}
-          <div className="mt-2.5 flex items-center gap-2">
-            {isCompleted && (
-              <span className="text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Completed
-              </span>
-            )}
-            {isInProgress && (
-              <span className="text-xs font-bold bg-blue-500/20 text-blue-300 border border-blue-500/40 px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                <Clock className="w-3.5 h-3.5 text-blue-400" /> In Progress
-              </span>
-            )}
-            {isReady && (
-              <span className="text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                <Unlock className="w-3.5 h-3.5 text-amber-400" /> Ready / Unlocked
-              </span>
-            )}
-            {isBlocked && (
-              <span className="text-xs font-bold bg-red-500/20 text-red-300 border border-red-500/40 px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                <Lock className="w-3.5 h-3.5 text-red-400" /> Blocked / Locked
-              </span>
-            )}
-          </div>
+          <h2 className="text-base font-bold leading-snug text-white">
+            {title}
+          </h2>
         </div>
 
         <button
           type="button"
           onClick={onClose}
-          className="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors"
-          aria-label="Close sidebar"
+          className="text-slate-300 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition-colors shrink-0"
+          aria-label="Close details"
         >
           <X className="w-5 h-5" />
         </button>
       </div>
 
-      {/* Lock Warning Callout (if node is blocked) */}
-      {isBlocked && uncompletedParents.length > 0 && (
-        <div className="p-4 bg-amber-50 border-b border-amber-200 text-amber-900 flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-          <div className="text-xs leading-relaxed">
-            <p className="font-bold text-amber-900">
-              Blocked: Requires completion of {uncompletedParents.map(p => `"${p.title}"`).join(', ')}
-            </p>
-            <p className="text-amber-700 mt-1">
-              Complete prerequisite approvals first to unlock this requirement.
-            </p>
+      {/* ── SCROLLABLE BODY ── */}
+      <div className="p-5 overflow-y-auto flex-1 space-y-5 text-xs text-slate-600">
+        {/* ── 2. STATUS ── */}
+        <div>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-1.5">
+            Status
+          </span>
+          <div className="flex items-center gap-2">
+            <span className={`text-xs font-bold px-2.5 py-1 rounded-md border flex items-center gap-1.5 ${canProceedConfig.badgeCls}`}>
+              <canProceedConfig.Icon className="w-3.5 h-3.5" />
+              <span>{canProceedConfig.badge}</span>
+            </span>
           </div>
         </div>
-      )}
 
-      {/* Scrollable Content Body */}
-      <div className="p-5 overflow-y-auto flex-1 space-y-5 text-xs">
-        {/* Form Dependency Checklist Stepper */}
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-bold text-slate-900 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
-              <FileText className="w-4 h-4 text-blue-600" />
-              Form Dependency Checklist
+        {/* ── 3. CAN PROCEED? ── */}
+        <div className={`p-4 rounded-xl border ${canProceedConfig.cardCls}`}>
+          <div className="flex items-start gap-2.5">
+            <canProceedConfig.Icon className="w-4 h-4 shrink-0 mt-0.5" />
+            <div>
+              <p className="font-bold text-xs uppercase tracking-wide">
+                Can proceed? {canProceedConfig.answer}
+              </p>
+              <p className="text-[11px] mt-1 leading-relaxed opacity-90">
+                {canProceedConfig.explanation}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* ── 4. BLOCKED BY (Prerequisites) ── */}
+        <div className="border border-slate-200 rounded-xl p-4 bg-slate-50/50">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="font-bold text-slate-800 uppercase tracking-wider text-[11px]">
+              Blocked By (Prerequisites)
             </h3>
-            <span className="font-mono font-bold text-slate-600">
-              {completedSubFormIndices.length} of {subForms.length} Done
+            <span className="font-mono text-slate-500 font-semibold text-[11px]">
+              {parentNodes.length}
             </span>
           </div>
 
-          <div className="relative pl-4 space-y-4 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
-            {subForms.map((formName, idx) => {
-              const isStepDone = completedSubFormIndices.includes(idx);
-
-              return (
-                <div key={formName} className="relative flex items-start justify-between gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
-                  {/* Step Node Marker */}
+          {parentNodes.length === 0 ? (
+            <p className="text-slate-500 italic text-[11px]">
+              None — This clearance has no prerequisites and can be initiated directly.
+            </p>
+          ) : (
+            <div className="space-y-2 mt-2">
+              {parentNodes.map(parent => {
+                const isParentDone = parent.status === 'completed';
+                return (
                   <div
-                    className={`absolute -left-4 top-3.5 -translate-x-1/2 w-4 h-4 rounded-full border-2 flex items-center justify-center text-[9px] font-black ${
-                      isStepDone
-                        ? 'bg-emerald-500 border-emerald-600 text-white'
-                        : isBlocked
-                        ? 'bg-slate-200 border-slate-300 text-slate-500'
-                        : 'bg-white border-blue-600 text-blue-600'
+                    key={parent.id}
+                    className={`p-2.5 rounded-lg border flex items-center justify-between gap-2 text-xs transition-colors ${
+                      isParentDone
+                        ? 'bg-emerald-50/50 border-emerald-200'
+                        : 'bg-white border-slate-200'
                     }`}
                   >
-                    {isStepDone ? '✓' : idx + 1}
-                  </div>
-
-                  <div className="pr-2">
-                    <p className="font-bold text-slate-900 text-xs leading-snug">{formName}</p>
-                    <p className="text-[11px] text-slate-500 mt-0.5">
-                      {isStepDone ? 'Completed & Submitted' : isBlocked ? 'Prerequisite Pending' : 'Action Required'}
-                    </p>
-                  </div>
-
-                  <button
-                    type="button"
-                    disabled={isStepDone || isBlocked}
-                    onClick={() => onCompleteSubFormStep(id, idx)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
-                      isStepDone
-                        ? 'bg-emerald-100 text-emerald-800 cursor-default'
-                        : isBlocked
-                        ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                        : 'bg-blue-600 text-white hover:bg-blue-700 active:scale-95 shadow-xs'
-                    }`}
-                  >
-                    {isStepDone ? 'Completed' : isBlocked ? 'Locked' : 'Continue'}
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Collapsible Section: Requirement Details */}
-        <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
-          <button
-            type="button"
-            onClick={() => setOpenSection(openSection === 'details' ? null : 'details')}
-            className="w-full px-4 py-3 bg-slate-50 font-bold text-slate-900 flex items-center justify-between text-xs border-b border-slate-200 hover:bg-slate-100 transition-colors"
-          >
-            <span>What is this & Why required?</span>
-            {openSection === 'details' ? <ChevronUp className="w-4 h-4 text-slate-500" /> : <ChevronDown className="w-4 h-4 text-slate-500" />}
-          </button>
-          {openSection === 'details' && (
-            <div className="p-4 space-y-3 text-slate-600">
-              <p className="leading-relaxed">{enrichment?.applicabilitySummary}</p>
-              <div className="pt-2 border-t border-slate-100 grid grid-cols-2 gap-2">
-                <div>
-                  <span className="font-bold text-slate-900 block text-[10px] uppercase">Configured SLA</span>
-                  <span className="text-slate-700 font-semibold">{enrichment?.slaConfigured}</span>
-                </div>
-                <div>
-                  <span className="font-bold text-slate-900 block text-[10px] uppercase">Regulatory Basis</span>
-                  <span className="text-slate-700 font-semibold">{enrichment?.regReference}</span>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Collapsible Section: Prerequisites Checklist */}
-        <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
-          <button
-            type="button"
-            onClick={() => setOpenSection(openSection === 'prereqs' ? null : 'prereqs')}
-            className="w-full px-4 py-3 bg-slate-50 font-bold text-slate-900 flex items-center justify-between text-xs border-b border-slate-200 hover:bg-slate-100 transition-colors"
-          >
-            <span>Prerequisite Checklist ({parentNodes.length})</span>
-            {openSection === 'prereqs' ? <ChevronUp className="w-4 h-4 text-slate-500" /> : <ChevronDown className="w-4 h-4 text-slate-500" />}
-          </button>
-          {openSection === 'prereqs' && (
-            <div className="p-4 space-y-2">
-              {parentNodes.length === 0 ? (
-                <p className="text-slate-500 italic">No prerequisite requirements. Can be started immediately.</p>
-              ) : (
-                parentNodes.map(parent => (
-                  <div key={parent.id} className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 flex items-center justify-between">
-                    <span className="font-bold text-slate-900">{parent.title}</span>
-                    {parent.status === 'completed' ? (
-                      <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3" /> Done
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="font-semibold text-slate-900 truncate">
+                          {parent.title}
+                        </span>
+                        <span className="text-[10px] text-slate-500">
+                          ({parent.department})
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-slate-500 block mt-0.5">
+                        {parent.depType === 'conditional' ? 'Conditional trigger' : 'Sequential prerequisite'}
                       </span>
-                    ) : (
-                      <span className="text-[10px] font-bold bg-slate-200 text-slate-600 px-2 py-0.5 rounded flex items-center gap-1">
-                        <Lock className="w-3 h-3" /> Pending
-                      </span>
-                    )}
-                  </div>
-                ))
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Collapsible Section: Downstream Unlocks */}
-        <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
-          <button
-            type="button"
-            onClick={() => setOpenSection(openSection === 'unlocks' ? null : 'unlocks')}
-            className="w-full px-4 py-3 bg-slate-50 font-bold text-slate-900 flex items-center justify-between text-xs border-b border-slate-200 hover:bg-slate-100 transition-colors"
-          >
-            <span>Downstream Unlocks ({childNodes.length})</span>
-            {openSection === 'unlocks' ? <ChevronUp className="w-4 h-4 text-slate-500" /> : <ChevronDown className="w-4 h-4 text-slate-500" />}
-          </button>
-          {openSection === 'unlocks' && (
-            <div className="p-4 space-y-2">
-              {childNodes.length === 0 ? (
-                <p className="text-slate-500 italic">No downstream dependencies.</p>
-              ) : (
-                childNodes.map(child => (
-                  <div key={child.id} className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 flex items-center justify-between">
-                    <div>
-                      <span className="text-[10px] font-bold text-slate-500 uppercase">{child.department}</span>
-                      <p className="font-bold text-slate-900">{child.title}</p>
                     </div>
-                    <span className="text-[10px] font-bold bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
-                      {child.status}
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
+                          isParentDone
+                            ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                            : 'bg-amber-100 text-amber-900 border-amber-200'
+                        }`}
+                      >
+                        {isParentDone ? '✓ Completed' : 'Pending'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => onSelectNode(parent.id)}
+                        className="text-slate-400 hover:text-slate-700 p-1 rounded hover:bg-slate-100"
+                        title="Focus in graph"
+                      >
+                        <Focus className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* ── 5. BLOCKS (Downstream Requirements) ── */}
+        <div className="border border-slate-200 rounded-xl p-4 bg-slate-50/50">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="font-bold text-slate-800 uppercase tracking-wider text-[11px]">
+              Blocks (Downstream Requirements)
+            </h3>
+            <span className="font-mono text-slate-500 font-semibold text-[11px]">
+              {childNodes.length}
+            </span>
+          </div>
+
+          {childNodes.length === 0 ? (
+            <p className="text-slate-500 italic text-[11px]">
+              None — No downstream clearances are waiting on this requirement.
+            </p>
+          ) : (
+            <div className="space-y-2 mt-2">
+              {childNodes.map(child => (
+                <div
+                  key={child.id}
+                  className="p-2.5 bg-white rounded-lg border border-slate-200 flex items-center justify-between gap-2 text-xs"
+                >
+                  <div className="flex-1 min-w-0">
+                    <span className="font-semibold text-slate-900 block truncate">
+                      {child.title}
+                    </span>
+                    <span className="text-[10px] text-slate-500">
+                      {child.department} · {isCompleted ? 'Unlocked' : 'Blocked until this approval'}
                     </span>
                   </div>
-                ))
-              )}
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded border bg-slate-100 text-slate-700 border-slate-200">
+                      {child.status}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => onSelectNode(child.id)}
+                      className="text-slate-400 hover:text-slate-700 p-1 rounded hover:bg-slate-100"
+                      title="Focus in graph"
+                    >
+                      <Focus className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
+          )}
+        </div>
+
+        {/* ── 6. WHY IT APPLIES ── */}
+        <div className="border border-slate-200 rounded-xl p-4 bg-slate-50/50">
+          <h3 className="font-bold text-slate-800 uppercase tracking-wider text-[11px] mb-2">
+            Why It Applies
+          </h3>
+          <p className="text-slate-700 leading-relaxed text-xs">
+            {enrichment?.applicabilitySummary}
+          </p>
+          {enrichment?.applicabilityBasis && enrichment.applicabilityBasis.length > 0 && (
+            <ul className="mt-2.5 space-y-1 pl-2">
+              {enrichment.applicabilityBasis.map(item => (
+                <li key={item} className="flex items-start gap-1.5 text-[11px] text-slate-600">
+                  <span className="text-blue-600 font-bold">✓</span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
           )}
         </div>
       </div>
 
-      {/* Primary CTA Footer */}
+      {/* ── 7. PRIMARY ACTION FOOTER ── */}
       <div className="p-4 bg-slate-50 border-t border-slate-200 space-y-2">
-        <button
-          type="button"
-          disabled={isBlocked}
-          onClick={() => router.push(ENTREPRENEUR_ROUTES.requirement(projectId, id))}
-          className={`w-full py-3 px-4 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 shadow-sm ${
-            isBlocked
-              ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
-              : 'bg-blue-600 text-white hover:bg-blue-700 active:scale-98'
-          }`}
+        <Link
+          href={primaryActionConfig.href}
+          className={`w-full py-2.5 px-4 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 shadow-xs ${primaryActionConfig.cls}`}
         >
-          {isBlocked ? (
-            <span className="flex items-center gap-1.5">
-              <Lock className="w-4 h-4" /> Locked by Prerequisite
-            </span>
-          ) : (
-            <>
-              <span>Go to Application</span>
-              <ArrowRight className="w-4 h-4" />
-            </>
-          )}
-        </button>
+          <span>{primaryActionConfig.label}</span>
+        </Link>
+
+        {primaryActionConfig.href !== ENTREPRENEUR_ROUTES.requirement(projectId, id) && (
+          <div className="text-center pt-1">
+            <Link
+              href={ENTREPRENEUR_ROUTES.requirement(projectId, id)}
+              className="text-[11px] text-[#1a56db] hover:underline font-semibold"
+            >
+              View Full Requirement Detail Page →
+            </Link>
+          </div>
+        )}
       </div>
     </aside>
   );

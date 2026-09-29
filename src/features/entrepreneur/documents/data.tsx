@@ -20,6 +20,24 @@ export type DocDependency =
   | 'Inspection-stage only'
   | 'Unlocks downstream services';
 
+export interface ExtractedInfo {
+  fields: { label: string; value: string; match?: boolean }[];
+  verificationState: string;
+  reviewRequired: boolean;
+  summary?: string;
+}
+
+export interface CertificateInfo {
+  certNumber: string;
+  authority: string;
+  issueDate: string;
+  validUntil: string;
+  signatoryName: string;
+  designation: string;
+  qrPayload: string;
+  conditions: string[];
+}
+
 export interface DocRecord {
   id: string;
   name: string;
@@ -44,6 +62,8 @@ export interface DocRecord {
   whereObtained: string;
   versionHistory: { version: number; uploaded: string; verification: string }[];
   triggeringCondition?: string;
+  extractedData?: ExtractedInfo;
+  certificateData?: CertificateInfo;
 }
 
 export const EKATMA_DOCS: readonly DocRecord[] = [
@@ -77,6 +97,17 @@ export const EKATMA_DOCS: readonly DocRecord[] = [
       { version: 2, uploaded: '04 Aug 2026', verification: 'Self-declared' },
       { version: 1, uploaded: '20 Jul 2026', verification: 'Self-declared' },
     ],
+    extractedData: {
+      fields: [
+        { label: 'Unit Capacity', value: '50,000 MT/year Bulk Drugs', match: true },
+        { label: 'Daily Water Consumption', value: '85 KLD (Fresh MIDC Supply)', match: true },
+        { label: 'Industrial Wastewater', value: '55 KLD', match: true },
+        { label: 'Hazardous Waste', value: 'Category 28.1 (Chemical Sludge - 12 MT/yr)', match: false },
+      ],
+      verificationState: 'Needs Verification',
+      reviewRequired: true,
+      summary: 'Hazardous waste quantification requires minor confirmation against initial profile estimate (12 MT vs 10 MT).',
+    },
   },
   {
     id: 'DOC-002',
@@ -108,6 +139,32 @@ export const EKATMA_DOCS: readonly DocRecord[] = [
     versionHistory: [
       { version: 1, uploaded: '20 Jun 2026', verification: 'User-confirmed' },
     ],
+    extractedData: {
+      fields: [
+        { label: 'Allottee Name', value: 'Sahyadri Bio-Pharma Private Limited', match: true },
+        { label: 'Plot Designation', value: 'Plot No. E-24, Phase II, MIDC Thane', match: true },
+        { label: 'Plot Area', value: '12,500 sq. meters', match: true },
+        { label: 'Lease Tenure', value: '95 Years (to 14 Jun 2086)', match: true },
+        { label: 'Issuing Authority', value: 'MIDC Regional Office, Thane Division', match: true },
+      ],
+      verificationState: 'Verified against Land Registry',
+      reviewRequired: false,
+      summary: 'Land allotment and coordinates cross-referenced and verified with MIDC Land Desk.',
+    },
+    certificateData: {
+      certNumber: 'MIDC/ALLOT/THN/2026/0482',
+      authority: 'Maharashtra Industrial Development Corporation (MIDC)',
+      issueDate: '15 Jun 2026',
+      validUntil: '14 Jun 2086',
+      signatoryName: 'Shri R. K. Gaikwad',
+      designation: 'Area Manager & Estate Officer, MIDC Thane Division',
+      qrPayload: 'https://maitri.mahaonline.gov.in/verify/land?ref=MIDC-ALLOT-THN-2026-0482',
+      conditions: [
+        'Plot allotted exclusively for pharmaceutical / chemical manufacturing use.',
+        'Possession transferred subject to building plan approval within 180 days.',
+        'Ground rent payable annually as per MIDC tariff regulation.',
+      ],
+    },
   },
   {
     id: 'DOC-003',
@@ -140,6 +197,33 @@ export const EKATMA_DOCS: readonly DocRecord[] = [
       { version: 1, uploaded: '10 Oct 2026', verification: 'Government-issued' },
     ],
     triggeringCondition: 'Generated automatically when MPCB grants Consent to Establish. Mandatory for all Red Category industries before construction commences.',
+    extractedData: {
+      fields: [
+        { label: 'Category', value: 'Red Category / Large Scale Manufacturing', match: true },
+        { label: 'Capital Investment', value: '₹48.50 Crores', match: true },
+        { label: 'Approved ETP Capacity', value: '70 KLD Zero Liquid Discharge', match: true },
+        { label: 'Air Emission Stacks', value: 'Boiler Stack (30m) & Process Scrubber', match: true },
+        { label: 'Order Reference', value: 'MPCB/CTE/RO-THN/2026/7812', match: true },
+      ],
+      verificationState: 'Government-issued (Digital PKI)',
+      reviewRequired: false,
+      summary: 'Statutory environmental clearance sanctioned by MPCB Member Secretary.',
+    },
+    certificateData: {
+      certNumber: 'CERT-CTE-2026-41872',
+      authority: 'Maharashtra Pollution Control Board (MPCB), Mumbai',
+      issueDate: '10 Oct 2026',
+      validUntil: '09 Oct 2031',
+      signatoryName: 'Dr. V. M. Motghare',
+      designation: 'Joint Director (WPC), Maharashtra Pollution Control Board',
+      qrPayload: 'https://mpcb.gov.in/verify/consent?cert=CERT-CTE-2026-41872&auth=pki',
+      conditions: [
+        'Consent valid for establishing manufacturing facility at Plot E-24, MIDC Thane.',
+        'Installation of 70 KLD Zero Liquid Discharge ETP mandatory prior to trial operations.',
+        'Continuous Online Emission Monitoring System (OCEMS) to be connected to MPCB server.',
+        'Separate Consent to Operate (CTO) must be obtained prior to commercial production.',
+      ],
+    },
   },
   {
     id: 'DOC-004',
@@ -200,6 +284,17 @@ export const EKATMA_DOCS: readonly DocRecord[] = [
       { version: 2, uploaded: '15 Aug 2026', verification: 'System-verified' },
       { version: 1, uploaded: '10 Mar 2024', verification: 'Self-declared' },
     ],
+    extractedData: {
+      fields: [
+        { label: 'Director Identification (DIN)', value: '08492014', match: true },
+        { label: 'Permanent Account (PAN)', value: 'AAECS4821P', match: true },
+        { label: 'Authorised Signatory', value: 'Vikramaditya Shinde', match: true },
+        { label: 'Designation', value: 'Managing Director', match: true },
+      ],
+      verificationState: 'System-verified (MCA & CBDT API)',
+      reviewRequired: false,
+      summary: 'Signatory authority cross-referenced and validated with MCA21 company master.',
+    },
   },
   {
     id: 'DOC-006',
@@ -228,6 +323,16 @@ export const EKATMA_DOCS: readonly DocRecord[] = [
     versionHistory: [
       { version: 1, uploaded: '08 Sep 2026', verification: 'Needs Verification' },
     ],
+    extractedData: {
+      fields: [
+        { label: 'Design Capacity', value: '70 KLD', match: true },
+        { label: 'Technology', value: 'Primary, Secondary Biological & RO + MEE', match: true },
+        { label: 'Zero Liquid Discharge', value: '100% Recycled for Cooling / Steam', match: true },
+      ],
+      verificationState: 'Needs Verification',
+      reviewRequired: false,
+      summary: 'Technical specs extracted from engineering drawings; pending board engineer review.',
+    },
   },
   {
     id: 'DOC-007',
@@ -312,6 +417,31 @@ export const EKATMA_DOCS: readonly DocRecord[] = [
     versionHistory: [
       { version: 1, uploaded: '04 Aug 2026', verification: 'Government-issued' },
     ],
+    extractedData: {
+      fields: [
+        { label: 'Scheme Reference', value: 'Package Scheme of Incentives (PSI) 2019', match: true },
+        { label: 'Zone Classification', value: 'Zone ‘D’ — High Priority Region', match: true },
+        { label: 'Max Subsidy Quantum', value: '₹21.82 Crores (45% of Eligible FCI)', match: true },
+        { label: 'Electricity Exemption', value: '100% Exemption for 7 Years', match: true },
+      ],
+      verificationState: 'Government-issued (DIC Directorate)',
+      reviewRequired: false,
+      summary: 'Statutory incentive entitlement ratified by Directorate of Industries.',
+    },
+    certificateData: {
+      certNumber: 'EC-PSI-2019-2026-01248',
+      authority: 'Industries, Energy & Labour Department, Government of Maharashtra',
+      issueDate: '04 Aug 2026',
+      validUntil: '03 Aug 2031',
+      signatoryName: 'Smt. S. P. Kulkarni, IAS',
+      designation: 'General Manager, District Industries Centre (DIC) Thane',
+      qrPayload: 'https://industries.maharashtra.gov.in/psi2019/verify?ec=EC-PSI-2019-2026-01248',
+      conditions: [
+        'Eligible for Capital Investment Subsidy up to 45% of gross eligible fixed capital investment.',
+        '100% Electricity Duty Exemption for a period of 7 years from commercial production.',
+        'Enterprise must maintain minimum direct employment of 120 persons.',
+      ],
+    },
   },
   {
     id: 'DOC-INC-002',
@@ -369,6 +499,19 @@ export const EKATMA_DOCS: readonly DocRecord[] = [
     versionHistory: [
       { version: 1, uploaded: '18 Jul 2026', verification: 'Needs Verification' },
     ],
+    certificateData: {
+      certNumber: 'MIDC/PROD/COMM/2026/089',
+      authority: 'Joint Inspection Committee — MIDC & DIC Thane',
+      issueDate: '18 Jul 2026',
+      validUntil: 'Permanent Record',
+      signatoryName: 'Shri A. D. Patil',
+      designation: 'Joint Director of Industries, Konkan Division',
+      qrPayload: 'https://maitri.mahaonline.gov.in/verify/production?id=MIDC-PROD-COMM-2026-089',
+      conditions: [
+        'Commercial production commenced on 15 Jul 2026.',
+        'Initial manufacturing lines operational for bulk formulation.',
+      ],
+    },
   },
 ] as const;
 

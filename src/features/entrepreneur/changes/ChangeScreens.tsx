@@ -1,8 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { RegAssistantTrigger, type RegAssistantContext } from '../regulatory-assistant/Trigger';
 import { findBusinessEntity } from '../identity/catalog';
+import type { BusinessProject } from '../businesses/catalog';
+import { ENTREPRENEUR_ROUTES } from '@/lib/routes/entrepreneur';
+import { MaharashtraApprovalHeatmap } from './MaharashtraApprovalHeatmap';
 
 // ─── E29 — Regulatory Change Impact ──────────────────────────────────────────
 
@@ -124,7 +128,9 @@ function regImpactBadge(c: RegulatoryChangeImpact) {
   return <span className={`text-[10px] font-semibold px-1.5 py-0.5 border ${map[c]}`}>{c}</span>
 }
 
-export function E29RegChangeImpactPage({ onBack, onGoToApplication, onGoToCompliance, canOpenAffectedRecord, onGoToE24, onOpenRegAssistant }: {
+export function E29RegChangeImpactPage({ changes, contextLabel, onBack, onGoToApplication, onGoToCompliance, canOpenAffectedRecord, onGoToE24, onOpenRegAssistant }: {
+  changes: RegulatoryChange[]
+  contextLabel: string
   onBack: () => void
   onGoToApplication: (id: string) => void
   onGoToCompliance: (id: string) => void
@@ -140,24 +146,24 @@ export function E29RegChangeImpactPage({ onBack, onGoToApplication, onGoToCompli
   const [ragInput, setRagInput] = useState('')
   const [ragMessages, setRagMessages] = useState<{ role: 'user' | 'assistant'; text: string }[]>([])
 
-  const allDepts = ['All', ...Array.from(new Set(REGULATORY_CHANGES.map(r => r.department)))]
+  const allDepts = ['All', ...Array.from(new Set(changes.map(r => r.department)))]
   const allImpacts: Array<'All' | RegulatoryChangeImpact> = ['All', 'Application affected', 'Compliance affected', 'New requirement potentially triggered', 'Review recommended', 'Renewal affected', 'New document', 'No action']
   const allVerifs: Array<'All' | RegulatoryChangeVerification> = ['All', 'Validated', 'Needs Verification', 'Under Review']
 
-  const filtered = REGULATORY_CHANGES.filter(r => {
+  const filtered = changes.filter(r => {
     if (deptFilter !== 'All' && r.department !== deptFilter) return false
     if (impactFilter !== 'All' && r.impactCategory !== impactFilter) return false
     if (verifFilter !== 'All' && r.verification !== verifFilter) return false
     return true
   })
 
-  const selected = selectedId ? REGULATORY_CHANGES.find(r => r.id === selectedId) : null
+  const selected = selectedId ? changes.find(r => r.id === selectedId) : null
 
   const summaryTiles = [
-    { label: 'Active Changes', value: REGULATORY_CHANGES.length, color: 'text-[#1a3a5c]' },
-    { label: 'Needs Verification', value: REGULATORY_CHANGES.filter(r => r.verification === 'Needs Verification').length, color: 'text-[#92400e]' },
-    { label: 'Applications Potentially Affected', value: 2, color: 'text-[#b91c1c]' },
-    { label: 'Compliance Obligations Affected', value: 2, color: 'text-[#b91c1c]' },
+    { label: 'Relevant changes', value: changes.length, color: 'text-[#1a3a5c]' },
+    { label: 'Needs Verification', value: changes.filter(r => r.verification === 'Needs Verification').length, color: 'text-[#92400e]' },
+    { label: 'Applications affected', value: changes.flatMap(r => r.affectedRecords).filter(r => r.type === 'application').length, color: 'text-[#b91c1c]' },
+    { label: 'Compliance affected', value: changes.flatMap(r => r.affectedRecords).filter(r => r.type === 'compliance').length, color: 'text-[#b91c1c]' },
   ]
 
   const RAG_SUGGESTED = [
@@ -175,7 +181,7 @@ export function E29RegChangeImpactPage({ onBack, onGoToApplication, onGoToCompli
       'What does the MPCB effluent standard change mean for my application?': 'MPCB has revised effluent discharge limits for pharmaceutical units. Your CTE application references the prior standards. You may need to provide updated ETP design documentation demonstrating compliance with the revised limits before the CTO stage is reached.',
       'Does the DISH amendment apply to my business?': 'The applicability of the DISH hazardous chemicals amendment (RC-2026-002) to your business requires verification against your declared maximum on-site storage quantities. The current status is Needs Verification — do not treat this as a confirmed obligation until verified.',
       'What is the difference between Validated and Needs Verification?': '"Validated" means the regulatory change has been confirmed as applicable to your business profile by a verified source. "Needs Verification" means a potential change has been identified but applicability to your specific business has not yet been confirmed — do not treat it as a binding obligation until validated.',
-      'How should I respond to the MPCB effluent standard update?': 'Review the revised effluent discharge limits against your existing ETP design. If the design meets the revised limits, retain documentary evidence. If it does not, engage your ETP designer and upload updated ETP design details via the Document Centre (E11). The affected CTE application should then be reviewed.',
+      'How should I respond to the MPCB effluent standard update?': 'Review the revised effluent limits against the ETP design. If they differ, update the design in Document Centre and review the affected CTE application.',
     }
     const reply = responses[text] || 'For specific guidance on this regulatory change, refer to the source circular or contact the relevant department. This assistant explains configured information only and does not provide legal advice.'
     setRagMessages(prev => [...prev, { role: 'user', text }, { role: 'assistant', text: reply }])
@@ -186,16 +192,11 @@ export function E29RegChangeImpactPage({ onBack, onGoToApplication, onGoToCompli
     <main id="main-content" className="flex-1 bg-[#f8f9fb]" tabIndex={-1}>
       <div className="bg-white border-b border-[#d1d9e0] px-6 py-4">
         <div className="max-w-[1280px] mx-auto">
-          <nav className="text-xs text-[#6b7a8d] mb-2 flex items-center gap-1.5">
-            <button onClick={onBack} className="hover:text-[#1a3a5c] hover:underline">Dashboard</button>
-            <span>›</span>
-            <span className="text-[#1a3a5c] font-medium">Regulatory Change Impact</span>
-          </nav>
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h1 className="text-xl font-bold text-[#1a3a5c]">Regulatory Change Impact</h1>
-              <p className="text-xs text-[#6b7a8d] mt-0.5">Sahyadri Bio-Pharma Pvt Ltd — Chakan Industrial Area Phase II</p>
-              <p className="text-xs text-[#6b7a8d] mt-1 max-w-2xl">Shows validated regulatory updates that may affect this business's active applications, approvals, renewals, or compliance obligations. Changes marked "Needs Verification" have been identified as potentially relevant but applicability has not yet been confirmed.</p>
+              <p className="mt-0.5 text-xs text-[#6b7a8d]">{contextLabel}</p>
+              <p className="text-xs text-[#6b7a8d] mt-1 max-w-2xl">Relevant regulatory updates, the part of your business they may affect, and what you need to do.</p>
             </div>
             {onOpenRegAssistant && (
               <RegAssistantTrigger lang="en" size="sm" onClick={() => onOpenRegAssistant({ entryPoint: 'reg-change', initialQuestion: 'What exactly changed?' })} />
@@ -220,26 +221,6 @@ export function E29RegChangeImpactPage({ onBack, onGoToApplication, onGoToCompli
               <p className="text-xs text-[#6b7a8d] mt-0.5">{t.label}</p>
             </div>
           ))}
-        </div>
-
-        {/* Potentially affected summary */}
-        <div className="bg-white border border-[#e2e8f0] px-5 py-4">
-          <p className="text-[10px] font-semibold text-[#64748b] uppercase tracking-wider mb-3">Potentially Affected Records</p>
-          <div className="flex flex-wrap gap-x-8 gap-y-2 text-xs">
-            {[
-              { label: 'Active applications', value: '2', onClick: undefined },
-              { label: 'Approvals', value: '1', onClick: undefined },
-              { label: 'Renewals', value: '3', onClick: undefined },
-              { label: 'Compliance obligations', value: '4', onClick: () => onGoToE24() },
-            ].map(r => (
-              <div key={r.label}>
-                <p className="text-[10px] text-[#64748b] mb-0.5">{r.label}</p>
-                {r.onClick
-                  ? <button onClick={r.onClick} className="text-lg font-bold text-[#1a3a5c] hover:underline">{r.value}</button>
-                  : <p className="text-lg font-bold text-[#1a3a5c]">{r.value}</p>}
-              </div>
-            ))}
-          </div>
         </div>
 
         {/* Filters */}
@@ -284,16 +265,21 @@ export function E29RegChangeImpactPage({ onBack, onGoToApplication, onGoToCompli
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
-                      <div className="flex flex-wrap items-center gap-2 mb-1">
+                      <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-[#64748b]">What changed</p>
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
                         <p className="text-xs font-bold text-[#1a3a5c]">{rc.title}</p>
                         <span className="text-[10px] font-mono text-[#94a3b8]">{rc.id}</span>
                       </div>
-                      <div className="flex flex-wrap gap-x-5 gap-y-1 text-[10px] text-[#6b7a8d]">
-                        <span><strong className="text-[#475569]">Effective:</strong> {rc.effectiveDate}</span>
-                        <span><strong className="text-[#475569]">Dept:</strong> {rc.department}</span>
-                        <span><strong className="text-[#475569]">Source:</strong> {rc.source}</span>
+                      <div className="grid gap-3 text-xs sm:grid-cols-[160px_minmax(0,1fr)]">
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-wider text-[#64748b]">Effective date</p>
+                          <p className="mt-0.5 font-semibold text-[#334155]">{rc.effectiveDate}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-wider text-[#64748b]">Part of my business that may be affected</p>
+                          <p className="mt-0.5 text-[#334155]">{rc.affectedRequirement}</p>
+                        </div>
                       </div>
-                      <p className="text-xs text-[#475569] mt-1.5 leading-relaxed">{rc.businessImpact}</p>
                     </div>
                     <div className="flex flex-col gap-1.5 items-end shrink-0">
                       {regImpactBadge(rc.impactCategory)}
@@ -307,16 +293,19 @@ export function E29RegChangeImpactPage({ onBack, onGoToApplication, onGoToCompli
                   <div className="border-t border-[#e8edf2] px-5 py-4 space-y-4 text-xs bg-[#f8f9fb]">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
                       <div>
-                        <p className="text-[10px] font-semibold text-[#64748b] uppercase tracking-wider mb-1">Affected Requirement</p>
-                        <p className="text-[#334155]">{rc.affectedRequirement}</p>
+                        <p className="text-[10px] font-semibold text-[#64748b] uppercase tracking-wider mb-1">What this means for my business</p>
+                        <p className="text-[#334155]">{rc.businessImpact}</p>
                       </div>
                       <div>
-                        <p className="text-[10px] font-semibold text-[#64748b] uppercase tracking-wider mb-1">Required Action</p>
+                        <p className="text-[10px] font-semibold text-[#64748b] uppercase tracking-wider mb-1">What I need to do</p>
                         <p className="text-[#334155]">{rc.requiredAction}</p>
                       </div>
                       <div className="sm:col-span-2">
-                        <p className="text-[10px] font-semibold text-[#64748b] uppercase tracking-wider mb-1">Detail</p>
-                        <p className="text-[#334155] leading-relaxed">{rc.detail}</p>
+                        <details>
+                          <summary className="cursor-pointer text-[10px] font-semibold uppercase tracking-wider text-[#1a3a5c]">Source and detailed change</summary>
+                          <p className="mt-2 text-[#334155] leading-relaxed">{rc.detail}</p>
+                          <p className="mt-2 text-[10px] text-[#64748b]">{rc.department} · {rc.source}</p>
+                        </details>
                       </div>
                     </div>
 
@@ -374,7 +363,7 @@ export function E29RegChangeImpactPage({ onBack, onGoToApplication, onGoToCompli
           </button>
           {ragOpen && (
             <div className="border-t border-[#e8edf2] px-5 py-4 space-y-3">
-              <p className="text-[10px] text-[#6b7a8d]">Ask about regulatory changes and their potential impact on your business. Responses are based on configured information only and do not constitute legal advice. Changes marked Needs Verification have not been confirmed as applicable.</p>
+              <p className="text-xs text-[#6b7a8d]">Ask about a change, its source, or its potential impact.</p>
               <div className="flex flex-wrap gap-2">
                 {RAG_SUGGESTED.map(p => (
                   <button key={p} onClick={() => handleRagSend(p)} className="text-[10px] border border-[#bfdbfe] bg-[#eff6ff] text-[#1e40af] px-2 py-1 hover:bg-[#dbeafe] transition-colors">{p}</button>
@@ -406,9 +395,10 @@ export function E29RegChangeImpactPage({ onBack, onGoToApplication, onGoToCompli
         </div>
 
         {/* Footer disclaimer */}
-        <div className="bg-white border border-[#e2e8f0] px-4 py-3 text-xs text-[#6b7a8d]">
-          <p><strong className="text-[#1a3a5c]">Disclaimer:</strong> Regulatory changes shown are based on validated notifications and business profile matching. Changes marked Needs Verification require confirmation before being treated as obligations. This system does not automatically alter your applications, compliance obligations, or approvals in response to regulatory changes.</p>
-        </div>
+        <details className="border border-[#e2e8f0] bg-white px-4 py-3 text-xs text-[#6b7a8d]">
+          <summary className="cursor-pointer font-semibold text-[#1a3a5c]">Source and legal note</summary>
+          <p className="mt-2">Impacts use validated notifications and Business Profile matching. Needs Verification items are not confirmed obligations, and no application, approval, or compliance record is changed automatically.</p>
+        </details>
       </div>
     </main>
   )
@@ -426,6 +416,8 @@ export type ChangeType =
   | 'Change product'
   | 'Increase workforce'
   | 'Change activity'
+  | 'Change location'
+  | 'Modify project scope'
   | 'Other'
 
 type SimImpactCategory =
@@ -467,6 +459,8 @@ const CHANGE_TYPE_CONFIG: Record<ChangeType, { currentLabel: string; currentValu
   'Change product': { currentLabel: 'Current declared products', currentValue: 'API — Amoxicillin Trihydrate; Pharmaceutical Intermediates', proposedPlaceholder: 'Describe product to be added/changed', proposedOptions: undefined },
   'Increase workforce': { currentLabel: 'Current declared total workforce', currentValue: '85 (permanent + contract)', proposedPlaceholder: 'e.g. 150', proposedOptions: ['100', '150', '200', '250', '300'] },
   'Change activity': { currentLabel: 'Current declared activities', currentValue: 'Pharmaceutical manufacturing; API synthesis', proposedPlaceholder: 'Describe new/changed activity', proposedOptions: undefined },
+  'Change location': { currentLabel: 'Current project location', currentValue: 'Chakan Industrial Area Phase II, Pune', proposedPlaceholder: 'Enter the proposed project location', proposedOptions: undefined },
+  'Modify project scope': { currentLabel: 'Current project scope', currentValue: 'New pharmaceutical manufacturing facility', proposedPlaceholder: 'Describe the proposed scope change', proposedOptions: undefined },
   'Other': { currentLabel: 'Describe the change', currentValue: '—', proposedPlaceholder: 'Describe the proposed change', proposedOptions: undefined },
 }
 
@@ -517,6 +511,16 @@ function getSimResults(changeType: ChangeType): SimResult[] {
       { id: 's1', category: 'MAY REQUIRE AMENDMENT', affectedRecord: 'MPCB Consent to Establish', currentState: 'Under processing', potentialImpact: 'Change in industrial activity may affect the CTE application category, process description, and applicable emission/effluent standards.', suggestedNextStep: 'File CTE amendment for changed activity description.', verification: 'Validated' },
       { id: 's2', category: 'COMPLIANCE IMPACT', affectedRecord: 'Industrial classification', currentState: 'MSME — Pharmaceutical manufacturing', potentialImpact: 'Activity change may affect industrial classification, potentially altering applicable regulations, PSI eligibility, and inspection requirements.', suggestedNextStep: 'Verify classification impact with the relevant classification authority before proceeding.', verification: 'Needs Verification' },
     ],
+    'Change location': [
+      { id: 's1', category: 'POTENTIALLY NEW', affectedRecord: 'Land and location approvals', currentState: 'Configured for Chakan Industrial Area Phase II', potentialImpact: 'A new location may require a new land allotment or land-use process and a fresh location-specific requirement assessment.', suggestedNextStep: 'Confirm the proposed plot, land type, and local authority before treating the new location as final.', verification: 'Needs Verification' },
+      { id: 's2', category: 'MAY REQUIRE AMENDMENT', affectedRecord: 'MPCB Consent to Establish', currentState: 'Under processing for the current project location', potentialImpact: 'The current CTE is tied to the declared site. Moving the project may require withdrawal, amendment, or a fresh application.', suggestedNextStep: 'Ask MPCB to confirm the correct route before changing the live Business Profile.', verification: 'Needs Verification' },
+      { id: 's3', category: 'INCENTIVE IMPACT', affectedRecord: 'PSI 2019 eligibility', currentState: 'Assessed using the current district and industrial area', potentialImpact: 'District classification and eligible incentive ceilings may change at the proposed location.', suggestedNextStep: 'Recalculate incentive eligibility using the proposed district before committing to the move.', verification: 'Needs Verification' },
+    ],
+    'Modify project scope': [
+      { id: 's1', category: 'MAY REQUIRE AMENDMENT', affectedRecord: 'Configured project approvals', currentState: 'Based on the current manufacturing scope', potentialImpact: 'A material scope change may alter the activities, capacities, emissions, utilities, and documents declared across existing applications.', suggestedNextStep: 'Describe the scope change precisely and review the generated regulatory delta before proceeding.', verification: 'Needs Verification' },
+      { id: 's2', category: 'POTENTIALLY NEW', affectedRecord: 'Regulatory Journey', currentState: 'Requirements identified for the current project scope', potentialImpact: 'Additional departments or requirements may apply if the proposed scope introduces new activities or infrastructure.', suggestedNextStep: 'Verify the proposed scope against the configured Dependency Graph.', verification: 'Needs Verification' },
+      { id: 's3', category: 'INSPECTION IMPACT', affectedRecord: 'Configured inspections', currentState: 'Inspection plan reflects the current scope', potentialImpact: 'New equipment, buildings, or hazardous processes may add or change inspection checkpoints.', suggestedNextStep: 'Review inspection impact before scheduling construction or commissioning.', verification: 'Needs Verification' },
+    ],
     'Other': [
       { id: 's1', category: 'MAY REQUIRE AMENDMENT', affectedRecord: 'Applicable approvals — subject to change description', currentState: 'Existing approvals', potentialImpact: 'Impact depends on the nature of the change. A specific regulatory analysis is required.', suggestedNextStep: 'Describe the change in detail and consult the Regulatory Assistant or your relationship manager for a targeted impact assessment.', verification: 'Needs Verification' },
     ],
@@ -566,6 +570,14 @@ function getE31Delta(changeType: ChangeType): DeltaItem[] {
     'Change activity': [
       { id: 'd1', whatChanged: 'Change in industrial activity', existingRecord: 'MPCB CTE — declared activity', newOrAmended: 'CTE Amendment — revised activity description', reason: 'Activity change requires updated CTE disclosure.', status: 'Amendment Required', verification: 'Validated', requiredAction: 'File CTE amendment.' },
     ],
+    'Change location': [
+      { id: 'd1', whatChanged: 'Project location', existingRecord: 'Chakan Industrial Area Phase II, Pune', newOrAmended: 'Fresh location-based regulatory assessment required', reason: 'Land, local authority, environmental, utility, and incentive requirements depend on the project location.', status: 'Review Required', verification: 'Needs Verification', requiredAction: 'Confirm the proposed site and generate a new location-specific requirement assessment.' },
+      { id: 'd2', whatChanged: 'Site-linked approvals', existingRecord: 'Applications and approvals linked to the current site', newOrAmended: 'Amendment, withdrawal, or fresh application may be required', reason: 'Existing records may not transfer automatically to a different site.', status: 'Amendment Required', verification: 'Needs Verification', requiredAction: 'Confirm treatment of each site-linked application with the issuing department.' },
+    ],
+    'Modify project scope': [
+      { id: 'd1', whatChanged: 'Project scope', existingRecord: 'New pharmaceutical manufacturing facility', newOrAmended: 'Business DNA and requirement assessment require review', reason: 'Requirements are generated from the configured project activities, scale, process, and infrastructure.', status: 'Review Required', verification: 'Needs Verification', requiredAction: 'Review the proposed scope against Business DNA before accepting any amendments.' },
+      { id: 'd2', whatChanged: 'Configured approvals and inspections', existingRecord: 'Current Regulatory Journey', newOrAmended: 'Potential new requirements and inspection checkpoints', reason: 'A scope change may introduce new regulatory dependencies.', status: 'Triggered', verification: 'Needs Verification', requiredAction: 'Review the generated delta and confirm applicability with the relevant departments.' },
+    ],
     'Other': [
       { id: 'd1', whatChanged: 'Undescribed change', existingRecord: 'All applicable records', newOrAmended: 'To be determined — regulatory analysis required', reason: 'Nature of change determines regulatory delta.', status: 'Review Required', verification: 'Needs Verification', requiredAction: 'Describe the change in detail. Consult Regulatory Assistant or relationship manager.' },
     ],
@@ -596,20 +608,24 @@ function deltaStatusBadge(s: DeltaItem['status']) {
   return <span className={`text-[10px] font-semibold px-1.5 py-0.5 border ${map[s]}`}>{s}</span>
 }
 
-export function E30BusinessChangeSimulator({ onBack, onGoToE31 }: {
+export function E30BusinessChangeSimulator({ project, onBack, onGoToE31 }: {
+  project: BusinessProject
   onBack: () => void
   onGoToE31: (changeType: ChangeType, proposedValue: string) => void
 }) {
   const CHANGE_TYPES: ChangeType[] = [
     'Increase production', 'Add machinery', 'Add boiler', 'Add chemical process',
     'Expand building', 'Acquire land', 'Change product', 'Increase workforce',
-    'Change activity', 'Other',
+    'Change activity', 'Change location', 'Modify project scope', 'Other',
   ]
   const [selectedChange, setSelectedChange] = useState<ChangeType | null>(null)
   const [proposedValue, setProposedValue] = useState('')
   const [analysed, setAnalysed] = useState(false)
   const [results, setResults] = useState<SimResult[]>([])
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [viewMode, setViewMode] = useState<'beginner' | 'advanced'>('beginner')
+  const [impactTab, setImpactTab] = useState<'Overall Summary' | 'Approvals' | 'Compliance' | 'Inspections' | 'Incentives'>('Overall Summary')
+  const [timeHorizon, setTimeHorizon] = useState<'1 year' | '3 years' | '5 years'>('3 years')
 
   const cfg = selectedChange ? CHANGE_TYPE_CONFIG[selectedChange] : null
 
@@ -629,120 +645,255 @@ export function E30BusinessChangeSimulator({ onBack, onGoToE31 }: {
 
   const needsVerifCount = results.filter(r => r.verification === 'Needs Verification').length
   const actionCount = results.filter(r => r.category !== 'REMAIN VALID').length
+  const documentImpactCount = results.filter(result => /document|design|certificate|record|disclosure/i.test(`${result.potentialImpact} ${result.suggestedNextStep}`)).length
+  const impactAreas = [
+    { label: 'New requirements', count: results.filter(result => result.category === 'POTENTIALLY NEW').length, tone: 'text-violet-700 bg-violet-50 border-violet-200' },
+    { label: 'Removed requirements', count: 0, tone: 'text-slate-600 bg-slate-50 border-slate-200' },
+    { label: 'Changed documents', count: documentImpactCount, tone: 'text-cyan-800 bg-cyan-50 border-cyan-200' },
+    { label: 'Changed approvals', count: results.filter(result => result.category === 'MAY REQUIRE AMENDMENT').length, tone: 'text-amber-800 bg-amber-50 border-amber-200' },
+    { label: 'Changed inspections', count: results.filter(result => result.category === 'INSPECTION IMPACT').length, tone: 'text-blue-800 bg-blue-50 border-blue-200' },
+    { label: 'Changed compliance obligations', count: results.filter(result => result.category === 'COMPLIANCE IMPACT').length, tone: 'text-orange-800 bg-orange-50 border-orange-200' },
+    { label: 'Potential incentives impact', count: results.filter(result => result.category === 'INCENTIVE IMPACT').length, tone: 'text-rose-800 bg-rose-50 border-rose-200' },
+  ]
+  const filteredResults = results.filter(result => {
+    if (impactTab === 'Overall Summary') return true
+    if (impactTab === 'Approvals') return result.category === 'MAY REQUIRE AMENDMENT' || result.category === 'POTENTIALLY NEW' || result.category === 'REMAIN VALID'
+    if (impactTab === 'Compliance') return result.category === 'COMPLIANCE IMPACT'
+    if (impactTab === 'Inspections') return result.category === 'INSPECTION IMPACT'
+    return result.category === 'INCENTIVE IMPACT'
+  })
+  const currentStep = !selectedChange ? 1 : !analysed ? 2 : 3
 
   return (
     <main id="main-content" className="flex-1 bg-[#f8f9fb]" tabIndex={-1}>
-      <div className="bg-white border-b border-[#d1d9e0] px-6 py-4">
-        <div className="max-w-[1100px] mx-auto">
-          <nav className="text-xs text-[#6b7a8d] mb-2 flex items-center gap-1.5">
-            <button onClick={onBack} className="hover:text-[#1a3a5c] hover:underline">Dashboard</button>
-            <span>›</span>
-            <span className="text-[#1a3a5c] font-medium">Business Change Simulator</span>
-          </nav>
-          <h1 className="text-xl font-bold text-[#1a3a5c]">Business Change Simulator</h1>
-          <p className="text-xs text-[#6b7a8d] mt-0.5">Sahyadri Bio-Pharma Pvt Ltd — Chakan Industrial Area Phase II</p>
-          <p className="text-xs text-[#6b7a8d] mt-1">What happens if I change my business? Simulate a proposed change and understand its potential regulatory impact before proceeding.</p>
-        </div>
-      </div>
-
-      <div className="max-w-[1100px] mx-auto px-6 py-5 space-y-4">
-        {/* Simulation notice */}
-        <div className="bg-white border border-[#bfdbfe] border-l-4 border-l-[#1d4ed8] px-4 py-3 text-xs text-[#1e3a8a]">
-          <p className="font-semibold mb-0.5">Impact Simulation — not statutory approval</p>
-          <p>Results below are a simulation based on your existing Business Profile. They do not constitute regulatory decisions, approvals, or obligations. Changes marked "Needs Verification" require confirmation before being treated as requirements. This simulation does not alter your Business Profile, applications, or compliance obligations.</p>
-        </div>
-
-        {/* Step 1 — Select change */}
-        <div className="bg-white border border-[#e2e8f0]">
-          <div className="px-5 py-3 border-b border-[#e8edf2] bg-[#f8f9fb]">
-            <p className="text-xs font-bold text-[#1a3a5c] uppercase tracking-wider">Step 1 — Select the proposed change</p>
+      <div className="border-b border-[#d1d9e0] bg-white px-6 py-4">
+        <div className="mx-auto flex max-w-[1440px] flex-wrap items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-[#102f55]">Business Change Simulator</h1>
+            <p className="mt-1 text-sm text-[#5d7189]">Simulate how a proposed business change may affect approvals, compliance, inspections, documents, and incentives.</p>
           </div>
-          <div className="px-5 py-4">
-            <div className="flex flex-wrap gap-2">
-              {CHANGE_TYPES.map(ct => (
+          <div className="flex items-center gap-2">
+            <div className="flex rounded-lg border border-[#d6e0ea] bg-[#f8fafc] p-1" aria-label="Simulation view">
+              {(['beginner', 'advanced'] as const).map(mode => (
                 <button
-                  key={ct}
-                  onClick={() => { setSelectedChange(ct); setProposedValue(''); setAnalysed(false); setResults([]) }}
-                  className={`text-xs px-3 py-1.5 border font-medium transition-colors ${selectedChange === ct ? 'bg-[#1a3a5c] text-white border-[#1a3a5c]' : 'border-[#d1d9e0] text-[#475569] hover:bg-[#f1f5f9] hover:text-[#1a3a5c]'}`}
+                  key={mode}
+                  onClick={() => setViewMode(mode)}
+                  aria-pressed={viewMode === mode}
+                  className={`rounded-md px-3 py-1.5 text-xs font-semibold capitalize transition-colors ${viewMode === mode ? 'bg-[#1d63d8] text-white shadow-sm' : 'text-[#52667d] hover:bg-white'}`}
                 >
-                  {ct}
+                  {mode} View
                 </button>
               ))}
             </div>
+            <button onClick={handleReset} className="rounded-lg border border-[#b8c7d8] bg-white px-3 py-2 text-xs font-semibold text-[#173b64] hover:bg-[#f5f8fb]">Reset Simulation</button>
           </div>
         </div>
+      </div>
 
-        {/* Step 2 — Proposed value */}
-        {selectedChange && cfg && (
-          <div className="bg-white border border-[#e2e8f0]">
-            <div className="px-5 py-3 border-b border-[#e8edf2] bg-[#f8f9fb]">
-              <p className="text-xs font-bold text-[#1a3a5c] uppercase tracking-wider">Step 2 — Describe the proposed change</p>
-            </div>
-            <div className="px-5 py-5 space-y-4 text-xs">
-              <div className="border border-[#e2e8f0] divide-y divide-[#f1f5f9]">
-                <div className="flex gap-4 px-3 py-2.5 items-center">
-                  <p className="w-48 shrink-0 text-[#64748b] font-medium">Current</p>
-                  <p className="text-[#1a2533] font-semibold">{cfg.currentValue}</p>
+      <div className="mx-auto max-w-[1440px] space-y-4 px-6 py-5">
+        <nav aria-label="Simulation progress" className="overflow-x-auto rounded-xl border border-[#d8e2ec] bg-white px-4 py-3 shadow-sm">
+          <ol className="grid min-w-[760px] grid-cols-5">
+            {['Define Change', 'Set Parameters', 'Review Impact', 'Explore Options', 'Next Steps'].map((step, index) => {
+              const number = index + 1
+              const complete = number < currentStep
+              const active = number === currentStep
+              return (
+                <li key={step} className="flex items-center last:flex-none">
+                  <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${complete || active ? 'bg-[#1d63d8] text-white' : 'bg-[#e8edf3] text-[#6b7a8d]'}`}>{complete ? '✓' : number}</span>
+                  <span className={`ml-2 whitespace-nowrap text-xs font-semibold ${active ? 'text-[#174b91]' : 'text-[#5f7084]'}`}>{step}</span>
+                  {index < 4 && <span className={`mx-4 h-px min-w-8 flex-1 ${complete ? 'bg-[#5f96ee]' : 'bg-[#d8e1ea]'}`} />}
+                </li>
+              )
+            })}
+          </ol>
+        </nav>
+
+        {/* Simulation notice */}
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-[#f2d788] bg-[#fffaf0] px-4 py-2.5 text-xs text-[#78580b]">
+          <p><strong>Simulation only.</strong> Nothing here changes your live Business Profile, applications, approvals, or compliance obligations.</p>
+          <span className="shrink-0 rounded border border-[#e9c65c] bg-white px-2 py-1 text-[10px] font-bold uppercase tracking-wide">Not statutory approval</span>
+        </div>
+
+        <div className="grid items-start gap-4 xl:grid-cols-[360px_minmax(0,1fr)]">
+        <section className="overflow-hidden rounded-2xl border border-[#d8e2ec] bg-white shadow-sm xl:sticky xl:top-4" aria-labelledby="simulation-deck-heading">
+          <div className="border-b border-[#e8edf2] bg-gradient-to-r from-[#eef5fb] via-white to-[#f5f0ff] px-5 py-4">
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#64748b]">Configure scenario</p>
+            <h2 id="simulation-deck-heading" className="mt-1 text-base font-bold text-[#1a3a5c]">1. Select a business change</h2>
+          </div>
+
+          <div className="grid max-h-[260px] grid-cols-2 gap-2 overflow-y-auto p-4">
+            {CHANGE_TYPES.map((changeType, index) => (
+              <button
+                key={changeType}
+                onClick={() => { setSelectedChange(changeType); setProposedValue(''); setAnalysed(false); setResults([]); setExpandedId(null) }}
+                className={`group min-h-16 rounded-xl border p-2.5 text-left transition-all ${selectedChange === changeType ? 'border-[#1a56db] bg-[#ebf3ff] shadow-sm ring-1 ring-[#1a56db]' : 'border-[#dbe3ea] bg-white hover:border-[#93b4d5] hover:shadow-sm'}`}
+              >
+                <span className={`mb-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-bold ${selectedChange === changeType ? 'bg-[#1a3a5c] text-white' : 'bg-[#eef2f6] text-[#64748b]'}`}>{String(index + 1).padStart(2, '0')}</span>
+                <span className="block text-[11px] font-bold leading-tight text-[#1a3a5c]">{changeType}</span>
+              </button>
+            ))}
+          </div>
+
+          {selectedChange && cfg ? (
+            <div className="border-t border-[#e8edf2] bg-[#f8fafc] p-4">
+              <h3 className="mb-3 text-sm font-bold text-[#173b64]">2. Set parameters</h3>
+              <div className="grid gap-3">
+                <div className="rounded-xl border border-[#dbe3ea] bg-white p-4">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-[#64748b]">Existing Business DNA</p>
+                  <p className="mt-2 text-sm font-bold text-[#1a2533]">{cfg.currentValue}</p>
+                  <p className="mt-2 text-[11px] text-[#64748b]">From the current Business DNA · {project.stage}</p>
                 </div>
-                <div className="flex gap-4 px-3 py-2.5 items-center">
-                  <p className="w-48 shrink-0 text-[#64748b] font-medium">Proposed</p>
-                  {cfg.proposedOptions ? (
-                    <select
-                      value={proposedValue}
-                      onChange={e => setProposedValue(e.target.value)}
-                      className="border border-[#d1d9e0] px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[#1a56db] min-w-[180px]"
-                    >
-                      <option value="">Select proposed value…</option>
-                      {cfg.proposedOptions.map(o => <option key={o}>{o}</option>)}
-                    </select>
-                  ) : (
-                    <input
-                      type="text"
-                      value={proposedValue}
-                      onChange={e => setProposedValue(e.target.value)}
-                      placeholder={cfg.proposedPlaceholder}
-                      className="border border-[#d1d9e0] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[#1a56db] min-w-[260px]"
-                    />
-                  )}
+                <div className="rounded-xl border border-[#93b4d5] bg-white p-4">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-[#64748b]">
+                    Proposed Change
+                    {cfg.proposedOptions ? (
+                      <select
+                        value={proposedValue}
+                        onChange={event => { setProposedValue(event.target.value); setAnalysed(false) }}
+                        className="mt-2 w-full rounded-lg border border-[#cbd5e1] bg-white px-3 py-2.5 text-sm font-semibold normal-case tracking-normal text-[#1a2533] focus:outline-none focus:ring-2 focus:ring-[#1a56db]"
+                      >
+                        <option value="">Select proposed value…</option>
+                        {cfg.proposedOptions.map(option => <option key={option}>{option}</option>)}
+                      </select>
+                    ) : (
+                      <input
+                        value={proposedValue}
+                        onChange={event => { setProposedValue(event.target.value); setAnalysed(false) }}
+                        placeholder={cfg.proposedPlaceholder}
+                        className="mt-2 w-full rounded-lg border border-[#cbd5e1] bg-white px-3 py-2.5 text-sm font-semibold normal-case tracking-normal text-[#1a2533] focus:outline-none focus:ring-2 focus:ring-[#1a56db]"
+                      />
+                    )}
+                  </label>
+                </div>
+                <div className="rounded-xl border border-[#dbe3ea] bg-white p-4">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-[#64748b]">Planning horizon</p>
+                  <div className="mt-2 grid grid-cols-3 gap-1 rounded-lg bg-[#eef2f6] p-1">
+                    {(['1 year', '3 years', '5 years'] as const).map(horizon => (
+                      <button key={horizon} onClick={() => setTimeHorizon(horizon)} className={`rounded-md py-1.5 text-[10px] font-semibold ${timeHorizon === horizon ? 'bg-white text-[#174b91] shadow-sm' : 'text-[#6b7a8d]'}`}>{horizon}</button>
+                    ))}
+                  </div>
                 </div>
               </div>
-              <button
-                onClick={handleAnalyse}
-                className="bg-[#1a3a5c] text-white text-xs font-semibold px-5 py-2 hover:bg-[#0f2540] transition-colors"
-              >
-                Analyse Regulatory Impact
-              </button>
+              <div className="mt-4">
+                <button onClick={handleAnalyse} className="w-full rounded-lg bg-[#1559c5] px-5 py-3 text-xs font-bold text-white shadow-sm transition-colors hover:bg-[#0d469e]">
+                  {analysed ? 'Update Simulation' : 'Analyse Regulatory Impact'}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="border-t border-[#e8edf2] bg-[#f8fafc] px-5 py-6 text-center text-xs text-[#64748b]">Select a possibility to configure a proposed change.</div>
+          )}
+        </section>
+
+        <section className="min-w-0 space-y-4" aria-labelledby="live-results-heading">
+          <div className="rounded-2xl border border-[#d8e2ec] bg-white p-4 shadow-sm">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h2 id="live-results-heading" className="text-lg font-bold text-[#102f55]">Live Simulation Results</h2>
+                <p className="mt-0.5 text-xs text-[#66788e]">Review the potential effect on configured regulatory records for this project.</p>
+              </div>
+              {analysed && selectedChange && <span className="rounded-full border border-[#b9d2f2] bg-[#edf5ff] px-3 py-1 text-[10px] font-bold text-[#174b91]">{selectedChange} · {timeHorizon}</span>}
             </div>
           </div>
-        )}
+
+          {!analysed && (
+            <div className="rounded-2xl border border-dashed border-[#b9c8d8] bg-white px-6 py-16 text-center shadow-sm">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#eaf2ff] text-xl text-[#1d63d8]" aria-hidden="true">↗</div>
+              <h3 className="mt-4 text-base font-bold text-[#173b64]">Configure a change to preview its impact</h3>
+              <p className="mx-auto mt-2 max-w-lg text-xs leading-relaxed text-[#66788e]">Select a business change, enter the proposed value, and run the simulation. Your live records will remain untouched.</p>
+            </div>
+          )}
 
         {/* Step 3 — Results */}
         {analysed && results.length > 0 && selectedChange && (
           <>
-            <div className="bg-white border border-[#e2e8f0]">
-              <div className="px-5 py-3 border-b border-[#e8edf2] bg-[#f8f9fb] flex items-center justify-between">
+            <div className="overflow-hidden rounded-2xl border border-[#e2e8f0] bg-white shadow-sm">
+              <div className="flex items-center justify-between border-b border-[#e8edf2] bg-[#f8f9fb] px-5 py-3">
                 <p className="text-xs font-bold text-[#1a3a5c] uppercase tracking-wider">Impact Simulation — {selectedChange}{proposedValue ? ` (${proposedValue})` : ''}</p>
-                <span className="text-[10px] font-semibold text-[#92400e] border border-[#fcd34d] bg-[#fef3c7] px-1.5 py-0.5">SIMULATION ONLY — NOT STATUTORY APPROVAL</span>
+                <span className="text-[10px] font-semibold text-[#92400e] border border-[#fcd34d] bg-[#fef3c7] px-1.5 py-0.5">SIMULATION ONLY</span>
               </div>
 
-              {/* Summary tiles */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 px-5 py-4 border-b border-[#f1f5f9]">
+              <div className="border-b border-[#e8edf2] bg-gradient-to-r from-[#f7fbff] to-white px-5 py-4">
+                <div className="grid items-stretch gap-2 md:grid-cols-[1fr_auto_1fr_auto_1fr]">
+                  <div className="rounded-lg border border-[#dce5ee] bg-white p-3">
+                    <p className="text-[9px] font-bold uppercase tracking-wider text-[#6b7a8d]">Current State</p>
+                    <p className="mt-1.5 text-xs font-semibold text-[#1a3a5c]">{cfg?.currentValue}</p>
+                    <p className="mt-1 text-[10px] text-[#718096]">Existing Business DNA</p>
+                  </div>
+                  <span className="self-center text-[#8ea1b5]" aria-hidden="true">→</span>
+                  <div className="rounded-lg border border-[#9fc0ea] bg-[#f5f9ff] p-3">
+                    <p className="text-[9px] font-bold uppercase tracking-wider text-[#386392]">Proposed Change</p>
+                    <p className="mt-1.5 text-xs font-semibold text-[#174b91]">{proposedValue || selectedChange}</p>
+                    <p className="mt-1 text-[10px] text-[#718096]">User input · not applied</p>
+                  </div>
+                  <span className="self-center text-[#8ea1b5]" aria-hidden="true">→</span>
+                  <div className="rounded-lg border border-[#b7dfc4] bg-[#f3fbf5] p-3">
+                    <p className="text-[9px] font-bold uppercase tracking-wider text-[#39734a]">Impact</p>
+                    <p className="mt-1.5 text-xs font-semibold text-[#176233]">{actionCount} record{actionCount === 1 ? '' : 's'} may need action</p>
+                    <p className="mt-1 text-[10px] text-[#718096]">Simulated regulatory delta</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 border-b border-[#eef2f6] p-4 lg:grid-cols-4">
                 {[
-                  { label: 'Items analysed', value: results.length, color: 'text-[#1a3a5c]' },
-                  { label: 'Require attention', value: actionCount, color: actionCount > 0 ? 'text-[#b91c1c]' : 'text-[#94a3b8]' },
-                  { label: 'Needs Verification', value: needsVerifCount, color: needsVerifCount > 0 ? 'text-[#92400e]' : 'text-[#94a3b8]' },
-                  { label: 'Remain valid', value: results.filter(r => r.category === 'REMAIN VALID').length, color: 'text-[#166534]' },
-                ].map(t => (
-                  <div key={t.label} className="bg-[#f8f9fb] border border-[#e8edf2] px-3 py-2.5">
-                    <p className={`text-xl font-bold ${t.color}`}>{t.value}</p>
-                    <p className="text-[10px] text-[#6b7a8d] mt-0.5">{t.label}</p>
+                  { label: 'Affected records', value: results.length, note: 'across this simulation', color: 'text-[#174b91]', icon: '◎' },
+                  { label: 'Potentially new', value: results.filter(result => result.category === 'POTENTIALLY NEW').length, note: 'requirements identified', color: 'text-[#6d28d9]', icon: '+' },
+                  { label: 'May need action', value: actionCount, note: 'review before proceeding', color: 'text-[#a34b0a]', icon: '!' },
+                  { label: 'Needs Verification', value: needsVerifCount, note: 'not yet confirmed', color: 'text-[#9a6700]', icon: '?' },
+                ].map(card => (
+                  <div key={card.label} className="rounded-xl border border-[#dbe4ed] bg-white p-3.5">
+                    <div className="flex items-center gap-2"><span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#eef4fb] text-[11px] font-bold text-[#245b96]">{card.icon}</span><p className="text-[10px] font-semibold text-[#50657c]">{card.label}</p></div>
+                    <p className={`mt-2 text-2xl font-bold ${card.color}`}>{card.value}</p>
+                    <p className="text-[10px] text-[#718096]">{card.note}</p>
                   </div>
                 ))}
               </div>
 
+              <div className="border-b border-[#f1f5f9] px-5 py-4">
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-xs font-bold text-[#1a3a5c]">Impact overview</p>
+                  <p className="text-[10px] text-[#64748b]">{needsVerifCount} item{needsVerifCount === 1 ? '' : 's'} need verification</p>
+                </div>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7">
+                  {impactAreas.map(area => (
+                    <div key={area.label} className={`rounded-lg border p-3 ${area.count > 0 ? area.tone : 'border-slate-200 bg-slate-50 text-slate-400'}`}>
+                      <p className="text-xl font-bold">{area.count}</p>
+                      <p className="mt-1 text-[10px] font-semibold leading-tight">{area.label}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="border-b border-[#e8edf2] p-4">
+                <MaharashtraApprovalHeatmap changeType={selectedChange} proposedValue={proposedValue} />
+              </div>
+
               {/* Results list */}
+              <div className="border-b border-[#e8edf2] px-5 pt-4">
+                <div className="flex flex-wrap items-end justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-bold text-[#173b64]">Detailed Impact View</p>
+                    <p className="mt-0.5 text-[10px] text-[#6b7a8d]">Open a result to understand why it may be affected.</p>
+                  </div>
+                  <Link href={ENTREPRENEUR_ROUTES.dependencies(project.id)} className="mb-2 text-[11px] font-semibold text-[#1559c5] hover:underline">View Dependency Graph →</Link>
+                </div>
+                <div className="mt-3 flex gap-1 overflow-x-auto" role="tablist" aria-label="Impact categories">
+                  {(['Overall Summary', 'Approvals', 'Compliance', 'Inspections', 'Incentives'] as const).map(tab => (
+                    <button
+                      key={tab}
+                      role="tab"
+                      aria-selected={impactTab === tab}
+                      onClick={() => setImpactTab(tab)}
+                      className={`whitespace-nowrap border-b-2 px-3 py-2 text-[10px] font-semibold ${impactTab === tab ? 'border-[#1d63d8] text-[#1559c5]' : 'border-transparent text-[#607287] hover:text-[#173b64]'}`}
+                    >
+                      {tab}
+                    </button>
+                  ))}
+                </div>
+              </div>
               <div className="divide-y divide-[#f1f5f9]">
-                {results.map(r => (
+                {filteredResults.map(r => (
                   <div key={r.id}>
                     <button
                       onClick={() => setExpandedId(r.id === expandedId ? null : r.id)}
@@ -751,7 +902,7 @@ export function E30BusinessChangeSimulator({ onBack, onGoToE31 }: {
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
                           <p className="text-xs font-semibold text-[#1a2533] mb-0.5">{r.affectedRecord}</p>
-                          <p className="text-[10px] text-[#6b7a8d]">{r.currentState}</p>
+                          <p className="text-[10px] text-[#6b7a8d]"><strong className="text-[#475569]">Current State:</strong> {r.currentState}</p>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
                           {simCategoryBadge(r.category)}
@@ -764,9 +915,10 @@ export function E30BusinessChangeSimulator({ onBack, onGoToE31 }: {
                     </button>
                     {expandedId === r.id && (
                       <div className="bg-[#f8f9fb] border-t border-[#e8edf2] px-5 py-4 space-y-3 text-xs">
+                        <p className="text-xs font-bold text-[#173b64]">Why is this affected?</p>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2.5">
                           <div>
-                            <p className="text-[10px] font-semibold text-[#64748b] uppercase tracking-wider mb-1">Potential Impact</p>
+                            <p className="text-[10px] font-semibold text-[#64748b] uppercase tracking-wider mb-1">Impact</p>
                             <p className="text-[#334155] leading-relaxed">{r.potentialImpact}</p>
                           </div>
                           <div>
@@ -779,39 +931,52 @@ export function E30BusinessChangeSimulator({ onBack, onGoToE31 }: {
                             Potential impact identified. Applicability to this business requires verification before treating as a confirmed obligation.
                           </div>
                         )}
+                        {viewMode === 'advanced' && (
+                          <div className="rounded-lg border border-[#cddbea] bg-white p-3">
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-[#52677e]">Regulatory reasoning</p>
+                            <p className="mt-1 text-[#40536a]">This simulation compares the proposed value with the current Business DNA and the configured relationship for this record. Use the Dependency Graph to inspect prerequisites and downstream approvals.</p>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
                 ))}
+                {filteredResults.length === 0 && (
+                  <div className="px-5 py-8 text-center text-xs text-[#6b7a8d]">No configured impact was identified in this category for the current scenario.</div>
+                )}
               </div>
             </div>
 
             {/* CTA to E31 */}
-            <div className="bg-white border border-[#e2e8f0] px-5 py-4 flex flex-wrap items-center justify-between gap-4">
-              <div className="text-xs">
-                <p className="font-semibold text-[#1a3a5c]">Accept and convert to regulatory delta?</p>
-                <p className="text-[#6b7a8d] mt-0.5">Proceed to Amendments / New Requirements (E31) to generate an actionable regulatory delta for this change.</p>
+            <div className="rounded-2xl border border-[#cddbea] bg-white px-5 py-5 shadow-sm">
+              <div className="flex flex-wrap items-start justify-between gap-5">
+              <div className="max-w-2xl text-xs">
+                <p className="text-sm font-bold text-[#1a3a5c]">Next Steps</p>
+                <p className="mt-1 text-[#6b7a8d]">Review the proposed regulatory delta before starting any workflow. Your live Business Profile remains unchanged.</p>
+                <ol className="mt-3 grid gap-2 text-[11px] text-[#40536a] sm:grid-cols-2">
+                  <li className="rounded-lg bg-[#f5f8fb] px-3 py-2"><strong>1.</strong> Review potential amendments</li>
+                  <li className="rounded-lg bg-[#f5f8fb] px-3 py-2"><strong>2.</strong> Verify conditional impacts</li>
+                  <li className="rounded-lg bg-[#f5f8fb] px-3 py-2"><strong>3.</strong> Inspect journey dependencies</li>
+                  <li className="rounded-lg bg-[#f5f8fb] px-3 py-2"><strong>4.</strong> Start only when ready</li>
+                </ol>
               </div>
-              <div className="flex gap-2 shrink-0">
+              <div className="flex shrink-0 flex-col items-stretch gap-2">
                 <button
                   onClick={() => onGoToE31(selectedChange, proposedValue)}
-                  className="text-xs bg-[#1a3a5c] text-white px-4 py-2 font-semibold hover:bg-[#0f2540] transition-colors"
+                  className="rounded-lg bg-[#1559c5] px-4 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-[#0d469e]"
                 >
                   Proceed to Amendments / New Requirements
                 </button>
-                <button onClick={handleReset} className="text-xs border border-[#d1d9e0] text-[#475569] px-4 py-2 hover:bg-[#f1f5f9]">Reset Simulation</button>
+                <Link href={ENTREPRENEUR_ROUTES.journey(project.id)} className="rounded-lg border border-[#b8c7d8] px-4 py-2 text-center text-xs font-semibold text-[#174b91] hover:bg-[#f5f8fb]">View Regulatory Journey</Link>
+                <button onClick={handleReset} className="px-4 py-1.5 text-xs font-semibold text-[#607287] hover:text-[#173b64]">Reset Simulation</button>
+              </div>
               </div>
             </div>
           </>
         )}
+        </section>
+        </div>
 
-        {/* Empty — no change selected yet */}
-        {!selectedChange && (
-          <div className="bg-white border border-[#e2e8f0] px-6 py-10 text-center">
-            <p className="text-sm font-semibold text-[#1a3a5c] mb-1">Select a proposed change above to begin the simulation.</p>
-            <p className="text-xs text-[#6b7a8d]">The simulator will show the potential regulatory impact based on your existing Business Profile without modifying any records.</p>
-          </div>
-        )}
       </div>
     </main>
   )
@@ -840,15 +1005,8 @@ export function E31AmendmentsPage({ changeType, proposedValue, onBack, onGoToE30
     <main id="main-content" className="flex-1 bg-[#f8f9fb]" tabIndex={-1}>
       <div className="bg-white border-b border-[#d1d9e0] px-6 py-4">
         <div className="max-w-[1200px] mx-auto">
-          <nav className="text-xs text-[#6b7a8d] mb-2 flex items-center gap-1.5">
-            <button onClick={onBack} className="hover:text-[#1a3a5c] hover:underline">Dashboard</button>
-            <span>›</span>
-            <button onClick={onGoToE30} className="hover:text-[#1a3a5c] hover:underline">Business Change Simulator</button>
-            <span>›</span>
-            <span className="text-[#1a3a5c] font-medium">Amendments / New Requirements</span>
-          </nav>
           <h1 className="text-xl font-bold text-[#1a3a5c]">Amendments / New Requirements</h1>
-          <p className="text-xs text-[#6b7a8d] mt-0.5">Sahyadri Bio-Pharma Pvt Ltd — Chakan Industrial Area Phase II</p>
+          <p className="text-xs text-[#6b7a8d] mt-1">Review the simulated regulatory delta before starting a change workflow.</p>
         </div>
       </div>
 
@@ -984,9 +1142,9 @@ export function E31AmendmentsPage({ changeType, proposedValue, onBack, onGoToE30
                           )}
                           <div className="mt-3 flex gap-2">
                             {d.status !== 'No Change' && (
-                              <button onClick={onGoToE14} className="text-xs border border-[#d1d9e0] text-[#1a3a5c] px-3 py-1.5 hover:bg-[#f1f5f9]">Start Application (E14)</button>
+                              <button onClick={onGoToE14} className="text-xs border border-[#d1d9e0] text-[#1a3a5c] px-3 py-1.5 hover:bg-[#f1f5f9]">Start Application</button>
                             )}
-                            <button onClick={onGoToE11} className="text-xs border border-[#d1d9e0] text-[#1a3a5c] px-3 py-1.5 hover:bg-[#f1f5f9]">Document Centre (E11)</button>
+                            <button onClick={onGoToE11} className="text-xs border border-[#d1d9e0] text-[#1a3a5c] px-3 py-1.5 hover:bg-[#f1f5f9]">Document Centre</button>
                           </div>
                         </td>
                       </tr>
@@ -1005,7 +1163,7 @@ export function E31AmendmentsPage({ changeType, proposedValue, onBack, onGoToE30
             <p className="text-[#6b7a8d] mt-0.5">Start Change Workflow to enter the existing EKATMA application journey for the required amendments and new approvals.</p>
           </div>
           <div className="flex flex-wrap gap-2 shrink-0">
-            <button onClick={onGoToE09} className="text-xs bg-[#1a3a5c] text-white px-4 py-2 font-semibold hover:bg-[#0f2540] transition-colors">Start Change Workflow (E09 Journey)</button>
+            <button onClick={onGoToE09} className="text-xs bg-[#1a3a5c] text-white px-4 py-2 font-semibold hover:bg-[#0f2540] transition-colors">Start Change Workflow</button>
             <button onClick={onGoToE30} className="text-xs border border-[#d1d9e0] text-[#475569] px-4 py-2 hover:bg-[#f1f5f9]">Back to Simulator</button>
           </div>
         </div>

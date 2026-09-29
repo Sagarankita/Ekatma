@@ -101,7 +101,7 @@ export function RegulatoryAssistantProvider({ children, initialContext, service 
       if (requestRef.current?.id !== requestId || contextKey(activeContextRef.current) !== contextKey(snapshot)) return;
       setMessages(current => [...current, {
         id: id(), role: 'assistant', content: response.content, createdAt: Date.now(), contextSnapshot: snapshot,
-        citations: response.citations, needsVerification: response.needsVerification, uncertainty: response.uncertainty,
+        citations: response.citations, relevantRequirement: response.relevantRequirement, needsVerification: response.needsVerification, uncertainty: response.uncertainty,
       }]);
     } catch (error) {
       if (!(error instanceof DOMException && error.name === 'AbortError')) throw error;

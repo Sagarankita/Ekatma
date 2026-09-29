@@ -26,9 +26,9 @@ const DEPARTMENT_GLOBAL = prompts('officer-review', [
 
 export const ASSISTANT_PROMPT_REGISTRY: Readonly<Record<string, readonly AssistantPrompt[]>> = {
   dashboard: prompts('attention', ['What needs my attention?', 'What should I complete next?', 'Are any deadlines approaching?', 'Explain my current regulatory status.']),
-  'regulatory-journey': prompts('dependencies', ['Which requirement should I complete next?', 'Why is this approval required?', 'What is blocking the next stage?', 'What can be completed in parallel?']),
-  'requirement-detail': prompts('requirements', ['Why is this requirement applicable?', 'What documents are required?', 'Which rule or authority requires it?', 'What happens if this is delayed?']),
-  documents: prompts('evidence', ['Which documents need attention?', 'What evidence should I prepare?', 'Are any documents expiring?', 'Which documents can be reused?']),
+  'regulatory-journey': prompts('dependencies', ['Which requirement should I complete next?', 'Why do I need this approval?', 'What is blocking the next stage?', 'What can be completed in parallel?']),
+  'requirement-detail': prompts('requirements', ['Why was this requirement identified?', 'What documents are required?', 'Which rule or authority requires it?', 'What happens if this is delayed?']),
+  documents: prompts('evidence', ['What document is missing?', 'What evidence should I prepare?', 'Are any documents expiring?', 'Which documents can be reused?']),
   'document-detail': prompts('evidence', ['Why is this document required?', 'What should this document contain?', 'Can this document be reused?', 'Are there validity requirements?']),
   applications: prompts('process', ['What should I work on next?', 'Which applications need attention?', 'What is blocking submission?', 'Explain the current status.']),
   'application-workspace': prompts('process', ['What is incomplete?', 'What should I fix before submission?', 'Which requirement is blocking this application?', 'What happens after submission?']),

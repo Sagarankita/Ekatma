@@ -126,6 +126,24 @@ body {
   scrollbar-width: none;
 }
 
+/* Entrepreneur content hierarchy: preserve compact metadata without making it illegible. */
+.entrepreneur-portal .text-\[9px\],
+.entrepreneur-portal .text-\[10px\] {
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.entrepreneur-portal main h2.uppercase,
+.entrepreneur-portal main h3.uppercase {
+  text-transform: none;
+  letter-spacing: 0.01em;
+}
+
+/* The persistent shell already provides the canonical page breadcrumb. */
+.entrepreneur-portal main nav[aria-label="Breadcrumb"] {
+  display: none;
+}
+
 /* ── Google Translate Clean Overrides ─────────────────────────────────────── */
 .goog-te-banner-frame,
 iframe.goog-te-banner-frame,
@@ -147,4 +165,3 @@ body {
 #google_translate_element {
   display: none !important;
 }
-

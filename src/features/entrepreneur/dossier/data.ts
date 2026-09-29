@@ -5,7 +5,8 @@ export type VerificationState =
   | 'User Confirmed'
   | 'Department Verified'
   | 'Needs Verification'
-  | 'System Verified';
+  | 'System Verified'
+  | 'Not Applicable';
 
 export interface DossierRow {
   field: string;
@@ -31,11 +32,12 @@ export function getDossierRows(project: BusinessProject): DossierRow[] {
     { field: 'Legal Entity Name', value: project.name, source: 'Business Discovery', verification: 'Self-Declared', usedBy: 5, lastUpdated: '23 Sep 2026', version: '1', group: 'Business / Legal Entity' },
     { field: 'PAN', value: 'ABCPS1234F', source: 'Business Discovery', verification: 'Needs Verification', usedBy: 3, lastUpdated: '23 Sep 2026', version: '1', group: 'Registration Identifiers' },
     { field: 'CIN', value: 'U24239PN2024PTC198234', source: 'Business Discovery', verification: 'Needs Verification', usedBy: 2, lastUpdated: '23 Sep 2026', version: '1', group: 'Registration Identifiers' },
+    { field: 'LLPIN', value: 'Not Applicable', source: 'Business Profile', verification: 'Not Applicable', usedBy: 0, lastUpdated: '23 Sep 2026', version: '1', group: 'Registration Identifiers' },
     { field: 'Industry', value: project.industry, source: 'Business Discovery', verification: 'Self-Declared', usedBy: 7, lastUpdated: '23 Sep 2026', version: '1', group: 'Project' },
     { field: 'Project Stage', value: project.stage, source: 'Business Discovery', verification: 'Self-Declared', usedBy: 3, lastUpdated: '23 Sep 2026', version: '1', group: 'Project' },
     { field: 'Location', value: project.location, source: 'Business Discovery', verification: 'Self-Declared', usedBy: 4, lastUpdated: '23 Sep 2026', version: '1', group: 'Project' },
     { field: 'MIDC Status', value: 'Yes', source: 'Basic Requirements', verification: 'Self-Declared', usedBy: 8, lastUpdated: '23 Sep 2026', version: '1', group: 'Land' },
-    { field: 'Plot Area', value: '4,800 sq.m', source: 'MIDC Allotment', verification: 'Department Verified', usedBy: 4, lastUpdated: '22 Sep 2026', version: '1', group: 'Land' },
+    { field: 'Plot Area', value: '4,800 sq.m', source: 'MIDC Allotment Letter', verification: 'Department Verified', usedBy: 4, lastUpdated: '22 Sep 2026', version: '1', group: 'Land' },
     { field: 'Total Investment', value: '₹25,00,00,000', source: 'Business Discovery', verification: 'Self-Declared', usedBy: 5, lastUpdated: '23 Sep 2026', version: '1', group: 'Investment' },
     { field: 'Workforce Total', value: '85', source: 'Business Discovery', verification: 'Self-Declared', usedBy: 3, lastUpdated: '23 Sep 2026', version: '1', group: 'Employment' },
     { field: 'Built-Up Area', value: '3,200 sq.m', source: 'Business Discovery', verification: 'Self-Declared', usedBy: 5, lastUpdated: '23 Sep 2026', version: '1', group: 'Building' },
@@ -78,13 +80,13 @@ export function getProvenanceDetails(fieldName: string, project: BusinessProject
     return {
       fieldName: 'Plot Area',
       currentValue: '4,800 m²',
-      currentSource: 'MIDC Allotment',
+      currentSource: 'MIDC Allotment Letter',
       currentVerification: 'Department Verified',
       isPlotArea: true,
       usedBy,
       history: [
         { version: 'V1', value: '4,800 m²', source: 'Entrepreneur Declaration', verification: 'Self-Declared', date: '23 Aug 2026' },
-        { version: 'V2', value: '4,800 m²', source: 'MIDC Allotment', verification: 'Department Verified', date: '22 Sep 2026' },
+        { version: 'V2', value: '4,800 m²', source: 'MIDC Allotment Letter', verification: 'Department Verified', date: '22 Sep 2026' },
       ],
     };
   }

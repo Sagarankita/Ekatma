@@ -7,18 +7,388 @@ import { ENTREPRENEUR_ROUTES } from '@/lib/routes/entrepreneur'
 import { ENTREPRENEUR_BUSINESSES, findBusinessById, findBusinessEntity, DEEP_SCREEN_BUSINESS_IDENTITY, type EntrepreneurBusinessIdentity } from '../identity/catalog'
 import { businessFromEntrepreneurPathname, readRememberedBusiness, rememberBusiness } from '../identity/selected-business'
 import { listGrievancesForBusiness } from '../grievances/data'
-import { findTrackerAppForBusiness } from '../applications/data'
-import { listInspectionsForBusiness } from '../applications/data'
+import { findQueryByAppId, findTrackerAppForBusiness, listInspectionsForBusiness, listTrackerAppsForBusiness } from '../applications/data'
 import { listComplianceForBusiness } from '../compliance/data'
 import { listIncentivesForBusiness } from '../incentives/data'
 import { getIncentiveClaims, getIncentiveDetailSchemes } from '../incentives/workspace/data'
 import { listJourneyNodesForBusiness } from '../journey/data'
 import { listDocumentsForBusiness } from '../documents/data'
+import { findBusinessProjectById } from '../businesses/catalog'
 import { useDisplayPreferences } from '../appearance/useDisplayPreferences'
 import { AccessibilityStrip, DemoNotice, Footer, Icon, PortalHeader } from '../public-auth/PublicChrome'
 import { useRegulatoryAssistant } from '@/features/regulatory-assistant/Provider'
 import { enrichAssistantContext, entrepreneurPageContext, globalAssistantContext } from '@/features/regulatory-assistant/context'
 import { GlobalAssistantSurface } from '@/features/regulatory-assistant/GlobalAssistant'
+
+type ShellBreadcrumb = {
+  label: string
+  href?: string
+}
+
+type ShellNextAction = {
+  label: string
+  detail: string
+  href?: string
+}
+
+function safeDecode(value: string | undefined): string {
+  if (!value) return ''
+  try {
+    return decodeURIComponent(value)
+  } catch {
+    return value
+  }
+}
+
+function routeBreadcrumbs(pathname: string, business?: EntrepreneurBusinessIdentity): ShellBreadcrumb[] {
+  const portfolio = { label: 'My Businesses', href: ENTREPRENEUR_ROUTES.businesses() }
+
+  if (pathname === ENTREPRENEUR_ROUTES.businesses()) return [{ label: 'My Businesses' }]
+
+  if (pathname.startsWith(ENTREPRENEUR_ROUTES.newBusiness())) {
+    const steps: Array<[string, string]> = [
+      ['/basic-requirements', 'Basic Requirements'],
+      ['/discovery/environment-safety', 'Environment, Safety & Existing Context'],
+      ['/discovery/scale', 'Scale & Operations'],
+      ['/discovery', 'Adaptive Business Questionnaire'],
+      ['/review', 'Business Profile Review'],
+    ]
+    const current = steps.find(([suffix]) => pathname.endsWith(suffix))?.[1] ?? 'Create Business / Project'
+    const crumbs: ShellBreadcrumb[] = [portfolio]
+    if (current !== 'Create Business / Project') {
+      crumbs.push({ label: 'Create Business / Project', href: ENTREPRENEUR_ROUTES.newBusiness() })
+    }
+    crumbs.push({ label: current })
+    return crumbs
+  }
+
+  if (pathname === ENTREPRENEUR_ROUTES.notifications()) return [portfolio, { label: 'Notifications' }]
+  if (pathname === ENTREPRENEUR_ROUTES.assistant()) return [portfolio, { label: 'Regulatory Assistant' }]
+
+  if (!business) return [portfolio]
+
+  const businessHome = ENTREPRENEUR_ROUTES.business(business.id)
+  const crumbs: ShellBreadcrumb[] = [portfolio]
+  if (pathname === businessHome) {
+    crumbs.push({ label: business.name })
+    return crumbs
+  }
+  crumbs.push({ label: business.name, href: businessHome })
+
+  const relative = pathname.slice(businessHome.length)
+  const parts = relative.split('/').filter(Boolean).map(safeDecode)
+  const [section, second, third] = parts
+
+  if (section === 'dossier') {
+    if (second === 'provenance') {
+      crumbs.push({ label: 'Master Project Dossier', href: ENTREPRENEUR_ROUTES.dossier(business.id) })
+      crumbs.push({ label: 'Data Provenance' })
+    } else crumbs.push({ label: 'Master Project Dossier' })
+    return crumbs
+  }
+
+  if (section === 'journey') {
+    crumbs.push({ label: 'Regulatory Journey' })
+    return crumbs
+  }
+
+  if (section === 'requirements') {
+    crumbs.push({ label: 'Regulatory Journey', href: ENTREPRENEUR_ROUTES.journey(business.id) })
+    crumbs.push({ label: 'Requirement Detail' })
+    return crumbs
+  }
+
+  if (section === 'dependencies') {
+    crumbs.push({ label: 'Regulatory Journey', href: ENTREPRENEUR_ROUTES.journey(business.id) })
+    crumbs.push({ label: 'Dependency Graph' })
+    return crumbs
+  }
+
+  if (section === 'documents') {
+    if (second) {
+      crumbs.push({ label: 'Documents', href: ENTREPRENEUR_ROUTES.documents(business.id) })
+      crumbs.push({ label: 'Document Detail' })
+    } else crumbs.push({ label: 'Documents' })
+    return crumbs
+  }
+
+  if (section === 'applications') {
+    const applications = { label: 'Applications', href: ENTREPRENEUR_ROUTES.applications(business.id) }
+    if (!second) {
+      crumbs.push({ label: 'Applications' })
+      return crumbs
+    }
+    crumbs.push(applications)
+    if (second === 'new') {
+      const intakeSteps: Record<string, string> = {
+        prevalidation: 'Pre-validation',
+        consistency: 'Cross-form Consistency',
+        submission: 'Payment / Submission',
+      }
+      if (third) {
+        crumbs.push({ label: 'Application', href: ENTREPRENEUR_ROUTES.newApplication(business.id) })
+        crumbs.push({ label: intakeSteps[third] ?? third })
+      } else crumbs.push({ label: 'Application' })
+      return crumbs
+    }
+
+    const applicationId = second
+    const applicationHref = ENTREPRENEUR_ROUTES.application(business.id, applicationId)
+    if (!third) {
+      crumbs.push({ label: 'Application Detail' })
+      return crumbs
+    }
+    crumbs.push({ label: 'Application Detail', href: applicationHref })
+    if (third === 'queries') crumbs.push({ label: 'Query / Deficiency Response' })
+    else if (third === 'resubmissions' || third === 'resubmission') crumbs.push({ label: 'Delta Resubmission' })
+    else if (third === 'decisions' || third === 'decision') crumbs.push({ label: 'Approval / Decision Detail' })
+    return crumbs
+  }
+
+  if (section === 'inspections') {
+    if (second) {
+      crumbs.push({ label: 'Inspections', href: ENTREPRENEUR_ROUTES.inspections(business.id) })
+      crumbs.push({ label: 'Inspection Centre' })
+    } else crumbs.push({ label: 'Inspections' })
+    return crumbs
+  }
+
+  if (section === 'compliance') {
+    if (second) {
+      crumbs.push({ label: 'Compliance', href: ENTREPRENEUR_ROUTES.compliance(business.id) })
+      crumbs.push({ label: 'Compliance Detail' })
+    } else crumbs.push({ label: 'Compliance' })
+    return crumbs
+  }
+
+  if (section === 'incentives' || section === 'incentive-claims') {
+    const incentiveRoot = { label: 'Incentives', href: ENTREPRENEUR_ROUTES.incentives(business.id) }
+    if (section === 'incentive-claims') {
+      crumbs.push(incentiveRoot)
+      crumbs.push({ label: 'Incentive Application / Claims' })
+      return crumbs
+    }
+    if (!second || second === 'centre') {
+      crumbs.push({ label: 'Incentives' })
+      return crumbs
+    }
+    crumbs.push(incentiveRoot)
+    const incentiveLabels: Record<string, string> = {
+      calculator: 'Incentives Discovery',
+      portfolio: 'Incentive Detail',
+      'claim-readiness': 'Incentive Application / Claims',
+      claims: 'Incentive Application / Claims',
+      roi: 'Incentives Discovery',
+      scenarios: 'Incentives Discovery',
+      'policy-updates': 'Incentives Discovery',
+    }
+    const label = incentiveLabels[second] ?? 'Incentive Detail'
+    if (third && second === 'calculator') {
+      crumbs.push({ label: 'Incentives Discovery', href: ENTREPRENEUR_ROUTES.incentiveCalculator(business.id) })
+      crumbs.push({ label: third === 'review' ? 'Review' : 'Questionnaire' })
+    } else if (third && second === 'portfolio') {
+      crumbs.push({ label: 'Incentive Detail' })
+    } else if (third && second === 'claims') {
+      crumbs.push({ label: 'Incentive Application / Claims' })
+    } else if (third && second === 'roi') {
+      crumbs.push({ label: 'Incentives Discovery', href: ENTREPRENEUR_ROUTES.incentiveRoi(business.id) })
+      crumbs.push({ label: 'Results' })
+    } else crumbs.push({ label })
+    return crumbs
+  }
+
+  if (section === 'regulatory-changes') {
+    crumbs.push({ label: 'Changes & Expansion', href: ENTREPRENEUR_ROUTES.changes(business.id) })
+    crumbs.push({ label: 'Regulatory Change Impact' })
+    return crumbs
+  }
+
+  if (section === 'changes') {
+    if (second === 'amendments') {
+      crumbs.push({ label: 'Changes & Expansion', href: ENTREPRENEUR_ROUTES.changes(business.id) })
+      crumbs.push({ label: 'Amendments / New Requirements' })
+    } else crumbs.push({ label: 'Changes & Expansion' })
+    return crumbs
+  }
+
+  if (section === 'grievances') {
+    crumbs.push({ label: 'Grievances' })
+    return crumbs
+  }
+
+  crumbs.push({ label: section || 'Overview' })
+  return crumbs
+}
+
+function businessAttention(business?: EntrepreneurBusinessIdentity): { count: number; summary: string; next: ShellNextAction } {
+  if (!business) {
+    return {
+      count: 0,
+      summary: 'Choose a business to see relevant work.',
+      next: { label: 'Select a business', detail: 'Open My Businesses to choose your working context.', href: ENTREPRENEUR_ROUTES.businesses() },
+    }
+  }
+
+  const applications = listTrackerAppsForBusiness(business.id)
+  const applicationActions = applications.filter(application => Boolean(application.actionRequired))
+  const complianceActions = listComplianceForBusiness(business.id).filter(obligation => obligation.status !== 'Compliant')
+  const inspectionActions = listInspectionsForBusiness(business.id).filter(inspection => inspection.status === 'Scheduled' && Boolean(inspection.actionRequired))
+  const missingDocuments = listDocumentsForBusiness(business.id).filter(document => document.availability === 'Missing')
+  const readyRequirements = listJourneyNodesForBusiness(business.id, false).filter(node => node.displayState === 'ready')
+  const count = applicationActions.length + complianceActions.length + inspectionActions.length + missingDocuments.slice(0, 2).length
+
+  const application = applicationActions[0]
+  if (application) {
+    const query = findQueryByAppId(application.appId)
+    return {
+      count,
+      summary: `${count} ${count === 1 ? 'item requires' : 'items require'} attention.`,
+      next: {
+        label: query ? 'Respond to query' : 'Review application',
+        detail: `${application.dept} · ${application.service}`,
+        href: query
+          ? ENTREPRENEUR_ROUTES.applicationQuery(business.id, application.appId, query.queryId)
+          : ENTREPRENEUR_ROUTES.application(business.id, application.appId),
+      },
+    }
+  }
+
+  const obligation = complianceActions[0]
+  if (obligation) {
+    return {
+      count,
+      summary: `${count} ${count === 1 ? 'item requires' : 'items require'} attention.`,
+      next: {
+        label: 'Review compliance obligation',
+        detail: `${obligation.name} · Due ${obligation.dueDate}`,
+        href: ENTREPRENEUR_ROUTES.complianceDetail(business.id, obligation.id),
+      },
+    }
+  }
+
+  const inspection = inspectionActions[0]
+  if (inspection) {
+    return {
+      count,
+      summary: `${count} ${count === 1 ? 'item requires' : 'items require'} attention.`,
+      next: {
+        label: 'Prepare for inspection',
+        detail: `${inspection.type} · ${inspection.date}`,
+        href: ENTREPRENEUR_ROUTES.inspection(business.id, inspection.id),
+      },
+    }
+  }
+
+  const document = missingDocuments[0]
+  if (document) {
+    return {
+      count,
+      summary: `${count} ${count === 1 ? 'item requires' : 'items require'} attention.`,
+      next: {
+        label: 'Provide missing document',
+        detail: document.name,
+        href: ENTREPRENEUR_ROUTES.document(business.id, document.id),
+      },
+    }
+  }
+
+  const requirement = readyRequirements[0]
+  if (requirement) {
+    return {
+      count: 0,
+      summary: 'No urgent items. A requirement is ready to continue.',
+      next: {
+        label: 'Continue Regulatory Journey',
+        detail: `${requirement.department} · ${requirement.service}`,
+        href: ENTREPRENEUR_ROUTES.requirement(business.id, requirement.id),
+      },
+    }
+  }
+
+  return {
+    count: 0,
+    summary: 'No immediate action is recorded for this business.',
+    next: {
+      label: 'Review Overview',
+      detail: 'Check current applications, compliance and upcoming work.',
+      href: ENTREPRENEUR_ROUTES.business(business.id),
+    },
+  }
+}
+
+function EntrepreneurContextBar({ pathname, business }: { pathname: string; business?: EntrepreneurBusinessIdentity }) {
+  const isCreatingBusiness = pathname.startsWith(ENTREPRENEUR_ROUTES.newBusiness())
+  const project = business ? findBusinessProjectById(business.id) : undefined
+  const attention = businessAttention(isCreatingBusiness ? undefined : business)
+  const breadcrumbs = routeBreadcrumbs(pathname, business)
+
+  const contextName = isCreatingBusiness ? 'New Business / Project' : (business?.name ?? 'No business selected')
+  const contextLine = isCreatingBusiness
+    ? 'Business DNA setup'
+    : business
+      ? `${business.industry} — ${business.location}`
+      : 'Choose a business to establish a working context.'
+  const projectLine = isCreatingBusiness
+    ? 'Draft business profile'
+    : project?.subtitle ?? business?.subtitle ?? 'No project selected'
+  const nextAction: ShellNextAction = isCreatingBusiness
+    ? { label: 'Complete this Business DNA step', detail: 'Use the primary action in the page below.' }
+    : attention.next
+
+  return (
+    <section className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur" aria-label="Current business and project context">
+      <div className="mx-auto max-w-[1600px] px-4 py-2.5 sm:px-6">
+        <nav aria-label="Breadcrumb" className="mb-2 flex flex-wrap items-center gap-1.5 text-[12px] text-[#5C6470]">
+          {breadcrumbs.map((crumb, index) => (
+            <React.Fragment key={`${crumb.label}-${index}`}>
+              {index > 0 ? <span aria-hidden="true" className="text-slate-300">›</span> : null}
+              {crumb.href ? (
+                <Link href={crumb.href} className="rounded px-1 py-0.5 font-medium text-[#245B8A] hover:bg-[#F0F5FA] hover:text-[#17365D] hover:underline">
+                  {crumb.label}
+                </Link>
+              ) : (
+                <span className="px-1 py-0.5 font-semibold text-[#20242A]" aria-current="page">{crumb.label}</span>
+              )}
+            </React.Fragment>
+          ))}
+        </nav>
+
+        <div className="grid gap-3 md:grid-cols-[minmax(0,1.35fr)_minmax(190px,0.75fr)_minmax(250px,0.95fr)] md:items-center">
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#5C6470]">Current Business / Project Context</p>
+            <p className="mt-0.5 truncate text-sm font-bold text-[#17365D]">{contextName}</p>
+            <p className="truncate text-[12px] text-[#5C6470]">{contextLine}</p>
+            <p className="truncate text-[12px] font-medium text-[#20242A]"><span className="text-[#5C6470]">Project:</span> {projectLine}</p>
+          </div>
+
+          <div className="min-w-0 border-t border-slate-100 pt-2 md:border-l md:border-t-0 md:pl-4 md:pt-0">
+            <div className="flex items-center gap-2">
+              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#5C6470]">Attention</p>
+              {attention.count > 0 ? <span className="rounded-full bg-[#9B2C2C] px-2 py-0.5 text-[10px] font-bold text-white">{attention.count}</span> : null}
+            </div>
+            <p className={`mt-1 text-[12px] font-semibold ${attention.count > 0 ? 'text-[#9B2C2C]' : 'text-[#20242A]'}`}>{isCreatingBusiness ? 'Business DNA setup is in progress.' : attention.summary}</p>
+          </div>
+
+          <div className="flex min-w-0 items-center justify-between gap-3 border-t border-slate-100 pt-2 md:border-l md:border-t-0 md:pl-4 md:pt-0">
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#5C6470]">Next action</p>
+              <p className="mt-0.5 truncate text-[11px] text-[#5C6470]">{nextAction.detail}</p>
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              {nextAction.href ? (
+                <Link href={nextAction.href} className="rounded-md bg-[#17365D] px-3.5 py-2 text-[12px] font-bold text-white hover:bg-[#1E4870] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E68A2E] focus-visible:ring-offset-2">
+                  {nextAction.label}
+                </Link>
+              ) : (
+                <span className="max-w-[190px] text-right text-[12px] font-bold text-[#17365D]">{nextAction.label}</span>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
 
 function Sidebar({ pathname, business, onSelectBusiness, closeMobile, collapsed, setCollapsed }: {
   pathname: string
@@ -189,10 +559,9 @@ function Sidebar({ pathname, business, onSelectBusiness, closeMobile, collapsed,
           </div>
           {!collapsed && (
             <div className="flex-1 min-w-0">
+              <p className="text-[9px] font-bold uppercase tracking-wider text-[#5C6470]">Business / Project</p>
               <p className="text-[13px] font-bold text-[#17365D] leading-snug truncate">{business?.name ?? 'All Businesses'}</p>
-              <p className="text-[11px] text-[#5C6470] leading-tight truncate">
-                {business ? `${business.industry} · ${business.location}` : 'Choose a business to view overview'}
-              </p>
+              <p className="text-[11px] text-[#5C6470] leading-tight truncate">{business?.subtitle ?? 'Choose a business to set context'}</p>
             </div>
           )}
         </div>
@@ -433,9 +802,17 @@ export function AuthenticatedShell({ children }: { children: React.ReactNode }) 
   const routeBusiness = businessFromEntrepreneurPathname(pathname)
   const rememberedBusiness = rememberedBusinessId ? findBusinessById(rememberedBusinessId) : undefined
   const currentBusiness = routeBusiness ?? rememberedBusiness
+  const currentProject = currentBusiness ? findBusinessProjectById(currentBusiness.id) : undefined
   const { openAssistant } = useRegulatoryAssistant()
   const assistantPageContext = React.useMemo(() => {
-    const context = entrepreneurPageContext(pathname, currentBusiness?.name)
+    const routeContext = entrepreneurPageContext(pathname, currentBusiness?.name)
+    const context = currentBusiness
+      ? {
+          ...routeContext,
+          entities: { ...routeContext.entities, businessId: routeContext.entities.businessId ?? currentBusiness.id },
+          safeMetadata: { ...routeContext.safeMetadata, businessName: currentBusiness.name, projectName: currentProject?.subtitle },
+        }
+      : routeContext
     const businessId = context.entities.businessId
     if (!businessId) return context
     const entity = context.entities.requirementId ? findBusinessEntity('requirement', businessId, context.entities.requirementId)
@@ -447,7 +824,7 @@ export function AuthenticatedShell({ children }: { children: React.ReactNode }) 
       : context.entities.inspectionId ? findBusinessEntity('inspection', businessId, context.entities.inspectionId)
       : undefined
     return entity ? enrichAssistantContext(context, { recordTitle: entity.label }, entity.label) : context
-  }, [pathname, currentBusiness?.name])
+  }, [pathname, currentBusiness, currentProject?.subtitle])
 
   useEffect(() => {
     if (sessionStorage.getItem('entrepreneur_demo_auth') !== 'true') {
@@ -481,7 +858,7 @@ export function AuthenticatedShell({ children }: { children: React.ReactNode }) 
     if (selected) setRememberedBusinessId(selected.id)
   }
 
-  return <div className={`min-h-screen flex flex-col ${fontSizeClass} ${contrastClass}`} style={{ fontFamily: 'Noto Sans, Noto Sans Devanagari, system-ui, sans-serif' }}>
+  return <div className={`entrepreneur-portal min-h-screen flex flex-col ${fontSizeClass} ${contrastClass}`} style={{ fontFamily: 'Noto Sans, Noto Sans Devanagari, system-ui, sans-serif' }}>
     <AccessibilityStrip {...display} />
     <PortalHeader isLoggedIn={true} setIsLoggedIn={value => { if (!value) logout() }} onGoToLogin={() => router.push(ENTREPRENEUR_ROUTES.login())} onGoToNotifications={() => router.push(ENTREPRENEUR_ROUTES.notifications())} onOpenRegAssistant={() => openAssistant({ origin: 'header', mode: 'global', context: globalAssistantContext(assistantPageContext) })} />
     <DemoNotice />
@@ -493,7 +870,10 @@ export function AuthenticatedShell({ children }: { children: React.ReactNode }) 
       <aside className={`fixed top-0 left-0 h-full z-50 bg-white border-r border-[#d1d9e0] w-64 transition-transform duration-200 lg:static lg:z-auto lg:translate-x-0 lg:h-auto lg:shrink-0 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'} ${collapsed ? 'lg:w-12' : 'lg:w-60'}`} aria-label="Entrepreneur navigation">
         <Sidebar pathname={pathname} business={currentBusiness} onSelectBusiness={selectBusiness} closeMobile={() => setMobileOpen(false)} collapsed={collapsed} setCollapsed={setCollapsed} />
       </aside>
-      <div className="flex-1 min-w-0 overflow-auto">{children}</div>
+      <div className="flex-1 min-w-0 overflow-auto">
+        <EntrepreneurContextBar pathname={pathname} business={currentBusiness} />
+        {children}
+      </div>
     </div>
     <Footer />
     <GlobalAssistantSurface pageContext={assistantPageContext} suppressed={mobileOpen || pathname.includes('/dependencies')} />

@@ -23,7 +23,7 @@ describe('Dossier feature data', () => {
     expect(prov.fieldName).toBe('Plot Area')
     expect(prov.currentValue).toBe('4,800 m²')
     expect(prov.isPlotArea).toBe(true)
-    expect(prov.currentSource).toBe('MIDC Allotment')
+    expect(prov.currentSource).toBe('MIDC Allotment Letter')
     expect(prov.history.length).toBe(2)
     expect(prov.usedBy.length).toBeGreaterThan(0)
   })

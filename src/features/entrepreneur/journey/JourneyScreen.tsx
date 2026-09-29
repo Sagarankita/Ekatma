@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { ENTREPRENEUR_ROUTES } from '@/lib/routes/entrepreneur'
 import { useRegulatoryAssistant } from '@/features/regulatory-assistant/Provider'
 import { inlineContext } from '@/features/regulatory-assistant/context'
@@ -15,337 +14,303 @@ import {
   type JourneyReq,
 } from './data'
 
-function ReqNode({
-  req,
-  allNodes,
-  onSelect,
-  compact = false,
-}: {
-  req: JourneyReq
-  allNodes: JourneyReq[]
-  onSelect: (id: string) => void
-  compact?: boolean
-}) {
+type RequirementGroup = {
+  key: string
+  title: string
+  description: string
+  states: JourneyReq['displayState'][]
+}
+
+const REQUIREMENT_GROUPS: RequirementGroup[] = [
+  {
+    key: 'active',
+    title: 'Ready / In Progress',
+    description: 'Requirements you can act on now or that are currently being processed.',
+    states: ['ready', 'in-progress', 'action-required', 'under-review', 'inspection-scheduled', 'needs-verification', 'rejected'],
+  },
+  {
+    key: 'conditional',
+    title: 'Conditional',
+    description: 'Requirements that apply only when the configured project conditions are met.',
+    states: ['conditional'],
+  },
+  {
+    key: 'waiting',
+    title: 'Waiting for prerequisite',
+    description: 'Requirements that will become available when their configured prerequisites are resolved.',
+    states: ['waiting'],
+  },
+  {
+    key: 'completed',
+    title: 'Completed',
+    description: 'Requirements already approved or completed for this project.',
+    states: ['approved'],
+  },
+  {
+    key: 'not-applicable',
+    title: 'Not Applicable',
+    description: 'Requirements excluded by the current project information.',
+    states: ['not-applicable'],
+  },
+]
+
+const STATE_SYMBOLS: Partial<Record<JourneyReq['displayState'], string>> = {
+  approved: '✓',
+  ready: '●',
+  waiting: '◷',
+  'action-required': '!',
+}
+
+function stageFor(req: JourneyReq) {
+  return STAGES.find(stage => stage.key === req.stage)
+}
+
+function requirementAction(projectId: string, req: JourneyReq) {
+  if (req.displayState === 'ready') {
+    return { label: 'Start application', href: ENTREPRENEUR_ROUTES.newApplication(projectId) }
+  }
+  if (req.displayState === 'in-progress') {
+    return { label: 'Continue application', href: ENTREPRENEUR_ROUTES.requirement(projectId, req.id) }
+  }
+  if (req.displayState === 'action-required' || req.displayState === 'needs-verification' || req.displayState === 'rejected') {
+    return { label: 'Provide information', href: ENTREPRENEUR_ROUTES.requirement(projectId, req.id) }
+  }
+  return { label: 'View requirement', href: ENTREPRENEUR_ROUTES.requirement(projectId, req.id) }
+}
+
+function relationshipSummary(req: JourneyReq, allNodes: JourneyReq[]) {
+  const prerequisiteNames = req.dependencies
+    .filter(dependency => dependency.type !== 'none')
+    .map(dependency => allNodes.find(node => node.id === dependency.reqId)?.service ?? dependency.reqId)
+
+  const unlockedNames = (req.unlocks ?? [])
+    .map(requirementId => allNodes.find(node => node.id === requirementId)?.service ?? requirementId)
+
+  return { prerequisiteNames, unlockedNames }
+}
+
+function RequirementCard({ projectId, req, allNodes }: { projectId: string; req: JourneyReq; allNodes: JourneyReq[] }) {
   const cfg = journeyStateCfg(req.displayState)
-  const prereqs = req.dependencies
-    .map(d => allNodes.find(n => n.id === d.reqId))
-    .filter(Boolean) as JourneyReq[]
+  const stage = stageFor(req)
+  const action = requirementAction(projectId, req)
+  const { prerequisiteNames, unlockedNames } = relationshipSummary(req, allNodes)
+  const stateSymbol = STATE_SYMBOLS[req.displayState] ?? cfg.icon
 
   return (
-    <button
-      type="button"
-      onClick={() => onSelect(req.id)}
-      className={`w-full text-left rounded-xl border-l-4 ${cfg.border} border border-slate-200 ${cfg.bg} p-4 hover:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-[#17365D]`}
-      aria-label={`${req.service} — ${cfg.label}`}
-    >
-      <div className="flex items-start justify-between gap-2 mb-2">
-        <div className="flex-1 min-w-0">
-          <p className="text-[10px] font-bold text-[#5C6470] uppercase tracking-wider truncate">{req.department}</p>
-          <p className={`text-[13px] font-bold ${cfg.textCls} leading-snug`}>{req.service}</p>
+    <article className={`flex h-full flex-col rounded-xl border border-slate-200 border-l-4 ${cfg.border} ${cfg.bg} p-4`}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-[#5C6470]">
+            {stage ? `Stage ${stage.num} · ${stage.label}` : req.stage}
+          </p>
+          <h3 className="mt-1 text-sm font-bold leading-snug text-[#20242A]">{req.service}</h3>
+          <p className="mt-1 text-xs text-[#5C6470]">{req.department}</p>
         </div>
-        <span className={`shrink-0 text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded border ${cfg.badgeCls}`}>
-          {cfg.icon} {cfg.label}
+        <span className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-bold ${cfg.badgeCls}`}>
+          <span aria-hidden="true">{stateSymbol}</span> {cfg.label}
         </span>
       </div>
 
-      {req.displayState === 'waiting' && prereqs.length > 0 && (
-        <div className="mt-1 mb-2 text-xs text-[#5C6470]">
-          <span className="font-semibold">Waiting for: </span>
-          {prereqs.map(p => `${p.department} — ${p.service}`).join(', ')}
-        </div>
-      )}
+      <div className="mt-4 flex-1 space-y-2 text-xs text-[#5C6470]">
+        {req.displayState === 'waiting' && prerequisiteNames.length > 0 && (
+          <p><span className="font-bold text-[#20242A]">Waiting for: </span>{prerequisiteNames.join(', ')}</p>
+        )}
+        {req.displayState === 'conditional' && req.conditionReason && (
+          <p><span className="font-bold text-[#20242A]">Applies when: </span>{req.conditionReason}</p>
+        )}
+        {req.displayState === 'not-applicable' && req.conditionReason && (
+          <p><span className="font-bold text-[#20242A]">Why it does not apply: </span>{req.conditionReason}</p>
+        )}
+        {req.displayState === 'approved' && req.approvalRef && (
+          <p className="font-semibold text-[#2F7D4F]">{req.approvalRef}{req.approvedDate ? ` · ${req.approvedDate}` : ''}</p>
+        )}
+        {req.requiredAction && !['approved', 'not-applicable'].includes(req.displayState) && (
+          <p><span className="font-bold text-[#20242A]">What happens now: </span>{req.requiredAction}</p>
+        )}
+        {req.nextMilestone && (
+          <p><span className="font-bold text-[#20242A]">Next: </span>{req.nextMilestone}</p>
+        )}
+        {unlockedNames.length > 0 && (
+          <p><span className="font-bold text-[#20242A]">Unlocks: </span>{unlockedNames.join(', ')}</p>
+        )}
+      </div>
 
-      {(req.displayState === 'conditional' || req.displayState === 'not-applicable') && req.conditionReason && (
-        <p className="text-xs text-[#5C6470] mb-2 italic">{req.conditionReason}</p>
-      )}
-
-      {req.displayState === 'approved' && req.approvalRef && (
-        <p className="text-xs text-[#2F7D4F] mb-2 font-medium">Ref: {req.approvalRef} · {req.approvedDate}</p>
-      )}
-
-      {req.requiredAction && req.displayState !== 'approved' && req.displayState !== 'not-applicable' && (
-        <p className="text-xs font-semibold text-[#20242A] mb-1">→ {req.requiredAction}</p>
-      )}
-
-      {!compact && (
-        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
-          {req.slaRemaining && <span className="text-[11px] text-[#5C6470]">SLA: {req.slaRemaining}</span>}
-          {req.documents && <span className="text-[11px] text-[#5C6470]">Docs: {req.documents}</span>}
-          {req.nextMilestone && <span className="text-[11px] text-[#5C6470]">Next: {req.nextMilestone}</span>}
-        </div>
-      )}
-
-      {req.displayState === 'approved' && req.unlocks && req.unlocks.length > 0 && !compact && (
-        <div className="mt-2 text-[11px] text-[#2F7D4F]">
-          <span className="font-semibold">Unlocks: </span>
-          {req.unlocks.map(uid => {
-            const un = allNodes.find(n => n.id === uid)
-            return un ? un.service : uid
-          }).join(', ')}
-        </div>
-      )}
-    </button>
+      <Link
+        href={action.href}
+        className={`mt-4 inline-flex min-h-10 items-center justify-center rounded-lg px-4 py-2 text-xs font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-[#17365D] focus:ring-offset-2 ${
+          ['ready', 'action-required', 'needs-verification', 'rejected'].includes(req.displayState)
+            ? 'bg-[#17365D] text-white hover:bg-[#102A49]'
+            : 'border border-slate-300 bg-white text-[#17365D] hover:bg-[#F0F5FA]'
+        }`}
+      >
+        {action.label}
+      </Link>
+    </article>
   )
 }
 
 export function JourneyScreen({ project }: { project: BusinessProject }) {
-  const router = useRouter()
-  const [filter, setFilter] = useState<string>('all')
   const [search, setSearch] = useState('')
-  const [showNA, setShowNA] = useState(false)
+  const [stageFilter, setStageFilter] = useState('all')
   const [cteApproved, setCteApproved] = useState(false)
   const { openAssistant, pageContext } = useRegulatoryAssistant()
-  // Kept false until the legacy markup is removed; all live triggers use the shared drawer.
-  const assistantOpen = false
-  const setAssistantOpen = (_open: boolean) => undefined
 
   const nodes = listJourneyNodesForBusiness(project.id, cteApproved)
+  const searchableNodes = nodes.filter(node => {
+    if (stageFilter !== 'all' && node.stage !== stageFilter) return false
+    if (!search.trim()) return true
+    const query = search.trim().toLowerCase()
+    return node.service.toLowerCase().includes(query) || node.department.toLowerCase().includes(query)
+  })
 
-  const applicable = nodes.filter(n => n.applicability !== 'not-applicable')
-  const totalCount = applicable.length
-  const readyCount = applicable.filter(n => n.displayState === 'ready').length
-  const inProgressCount = applicable.filter(n => n.displayState === 'in-progress' || n.displayState === 'under-review').length
-  const blockedCount = applicable.filter(n => n.displayState === 'waiting').length
-  const actionCount = applicable.filter(n => n.displayState === 'action-required').length
-  const approvedCount = applicable.filter(n => n.displayState === 'approved').length
+  const activeStage = STAGES.find(stage => {
+    const state = stageDisplayState(nodes, stage.key)
+    return state === 'Action Required' || state === 'In Progress' || state === 'Ready'
+  }) ?? STAGES.find(stage => nodes.some(node => node.stage === stage.key && node.displayState === 'waiting'))
 
-  const summaryMetrics = [
-    { label: 'Total Identified', val: totalCount, cls: 'text-[#20242A]' },
-    { label: 'Ready Now', val: readyCount, cls: 'text-[#17365D]' },
-    { label: 'In Progress', val: inProgressCount, cls: 'text-[#245B8A]' },
-    { label: 'Blocked', val: blockedCount, cls: 'text-[#5C6470]' },
-    { label: 'Action Required', val: actionCount, cls: 'text-[#C46A15]' },
-    { label: 'Approved', val: approvedCount, cls: 'text-[#2F7D4F]' },
-  ]
-
-  const filterFn = (n: JourneyReq) => {
-    if (!showNA && n.displayState === 'not-applicable') return false
-    if (search) {
-      const q = search.toLowerCase()
-      if (!n.service.toLowerCase().includes(q) && !n.department.toLowerCase().includes(q)) return false
-    }
-    if (filter === 'ready') return n.displayState === 'ready'
-    if (filter === 'action-required') return n.displayState === 'action-required'
-    if (filter === 'in-progress') return n.displayState === 'in-progress' || n.displayState === 'under-review'
-    if (filter === 'blocked') return n.displayState === 'waiting'
-    if (filter === 'approved') return n.displayState === 'approved'
-    if (filter === 'needs-verification') return n.displayState === 'needs-verification'
-    return true
+  const currentStageNodes = activeStage ? nodes.filter(node => node.stage === activeStage.key) : []
+  const currentStageCounts = {
+    complete: currentStageNodes.filter(node => node.displayState === 'approved').length,
+    active: currentStageNodes.filter(node => ['ready', 'in-progress', 'action-required', 'under-review', 'inspection-scheduled', 'needs-verification', 'rejected'].includes(node.displayState)).length,
+    waiting: currentStageNodes.filter(node => node.displayState === 'waiting').length,
+    conditional: currentStageNodes.filter(node => node.displayState === 'conditional').length,
   }
 
-  const handleSelectReq = (reqId: string) => {
-    router.push(ENTREPRENEUR_ROUTES.requirement(project.id, reqId))
-  }
+  const stagesWithRequirements = STAGES.filter(stage => nodes.some(node => node.stage === stage.key))
 
   return (
     <main id="main-content" className="flex-1 bg-[#F8F9FA]" tabIndex={-1}>
-      <div className="max-w-[900px] mx-auto px-6 py-6">
-        {/* Breadcrumb */}
-        <div className="mb-4">
-          <nav className="text-xs text-[#5C6470] flex items-center gap-1.5" aria-label="Breadcrumb">
-            <Link href={ENTREPRENEUR_ROUTES.businesses()} className="hover:text-[#17365D] hover:underline">My Businesses</Link>
-            <span>›</span>
-            <Link href={ENTREPRENEUR_ROUTES.business(project.id)} className="hover:text-[#17365D] hover:underline">{project.name}</Link>
-            <span>›</span>
-            <span className="text-[#17365D] font-bold">Regulatory Journey</span>
-          </nav>
-        </div>
-
-        {/* Header */}
-        <div className="mb-5 pb-4 border-b border-slate-200 flex items-start justify-between gap-4">
+      <div className="mx-auto max-w-[1120px] px-6 py-6">
+        <div className="mb-6 flex flex-col gap-4 border-b border-slate-200 pb-5 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-[#17365D]">Regulatory Journey</h1>
-            <p className="text-xs text-[#5C6470] mt-1">
-              Your personalised regulatory journey based on the confirmed Business Profile and applicable regulatory rules.
+            <p className="mt-1 max-w-2xl text-sm text-[#5C6470]">
+              See what can proceed now, what is complete, and how prerequisites and conditions affect what happens next.
             </p>
           </div>
-          <div className="flex gap-2 shrink-0">
+          <div className="flex shrink-0 flex-wrap gap-2">
             <Link
               href={ENTREPRENEUR_ROUTES.dependencies(project.id)}
-              className="text-xs border border-[#245B8A] bg-white text-[#245B8A] px-3.5 py-2 rounded-lg hover:bg-[#F0F5FA] hover:text-[#17365D] font-semibold transition-colors shadow-xs"
+              className="rounded-lg bg-[#17365D] px-4 py-2.5 text-xs font-bold text-white shadow-xs transition-colors hover:bg-[#102A49]"
             >
-              Dependency View
+              View Dependency Graph
             </Link>
             <button
               type="button"
               onClick={() => openAssistant({ origin: 'inline', mode: 'entity', context: inlineContext(pageContext, { pageType: 'regulatory-journey', pageTitle: 'Regulatory Journey', label: `${project.name} regulatory journey`, entities: { businessId: project.id }, recordTitle: project.name }) })}
-              className="text-xs border border-slate-200 bg-white text-[#20242A] px-3.5 py-2 rounded-lg hover:bg-[#F0F5FA] font-semibold transition-colors shadow-xs"
+              className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-xs font-semibold text-[#20242A] shadow-xs transition-colors hover:bg-[#F0F5FA]"
             >
               Ask Assistant
             </button>
           </div>
         </div>
 
-        {/* Demo toggle */}
-        <div className="mb-5 p-3.5 bg-[#FDF4EB] border border-[#F8D4B0] rounded-xl flex items-center gap-3">
-          <span className="text-[10px] font-bold text-[#C46A15] uppercase tracking-wider">Prototype Demo</span>
-          <button
-            type="button"
-            onClick={() => setCteApproved(v => !v)}
-            className={`text-xs px-3 py-1.5 rounded-lg font-semibold transition-colors ${cteApproved ? 'bg-[#2F7D4F] text-white' : 'bg-[#17365D] text-white'}`}
-          >
-            {cteApproved ? '✓ CTE Approved (click to reset)' : 'Simulate CTE Approval →'}
-          </button>
-          <span className="text-[11px] text-[#C46A15]">Simulates E09 ↔ E13 state transition</span>
-        </div>
-
-        {/* Project context strip */}
-        <div className="mb-6 p-5 bg-white border border-slate-200 rounded-xl shadow-xs grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {[
-            { label: 'Project', value: project.name },
-            { label: 'Industry', value: project.industry },
-            { label: 'Stage', value: project.stage },
-            { label: 'Business DNA', value: 'Version 1' },
-          ].map(f => (
-            <div key={f.label}>
-              <p className="text-[10px] font-bold text-[#5C6470] uppercase tracking-wider">{f.label}</p>
-              <p className="text-xs font-bold text-[#20242A] mt-0.5 truncate">{f.value}</p>
-            </div>
-          ))}
-          <div className="col-span-2 sm:col-span-4 flex gap-4 pt-3 border-t border-slate-100">
-            <Link href={ENTREPRENEUR_ROUTES.business(project.id)} className="text-xs text-[#245B8A] hover:underline font-semibold">
-              View Business Profile
-            </Link>
-            <Link href={ENTREPRENEUR_ROUTES.dossier(project.id)} className="text-xs text-[#245B8A] hover:underline font-semibold">
-              View Master Project Dossier
-            </Link>
-            <Link href={ENTREPRENEUR_ROUTES.dependencies(project.id)} className="text-xs text-[#245B8A] hover:underline font-semibold">
-              View Dependencies
-            </Link>
+        <section aria-labelledby="current-stage-heading" className="mb-6 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs">
+          <div className="border-b border-slate-200 bg-[#F0F5FA] px-5 py-3">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-[#5C6470]">Current Project Stage</p>
+            <h2 id="current-stage-heading" className="mt-0.5 text-base font-bold text-[#17365D]">{project.stage}</h2>
           </div>
-        </div>
-
-        {/* Journey summary metrics */}
-        <div className="mb-6 grid grid-cols-3 sm:grid-cols-6 gap-3">
-          {summaryMetrics.map(m => (
-            <div key={m.label} className="bg-white border border-slate-200 rounded-xl p-3.5 text-center shadow-xs">
-              <p className={`text-2xl font-bold ${m.cls}`}>{m.val}</p>
-              <p className="text-[11px] text-[#5C6470] font-semibold mt-0.5 leading-tight">{m.label}</p>
+          <div className="grid gap-5 p-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[#5C6470]">Stage Summary</p>
+              <p className="mt-1 text-lg font-bold text-[#20242A]">
+                {activeStage ? `Stage ${activeStage.num} — ${activeStage.label} Steps` : 'No configured stage milestone'}
+              </p>
+              <p className="mt-1 text-xs text-[#5C6470]">
+                Requirements are grouped by what you can do, not forced into a single chronological checklist.
+              </p>
             </div>
-          ))}
-        </div>
+            {currentStageNodes.length > 0 && (
+              <dl className="flex flex-wrap gap-x-5 gap-y-2 text-xs md:justify-end">
+                <div><dt className="text-[#5C6470]">Complete</dt><dd className="font-bold text-[#2F7D4F]">{currentStageCounts.complete}</dd></div>
+                <div><dt className="text-[#5C6470]">Active</dt><dd className="font-bold text-[#17365D]">{currentStageCounts.active}</dd></div>
+                <div><dt className="text-[#5C6470]">Waiting</dt><dd className="font-bold text-[#5C6470]">{currentStageCounts.waiting}</dd></div>
+                <div><dt className="text-[#5C6470]">Conditional</dt><dd className="font-bold text-[#8A5A13]">{currentStageCounts.conditional}</dd></div>
+              </dl>
+            )}
+          </div>
+        </section>
 
-        {/* Filter + search bar */}
-        <div className="flex flex-wrap gap-2.5 mb-5 items-center">
-          <div className="relative flex-1 min-w-[200px]">
+        <div className="mb-6 flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-xs sm:flex-row sm:items-end">
+          <label className="flex-1 text-[11px] font-bold uppercase tracking-wider text-[#5C6470]">
+            Find a requirement
             <input
-              className="w-full pl-8 pr-3 py-2 text-xs border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#17365D]"
-              placeholder="Search by service or department"
+              className="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm font-normal normal-case tracking-normal text-[#20242A] focus:outline-none focus:ring-2 focus:ring-[#17365D]"
+              placeholder="Search by requirement or department"
               value={search}
-              onChange={e => setSearch(e.target.value)}
+              onChange={event => setSearch(event.target.value)}
             />
-            <span className="absolute left-2.5 top-2.5 text-[#5C6470] text-xs">⌕</span>
+          </label>
+          <label className="text-[11px] font-bold uppercase tracking-wider text-[#5C6470] sm:w-64">
+            Stage
+            <select
+              value={stageFilter}
+              onChange={event => setStageFilter(event.target.value)}
+              className="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm font-normal normal-case tracking-normal text-[#20242A] focus:outline-none focus:ring-2 focus:ring-[#17365D]"
+            >
+              <option value="all">All configured stages</option>
+              {stagesWithRequirements.map(stage => <option key={stage.key} value={stage.key}>Stage {stage.num} — {stage.label}</option>)}
+            </select>
+          </label>
+        </div>
+
+        <div className="mb-6 flex flex-wrap items-center gap-x-5 gap-y-2 rounded-lg border border-slate-200 bg-white px-4 py-3 text-xs text-[#5C6470]" aria-label="Requirement state guide">
+          <span><strong className="text-[#2F7D4F]">✓</strong> Completed</span>
+          <span><strong className="text-[#17365D]">●</strong> Can proceed</span>
+          <span><strong>◷</strong> Waiting</span>
+          <span><strong className="text-[#C46A15]">!</strong> Action required</span>
+          <span className="rounded-full bg-[#FEF3C7] px-2 py-0.5 font-semibold text-[#78350F]">Conditional</span>
+          <span className="rounded-full bg-[#F1F3F5] px-2 py-0.5 font-semibold">Not Applicable</span>
+        </div>
+
+        {nodes.length === 0 ? (
+          <section className="rounded-xl border border-slate-200 bg-white p-8 text-center shadow-xs">
+            <h2 className="text-base font-bold text-[#17365D]">No configured requirements yet</h2>
+            <p className="mt-2 text-sm text-[#5C6470]">Requirements will appear here when the configured Dependency Graph identifies them for this project.</p>
+          </section>
+        ) : (
+          <div className="space-y-7">
+            {REQUIREMENT_GROUPS.map(group => {
+              const groupNodes = searchableNodes.filter(node => group.states.includes(node.displayState))
+              return (
+                <section key={group.key} aria-labelledby={`${group.key}-heading`}>
+                  <div className="mb-3 flex items-end justify-between gap-4">
+                    <div>
+                      <h2 id={`${group.key}-heading`} title={group.description} className="text-base font-bold text-[#17365D]">{group.title}</h2>
+                    </div>
+                    <span className="shrink-0 text-xs font-bold text-[#5C6470]">{groupNodes.length}</span>
+                  </div>
+                  {groupNodes.length > 0 ? (
+                    <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+                      {groupNodes.map(req => <RequirementCard key={req.id} projectId={project.id} req={req} allNodes={nodes} />)}
+                    </div>
+                  ) : (
+                    <div className="rounded-xl border border-dashed border-slate-300 bg-white px-4 py-3 text-xs text-[#5C6470]">
+                      {search || stageFilter !== 'all' ? 'No requirements in this group match the current search and stage filter.' : 'No requirements in this group.'}
+                    </div>
+                  )}
+                </section>
+              )
+            })}
           </div>
-          <div className="flex flex-wrap gap-1.5">
-            {[
-              { k: 'all', l: 'All' },
-              { k: 'ready', l: 'Ready Now' },
-              { k: 'action-required', l: 'Action Required' },
-              { k: 'in-progress', l: 'In Progress' },
-              { k: 'blocked', l: 'Blocked' },
-              { k: 'approved', l: 'Approved' },
-            ].map(f => (
-              <button
-                key={f.k}
-                type="button"
-                onClick={() => setFilter(f.k)}
-                className={`text-xs px-3 py-1.5 rounded-lg border font-semibold transition-colors ${filter === f.k ? 'bg-[#17365D] text-white border-[#17365D]' : 'bg-white text-[#20242A] border-slate-200 hover:bg-[#F0F5FA]'}`}
-              >
-                {f.l}
-              </button>
-            ))}
+        )}
+
+        <div className="mt-7 rounded-xl border border-[#F8D4B0] bg-[#FDF4EB] p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[#C46A15]">Prototype Demo</p>
+              <p className="mt-1 text-xs text-[#8A4A12]">Simulate the configured CTE decision to preview how dependent requirements change state.</p>
+            </div>
             <button
               type="button"
-              onClick={() => setShowNA(!showNA)}
-              className={`text-xs px-3 py-1.5 rounded-lg border font-semibold transition-colors ${showNA ? 'bg-[#F1F3F5] text-[#5C6470] border-slate-200' : 'text-[#5C6470] border-slate-200 bg-white hover:bg-[#F0F5FA]'}`}
+              onClick={() => setCteApproved(value => !value)}
+              className={`shrink-0 rounded-lg px-4 py-2 text-xs font-bold text-white transition-colors ${cteApproved ? 'bg-[#2F7D4F] hover:bg-[#25663F]' : 'bg-[#17365D] hover:bg-[#102A49]'}`}
             >
-              {showNA ? 'Hide N/A' : 'Show N/A'}
+              {cteApproved ? '✓ CTE Approved — Reset' : 'Simulate CTE Approval'}
             </button>
           </div>
         </div>
-
-        {/* Journey stages */}
-        <div className="space-y-5">
-          {STAGES.map(stage => {
-            const stageNodes = nodes.filter(n => n.stage === stage.key && filterFn(n))
-            const allStageNodes = nodes.filter(n => n.stage === stage.key)
-            const stageSt = stageDisplayState(nodes, stage.key)
-            const stCls: Record<string, string> = {
-              'Complete': 'text-[#2F7D4F]',
-              'In Progress': 'text-[#17365D]',
-              'Action Required': 'text-[#C46A15]',
-              'Ready': 'text-[#17365D]',
-              'Waiting': 'text-[#5C6470]',
-              'Upcoming': 'text-[#5C6470]',
-            }
-            if (stageNodes.length === 0 && allStageNodes.filter(filterFn).length === 0) return null
-            const isEmpty = allStageNodes.length === 0
-
-            return (
-              <div key={stage.key} className="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
-                <div className="flex items-center gap-3 px-4 py-3 bg-[#F8F9FA] border-b border-slate-200">
-                  <span className="text-xs font-bold text-[#5C6470] w-6">{stage.num}</span>
-                  <h2 className="text-[13px] font-bold text-[#17365D] uppercase tracking-wider flex-1">{stage.label}</h2>
-                  <span className={`text-xs font-semibold ${stCls[stageSt] ?? 'text-[#5C6470]'}`}>{stageSt}</span>
-                </div>
-                <div className="p-4">
-                  {isEmpty ? (
-                    <p className="text-xs text-[#5C6470] italic">
-                      {stage.key === 'compliance' ? 'Compliance obligations will appear here after approvals are granted.' : 'No requirements identified for this stage.'}
-                    </p>
-                  ) : stageNodes.length === 0 ? (
-                    <p className="text-xs text-[#5C6470] italic">No requirements match the current filter.</p>
-                  ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {stageNodes.map(req => (
-                        <ReqNode key={req.id} req={req} allNodes={nodes} onSelect={handleSelectReq} />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )
-          })}
-        </div>
-
-        {/* Back */}
-        <div className="mt-6 pt-4 border-t border-slate-200">
-          <Link
-            href={ENTREPRENEUR_ROUTES.business(project.id)}
-            className="inline-block border border-slate-200 bg-white text-[#20242A] text-xs font-semibold px-5 py-2.5 rounded-lg hover:bg-[#F0F5FA] transition-colors shadow-xs"
-          >
-            ← Back to Overview
-          </Link>
-        </div>
       </div>
-
-      {/* Ask Assistant */}
-      {assistantOpen && (
-        <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true">
-          <div className="absolute inset-0 bg-black/30" onClick={() => setAssistantOpen(false)} />
-          <div className="relative bg-white w-80 h-full shadow-2xl flex flex-col border-l border-[#d1d9e0]">
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-[#e8edf2] bg-[#f8f9fb]">
-              <div className="w-7 h-7 rounded-full bg-[#1a3a5c] flex items-center justify-center text-white text-xs">?</div>
-              <div className="flex-1">
-                <p className="text-xs font-bold text-[#1a2533]">EKATMA Regulatory Assistant</p>
-                <p className="text-[10px] text-[#6b7a8d]">Regulatory Journey context</p>
-              </div>
-              <button type="button" onClick={() => setAssistantOpen(false)} className="text-[#9aa5b4] text-lg leading-none">✕</button>
-            </div>
-            <div className="flex-1 p-4 space-y-2">
-              {['Why is Building Plan locked?', 'What does CTE mean?', 'What must happen before this unlocks?', 'Why is this approval shown?'].map(q => (
-                <button key={q} type="button" className="w-full text-left text-xs px-3 py-2.5 border border-[#d1d9e0] rounded hover:bg-[#f0f4f8] text-[#374151]">{q}</button>
-              ))}
-            </div>
-            <div className="p-4 border-t border-[#e8edf2]">
-              <div className="flex gap-2">
-                <input className="flex-1 text-sm border border-[#d1d9e0] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1a56db]" placeholder="Ask a question…" />
-                <button type="button" className="px-3 py-2 bg-[#1a3a5c] text-white text-sm rounded">Send</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </main>
   )
 }

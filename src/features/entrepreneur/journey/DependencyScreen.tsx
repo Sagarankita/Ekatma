@@ -1,13 +1,13 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Link from 'next/link';
 import {
   ReactFlow,
-  Controls,
   MiniMap,
   Background,
   BackgroundVariant,
+  useReactFlow,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
@@ -17,11 +17,67 @@ import { ApprovalNode } from './components/ApprovalNode';
 import { StageSwimlanes } from './components/StageSwimlanes';
 import { ApprovalSidebar } from './components/ApprovalSidebar';
 import { useDependencyGraph } from './hooks/useDependencyGraph';
-import { Target, ArrowRight } from 'lucide-react';
+import { ZoomIn, ZoomOut, Maximize2, Info, ArrowLeft } from 'lucide-react';
 
 const nodeTypes = {
   approval: ApprovalNode,
 };
+
+// Automatic initial fit to screen
+function AutoFitView() {
+  const { fitView } = useReactFlow();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fitView({ padding: 0.12, duration: 400 });
+    }, 120);
+    return () => clearTimeout(timer);
+  }, [fitView]);
+
+  return null;
+}
+
+// Clear floating zoom and reset controls
+function GraphControlsBar() {
+  const { zoomIn, zoomOut, fitView } = useReactFlow();
+
+  return (
+    <div className="absolute top-4 left-4 z-10 bg-white/95 backdrop-blur-xs border border-slate-200 shadow-md rounded-xl p-1.5 flex items-center gap-1 text-slate-700 text-xs">
+      <button
+        type="button"
+        onClick={() => zoomIn({ duration: 250 })}
+        className="p-1.5 rounded-lg hover:bg-slate-100 transition-colors flex items-center gap-1 font-semibold text-xs text-slate-700 hover:text-slate-900"
+        title="Zoom In (+)"
+        aria-label="Zoom in"
+      >
+        <ZoomIn className="w-4 h-4" />
+      </button>
+
+      <button
+        type="button"
+        onClick={() => zoomOut({ duration: 250 })}
+        className="p-1.5 rounded-lg hover:bg-slate-100 transition-colors flex items-center gap-1 font-semibold text-xs text-slate-700 hover:text-slate-900"
+        title="Zoom Out (-)"
+        aria-label="Zoom out"
+      >
+        <ZoomOut className="w-4 h-4" />
+      </button>
+
+      <div className="w-px h-4 bg-slate-200 mx-0.5" />
+
+      <button
+        type="button"
+        onClick={() => fitView({ padding: 0.12, duration: 400 })}
+        className="px-2.5 py-1.5 rounded-lg hover:bg-slate-100 transition-colors flex items-center gap-1.5 font-semibold text-xs text-slate-800"
+        title="Fit graph to screen"
+        aria-label="Fit view"
+      >
+        <Maximize2 className="w-3.5 h-3.5 text-slate-700" />
+        <span>Fit View</span>
+      </button>
+    </div>
+  );
+}
 
 export function DependencyScreen({ project }: { project: BusinessProject }) {
   const {
@@ -29,7 +85,6 @@ export function DependencyScreen({ project }: { project: BusinessProject }) {
     edges,
     selectedNodeId,
     selectedNode,
-    nextRecommendedNode,
     allNodes,
     onNodesChange,
     onEdgesChange,
@@ -40,10 +95,10 @@ export function DependencyScreen({ project }: { project: BusinessProject }) {
   } = useDependencyGraph(project.id);
 
   return (
-    <main id="main-content" className="flex-1 bg-[#F8F9FA] min-h-screen pb-12 font-sans" tabIndex={-1}>
+    <main id="main-content" className="flex-1 bg-[#F8F9FA] min-h-screen pb-16 font-sans" tabIndex={-1}>
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-6">
         {/* Breadcrumb Navigation */}
-        <div className="mb-4 flex items-center justify-between">
+        <div className="mb-4 flex items-center justify-between flex-wrap gap-3">
           <nav className="text-xs text-[#5C6470] flex items-center gap-1.5" aria-label="Breadcrumb">
             <Link href={ENTREPRENEUR_ROUTES.businesses()} className="hover:text-[#17365D] hover:underline">
               My Businesses
@@ -57,60 +112,42 @@ export function DependencyScreen({ project }: { project: BusinessProject }) {
               Regulatory Journey
             </Link>
             <span>›</span>
-            <span className="text-[#17365D] font-bold">Dependency Map (DAG)</span>
+            <span className="text-[#17365D] font-bold">Dependency Graph</span>
           </nav>
 
+          {/* Primary back link to the simpler journey */}
           <Link
             href={ENTREPRENEUR_ROUTES.journey(project.id)}
-            className="text-xs border border-slate-200 bg-white text-[#20242A] px-3.5 py-1.5 rounded-lg hover:bg-[#F0F5FA] font-semibold transition-colors shadow-xs"
+            className="text-xs border border-slate-300 bg-white text-[#17365D] px-3.5 py-1.5 rounded-lg hover:bg-slate-50 font-bold transition-colors shadow-xs flex items-center gap-1.5"
           >
-            ← Back to List View
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Back to Step-by-Step Journey</span>
           </Link>
         </div>
 
-        {/* Header Banner */}
+        {/* Power-User Context Banner */}
         <div className="mb-5 bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs text-[#5C6470] font-semibold">E13 — Industrial Approval Journey</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#17365D] bg-[#17365D]/8 border border-[#17365D]/15 px-2 py-0.5 rounded">
+                Power-User Relationship View
+              </span>
             </div>
             <h1 className="text-2xl font-bold text-[#17365D] tracking-tight">Regulatory Dependency Map</h1>
-            <p className="text-xs sm:text-sm text-[#5C6470] mt-1 max-w-2xl">
-              Automatic hierarchical layout calculation. Locked approvals automatically unlock when prerequisite sub-forms are submitted.
+            <p className="text-xs sm:text-sm text-[#5C6470] mt-1 max-w-2xl leading-relaxed">
+              Detailed statutory relationship map showing sequential prerequisites, parallel approvals, and downstream unlocks.
+              Click any requirement to highlight its direct dependencies and view its details.
+            </p>
+          </div>
+
+          <div className="p-3 bg-blue-50/70 border border-blue-200 rounded-xl text-xs text-blue-900 flex items-start gap-2 max-w-sm">
+            <Info className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+            <p className="leading-snug text-[11px]">
+              <span className="font-bold">Normal Journey Available:</span> Entrepreneurs can follow the simpler step-by-step
+              checklist in Regulatory Journey. This graph provides deep prerequisite analysis.
             </p>
           </div>
         </div>
-
-        {/* Sticky Next Recommended Action Bar */}
-        {nextRecommendedNode && (
-          <div className="mb-5 bg-[#17365D] text-white p-4 rounded-xl shadow-md border border-[#245B8A] flex flex-col sm:flex-row items-center justify-between gap-3 sticky top-2 z-20">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-[#245B8A] border border-[#3A75A4] flex items-center justify-center shrink-0">
-                <Target className="w-5 h-5 text-[#B8D5E5]" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-bold uppercase tracking-wider bg-[#E68A2E] text-white px-2 py-0.5 rounded">
-                    Next Recommended Action
-                  </span>
-                  <span className="text-xs font-mono text-[#B8D5E5]">{nextRecommendedNode.department}</span>
-                </div>
-                <p className="text-sm font-bold text-white mt-0.5">
-                  {nextRecommendedNode.title}
-                </p>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setSelectedNodeId(nextRecommendedNode.id)}
-              className="w-full sm:w-auto px-4 py-2 bg-[#245B8A] hover:bg-[#1E4870] text-white text-xs font-bold rounded-lg transition-all shadow-xs flex items-center justify-center gap-1.5 shrink-0 border border-[#3A75A4]"
-            >
-              <span>Focus Requirement & Checklist</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-        )}
 
         {/* 6-Metric Top Summary Bar */}
         <div className="mb-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
@@ -146,39 +183,39 @@ export function DependencyScreen({ project }: { project: BusinessProject }) {
 
           <div className="bg-white p-3.5 rounded-xl border border-amber-200 shadow-xs flex flex-col justify-between">
             <span className="text-[11px] font-semibold text-amber-800 uppercase tracking-wider flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-amber-500" /> Ready / Unlocked
+              <span className="w-2 h-2 rounded-full bg-amber-500" /> Ready to Apply
             </span>
             <div className="flex items-baseline justify-between mt-2">
               <span className="text-2xl font-black text-amber-900">{metrics.ready}</span>
-              <span className="text-xs font-bold text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded">Ready</span>
+              <span className="text-xs font-bold text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded">Unlocked</span>
             </div>
           </div>
 
           <div className="bg-white p-3.5 rounded-xl border border-slate-300 shadow-xs flex flex-col justify-between">
             <span className="text-[11px] font-semibold text-slate-600 uppercase tracking-wider flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-slate-400" /> Blocked (Locked)
+              <span className="w-2 h-2 rounded-full bg-slate-400" /> Pending Prerequisite
             </span>
             <div className="flex items-baseline justify-between mt-2">
               <span className="text-2xl font-black text-slate-700">{metrics.blocked}</span>
-              <span className="text-xs font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">Locked</span>
+              <span className="text-xs font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">Waiting</span>
             </div>
           </div>
 
           <div className="bg-white p-3.5 rounded-xl border border-purple-200 shadow-xs flex flex-col justify-between">
             <span className="text-[11px] font-semibold text-purple-700 uppercase tracking-wider flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-purple-500" /> Conditional / N/A
+              <span className="w-2 h-2 rounded-full bg-purple-500" /> Conditional
             </span>
             <div className="flex items-baseline justify-between mt-2">
               <span className="text-2xl font-black text-purple-800">{metrics.conditional}</span>
-              <span className="text-xs font-bold text-purple-800 bg-purple-50 px-1.5 py-0.5 rounded">Evaluated</span>
+              <span className="text-xs font-bold text-purple-800 bg-purple-50 px-1.5 py-0.5 rounded">Rule Gate</span>
             </div>
           </div>
         </div>
 
-        {/* Swimlanes Header Banner */}
+        {/* Stage Milestones Swimlane Header */}
         <StageSwimlanes />
 
-        {/* Split Screen Container: Left React Flow Canvas, Right Approval Sidebar */}
+        {/* Split Screen Container: Left Graph Canvas, Right Detail Panel */}
         <div className="mt-4 flex flex-col lg:flex-row gap-5 items-start">
           {/* React Flow Canvas */}
           <div className="flex-1 w-full bg-white rounded-2xl border border-slate-200 shadow-sm h-[720px] relative overflow-hidden">
@@ -189,20 +226,29 @@ export function DependencyScreen({ project }: { project: BusinessProject }) {
               onNodesChange={onNodesChange}
               onEdgesChange={onEdgesChange}
               onNodeClick={onNodeClick}
+              onPaneClick={() => setSelectedNodeId(null)}
               nodesDraggable={false}
               nodesConnectable={false}
               elementsSelectable={true}
               fitView
-              minZoom={0.6}
-              maxZoom={1.2}
+              minZoom={0.4}
+              maxZoom={1.5}
               defaultEdgeOptions={{
                 type: 'smoothstep',
               }}
             >
-              <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="#cbd5e1" />
-              <Controls className="!bg-white !border-slate-200 !shadow-md !rounded-xl" />
+              {/* Background grid */}
+              <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="#cbd5e1" />
+
+              {/* Automatic initial fit-to-screen */}
+              <AutoFitView />
+
+              {/* Floating Zoom & Fit Controls */}
+              <GraphControlsBar />
+
+              {/* MiniMap */}
               <MiniMap
-                className="!bg-white !border-slate-200 !shadow-md !rounded-xl"
+                className="!bg-white !border-slate-200 !shadow-md !rounded-xl !bottom-4 !right-4"
                 zoomable={false}
                 pannable={false}
                 nodeColor={n => {
@@ -210,18 +256,44 @@ export function DependencyScreen({ project }: { project: BusinessProject }) {
                   if (status === 'completed') return '#10b981';
                   if (status === 'in-progress') return '#3b82f6';
                   if (status === 'ready') return '#f59e0b';
-                  return '#cbd5e1';
+                  if (status === 'conditional') return '#8b5cf6';
+                  return '#94a3b8';
                 }}
               />
+
+              {/* Dependency Direction Legend */}
+              <div className="absolute bottom-4 left-4 z-10 bg-white/95 backdrop-blur-xs border border-slate-200 shadow-sm rounded-xl p-2.5 flex items-center gap-4 text-[11px] text-slate-600 flex-wrap">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-4 h-0.5 bg-slate-600 inline-block" />
+                  <span className="font-semibold text-slate-800">──▶ Sequential Prerequisite</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-4 h-0.5 border-t-2 border-dashed border-purple-500 inline-block" />
+                  <span className="font-semibold text-slate-800">- -▶ Conditional</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block" />
+                  <span>Completed</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block" />
+                  <span>Ready</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-slate-400 inline-block" />
+                  <span>Pending Prerequisite</span>
+                </div>
+              </div>
             </ReactFlow>
           </div>
 
-          {/* Right Sidebar Panel */}
+          {/* Right Focused Detail Panel */}
           {selectedNode && (
             <ApprovalSidebar
               selectedNode={selectedNode}
               allNodes={allNodes}
               onClose={() => setSelectedNodeId(null)}
+              onSelectNode={setSelectedNodeId}
               onCompleteSubFormStep={completeSubFormStep}
               projectId={project.id}
             />

@@ -4,6 +4,9 @@ import React, { useState } from 'react';
 import { Icon } from '../public-auth/PublicChrome';
 import { listGrievancesForBusiness, type Grievance, type GrievanceReason, type GrievanceStatus } from './data';
 import { findTrackerAppForBusiness, listTrackerAppsForBusiness } from '../applications/data';
+import { findBusinessProjectById } from '../businesses/catalog';
+
+type RequestType = 'Application grievance' | 'Service request' | 'Escalation'
 
 const inputDefault = 'w-full px-3 py-2 text-sm border rounded bg-white focus:outline-none focus:ring-2 focus:ring-[#1a56db] focus:border-[#1a56db] transition-colors placeholder:text-[#9aa5b4] border-[#d1d9e0]';
 function Breadcrumb({ items }: { items: { label: string; href?: string }[] }) {
@@ -58,12 +61,15 @@ function GrievanceStatusBadge({ status }: { status: GrievanceStatus }) {
   )
 }
 
-function GrievanceDetailPanel({ grievance, onBack, onReopen, lang }: {
+function GrievanceDetailPanel({ grievance, businessId, onBack, onReopen, lang }: {
   grievance: Grievance
+  businessId: string
   onBack: () => void
   onReopen: () => void
   lang: 'en' | 'mr'
 }) {
+  const business = findBusinessProjectById(businessId)
+  const linkedApplication = findTrackerAppForBusiness(businessId, grievance.applicationId)
   const t = {
     en: {
       back: '← Grievances',
@@ -173,12 +179,12 @@ function GrievanceDetailPanel({ grievance, onBack, onReopen, lang }: {
               <div className="p-4">
                 <dl className="space-y-2.5 text-sm">
                   {[
+                    ['Business', business?.name ?? businessId],
+                    ['Project', business?.subtitle ?? 'Current project'],
                     [t.appId, grievance.applicationId],
                     [t.dept, grievance.department],
-                    [t.service, grievance.service],
-                    [t.desk, grievance.currentDesk],
-                    [t.submitted, grievance.submissionDate],
-                    [t.sla, grievance.sla],
+                    ['Current stage', linkedApplication?.stage ?? grievance.currentDesk],
+                    ['Timeline', linkedApplication ? `Submitted ${linkedApplication.submittedDate ?? grievance.submissionDate} · ${linkedApplication.lastUpdated ?? linkedApplication.sla} · Target ${linkedApplication.targetDate ?? 'not available'}` : `Submitted ${grievance.submissionDate} · ${grievance.sla}`],
                   ].map(([label, val]) => (
                     <div key={label as string}>
                       <dt className="text-xs text-[#9aa5b4] font-medium">{label}</dt>
@@ -303,9 +309,14 @@ export function E32GrievancesPage({
 
   // New grievance form state
   const [newReason, setNewReason] = useState<GrievanceReason | ''>('')
+  const [newRequestType, setNewRequestType] = useState<RequestType | ''>('')
   const [newDesc, setNewDesc] = useState('')
+  const [evidenceNames, setEvidenceNames] = useState<string[]>([])
   // Invalid applicationId must NOT select the first record; only exact matchedApp is used
-  const [newAppId, setNewAppId] = useState<string>(() => (matchedApp ? matchedApp.appId : ''))
+  const [newAppId, setNewAppId] = useState<string>(() => {
+    if (initialApplicationId) return matchedApp?.appId ?? ''
+    return initialAppOptions.find(app => app.actionRequired)?.appId ?? initialAppOptions[0]?.appId ?? ''
+  })
   const [submitted, setSubmitted] = useState(false)
   const [lastCreatedId, setLastCreatedId] = useState<string>('')
 
@@ -319,10 +330,12 @@ export function E32GrievancesPage({
       all: 'All',
       noGrievances: 'No grievances found.',
       newTitle: 'Raise a New Grievance',
-      reasonLabel: 'Reason for Grievance',
+      typeLabel: 'Type of Request',
+      reasonLabel: 'Nature of Request',
       descLabel: 'Description',
       descHint: 'Describe the issue. System data will be automatically attached — you do not need to repeat information already in your application.',
       appIdLabel: 'Application / Reference',
+      evidenceLabel: 'Supporting Evidence',
       submit: 'Submit Grievance',
       cancel: 'Cancel',
       autoAttached: 'Auto-attached system data',
@@ -337,10 +350,12 @@ export function E32GrievancesPage({
       all: 'सर्व',
       noGrievances: 'कोणत्याही तक्रारी आढळल्या नाहीत.',
       newTitle: 'नवीन तक्रार दाखल करा',
+      typeLabel: 'विनंतीचा प्रकार',
       reasonLabel: 'तक्रारीचे कारण',
       descLabel: 'वर्णन',
       descHint: 'समस्या वर्णन करा. सिस्टम डेटा आपोआप जोडला जाईल.',
       appIdLabel: 'अर्ज / संदर्भ',
+      evidenceLabel: 'समर्थन पुरावा',
       submit: 'तक्रार सादर करा',
       cancel: 'रद्द करा',
       autoAttached: 'आपोआप जोडलेला सिस्टम डेटा',
@@ -349,9 +364,10 @@ export function E32GrievancesPage({
   }[lang]
 
   const REASONS: GrievanceReason[] = ['SLA breach', 'Unresolved query', 'Department delay', 'Incorrect status', 'Inspection delay', 'Other']
+  const REQUEST_TYPES: RequestType[] = ['Application grievance', 'Service request', 'Escalation']
 
-  const applicationOptions = listTrackerAppsForBusiness(businessId)
   const selectedApp = newAppId ? findTrackerAppForBusiness(businessId, newAppId) : undefined
+  const business = findBusinessProjectById(businessId)
 
   const filtered = filter === 'All' ? grievances : grievances.filter(g => g.status === filter)
   const selected = grievances.find(g => g.id === selectedId)
@@ -360,6 +376,7 @@ export function E32GrievancesPage({
     return (
       <GrievanceDetailPanel
         grievance={selected}
+        businessId={businessId}
         lang={lang}
         onBack={() => setView('list')}
         onReopen={() => {
@@ -401,10 +418,10 @@ export function E32GrievancesPage({
           <div className="bg-white border border-[#d1d9e0] rounded p-5 mb-4">
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-[#374151] mb-1">{t.appIdLabel}</label>
-                <select value={newAppId} onChange={e => setNewAppId(e.target.value)} className={inputDefault}>
-                  <option value="">Select an application…</option>
-                  {applicationOptions.map(app => <option key={app.appId} value={app.appId}>{app.appId} — {app.service}</option>)}
+                <label className="block text-sm font-medium text-[#374151] mb-1">{t.typeLabel} <span className="text-red-600" aria-hidden="true">*</span></label>
+                <select value={newRequestType} onChange={e => setNewRequestType(e.target.value as RequestType)} className={inputDefault}>
+                  <option value="">Select request type…</option>
+                  {REQUEST_TYPES.map(type => <option key={type} value={type}>{type}</option>)}
                 </select>
               </div>
               <div>
@@ -419,6 +436,11 @@ export function E32GrievancesPage({
                 <textarea rows={4} value={newDesc} onChange={e => setNewDesc(e.target.value)} className={`${inputDefault} resize-none`} placeholder={t.descHint} />
                 <p className="mt-1 text-xs text-[#6b7a8d]">{t.descHint}</p>
               </div>
+              <div>
+                <label className="block text-sm font-medium text-[#374151] mb-1" htmlFor="grievance-evidence">{t.evidenceLabel}</label>
+                <input id="grievance-evidence" type="file" multiple onChange={event => setEvidenceNames(Array.from(event.target.files ?? []).map(file => file.name))} className="block w-full rounded border border-[#d1d9e0] bg-white px-3 py-2 text-xs text-[#475569] file:mr-3 file:rounded file:border-0 file:bg-[#eef4f8] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-[#1a3a5c]" />
+                <p className="mt-1 text-xs text-[#6b7a8d]">Optional. Attach correspondence, screenshots, receipts, or other evidence.</p>
+              </div>
             </div>
           </div>
 
@@ -429,20 +451,15 @@ export function E32GrievancesPage({
               <span className="text-xs font-semibold text-blue-800 uppercase tracking-wider">{t.autoAttached}</span>
             </div>
             <div className="p-4">
-              <p className="text-xs text-[#6b7a8d] mb-3">{t.autoNote}</p>
-              <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-xs">
+              <p className="text-xs text-[#6b7a8d] mb-3">{t.autoNote} You do not need to enter it again.</p>
+              <dl className="grid grid-cols-1 gap-x-6 gap-y-3 text-xs sm:grid-cols-2">
                 {[
-                  ['Application ID', newAppId],
+                  ['Business', business?.name ?? businessId],
+                  ['Project', business?.subtitle ?? 'Current project'],
+                  ['Application', selectedApp ? `${selectedApp.appId} — ${selectedApp.service}` : 'No application context available'],
                   ['Department', selectedApp?.dept ?? 'Select an application'],
-                  ['Service', selectedApp?.service ?? 'Select an application'],
-                  ['Current Desk', selectedApp?.currentDesk ?? 'Select an application'],
-                  ['Submission Date', 'Not available'],
-                  ['SLA', selectedApp?.sla ?? 'Select an application'],
-                  ['Query History', 'Not available'],
-                  ['Entrepreneur Time', 'Not available'],
-                  ['Department Time', 'Not available'],
-                  ['Inspection State', selectedApp?.inspection ?? 'Select an application'],
-                  ['Prior Escalation', 'Not available'],
+                  ['Current stage', selectedApp?.stage ?? 'Not available'],
+                  ['Timeline', selectedApp ? `Submitted ${selectedApp.submittedDate ?? 'date unavailable'} · ${selectedApp.lastUpdated ?? selectedApp.sla} · Target ${selectedApp.targetDate ?? 'not available'}` : 'Not available'],
                 ].map(([label, val]) => (
                   <div key={label}>
                     <dt className="text-[#9aa5b4] font-medium">{label}</dt>
@@ -456,7 +473,7 @@ export function E32GrievancesPage({
           <div className="flex gap-3">
             <button
               onClick={() => {
-                if (!selectedApp || !newReason || !newDesc.trim()) return
+                if (!selectedApp || !newRequestType || !newReason || !newDesc.trim()) return
                 const newId = `GRV-2026-001${grievances.length + 1}`
                 const created: Grievance = {
                   id: newId,
@@ -477,7 +494,7 @@ export function E32GrievancesPage({
                       date: '25 Sep 2026',
                       from: 'Entrepreneur',
                       to: 'Grievance Cell',
-                      reason: 'New grievance submitted (local tab demo record)',
+                      reason: `${newRequestType} submitted${evidenceNames.length ? ` with ${evidenceNames.length} supporting evidence file${evidenceNames.length === 1 ? '' : 's'}` : ''} (local tab demo record)`,
                     },
                   ],
                 }
@@ -512,7 +529,7 @@ export function E32GrievancesPage({
               {t.subtitle}
             </p>
           </div>
-          <button onClick={() => { setNewReason(''); setNewDesc(''); setView('new') }} className="flex items-center gap-2 bg-[#1a3a5c] text-white text-sm font-medium px-4 py-2 rounded hover:bg-[#0f2540] transition-colors shrink-0">
+          <button onClick={() => { setNewRequestType(''); setNewReason(''); setNewDesc(''); setEvidenceNames([]); setView('new') }} className="flex items-center gap-2 bg-[#1a3a5c] text-white text-sm font-medium px-4 py-2 rounded hover:bg-[#0f2540] transition-colors shrink-0">
             <Icon.Plus /> {t.raise}
           </button>
         </div>

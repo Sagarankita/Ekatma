@@ -9,19 +9,26 @@ function temporaryResponse(input: AssistantRequest): AssistantResponse {
     ?? context.entities.documentId
     ?? context.entities.applicationId;
   const scope = entity ? `${context.label} (${entity})` : context.label;
+  const businessScope = [context.safeMetadata?.businessName ?? context.entities.businessId, context.safeMetadata?.projectName].filter(Boolean).join(' — ');
+  const relevantRequirement = context.safeMetadata?.recordTitle
+    ?? context.entities.requirementId
+    ?? context.safeMetadata?.applicationService
+    ?? (context.pageType === 'regulatory-changes' ? 'Regulatory Change Impact' : context.label);
 
   if (context.portal === 'department') {
     return {
       content: `Source-backed prototype guidance for: "${content}"\n\nThe shared assistant searched the currently configured regulatory reference set for ${scope}. A production retrieval backend is not connected in this phase, so the cited prototype source must be verified before an officer relies on it.`,
-      citations: [{ source: 'Configured MIDC regulatory repository', clause: 'Applicable clause requires verification', version: 'Prototype reference set' }],
+      citations: [{ source: 'Configured MIDC regulatory repository', clause: 'Applicable clause requires verification', version: 'Prototype reference set', effectiveDate: 'Verify current published version' }],
+      relevantRequirement,
       needsVerification: true,
       uncertainty: 'No production retrieval service is connected. Confirm the source and current rule version before making a determination.',
     };
   }
 
   return {
-    content: `Prototype regulatory guidance for: "${content}"\n\nThis response is scoped to ${scope}. It explains configured EKATMA information only and does not approve, reject, or replace a department decision.`,
-    citations: [{ source: 'Configured EKATMA regulatory reference data', version: 'Prototype reference set' }],
+    content: `Prototype regulatory guidance for: "${content}"\n\nThis response is scoped to ${scope}${businessScope ? ` for ${businessScope}` : ''}. It explains configured EKATMA information only and does not approve, reject, or replace a department decision.`,
+    citations: [{ source: 'Configured EKATMA regulatory reference data', version: 'Prototype reference set', effectiveDate: 'Verify current published version' }],
+    relevantRequirement,
     needsVerification: context.pageType === 'dashboard' || context.mode === 'global',
     uncertainty: context.mode === 'global' ? 'Open the assistant from a specific record for entity-scoped guidance.' : undefined,
   };

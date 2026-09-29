@@ -8,7 +8,7 @@ import { findBusinessEntity } from '../identity/catalog';
 import type { RegAssistantContext } from '../regulatory-assistant/AssistantScreen';
 import { useRegulatoryAssistant } from '@/features/regulatory-assistant/Provider';
 import { inlineContext } from '@/features/regulatory-assistant/context';
-import { E29RegChangeImpactPage, E30BusinessChangeSimulator, E31AmendmentsPage, type ChangeType } from './ChangeScreens';
+import { E29RegChangeImpactPage, E30BusinessChangeSimulator, E31AmendmentsPage, listRegulatoryChangesForBusiness, type ChangeType } from './ChangeScreens';
 
 const getDraftKey = (businessId: string) => `entrepreneur_change_draft_${businessId}_v1`;
 type ChangeDraft = { changeType: ChangeType; proposedValue: string };
@@ -31,6 +31,8 @@ export function ChangeRoute({ project, screen }: { project: BusinessProject; scr
   }, [draftKey]);
 
   if (screen === 'regulatory') return <E29RegChangeImpactPage
+    changes={listRegulatoryChangesForBusiness(project.id)}
+    contextLabel={`${project.name} — ${project.subtitle.replace(/^Internal demo project — /, '')}`}
     onBack={() => router.push(ENTREPRENEUR_ROUTES.business(project.id))}
     onGoToApplication={id => { if (findBusinessEntity('application', project.id, id)) router.push(ENTREPRENEUR_ROUTES.application(project.id, id)); }}
     onGoToCompliance={id => { if (findBusinessEntity('compliance', project.id, id)) router.push(ENTREPRENEUR_ROUTES.complianceDetail(project.id, id)); }}
@@ -69,6 +71,7 @@ export function ChangeRoute({ project, screen }: { project: BusinessProject; scr
   }
 
   return <E30BusinessChangeSimulator
+    project={project}
     onBack={() => router.push(ENTREPRENEUR_ROUTES.business(project.id))}
     onGoToE31={(changeType, proposedValue) => {
       sessionStorage.setItem(draftKey, JSON.stringify({ changeType, proposedValue }));

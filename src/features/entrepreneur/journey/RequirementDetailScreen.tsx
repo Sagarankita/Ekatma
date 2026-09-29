@@ -14,14 +14,56 @@ import {
   type JourneyReq,
 } from './data';
 
-function SectionCard({ title, children, id }: { title: string; children: React.ReactNode; id?: string }) {
+const REQUIREMENT_SUMMARIES: Record<string, string> = {
+  'LAND-001': 'Formal allotment and physical possession confirmation of industrial plot within MIDC industrial estate.',
+  'EST-001': 'Statutory environmental permission granted by MPCB before setting up any industrial plant or commencing physical construction.',
+  'CON-001': 'Formal sanction of architectural and structural construction drawings by the local planning authority before starting construction.',
+  'CON-002': 'Provisional clearance issued by Fire Services confirming that proposed building drawings comply with fire protection norms.',
+  'UTIL-001': 'High-tension electricity supply sanction and connection agreement with MSEDCL / MIDC.',
+  'UTIL-002': 'Industrial water supply sanction and pipeline connection permission from MIDC water supply department.',
+  'UTIL-003': 'Permission for groundwater extraction and borewell drilling from the competent groundwater authority.',
+  'UTIL-004': 'NOC from local municipal authority or MIDC for connecting domestic and industrial wastewater discharge.',
+  'PREOP-001': 'Statutory operational consent required from MPCB before starting manufacturing operations or trial runs.',
+  'PREOP-002': 'Official factory registration and occupier license issued by the Directorate of Industrial Safety & Health (DISH).',
+  'PREOP-003': 'Registration and statutory inspection certificate for industrial boilers prior to operation.',
+  'PREOP-004': 'Final inspection and Fire Safety NOC required prior to building occupancy and operations.',
+  'COMPLY-001': 'Periodic environmental compliance monitoring reports and returns mandated under consent conditions.',
+};
+
+function SectionCard({
+  title,
+  questionNumber,
+  questionLabel,
+  children,
+  id,
+  className = '',
+}: {
+  title: string;
+  questionNumber?: string;
+  questionLabel?: string;
+  children: React.ReactNode;
+  id?: string;
+  className?: string;
+}) {
   return (
-    <div id={id} className="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
-      <div className="px-5 py-3.5 bg-[#F8F9FA] border-b border-slate-200">
-        <h2 className="text-[13px] font-bold text-[#17365D] uppercase tracking-wider">{title}</h2>
+    <section id={id} className={`bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden ${className}`}>
+      <div className="px-5 py-3.5 bg-slate-50/80 border-b border-slate-200 flex items-center justify-between gap-3">
+        <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+          {questionNumber && (
+            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#17365D] text-white text-[10px] font-bold">
+              {questionNumber}
+            </span>
+          )}
+          <span>{title}</span>
+        </h2>
+        {questionLabel && (
+          <span className="text-[10px] font-semibold text-[#17365D] bg-[#17365D]/8 px-2 py-0.5 rounded border border-[#17365D]/15">
+            {questionLabel}
+          </span>
+        )}
       </div>
       <div className="px-5 py-4">{children}</div>
-    </div>
+    </section>
   );
 }
 
@@ -33,9 +75,6 @@ export function RequirementDetailScreen({
   requirementId: string;
 }) {
   const [cteApproved, setCteApproved] = useState(false);
-  const [ragOpen, setRagOpen] = useState(false);
-  const [ragQuestion, setRagQuestion] = useState('');
-  const [ragAnswer, setRagAnswer] = useState<string | null>(null);
   const { openAssistant, pageContext } = useRegulatoryAssistant();
 
   const nodes = listJourneyNodesForBusiness(project.id, cteApproved);
@@ -43,14 +82,17 @@ export function RequirementDetailScreen({
 
   if (!req) {
     return (
-      <main id="main-content" className="flex-1 bg-[#f8f9fb] flex items-center justify-center min-h-[60vh]" tabIndex={-1}>
+      <main id="main-content" className="flex-1 bg-[#F8F9FA] flex items-center justify-center min-h-[60vh]" tabIndex={-1}>
         <div className="max-w-[900px] mx-auto px-6 py-12 text-center">
-          <p className="text-[#6b7a8d]">Requirement not found.</p>
+          <h1 className="text-xl font-bold text-slate-800">Requirement Not Found</h1>
+          <p className="text-sm text-slate-500 mt-2">
+            The requested requirement could not be located for this business project.
+          </p>
           <Link
             href={ENTREPRENEUR_ROUTES.journey(project.id)}
-            className="mt-4 inline-block text-sm text-[#1a56db] hover:underline"
+            className="mt-5 inline-block text-sm font-semibold text-[#1a56db] hover:underline"
           >
-            ← Back to Journey
+            ← Return to Regulatory Journey
           </Link>
         </div>
       </main>
@@ -60,806 +102,857 @@ export function RequirementDetailScreen({
   const cfg = journeyStateCfg(req.displayState);
   const enrich = getEnrichment(req.id, project.name, project.location);
   const prereqs = req.dependencies.map(d => nodes.find(n => n.id === d.reqId)).filter(Boolean) as JourneyReq[];
+  const pendingPrereqs = prereqs.filter(p => p.displayState !== 'approved');
   const downstream = nodes.filter(n => n.dependencies.some(d => d.reqId === req.id));
   const parallel = enrich.parallelServices.map(id => nodes.find(n => n.id === id)).filter(Boolean) as JourneyReq[];
+
   const isReady = req.displayState === 'ready';
   const isApproved = req.displayState === 'approved';
-  const isWaiting = req.displayState === 'waiting';
-  const openRequirementAssistant = () => openAssistant({
-    origin: 'inline', mode: 'entity',
-    context: inlineContext(pageContext, { pageType: 'requirement-detail', pageTitle: 'Requirement Detail', label: req.service, entities: { businessId: project.id, requirementId: req.id }, recordTitle: req.service }),
-  });
+  const isWaiting = req.displayState === 'waiting' || (pendingPrereqs.length > 0 && !isApproved);
+  const isUnderReview = req.displayState === 'under-review';
+  const isInProgress = req.displayState === 'in-progress';
+  const isActionRequired = req.displayState === 'action-required';
 
-  const ragSuggestions = [
-    'Why is this requirement applicable to my business?',
-    'Explain the relevant regulatory clause',
-    'Which Government Resolution applies here?',
-    'Explain in Marathi',
-    'What documents do I need and where do I get them?',
-    'What happens after I submit?',
-  ];
+  const stageInfo = STAGES.find(s => s.key === req.stage);
+  const requirementSummary =
+    REQUIREMENT_SUMMARIES[req.id] ??
+    `${req.service} is a required statutory clearance administered by ${req.department} under applicable Maharashtra state regulations.`;
 
-  function handleRagQuestion(q: string) {
-    setRagQuestion(q);
-    setRagAnswer(
-      `This is a simulated regulatory assistant response to: "${q}"\n\nSource: ${enrich.regSourceType} — ${enrich.regReference}, ${enrich.regClause}\n\nThe EKATMA Regulatory Assistant retrieves and explains applicable rules. It does not grant approval or make statutory decisions. The final decision rests with the appropriate department/authority.`,
-    );
-  }
+  const openRequirementAssistant = () =>
+    openAssistant({
+      origin: 'inline',
+      mode: 'entity',
+      context: inlineContext(pageContext, {
+        pageType: 'requirement-detail',
+        pageTitle: 'Requirement Detail',
+        label: req.service,
+        entities: { businessId: project.id, requirementId: req.id },
+        recordTitle: req.service,
+      }),
+    });
+
+  // Determine Primary Action (Ensure single, obvious primary action, no duplicate destinations)
+  type PrimaryAction = {
+    canApplyText: string;
+    canApplyBadge: string;
+    description: string;
+    buttonLabel?: string;
+    buttonHref?: string;
+    theme: 'emerald' | 'amber' | 'blue' | 'indigo' | 'slate';
+  };
+
+  const primaryAction: PrimaryAction = (() => {
+    if (isApproved) {
+      return {
+        canApplyText: 'Approved & Completed',
+        canApplyBadge: 'Approved',
+        description: `This clearance is approved and active.${req.approvalRef ? ` Reference No: ${req.approvalRef}` : ''}${req.approvedDate ? ` (Granted on ${req.approvedDate})` : ''}.`,
+        theme: 'emerald',
+      };
+    }
+
+    if (isWaiting && pendingPrereqs.length > 0) {
+      const blockingReq = pendingPrereqs[0];
+      return {
+        canApplyText: 'Not Yet — Complete Prerequisite First',
+        canApplyBadge: 'Prerequisite Required',
+        description: `You must obtain approval for ${blockingReq.service} (${blockingReq.department}) before applying for this requirement.`,
+        buttonLabel: 'Complete Prerequisite →',
+        buttonHref: ENTREPRENEUR_ROUTES.requirement(project.id, blockingReq.id),
+        theme: 'amber',
+      };
+    }
+
+    if (isUnderReview) {
+      return {
+        canApplyText: 'Submitted — Under Department Review',
+        canApplyBadge: 'Under Review',
+        description: `Your application has been submitted to ${req.department} and is currently undergoing scrutiny. No applicant action required.`,
+        theme: 'blue',
+      };
+    }
+
+    if (isInProgress) {
+      return {
+        canApplyText: 'Yes — Application Draft Open',
+        canApplyBadge: 'Draft in Progress',
+        description: 'You have an active application draft for this requirement. Resume and finish submission.',
+        buttonLabel: 'Continue Application →',
+        buttonHref: ENTREPRENEUR_ROUTES.newApplication(project.id),
+        theme: 'indigo',
+      };
+    }
+
+    if (isActionRequired) {
+      return {
+        canApplyText: 'Action Required Before Submission',
+        canApplyBadge: 'Action Required',
+        description: 'Required documents or missing clarifications must be provided before submission can proceed.',
+        buttonLabel: 'Upload Document →',
+        buttonHref: ENTREPRENEUR_ROUTES.documents(project.id),
+        theme: 'amber',
+      };
+    }
+
+    if (isReady) {
+      return {
+        canApplyText: 'Yes — You Can Apply Now',
+        canApplyBadge: 'Ready to Apply',
+        description: 'All prerequisites and initial profile validations are satisfied. You may start the statutory application.',
+        buttonLabel: 'Start Application →',
+        buttonHref: ENTREPRENEUR_ROUTES.newApplication(project.id),
+        theme: 'emerald',
+      };
+    }
+
+    if (req.applicability === 'not-applicable') {
+      return {
+        canApplyText: 'Not Applicable',
+        canApplyBadge: 'Exempt',
+        description: req.conditionReason ?? 'This requirement is excluded by your current Business DNA configuration.',
+        theme: 'slate',
+      };
+    }
+
+    return {
+      canApplyText: 'Conditional Requirement',
+      canApplyBadge: 'Conditional',
+      description: req.conditionReason ?? 'Applicability depends on verified project parameters.',
+      buttonLabel: 'Upload Document →',
+      buttonHref: ENTREPRENEUR_ROUTES.documents(project.id),
+      theme: 'amber',
+    };
+  })();
+
+  const themeClasses = {
+    emerald: {
+      border: 'border-emerald-300',
+      bg: 'bg-emerald-50/70',
+      badge: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+      button: 'bg-emerald-700 hover:bg-emerald-800 text-white',
+      title: 'text-emerald-950',
+    },
+    amber: {
+      border: 'border-amber-300',
+      bg: 'bg-amber-50/70',
+      badge: 'bg-amber-100 text-amber-900 border-amber-300',
+      button: 'bg-amber-700 hover:bg-amber-800 text-white',
+      title: 'text-amber-950',
+    },
+    blue: {
+      border: 'border-blue-300',
+      bg: 'bg-blue-50/70',
+      badge: 'bg-blue-100 text-blue-900 border-blue-300',
+      button: 'bg-blue-700 hover:bg-blue-800 text-white',
+      title: 'text-blue-950',
+    },
+    indigo: {
+      border: 'border-indigo-300',
+      bg: 'bg-indigo-50/70',
+      badge: 'bg-indigo-100 text-indigo-900 border-indigo-300',
+      button: 'bg-indigo-700 hover:bg-indigo-800 text-white',
+      title: 'text-indigo-950',
+    },
+    slate: {
+      border: 'border-slate-300',
+      bg: 'bg-slate-50',
+      badge: 'bg-slate-200 text-slate-800 border-slate-300',
+      button: 'bg-slate-700 hover:bg-slate-800 text-white',
+      title: 'text-slate-900',
+    },
+  }[primaryAction.theme];
 
   return (
-    <main id="main-content" className="flex-1 bg-[#F8F9FA]" tabIndex={-1}>
-      <div className="max-w-[960px] mx-auto px-6 py-6">
-        {/* Breadcrumb */}
-        <div className="mb-4">
-          <nav className="text-xs text-[#5C6470] flex items-center gap-1.5" aria-label="Breadcrumb">
-            <Link href={ENTREPRENEUR_ROUTES.businesses()} className="hover:text-[#17365D] hover:underline">
-              My Businesses
-            </Link>
-            <span>›</span>
-            <Link href={ENTREPRENEUR_ROUTES.business(project.id)} className="hover:text-[#17365D] hover:underline">
-              {project.name}
-            </Link>
-            <span>›</span>
-            <Link href={ENTREPRENEUR_ROUTES.journey(project.id)} className="hover:text-[#17365D] hover:underline">
-              Regulatory Journey
-            </Link>
-            <span>›</span>
-            <span className="text-[#17365D] font-bold">{req.service}</span>
-          </nav>
-        </div>
+    <main id="main-content" className="flex-1 bg-[#F8F9FA] pb-16" tabIndex={-1}>
+      <div className="max-w-[960px] mx-auto px-4 sm:px-6 py-6">
+        {/* ── Breadcrumb Navigation ── */}
+        <nav className="mb-4 text-xs text-slate-500 flex items-center gap-1.5 flex-wrap" aria-label="Breadcrumb">
+          <Link href={ENTREPRENEUR_ROUTES.businesses()} className="hover:text-[#17365D] hover:underline">
+            My Businesses
+          </Link>
+          <span>›</span>
+          <Link href={ENTREPRENEUR_ROUTES.business(project.id)} className="hover:text-[#17365D] hover:underline">
+            {project.name}
+          </Link>
+          <span>›</span>
+          <Link href={ENTREPRENEUR_ROUTES.journey(project.id)} className="hover:text-[#17365D] hover:underline">
+            Regulatory Journey
+          </Link>
+          <span>›</span>
+          <span className="text-[#17365D] font-bold truncate max-w-[280px]">{req.service}</span>
+        </nav>
 
-        {/* Demo toggle banner */}
+        {/* ── Demo Toggle Banner (Prototype Verification) ── */}
         <div className="mb-5 p-3.5 bg-[#FDF4EB] border border-[#F8D4B0] rounded-xl flex items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-bold text-[#C46A15] uppercase tracking-wider">Prototype Demo</span>
-            <span className="text-[#C46A15]">Simulate requirement approval to inspect unlocked states</span>
+            <span className="text-[#C46A15] hidden sm:inline">Simulate requirement approval to inspect unlocked states</span>
           </div>
           <button
             type="button"
             onClick={() => setCteApproved(v => !v)}
-            className={`px-3 py-1.5 rounded-lg font-semibold transition-colors ${cteApproved ? 'bg-[#2F7D4F] text-white' : 'bg-[#17365D] text-white'}`}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors shrink-0 ${
+              cteApproved ? 'bg-[#2F7D4F] text-white' : 'bg-[#17365D] text-white'
+            }`}
           >
-            {cteApproved ? '✓ CTE Approved (reset)' : 'Simulate CTE Approval →'}
+            {cteApproved ? '✓ CTE Approved (Reset Simulation)' : 'Simulate CTE Approval →'}
           </button>
         </div>
 
-        {/* ── Page Header ── */}
+        {/* ── 1. WHAT IS THIS? (Header & Requirement Name) ── */}
         <div className="mb-6 bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
-          <div className="px-5 py-4 border-b border-slate-200">
+          <div className="p-5 sm:p-6 border-b border-slate-200">
             <div className="flex flex-wrap items-start justify-between gap-4">
-              <div>
-                <p className="text-[10px] font-bold text-[#5C6470] uppercase tracking-wider mb-1">
-                  {enrich.serviceId} · {STAGES.find(s => s.key === req.stage)?.label ?? req.stage} Stage
+              <div className="flex-1 min-w-[280px]">
+                <div className="flex items-center gap-2 flex-wrap mb-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded">
+                    {enrich.serviceId}
+                  </span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#17365D] bg-[#17365D]/8 border border-[#17365D]/15 px-2 py-0.5 rounded">
+                    Stage {stageInfo?.num ?? '00'} · {stageInfo?.label ?? req.stage}
+                  </span>
+                  <span className="text-[10px] font-semibold text-slate-500">
+                    {req.department}
+                  </span>
+                </div>
+                <h1 className="text-xl sm:text-2xl font-bold text-slate-900 leading-tight">
+                  {req.service}
+                </h1>
+                <p className="text-sm text-slate-600 mt-2 leading-relaxed">
+                  {requirementSummary}
                 </p>
-                <h1 className="text-xl font-bold text-[#17365D] leading-tight">{req.service}</h1>
-                <p className="text-xs text-[#5C6470] mt-0.5">{req.department}</p>
               </div>
-              <div className="flex items-center gap-3">
-                <span className={`text-xs font-semibold px-3 py-1.5 rounded border ${cfg.badgeCls}`}>
+
+              {/* Header Actions */}
+              <div className="flex items-center gap-2.5 shrink-0">
+                <span className={`text-xs font-semibold px-3 py-1.5 rounded-lg border ${cfg.badgeCls}`}>
                   {cfg.icon} {cfg.label}
                 </span>
                 <button
                   type="button"
                   onClick={openRequirementAssistant}
-                  className="text-xs bg-[#17365D] text-white px-3.5 py-1.5 rounded-lg hover:bg-[#245B8A] font-semibold flex items-center gap-1.5 shadow-xs"
+                  className="text-xs bg-[#17365D] text-white px-3.5 py-1.5 rounded-lg hover:bg-[#245B8A] font-semibold flex items-center gap-1.5 shadow-xs transition-colors"
                 >
+                  <span className="w-3.5 h-3.5 rounded-full bg-white/20 flex items-center justify-center text-[10px]">?</span>
                   Ask Assistant
                 </button>
               </div>
             </div>
           </div>
 
-          {/* At-a-glance strip */}
-          <div className="px-5 py-3.5 grid grid-cols-2 sm:grid-cols-4 gap-4 bg-[#F8F9FA]">
-            {[
-              {
-                label: 'Applicability',
-                value:
-                  req.applicability === 'applicable'
-                    ? 'Confirmed Applicable'
-                    : req.applicability === 'conditional'
-                      ? 'Conditional'
-                      : req.applicability === 'needs-verification'
-                        ? 'Needs Verification'
-                        : 'Not Applicable',
-              },
-              {
-                label: 'Dependency',
-                value:
-                  prereqs.length > 0
-                    ? prereqs.every(p => p.displayState === 'approved')
-                      ? 'Prerequisites Complete'
-                      : 'Prerequisites Pending'
-                    : 'No Prerequisites',
-              },
-              { label: 'Inspection', value: req.inspectionState ?? 'May be Required' },
-              { label: 'Configured SLA', value: enrich.slaConfigured },
-            ].map(f => (
-              <div key={f.label}>
-                <p className="text-[10px] font-bold text-[#5C6470] uppercase tracking-wider">{f.label}</p>
-                <p className="text-xs font-bold text-[#20242A] mt-0.5">{f.value}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Primary actions */}
-          <div className="px-5 py-4 border-t border-[#e8edf2] flex flex-wrap items-center gap-3">
-            {isReady && (
-              <Link
-                href={ENTREPRENEUR_ROUTES.newApplication(project.id)}
-                className="bg-[#1a56db] text-white text-sm font-bold px-6 py-2.5 rounded hover:bg-[#1a3a5c] transition-colors"
-              >
-                Start Application →
-              </Link>
-            )}
-            {isWaiting && (
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-[#f8f9fb] border border-[#d1d9e0] rounded flex items-center gap-2">
-                  <span className="text-xs font-semibold text-[#6b7a8d]">⏸ Waiting on Dependency</span>
-                </div>
-                <Link
-                  href={ENTREPRENEUR_ROUTES.dependencies(project.id)}
-                  className="text-sm border border-[#1a56db] text-[#1a56db] px-4 py-2 rounded hover:bg-[#ebf3ff] font-semibold transition-colors"
-                >
-                  View Dependency
-                </Link>
-              </div>
-            )}
-            {isApproved && (
-              <div className="flex items-center gap-2 text-sm font-bold text-[#166534]">
-                <span>✓ Approved</span>
-                {req.approvalRef && <span className="text-xs font-normal text-[#6b7a8d]">· Ref: {req.approvalRef}</span>}
-              </div>
-            )}
-            {!isReady && !isWaiting && !isApproved && (
-              <button
-                type="button"
-                className="bg-[#9aa5b4] text-white text-sm font-bold px-6 py-2.5 rounded cursor-not-allowed"
-                disabled
-              >
-                Start Application
-              </button>
-            )}
-            <Link
-              href={ENTREPRENEUR_ROUTES.documents(project.id)}
-              className="text-sm border border-[#d1d9e0] text-[#374151] px-4 py-2.5 rounded hover:bg-[#f0f4f8] font-medium transition-colors"
-            >
-              View Documents
-            </Link>
-            <Link
-              href={ENTREPRENEUR_ROUTES.journey(project.id)}
-              className="text-sm border border-[#d1d9e0] text-[#374151] px-4 py-2.5 rounded hover:bg-[#f0f4f8] font-medium transition-colors"
-            >
-              View in Journey
-            </Link>
+          {/* Quick Metrics Bar */}
+          <div className="px-5 py-3 grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50/70 border-t border-slate-100 text-xs">
+            <div>
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Applicability</p>
+              <p className="font-semibold text-slate-800 mt-0.5">
+                {req.applicability === 'applicable'
+                  ? 'Confirmed Applicable'
+                  : req.applicability === 'conditional'
+                    ? 'Conditional Rule'
+                    : req.applicability === 'needs-verification'
+                      ? 'Needs Verification'
+                      : 'Not Applicable'}
+              </p>
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Prerequisites</p>
+              <p className="font-semibold text-slate-800 mt-0.5">
+                {prereqs.length === 0
+                  ? 'None (Can start directly)'
+                  : pendingPrereqs.length === 0
+                    ? 'All Prerequisites Met'
+                    : `${pendingPrereqs.length} Pending`}
+              </p>
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Configured SLA</p>
+              <p className="font-semibold text-slate-800 mt-0.5">{enrich.slaConfigured}</p>
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Site Inspection</p>
+              <p className="font-semibold text-slate-800 mt-0.5">{req.inspectionState ?? 'May be Required'}</p>
+            </div>
           </div>
         </div>
 
-        {/* ── Two-column layout ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Main column */}
-          <div className="lg:col-span-2 space-y-4">
-            {/* Why do I need this? */}
-            <SectionCard title="Why do I need this?">
-              <p className="text-xs font-semibold text-[#9aa5b4] uppercase tracking-wider mb-2">Your business factors</p>
-              <div className="space-y-1.5 mb-4">
-                {enrich.dnaBasis.map(f => (
-                  <div key={f.label} className="flex gap-2 text-sm">
-                    <span className="text-[#9aa5b4] font-medium w-36 shrink-0">{f.label}</span>
-                    <span className="font-semibold text-[#1a2533]">{f.value}</span>
-                  </div>
-                ))}
-              </div>
-              <p className="text-[10px] font-bold text-[#9aa5b4] uppercase tracking-wider mb-1.5">Applicability Summary</p>
-              <p className="text-sm text-[#374151] leading-relaxed">{enrich.applicabilitySummary}</p>
-              <p className="text-[10px] text-[#9aa5b4] mt-3 italic">
-                These are Business DNA factors used by the regulatory applicability engine. They are carried from your
-                confirmed Business Profile.
-              </p>
-            </SectionCard>
-
-            {/* Applicability */}
-            <SectionCard title="Applicability">
-              <div className="flex items-center gap-2 mb-3">
-                <span
-                  className={`text-xs font-bold px-2.5 py-1 rounded border ${
-                    req.applicability === 'applicable'
-                      ? 'bg-[#f0fdf4] text-[#166534] border-[#86efac]'
-                      : req.applicability === 'conditional'
-                        ? 'bg-[#fef3c7] text-[#92400e] border-[#fde68a]'
-                        : 'bg-[#e0e7ff] text-[#3730a3] border-[#a5b4fc]'
-                  }`}
-                >
-                  {req.applicability === 'applicable'
-                    ? 'Confirmed Applicable'
-                    : req.applicability === 'conditional'
-                      ? 'Conditional'
-                      : 'Needs Verification'}
-                </span>
-                {enrich.regVerified ? (
-                  <span className="text-[10px] text-[#166534] font-semibold border border-[#bbf7d0] bg-[#f0fdf4] px-2 py-0.5 rounded">
-                    Verified Source
-                  </span>
-                ) : (
-                  <span className="text-[10px] text-[#3730a3] font-semibold border border-[#a5b4fc] bg-[#e0e7ff] px-2 py-0.5 rounded">
-                    Needs Verification
-                  </span>
-                )}
-              </div>
-              <p className="text-xs font-semibold text-[#9aa5b4] uppercase tracking-wider mb-2">Based on</p>
-              <ul className="space-y-1">
-                {enrich.applicabilityBasis.map(b => (
-                  <li key={b} className="flex items-center gap-2 text-sm text-[#374151]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#1a56db] shrink-0" />
-                    {b}
-                  </li>
-                ))}
-              </ul>
-              {req.conditionReason && (
-                <p className="mt-3 text-xs text-[#78350f] italic border-t border-[#e8edf2] pt-3">
-                  {req.conditionReason}
+        {/* ── 2. WHY THIS APPLIES (Concise Explanation + Trigger Factors) ── */}
+        <div className="mb-6">
+          <SectionCard
+            title="Why This Applies"
+            questionNumber="2"
+            questionLabel="WHY DO I NEED IT?"
+          >
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm text-slate-800 leading-relaxed font-medium">
+                  {enrich.applicabilitySummary}
                 </p>
-              )}
-            </SectionCard>
+              </div>
 
-            {/* Dependencies */}
-            <SectionCard title="Dependencies">
-              {prereqs.length > 0 && (
-                <div className="mb-4">
-                  <p className="text-[10px] font-bold text-[#9aa5b4] uppercase tracking-wider mb-2">
-                    Required before starting
+              {/* Trigger Factors */}
+              <div>
+                <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">
+                  Matching Business DNA Triggers
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {enrich.dnaBasis.map(f => (
+                    <div
+                      key={f.label}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 border border-slate-200 text-xs"
+                    >
+                      <span className="text-slate-500 font-medium">{f.label}:</span>
+                      <span className="font-bold text-slate-800">{f.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Expandable Section: Detailed Rule */}
+              <details className="group border border-slate-200 rounded-lg p-3.5 bg-slate-50/60 transition-colors">
+                <summary className="cursor-pointer text-xs font-semibold text-slate-700 flex items-center justify-between list-none select-none">
+                  <span className="flex items-center gap-2">
+                    <span className="text-[#17365D]">ℹ</span>
+                    <span>Detailed Rule & Evaluation Logic</span>
+                  </span>
+                  <span className="text-xs text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+                </summary>
+                <div className="mt-3 pt-3 border-t border-slate-200 text-xs text-slate-600 space-y-2.5">
+                  <p className="font-semibold text-slate-800">Regulatory Evaluation Criteria:</p>
+                  <ul className="space-y-1.5 pl-2">
+                    {enrich.applicabilityBasis.map(item => (
+                      <li key={item} className="flex items-start gap-2">
+                        <span className="text-[#1a56db] font-bold">✓</span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  {req.conditionReason && (
+                    <p className="p-2.5 bg-amber-50 border border-amber-200 rounded text-amber-900 text-[11px] mt-2">
+                      <span className="font-semibold">Condition Rule: </span>
+                      {req.conditionReason}
+                    </p>
+                  )}
+                  <p className="text-[11px] text-slate-500 italic pt-1">
+                    Evaluated against confirmed parameters from your Business Profile.
                   </p>
+                </div>
+              </details>
+            </div>
+          </SectionCard>
+        </div>
+
+        {/* ── 3. STATUS & CAN I APPLY NOW? (Primary Action Hero Card) ── */}
+        <div className="mb-6">
+          <section className={`border ${themeClasses.border} ${themeClasses.bg} rounded-xl p-5 shadow-xs transition-all`}>
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex-1 min-w-[280px]">
+                <div className="flex items-center gap-2.5 mb-1.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                    Question 4 · Can I apply now?
+                  </span>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider ${themeClasses.badge}`}>
+                    {primaryAction.canApplyBadge}
+                  </span>
+                </div>
+                <h2 className={`text-lg font-bold leading-tight ${themeClasses.title}`}>
+                  {primaryAction.canApplyText}
+                </h2>
+                <p className="text-xs text-slate-600 mt-1 max-w-[650px] leading-relaxed">
+                  {primaryAction.description}
+                </p>
+              </div>
+
+              {/* Single Obvious Primary Action (No duplicate buttons) */}
+              {primaryAction.buttonLabel && primaryAction.buttonHref && (
+                <div className="shrink-0">
+                  <Link
+                    href={primaryAction.buttonHref}
+                    className={`inline-flex items-center justify-center px-6 py-2.5 rounded-lg text-sm font-bold shadow-xs transition-colors ${themeClasses.button}`}
+                  >
+                    {primaryAction.buttonLabel}
+                  </Link>
+                </div>
+              )}
+            </div>
+          </section>
+        </div>
+
+        {/* ── 4. WHAT YOU NEED (Documents, Information, Prerequisites) ── */}
+        <div className="mb-6">
+          <SectionCard
+            title="What You Need"
+            questionNumber="3"
+            questionLabel="WHAT DO I NEED TO PROVIDE?"
+          >
+            <div className="space-y-6">
+              {/* 4A. Documents */}
+              <div>
+                <div className="flex items-center justify-between mb-2.5">
+                  <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                    <span>📄 Documents</span>
+                    <span className="text-slate-400 font-normal">({enrich.docs.length})</span>
+                  </h3>
+                  <Link
+                    href={ENTREPRENEUR_ROUTES.documents(project.id)}
+                    className="text-xs text-[#1a56db] hover:underline font-semibold"
+                  >
+                    Open Document Centre →
+                  </Link>
+                </div>
+                <div className="divide-y divide-slate-100 border border-slate-200 rounded-lg overflow-hidden bg-white">
+                  {enrich.docs.map(doc => {
+                    const isAvailable =
+                      doc.availability.toLowerCase().includes('available') ||
+                      doc.availability.toLowerCase().includes('verified');
+                    return (
+                      <div key={doc.name} className="p-3 sm:px-4 flex items-center justify-between gap-3 text-xs hover:bg-slate-50/50">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-semibold text-slate-800">{doc.name}</span>
+                            {doc.required ? (
+                              <span className="text-[9px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 border border-blue-200 px-1.5 py-0.5 rounded">
+                                Required
+                              </span>
+                            ) : (
+                              <span className="text-[9px] font-bold uppercase tracking-wider text-slate-600 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded">
+                                Conditional
+                              </span>
+                            )}
+                            {doc.reusable && (
+                              <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
+                                Reusable
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex gap-3 text-[11px] text-slate-500 mt-1">
+                            <span>Status: {doc.availability}</span>
+                            <span>·</span>
+                            <span>Verification: {doc.verification}</span>
+                          </div>
+                        </div>
+                        <span
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded border shrink-0 ${
+                            isAvailable
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                              : 'bg-amber-50 text-amber-800 border-amber-200'
+                          }`}
+                        >
+                          {isAvailable ? '✓ Ready' : 'Upload Needed'}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* 4B. Information & Forms */}
+              <div>
+                <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2.5">
+                  📝 Information & Declarations
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {/* Statutory Application Forms */}
+                  <div className="border border-slate-200 rounded-lg p-3 bg-slate-50/40">
+                    <p className="text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-2">
+                      Statutory Application Forms
+                    </p>
+                    <ul className="space-y-2 text-xs">
+                      {enrich.forms.map(form => (
+                        <li key={form.name} className="flex items-center justify-between gap-2 p-1.5 bg-white border border-slate-200 rounded">
+                          <span className="font-medium text-slate-800 truncate">{form.name}</span>
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded border bg-slate-100 text-slate-700 border-slate-200 shrink-0">
+                            {form.requirement}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Mandatory Declarations */}
+                  <div className="border border-slate-200 rounded-lg p-3 bg-slate-50/40">
+                    <p className="text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-2">
+                      Mandatory Undertakings
+                    </p>
+                    <ul className="space-y-2 text-xs">
+                      {enrich.declarations.map((decl, idx) => (
+                        <li key={idx} className="flex items-start gap-2 p-1.5 bg-white border border-slate-200 rounded">
+                          <span className="text-emerald-600 font-bold mt-0.5 text-xs">✓</span>
+                          <span className="text-slate-700 text-[11px] leading-tight">{decl.text}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+                <p className="text-[11px] text-slate-500 mt-2 italic">
+                  ⚡ EKATMA automatically pre-populates enterprise details and plot credentials from your verified Business DNA.
+                </p>
+              </div>
+
+              {/* 4C. Prerequisites */}
+              <div>
+                <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2.5">
+                  🔗 Prerequisites
+                </h3>
+                {prereqs.length === 0 ? (
+                  <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-600">
+                    ✓ <span className="font-semibold text-slate-800">No prior clearances required.</span> This requirement can be initiated directly without predecessor approvals.
+                  </div>
+                ) : (
                   <div className="space-y-2">
                     {prereqs.map(p => {
                       const pCfg = journeyStateCfg(p.displayState);
                       const dep = req.dependencies.find(d => d.reqId === p.id);
                       return (
-                        <Link
+                        <div
                           key={p.id}
-                          href={ENTREPRENEUR_ROUTES.requirement(project.id, p.id)}
-                          className={`block p-3 rounded border hover:shadow-sm transition-shadow ${
+                          className={`p-3 rounded-lg border text-xs flex items-center justify-between gap-3 ${
                             p.displayState === 'approved'
-                              ? 'border-[#bbf7d0] bg-[#f0fdf4]'
-                              : 'border-[#e8edf2] bg-[#f8f9fb]'
+                              ? 'bg-emerald-50/50 border-emerald-200'
+                              : 'bg-amber-50/50 border-amber-200'
                           }`}
                         >
-                          <div className="flex items-start gap-3">
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded border shrink-0 ${pCfg.badgeCls}`}>
-                              {pCfg.label}
-                            </span>
-                            <div>
-                              <p className="text-xs font-semibold text-[#1a2533]">
-                                {p.department} — {p.service}
-                              </p>
-                              {dep?.type === 'conditional' && (
-                                <p className="text-[10px] text-[#78350f]">Conditional dependency</p>
-                              )}
-                              {dep?.reason && <p className="text-xs text-[#6b7a8d] mt-0.5">{dep.reason}</p>}
+                          <div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-bold text-slate-900">{p.service}</span>
+                              <span className="text-slate-500">({p.department})</span>
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${pCfg.badgeCls}`}>
+                                {pCfg.label}
+                              </span>
                             </div>
+                            {dep?.reason && (
+                              <p className="text-[11px] text-slate-600 mt-1">{dep.reason}</p>
+                            )}
                           </div>
-                        </Link>
+                          <Link
+                            href={ENTREPRENEUR_ROUTES.requirement(project.id, p.id)}
+                            className="text-xs text-[#1a56db] hover:underline font-semibold shrink-0"
+                          >
+                            View →
+                          </Link>
+                        </div>
                       );
                     })}
                   </div>
-                </div>
-              )}
+                )}
+              </div>
+            </div>
+          </SectionCard>
+        </div>
 
-              {/* This requirement */}
-              <div className="mb-4">
-                <p className="text-[10px] font-bold text-[#9aa5b4] uppercase tracking-wider mb-2">This requirement</p>
-                <div
-                  className={`flex items-center gap-3 p-3 rounded border-l-4 ${cfg.border} border border-[#e8edf2] ${cfg.bg}`}
-                >
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${cfg.badgeCls}`}>
-                    {cfg.label}
+        {/* ── 5. APPLICATION STATUS & DETAILS ── */}
+        <div className="mb-6">
+          <SectionCard title="Application Status">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Processing State</p>
+                <div className="mt-1 flex items-center gap-1.5">
+                  <span className={`text-xs font-semibold px-2 py-0.5 rounded border ${cfg.badgeCls}`}>
+                    {cfg.icon} {cfg.label}
                   </span>
-                  <div>
-                    <p className="text-xs font-semibold text-[#1a2533]">
-                      {req.department} — {req.service}
-                    </p>
-                  </div>
                 </div>
+                {req.slaRemaining && (
+                  <p className="text-[11px] text-[#1a56db] font-semibold mt-1.5">{req.slaRemaining}</p>
+                )}
               </div>
 
-              {/* Downstream */}
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Configured SLA</p>
+                <p className="font-bold text-slate-900 mt-1">{enrich.slaConfigured}</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">Enforced under Maharashtra RTSA</p>
+              </div>
+
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Department Fee</p>
+                <p className="font-bold text-slate-900 mt-1">{enrich.fee}</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">Calculated by department during processing</p>
+              </div>
+
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Site Inspection</p>
+                <p className="font-bold text-slate-900 mt-1">{req.inspectionState ?? 'May be Required'}</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">{enrich.inspectionNote}</p>
+              </div>
+            </div>
+
+            {/* Approval Record details if approved */}
+            {isApproved && (
+              <div className="mt-4 p-3.5 bg-emerald-50 border border-emerald-200 rounded-lg flex items-center justify-between gap-4 text-xs">
+                <div>
+                  <span className="font-bold text-emerald-900">✓ Official Clearance Granted</span>
+                  <div className="flex gap-4 text-[11px] text-emerald-800 mt-0.5">
+                    {req.approvalRef && <span>Approval Ref: {req.approvalRef}</span>}
+                    {req.approvedDate && <span>Date: {req.approvedDate}</span>}
+                  </div>
+                </div>
+                <span className="text-[11px] font-semibold text-emerald-700 bg-white border border-emerald-200 px-2.5 py-1 rounded">
+                  Active
+                </span>
+              </div>
+            )}
+          </SectionCard>
+        </div>
+
+        {/* ── 6. WHAT HAPPENS NEXT? (Immediate Milestone, Downstream, Parallel) ── */}
+        <div className="mb-6">
+          <SectionCard
+            title="What Happens Next"
+            questionNumber="5"
+            questionLabel="WHAT HAPPENS AFTER THIS?"
+          >
+            <div className="space-y-4">
+              {/* Next Immediate Milestone */}
+              <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-lg text-xs">
+                <p className="text-[10px] font-bold text-[#17365D] uppercase tracking-wider mb-1">
+                  Immediate Next Milestone
+                </p>
+                <p className="font-semibold text-slate-900">
+                  {req.nextMilestone ?? (isApproved ? 'All milestone steps completed' : 'Department scrutiny and officer assignment')}
+                </p>
+                <p className="text-[11px] text-slate-600 mt-1">
+                  {isApproved
+                    ? 'Clearance conditions remain active. Downstream clearances have been unlocked.'
+                    : isUnderReview
+                      ? 'The competent authority is verifying submitted annexures against statutory standards.'
+                      : 'Upon submission, your dossier is registered on the departmental portal for automated scrutiny.'}
+                </p>
+              </div>
+
+              {/* Downstream Unlocks */}
               {downstream.length > 0 && (
                 <div>
-                  <p className="text-[10px] font-bold text-[#9aa5b4] uppercase tracking-wider mb-2">
-                    Downstream (unlocks when approved)
+                  <p className="text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-2">
+                    Clearances Unlocked Upon Approval ({downstream.length})
                   </p>
-                  <div className="space-y-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     {downstream.map(d => {
                       const dCfg = journeyStateCfg(d.displayState);
                       return (
-                        <Link
+                        <div
                           key={d.id}
-                          href={ENTREPRENEUR_ROUTES.requirement(project.id, d.id)}
-                          className="block p-3 border border-[#e8edf2] bg-[#f8f9fb] rounded hover:shadow-sm transition-shadow"
+                          className="p-3 border border-slate-200 rounded-lg bg-white text-xs flex items-center justify-between gap-2"
                         >
-                          <div className="flex items-center gap-3">
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${dCfg.badgeCls}`}>
-                              {dCfg.label}
-                            </span>
-                            <div>
-                              <p className="text-xs font-semibold text-[#1a2533]">
-                                {d.department} — {d.service}
-                              </p>
-                              <p className="text-[10px] text-[#6b7a8d]">Blocked until this requirement is resolved</p>
-                            </div>
+                          <div>
+                            <p className="font-semibold text-slate-900">{d.service}</p>
+                            <p className="text-[11px] text-slate-500">{d.department}</p>
                           </div>
-                        </Link>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded border shrink-0 ${dCfg.badgeCls}`}>
+                            {dCfg.label}
+                          </span>
+                        </div>
                       );
                     })}
                   </div>
                 </div>
               )}
-              <Link
-                href={ENTREPRENEUR_ROUTES.dependencies(project.id)}
-                className="inline-block mt-3 text-xs text-[#1a56db] hover:underline font-medium"
-              >
-                View in Dependency Graph →
-              </Link>
-            </SectionCard>
 
-            {/* Forms */}
-            <SectionCard title="Forms">
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs">
-                  <thead>
-                    <tr className="border-b border-[#e8edf2]">
-                      <th className="text-left py-2 text-[#9aa5b4] font-semibold uppercase tracking-wider">Form</th>
-                      <th className="text-left py-2 text-[#9aa5b4] font-semibold uppercase tracking-wider w-28">
-                        Requirement
-                      </th>
-                      <th className="text-left py-2 text-[#9aa5b4] font-semibold uppercase tracking-wider w-28">State</th>
-                      <th className="text-left py-2 w-16" />
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#f0f4f8]">
-                    {enrich.forms.map(f => (
-                      <tr key={f.name}>
-                        <td className="py-2.5 font-medium text-[#1a2533]">{f.name}</td>
-                        <td className="py-2.5">
-                          <span
-                            className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
-                              f.requirement === 'Required'
-                                ? 'bg-[#ebf3ff] text-[#1a3a5c] border-[#b8d0f5]'
-                                : f.requirement === 'Conditional'
-                                  ? 'bg-[#fef3c7] text-[#92400e] border-[#fde68a]'
-                                  : 'bg-[#f8f9fb] text-[#9aa5b4] border-[#d1d9e0]'
-                            }`}
-                          >
-                            {f.requirement}
-                          </span>
-                        </td>
-                        <td className="py-2.5">
-                          <span
-                            className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
-                              f.state === 'Ready' || f.state === 'Completed'
-                                ? 'bg-[#f0fdf4] text-[#166534] border-[#86efac]'
-                                : f.state === 'Not Applicable'
-                                  ? 'bg-[#f8f9fb] text-[#9aa5b4] border-[#d1d9e0]'
-                                  : 'bg-[#f8f9fb] text-[#6b7a8d] border-[#d1d9e0]'
-                            }`}
-                          >
-                            {f.state}
-                          </span>
-                        </td>
-                        <td className="py-2.5">
-                          <button type="button" className="text-[#1a56db] hover:underline text-[10px] font-medium">
-                            View
-                          </button>
-                        </td>
-                      </tr>
+              {/* Parallel Processing Possibilities */}
+              {parallel.length > 0 && (
+                <div>
+                  <p className="text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-2">
+                    Can Proceed in Parallel
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {parallel.map(p => (
+                      <div
+                        key={p.id}
+                        className="p-3 border border-slate-200 rounded-lg bg-white text-xs flex items-center justify-between gap-2"
+                      >
+                        <div>
+                          <p className="font-semibold text-slate-900">{p.service}</p>
+                          <p className="text-[11px] text-slate-500">{p.department} · Simultaneous application allowed</p>
+                        </div>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded border bg-indigo-50 text-indigo-700 border-indigo-200 shrink-0">
+                          Parallel
+                        </span>
+                      </div>
                     ))}
-                  </tbody>
-                </table>
-              </div>
-            </SectionCard>
+                  </div>
+                </div>
+              )}
+            </div>
+          </SectionCard>
+        </div>
 
-            {/* Required Documents */}
-            <SectionCard title="Required Documents">
+        {/* ── 7. DEPENDENCIES (Relevant Only + Expandable Full Explanation) ── */}
+        <div className="mb-6">
+          <SectionCard title="Dependencies">
+            <div className="space-y-4">
+              <p className="text-xs text-slate-600">
+                Displaying only direct dependencies directly linked to this requirement in the regulatory sequence.
+              </p>
+
+              {/* Relevant direct dependencies */}
               <div className="space-y-2">
-                {enrich.docs.map(d => (
-                  <div
-                    key={d.name}
-                    className="flex items-start gap-3 p-3 border border-[#e8edf2] rounded hover:bg-[#f8f9fb]"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <p className="text-xs font-semibold text-[#1a2533]">{d.name}</p>
-                        {d.required && (
-                          <span className="text-[9px] font-bold uppercase tracking-wider text-[#1a3a5c] bg-[#ebf3ff] border border-[#b8d0f5] px-1.5 py-0.5 rounded">
-                            Required
-                          </span>
-                        )}
-                        {d.reusable && (
-                          <span className="text-[9px] font-bold uppercase tracking-wider text-[#166534] bg-[#f0fdf4] border border-[#bbf7d0] px-1.5 py-0.5 rounded">
-                            Reusable
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex gap-3 mt-1">
-                        <span className="text-[10px] text-[#6b7a8d]">Availability: {d.availability}</span>
-                        <span className="text-[10px] text-[#6b7a8d]">Verification: {d.verification}</span>
-                      </div>
-                    </div>
+                {prereqs.map(p => (
+                  <div key={p.id} className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-between text-xs">
+                    <span className="font-medium text-slate-800">
+                      ← Prerequisite: <span className="font-bold">{p.service}</span> ({p.department})
+                    </span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded border bg-slate-100 text-slate-700 border-slate-300">
+                      Must Be Approved First
+                    </span>
+                  </div>
+                ))}
+                {downstream.map(d => (
+                  <div key={d.id} className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-between text-xs">
+                    <span className="font-medium text-slate-800">
+                      → Downstream: <span className="font-bold">{d.service}</span> ({d.department})
+                    </span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded border bg-slate-100 text-slate-700 border-slate-300">
+                      Unlocks When This Is Approved
+                    </span>
+                  </div>
+                ))}
+                {prereqs.length === 0 && downstream.length === 0 && (
+                  <p className="text-xs text-slate-500 italic">No direct dependencies configured for this service.</p>
+                )}
+              </div>
+
+              {/* Expandable Section: Full Dependency Explanation */}
+              <details className="group border border-slate-200 rounded-lg p-3.5 bg-slate-50/60 transition-colors">
+                <summary className="cursor-pointer text-xs font-semibold text-slate-700 flex items-center justify-between list-none select-none">
+                  <span className="flex items-center gap-2">
+                    <span className="text-[#17365D]">🔍</span>
+                    <span>Full Dependency Explanation & Statutory Sequencing</span>
+                  </span>
+                  <span className="text-xs text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+                </summary>
+                <div className="mt-3 pt-3 border-t border-slate-200 text-xs text-slate-600 space-y-2 leading-relaxed">
+                  <p>
+                    Under Maharashtra single-window and departmental guidelines, industrial consents must adhere to statutory sequencing to guarantee site ownership and environmental compliance before construction sanctions are granted.
+                  </p>
+                  <p>
+                    Prerequisites prevent premature capital expenditure before environmental zoning clearance is ratified by competent bodies.
+                  </p>
+                  <div className="pt-2">
                     <Link
-                      href={ENTREPRENEUR_ROUTES.documents(project.id)}
-                      className="text-[10px] text-[#1a56db] hover:underline font-medium shrink-0"
+                      href={ENTREPRENEUR_ROUTES.dependencies(project.id)}
+                      className="text-xs text-[#1a56db] hover:underline font-semibold"
                     >
-                      View
+                      View full interactive Dependency Graph →
                     </Link>
                   </div>
-                ))}
-              </div>
-              <Link
-                href={ENTREPRENEUR_ROUTES.documents(project.id)}
-                className="inline-block mt-3 text-xs text-[#1a56db] hover:underline font-medium"
-              >
-                View in Document Centre →
-              </Link>
-            </SectionCard>
-
-            {/* Declarations */}
-            <SectionCard title="Declarations">
-              <div className="space-y-3">
-                {enrich.declarations.map((d, i) => (
-                  <div key={i} className="flex items-start gap-3 p-3 border border-[#e8edf2] rounded">
-                    <div
-                      className={`shrink-0 mt-0.5 w-4 h-4 rounded border ${
-                        d.state === 'Accepted' ? 'bg-[#22c55e] border-[#22c55e]' : 'border-[#9aa5b4]'
-                      } flex items-center justify-center`}
-                    >
-                      {d.state === 'Accepted' && <span className="text-white text-[9px] font-bold">✓</span>}
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-xs text-[#374151]">{d.text}</p>
-                      <p className="text-[10px] text-[#9aa5b4] mt-1">
-                        {d.state === 'Required'
-                          ? 'Required before submission'
-                          : d.state === 'Accepted'
-                            ? 'Accepted'
-                            : d.state === 'Pending'
-                              ? 'Pending acceptance'
-                              : 'Not Applicable'}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-                <p className="text-[10px] text-[#9aa5b4] italic">
-                  Accepting a declaration does not constitute government approval. The statutory decision rests with the
-                  appropriate department.
-                </p>
-              </div>
-            </SectionCard>
-
-            {/* Parallel possibilities */}
-            {parallel.length > 0 && (
-              <SectionCard title="What can happen in parallel?">
-                <p className="text-xs text-[#6b7a8d] mb-3">
-                  While this requirement is in progress, these services may proceed in parallel where their dependencies
-                  permit:
-                </p>
-                <div className="space-y-2">
-                  {parallel.map(p => {
-                    const pCfg = journeyStateCfg(p.displayState);
-                    return (
-                      <Link
-                        key={p.id}
-                        href={ENTREPRENEUR_ROUTES.requirement(project.id, p.id)}
-                        className="block p-3 border border-[#e8edf2] rounded hover:shadow-sm transition-shadow"
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${pCfg.badgeCls}`}>
-                            {pCfg.label}
-                          </span>
-                          <div>
-                            <p className="text-xs font-semibold text-[#1a2533]">
-                              {p.department} — {p.service}
-                            </p>
-                            <p className="text-[10px] text-[#6b7a8d]">Can proceed in parallel where applicable</p>
-                          </div>
-                        </div>
-                      </Link>
-                    );
-                  })}
                 </div>
-                <Link
-                  href={ENTREPRENEUR_ROUTES.journey(project.id)}
-                  className="inline-block mt-3 text-xs text-[#1a56db] hover:underline font-medium"
-                >
-                  View Journey →
-                </Link>
-              </SectionCard>
-            )}
-
-            {/* Downstream services */}
-            {downstream.length > 0 && (
-              <SectionCard title="What does this unlock?">
-                <p className="text-xs text-[#6b7a8d] mb-3">
-                  Approval of this requirement unlocks the following downstream services:
-                </p>
-                <div className="space-y-2">
-                  {downstream.map(d => {
-                    const dCfg = journeyStateCfg(d.displayState);
-                    return (
-                      <Link
-                        key={d.id}
-                        href={ENTREPRENEUR_ROUTES.requirement(project.id, d.id)}
-                        className="block p-3 border border-[#e8edf2] rounded hover:shadow-sm transition-shadow"
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${dCfg.badgeCls}`}>
-                            {dCfg.label}
-                          </span>
-                          <div>
-                            <p className="text-xs font-semibold text-[#1a2533]">
-                              {d.department} — {d.service}
-                            </p>
-                            <p className="text-[10px] text-[#6b7a8d]">Blocked until this requirement is resolved</p>
-                          </div>
-                        </div>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </SectionCard>
-            )}
-          </div>
-
-          {/* Right sidebar */}
-          <div className="space-y-4">
-            {/* Inspection */}
-            <SectionCard title="Inspection">
-              <p className="text-xs font-semibold text-[#1a2533] mb-1">{req.inspectionState ?? 'May be Required'}</p>
-              <p className="text-xs text-[#6b7a8d]">{enrich.inspectionNote}</p>
-              <div className="mt-3 space-y-1">
-                {[
-                  { label: 'Inspection Stage', value: 'During processing' },
-                  { label: 'Current State', value: req.inspectionState ?? 'Not Scheduled' },
-                ].map(f => (
-                  <div key={f.label} className="flex justify-between text-xs">
-                    <span className="text-[#9aa5b4]">{f.label}</span>
-                    <span className="text-[#374151] font-medium">{f.value}</span>
-                  </div>
-                ))}
-              </div>
-            </SectionCard>
-
-            {/* SLA */}
-            <SectionCard title="Service Level / SLA">
-              <div className="space-y-2">
-                <div className="flex justify-between text-xs">
-                  <span className="text-[#9aa5b4]">Configured SLA</span>
-                  <span className="font-semibold text-[#1a2533]">{enrich.slaConfigured}</span>
-                </div>
-                {req.slaRemaining && (
-                  <>
-                    <div className="flex justify-between text-xs">
-                      <span className="text-[#9aa5b4]">Remaining</span>
-                      <span className="font-semibold text-[#1a56db]">{req.slaRemaining}</span>
-                    </div>
-                    {req.slaElapsed && (
-                      <div className="flex justify-between text-xs">
-                        <span className="text-[#9aa5b4]">Elapsed</span>
-                        <span className="font-medium text-[#374151]">{req.slaElapsed}</span>
-                      </div>
-                    )}
-                  </>
-                )}
-                {!req.slaRemaining && (
-                  <p className="text-xs text-[#9aa5b4] italic">SLA tracking begins after submission.</p>
-                )}
-              </div>
-            </SectionCard>
-
-            {/* Fee */}
-            <SectionCard title="Fee">
-              <p className="text-xs text-[#6b7a8d]">{enrich.fee}</p>
-              <p className="text-[10px] text-[#9aa5b4] mt-2 italic">
-                Exact fee is determined by the department based on project parameters.
-              </p>
-            </SectionCard>
-
-            {/* Regulatory Source */}
-            <SectionCard title="Regulatory Source">
-              <div className="space-y-2">
-                {[
-                  { label: 'Source Type', value: enrich.regSourceType },
-                  { label: 'Reference', value: enrich.regReference },
-                  { label: 'Clause / Section', value: enrich.regClause },
-                  { label: 'Effective Date', value: enrich.regEffective },
-                  { label: 'Source Document', value: enrich.regDoc },
-                ].map(f => (
-                  <div key={f.label}>
-                    <p className="text-[10px] font-semibold text-[#9aa5b4] uppercase tracking-wider">{f.label}</p>
-                    <p className="text-xs text-[#374151] mt-0.5">{f.value}</p>
-                  </div>
-                ))}
-                <div className="pt-2 border-t border-[#e8edf2]">
-                  {enrich.regVerified ? (
-                    <span className="text-[10px] font-bold text-[#166534] bg-[#f0fdf4] border border-[#bbf7d0] px-2 py-0.5 rounded">
-                      ✓ Verified Source
-                    </span>
-                  ) : (
-                    <span className="text-[10px] font-bold text-[#3730a3] bg-[#e0e7ff] border border-[#a5b4fc] px-2 py-0.5 rounded">
-                      ◌ Needs Verification
-                    </span>
-                  )}
-                </div>
-                <p className="text-[10px] text-[#9aa5b4] italic">
-                  Regulatory rules determine applicability. This source is provided for transparency. The final decision
-                  rests with the appropriate department/authority.
-                </p>
-              </div>
-            </SectionCard>
-
-            {/* Approval ref if approved */}
-            {isApproved && req.approvalRef && (
-              <div className="bg-[#f0fdf4] border border-[#86efac] rounded p-4 shadow-sm">
-                <p className="text-xs font-bold text-[#166534] mb-2">✓ Approval Record</p>
-                <div className="space-y-1">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-[#166534]">Reference</span>
-                    <span className="font-semibold text-[#1a2533]">{req.approvalRef}</span>
-                  </div>
-                  {req.approvedDate && (
-                    <div className="flex justify-between text-xs">
-                      <span className="text-[#166534]">Date</span>
-                      <span className="font-medium text-[#374151]">{req.approvedDate}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Regulatory Assistant entry */}
-            <div className="bg-[#1a2533] border border-[#2d3f52] rounded p-4 shadow-sm">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-5 h-5 rounded-full bg-[#1a56db] text-white flex items-center justify-center text-xs font-bold">
-                  ?
-                </div>
-                <p className="text-xs font-bold text-white">Regulatory Assistant</p>
-              </div>
-              <p className="text-[10px] text-[#9aa5b4] mb-3">
-                Why is this required? Which GR applies? Explain in Marathi.
-              </p>
-              <button
-                type="button"
-                onClick={openRequirementAssistant}
-                className="w-full text-xs font-semibold bg-[#1a56db] text-white px-3 py-2 rounded hover:bg-[#1e40af] transition-colors"
-              >
-                Ask Regulatory Assistant →
-              </button>
+              </details>
             </div>
-          </div>
+          </SectionCard>
         </div>
 
-        {/* Back bar */}
-        <div className="mt-5 pt-4 border-t border-[#d1d9e0] flex gap-3">
+        {/* ── 8. SOURCE / LEGAL BASIS (Visually Secondary, Expandable Sections) ── */}
+        <div className="mb-6">
+          <section className="bg-slate-50/80 border border-slate-200 rounded-xl p-5 text-xs text-slate-600 shadow-xs">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-3 pb-3 border-b border-slate-200">
+              <div>
+                <h2 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Source / Legal Basis
+                </h2>
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  Statutory provisions governing applicability and processing
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold text-slate-700 bg-white border border-slate-300 px-2 py-0.5 rounded">
+                  {enrich.regSourceType}
+                </span>
+                {enrich.regVerified ? (
+                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-300 px-2 py-0.5 rounded">
+                    ✓ Verified Source
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-bold text-slate-600 bg-slate-200 border border-slate-300 px-2 py-0.5 rounded">
+                    Unverified Source
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* High-level Summary (No long prose exposed by default) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4 bg-white p-3 border border-slate-200 rounded-lg">
+              <div>
+                <span className="text-[10px] text-slate-400 uppercase font-semibold">Statutory Reference</span>
+                <p className="font-semibold text-slate-800 text-xs mt-0.5">{enrich.regReference}</p>
+              </div>
+              <div>
+                <span className="text-[10px] text-slate-400 uppercase font-semibold">Clause / Rule</span>
+                <p className="font-semibold text-slate-800 text-xs mt-0.5">{enrich.regClause}</p>
+              </div>
+            </div>
+
+            {/* Expandable Sections for Deep Legal Details */}
+            <div className="space-y-2">
+              {/* Expandable: Legal Basis */}
+              <details className="group border border-slate-200 rounded-lg p-3 bg-white transition-colors">
+                <summary className="cursor-pointer font-semibold text-xs text-slate-700 flex items-center justify-between list-none select-none">
+                  <span>Legal Basis</span>
+                  <span className="text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+                </summary>
+                <div className="mt-2.5 pt-2.5 border-t border-slate-100 text-slate-600 leading-relaxed space-y-1.5">
+                  <p>
+                    Statutory powers are enacted under the Water (Prevention and Control of Pollution) Act 1974, Air (Prevention and Control of Pollution) Act 1981, and relevant Maharashtra Government Resolutions.
+                  </p>
+                  <p className="text-[11px] text-slate-500">
+                    Authority: {req.department} as mandated by the Government of Maharashtra.
+                  </p>
+                </div>
+              </details>
+
+              {/* Expandable: Detailed Rule */}
+              <details className="group border border-slate-200 rounded-lg p-3 bg-white transition-colors">
+                <summary className="cursor-pointer font-semibold text-xs text-slate-700 flex items-center justify-between list-none select-none">
+                  <span>Detailed Rule</span>
+                  <span className="text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+                </summary>
+                <div className="mt-2.5 pt-2.5 border-t border-slate-100 text-slate-600 leading-relaxed space-y-1.5">
+                  <p>
+                    {enrich.regClause} mandates that all manufacturing and establishment activities must satisfy prescribed environmental parameters, effluent discharge thresholds, and emission ceilings prior to physical ground-breaking.
+                  </p>
+                </div>
+              </details>
+
+              {/* Expandable: Source Document */}
+              <details className="group border border-slate-200 rounded-lg p-3 bg-white transition-colors">
+                <summary className="cursor-pointer font-semibold text-xs text-slate-700 flex items-center justify-between list-none select-none">
+                  <span>Source Document & Gazette</span>
+                  <span className="text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+                </summary>
+                <div className="mt-2.5 pt-2.5 border-t border-slate-100 text-slate-600 leading-relaxed space-y-1.5">
+                  <p className="font-medium text-slate-800">{enrich.regDoc}</p>
+                  <p className="text-[11px] text-slate-500">Official document publication maintained in Maharashtra State Gazette.</p>
+                </div>
+              </details>
+
+              {/* Expandable: Effective Date */}
+              <details className="group border border-slate-200 rounded-lg p-3 bg-white transition-colors">
+                <summary className="cursor-pointer font-semibold text-xs text-slate-700 flex items-center justify-between list-none select-none">
+                  <span>Effective Date & Enactment</span>
+                  <span className="text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+                </summary>
+                <div className="mt-2.5 pt-2.5 border-t border-slate-100 text-slate-600 leading-relaxed space-y-1.5">
+                  <p>
+                    Effective from: <span className="font-bold text-slate-800">{enrich.regEffective}</span>
+                  </p>
+                  <p className="text-[11px] text-slate-500">
+                    Enforced in accordance with notification timelines and applicable amendments.
+                  </p>
+                </div>
+              </details>
+            </div>
+          </section>
+        </div>
+
+        {/* ── Return Link ── */}
+        <div className="pt-2 flex items-center justify-between text-xs">
           <Link
             href={ENTREPRENEUR_ROUTES.journey(project.id)}
-            className="border border-[#d1d9e0] text-[#374151] text-sm font-medium px-5 py-2.5 rounded hover:bg-[#f0f4f8] transition-colors"
+            className="text-slate-600 hover:text-slate-900 font-semibold"
           >
-            ← Back to Journey
+            ← Back to Regulatory Journey
           </Link>
-          <Link
-            href={ENTREPRENEUR_ROUTES.dependencies(project.id)}
-            className="text-xs text-[#1a56db] hover:underline font-medium self-center"
-          >
-            View Dependency Graph
-          </Link>
+          <span className="text-slate-400 text-[11px]">
+            EKATMA Single-Window Regulatory Engine
+          </span>
         </div>
       </div>
-
-      {/* ── Regulatory Help Drawer ── */}
-      {ragOpen && (
-        <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-label="Regulatory Help">
-          <div className="absolute inset-0 bg-black/30" onClick={() => { setRagOpen(false); setRagAnswer(null); }} />
-          <div className="relative bg-white w-96 max-w-full h-full shadow-2xl flex flex-col border-l border-[#d1d9e0]">
-            {/* Drawer header */}
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-[#e8edf2] bg-[#1a2533]">
-              <div className="w-7 h-7 rounded-full bg-[#1a56db] flex items-center justify-center text-white text-xs font-bold">
-                ?
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold text-white">Regulatory Help</p>
-                <p className="text-[10px] text-[#9aa5b4] truncate">About {req.service}</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => { setRagOpen(false); setRagAnswer(null); }}
-                className="text-[#9aa5b4] hover:text-white text-lg leading-none"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Boundary notice */}
-            <div className="px-4 py-2.5 bg-[#fffbeb] border-b border-[#fde68a]">
-              <p className="text-[10px] text-[#92400e] font-medium">
-                This assistant retrieves and explains regulatory information. It does not grant approval or make statutory
-                decisions.
-              </p>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-4 space-y-3">
-              {/* Suggested questions */}
-              {!ragAnswer && (
-                <>
-                  <p className="text-xs font-semibold text-[#9aa5b4] uppercase tracking-wider">Suggested questions</p>
-                  <div className="space-y-2">
-                    {ragSuggestions.map(q => (
-                      <button
-                        key={q}
-                        type="button"
-                        onClick={() => handleRagQuestion(q)}
-                        className="w-full text-left text-xs px-3 py-2.5 border border-[#d1d9e0] rounded hover:bg-[#f0f4f8] text-[#374151] transition-colors"
-                      >
-                        {q}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
-
-              {/* Answer */}
-              {ragAnswer && (
-                <div>
-                  <div className="mb-3 p-3 bg-[#f8f9fb] border border-[#e8edf2] rounded">
-                    <p className="text-[10px] font-bold text-[#9aa5b4] uppercase tracking-wider mb-1">Your question</p>
-                    <p className="text-xs text-[#374151]">{ragQuestion}</p>
-                  </div>
-                  <div className="p-3 bg-white border border-[#d1d9e0] rounded">
-                    <p className="text-[10px] font-bold text-[#1a3a5c] uppercase tracking-wider mb-2">Response</p>
-                    <p className="text-xs text-[#374151] whitespace-pre-line leading-relaxed">{ragAnswer}</p>
-                    <div className="mt-3 pt-2 border-t border-[#e8edf2]">
-                      <p className="text-[10px] font-semibold text-[#9aa5b4] uppercase tracking-wider mb-1">Source</p>
-                      <p className="text-[10px] text-[#374151]">
-                        {enrich.regSourceType}: {enrich.regReference}
-                      </p>
-                      <p className="text-[10px] text-[#6b7a8d]">
-                        {enrich.regClause} · Effective {enrich.regEffective}
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setRagAnswer(null)}
-                    className="mt-2 text-xs text-[#1a56db] hover:underline"
-                  >
-                    ← Back to questions
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <div className="p-4 border-t border-[#e8edf2]">
-              <form
-                onSubmit={e => {
-                  e.preventDefault();
-                  const input = (e.currentTarget.elements.namedItem('q') as HTMLInputElement)?.value;
-                  if (input?.trim()) {
-                    handleRagQuestion(input.trim());
-                    e.currentTarget.reset();
-                  }
-                }}
-                className="flex gap-2"
-              >
-                <input
-                  name="q"
-                  className="flex-1 text-sm border border-[#d1d9e0] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1a56db]"
-                  placeholder="Ask about this requirement…"
-                />
-                <button type="submit" className="px-3 py-2 bg-[#1a3a5c] text-white text-sm rounded hover:bg-[#0f2540]">
-                  Send
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
     </main>
   );
 }

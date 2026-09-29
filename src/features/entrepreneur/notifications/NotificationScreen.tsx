@@ -2,11 +2,7 @@
 
 import React, { useState } from 'react';
 import { Icon } from '../public-auth/PublicChrome';
-import { MOCK_NOTIFICATIONS, notificationDestination, type AppNotification, type NotificationGroup, type NotificationType } from './data';
-
-function Breadcrumb({ items }: { items: { label: string; href?: string }[] }) {
-  return <nav aria-label="Breadcrumb"><ol className="flex items-center gap-1 text-sm text-[#6b7a8d]">{items.map((item, i) => <li key={`${item.label}-${i}`} className="flex items-center gap-1">{i > 0 && <Icon.ChevronRight />}<span className="text-[#1a2533]">{item.label}</span></li>)}</ol></nav>;
-}
+import { MOCK_NOTIFICATIONS, type AppNotification, type NotificationGroup, type NotificationType } from './data';
 
 const notifTypeIcon: Record<NotificationType, React.FC> = {
   'missing-doc':  Icon.Upload,
@@ -28,12 +24,13 @@ const notifTypeIcon: Record<NotificationType, React.FC> = {
   'grievance':    Icon.AlertCircle,
 }
 
-const notifGroupOrder: NotificationGroup[] = ['Action Required', 'Upcoming', 'Information', 'Resolved']
+const notifGroupOrder: NotificationGroup[] = ['Action Required', 'Application Updates', 'Inspections', 'Compliance', 'Regulatory Changes']
 const notifGroupColors: Record<NotificationGroup, { header: string; dot: string }> = {
   'Action Required': { header: 'text-[#9B2C2C]', dot: 'bg-[#9B2C2C]' },
-  'Upcoming':        { header: 'text-[#C46A15]', dot: 'bg-[#E68A2E]' },
-  'Information':     { header: 'text-[#17365D]', dot: 'bg-[#245B8A]' },
-  'Resolved':        { header: 'text-[#2F7D4F]', dot: 'bg-[#2F7D4F]' },
+  'Application Updates': { header: 'text-[#17365D]', dot: 'bg-[#245B8A]' },
+  'Inspections': { header: 'text-[#8A4A12]', dot: 'bg-[#E68A2E]' },
+  'Compliance': { header: 'text-[#5B3A91]', dot: 'bg-[#7C5CBF]' },
+  'Regulatory Changes': { header: 'text-[#2F6F67]', dot: 'bg-[#3B8C80]' },
 }
 
 export function E33NotificationCentrePage({ onNavigate, lang }: { onNavigate: (notification: AppNotification) => void; lang: 'en' | 'mr' }) {
@@ -80,10 +77,6 @@ export function E33NotificationCentrePage({ onNavigate, lang }: { onNavigate: (n
   return (
     <main id="main-content" className="flex-1 bg-[#F8F9FA]" tabIndex={-1}>
       <div className="max-w-[900px] mx-auto px-6 py-6">
-        <div className="mb-4">
-          <Breadcrumb items={[{ label: 'Home', href: '#' }, { label: t.title }]} />
-        </div>
-
         <div className="flex items-start justify-between gap-4 mb-6">
           <div>
             <h1 className="text-2xl font-bold text-[#17365D]">{t.title}</h1>
@@ -135,8 +128,8 @@ export function E33NotificationCentrePage({ onNavigate, lang }: { onNavigate: (n
                   {items.map(n => {
                     const TypeIcon = notifTypeIcon[n.type]
                     return (
-                      <article key={n.id} className={`bg-white border rounded-xl p-5 shadow-xs transition-colors ${n.isRead ? 'border-slate-200' : 'border-[#245B8A] bg-[#F0F5FA]/30'}`}
-                        onClick={() => markRead(n.id)} role="article" aria-label={n.title}>
+                      <article key={n.id} className={`cursor-pointer bg-white border rounded-xl p-5 shadow-xs transition-all hover:border-[#93B4D5] hover:shadow-sm ${n.isRead ? 'border-slate-200' : 'border-[#245B8A] bg-[#F0F5FA]/30'}`}
+                        onClick={() => { markRead(n.id); onNavigate(n) }} onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); markRead(n.id); onNavigate(n) } }} role="article" tabIndex={0} aria-label={n.title}>
                         <div className="flex items-start gap-3.5">
                           <div className={`shrink-0 w-9 h-9 rounded-lg flex items-center justify-center mt-0.5 ${n.isRead ? 'bg-[#F1F3F5] text-[#5C6470]' : 'bg-[#EBF3FA] text-[#17365D]'}`}>
                             <TypeIcon />
@@ -151,22 +144,22 @@ export function E33NotificationCentrePage({ onNavigate, lang }: { onNavigate: (n
                             </div>
                             <div className="mt-2.5 grid grid-cols-1 md:grid-cols-3 gap-2 text-xs">
                               <div>
-                                <p className="text-[#5C6470] font-bold text-[10px] uppercase tracking-wider">{t.why}</p>
+                                <p className="text-xs font-semibold text-[#5C6470]">{t.why}</p>
                                 <p className="text-[#20242A] mt-0.5">{n.why}</p>
                               </div>
                               <div>
-                                <p className="text-[#5C6470] font-bold text-[10px] uppercase tracking-wider">{t.action}</p>
+                                <p className="text-xs font-semibold text-[#5C6470]">{t.action}</p>
                                 <p className="text-[#20242A] mt-0.5">{n.action}</p>
                               </div>
                               <div>
-                                <p className="text-[#5C6470] font-bold text-[10px] uppercase tracking-wider">{t.due}</p>
+                                <p className="text-xs font-semibold text-[#5C6470]">{t.due}</p>
                                 <p className={`mt-0.5 font-semibold ${n.group === 'Action Required' ? 'text-[#9B2C2C]' : 'text-[#20242A]'}`}>{n.due}</p>
                               </div>
                             </div>
                             <div className="mt-3">
                               <button
-                                onClick={(e) => { e.stopPropagation(); markRead(n.id); onNavigate(n) }} disabled={!notificationDestination(n)} title={!notificationDestination(n) ? "Related record is unavailable" : undefined}
-                                className="text-xs text-[#245B8A] hover:underline font-semibold focus:outline-none focus-visible:underline disabled:text-[#94A3B8] disabled:no-underline disabled:cursor-not-allowed"
+                                onClick={(e) => { e.stopPropagation(); markRead(n.id); onNavigate(n) }}
+                                className="text-xs text-[#245B8A] hover:underline font-semibold focus:outline-none focus-visible:underline"
                               >
                                 {n.ctaLabel} →
                               </button>

@@ -31,6 +31,7 @@ export interface AssistantContext {
   entities: AssistantEntities;
   safeMetadata?: {
     businessName?: string;
+    projectName?: string;
     applicationService?: string;
     authority?: string;
     recordTitle?: string;
@@ -55,6 +56,7 @@ export interface AssistantMessage {
   createdAt: number;
   contextSnapshot: AssistantContext;
   citations?: AssistantCitation[];
+  relevantRequirement?: string;
   needsVerification?: boolean;
   uncertainty?: string;
 }
@@ -71,6 +73,7 @@ export interface AssistantRequest {
 export interface AssistantResponse {
   content: string;
   citations?: AssistantCitation[];
+  relevantRequirement?: string;
   needsVerification?: boolean;
   uncertainty?: string;
 }

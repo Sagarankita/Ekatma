@@ -44,12 +44,15 @@ test('notifications navigate only to bound record context with search params', a
   await page.getByRole('article', { name: /SLA breach: MPCB CTE/ }).getByRole('button', { name: /Raise Grievance/ }).click();
   await expect(page).toHaveURL(/\/businesses\/BP-001\/grievances\?applicationId=APP-MPCB-2026-4892&raise=1$/);
   await expect(page.getByRole('heading', { name: /Raise a New Grievance|नवीन तक्रार दाखल करा/ })).toBeVisible();
-  await expect(page.locator('select').first()).toHaveValue('APP-MPCB-2026-4892');
+  await expect(page.getByText(/APP-MPCB-2026-4892/)).toBeVisible();
 
-  // Unbound / ambiguous notifications have disabled CTAs
+  // Every notification opens the most relevant existing page
   await page.goto('/entrepreneur/notifications');
-  await expect(page.getByRole('article', { name: /New query from Inspector of Factories/ }).getByRole('button', { name: /Respond to Query/ })).toBeDisabled();
-  await expect(page.getByRole('article', { name: /Regulatory change: MPCB effluent/ }).getByRole('button', { name: /View Regulatory Change/ })).toBeDisabled();
+  await page.getByRole('article', { name: /New query from Inspector of Factories/ }).getByRole('button', { name: /Respond to Query/ }).click();
+  await expect(page).toHaveURL(/\/businesses\/BP-001\/applications\/APP-FAC-2026-3371$/);
+  await page.goto('/entrepreneur/notifications');
+  await page.getByRole('article', { name: /Regulatory change: MPCB effluent/ }).getByRole('button', { name: /View Regulatory Change/ }).click();
+  await expect(page).toHaveURL(/\/businesses\/BP-004\/regulatory-changes$/);
 });
 
 test('grievance search params validate strictly and submission creates a local demo record', async ({ page }) => {
@@ -58,14 +61,15 @@ test('grievance search params validate strictly and submission creates a local d
   await expect(page.getByRole('heading', { name: 'Grievances', exact: true })).toBeVisible();
   await expect(page.getByText('GRV-2026-0014').first()).toBeVisible();
 
-  // Invalid applicationId on raise does NOT select the first app
+  // Invalid applicationId on raise does not attach another application
   await page.goto('/entrepreneur/businesses/BP-001/grievances?applicationId=INVALID-APP&raise=1');
   await expect(page.getByRole('heading', { name: /Raise a New Grievance/ })).toBeVisible();
-  await expect(page.locator('select').first()).toHaveValue('');
+  await expect(page.getByText('No application context available')).toBeVisible();
 
   // Valid raise grievance submission creates trackable demo record
   await page.goto('/entrepreneur/businesses/BP-001/grievances?applicationId=APP-MPCB-2026-4892&raise=1');
-  await expect(page.locator('select').first()).toHaveValue('APP-MPCB-2026-4892');
+  await expect(page.getByText(/APP-MPCB-2026-4892/)).toBeVisible();
+  await page.locator('select').first().selectOption('Application grievance');
   await page.locator('select').nth(1).selectOption('Department delay');
   await page.locator('textarea').fill('Escalating prolonged department delay for MPCB CTE clearance.');
   await page.getByRole('button', { name: 'Submit Grievance' }).click();

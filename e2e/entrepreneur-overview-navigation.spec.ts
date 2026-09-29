@@ -9,9 +9,10 @@ test('overview links exact bound application and nested navigation stays active'
   await page.goto('/entrepreneur/businesses/BP-001');
   await expect(page).toHaveURL(/\/entrepreneur\/businesses\/BP-001$/);
   await expect(page.getByTestId('e00-command-centre')).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'ABC Pharma Pvt Ltd' })).toBeVisible();
-  const applicationsSection = page.locator('section').filter({ has: page.getByRole('heading', { name: 'Applications Across Departments' }) });
-  await applicationsSection.getByRole('link', { name: /APP-MPCB-2026-4892/ }).click();
+  await expect(page.getByRole('heading', { name: 'Overview', exact: true })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Current business and project context' }).getByText('ABC Pharma Pvt Ltd', { exact: true })).toBeVisible();
+  const actionsSection = page.locator('section').filter({ has: page.getByRole('heading', { name: 'Action Required' }) });
+  await actionsSection.getByRole('link', { name: 'Respond now' }).first().click();
   await expect(page).toHaveURL(/\/BP-001\/applications\/APP-MPCB-2026-4892$/);
   await expect(page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Applications' })).toHaveAttribute('aria-current', 'page');
   await page.reload();
@@ -22,27 +23,46 @@ test('overview links exact bound application and nested navigation stays active'
   await expect(page).toHaveURL(/\/APP-MPCB-2026-4892$/);
 });
 
-test('BP-004 overview displays exact business-filtered counts and excludes cross-business data', async ({ page }) => {
+test('global shell keeps business, project, location, attention and next action visible on deep routes', async ({ page }) => {
+  await page.goto('/entrepreneur/businesses/BP-004/applications/APP-2026-MPCB-00412');
+
+  const context = page.getByRole('region', { name: 'Current business and project context' });
+  await expect(context).toBeVisible();
+  await expect(context.getByText('Sahyadri Bio-Pharma Pvt Ltd', { exact: true })).toBeVisible();
+  await expect(context.getByText('Pharmaceutical Manufacturing — Chakan, Pune, Maharashtra', { exact: true })).toBeVisible();
+  await expect(context.getByText(/Project: Internal demo project — Chakan Industrial Area Phase II/)).toBeVisible();
+  await expect(context.getByText('Attention', { exact: true })).toBeVisible();
+  await expect(context.getByText('Next action', { exact: true })).toBeVisible();
+
+  const breadcrumb = context.getByRole('navigation', { name: 'Breadcrumb' });
+  await expect(breadcrumb.getByRole('link', { name: 'My Businesses' })).toHaveAttribute('href', '/entrepreneur/businesses');
+  await expect(breadcrumb.getByRole('link', { name: 'Sahyadri Bio-Pharma Pvt Ltd' })).toHaveAttribute('href', '/entrepreneur/businesses/BP-004');
+  await expect(breadcrumb.getByRole('link', { name: 'Applications' })).toHaveAttribute('href', '/entrepreneur/businesses/BP-004/applications');
+  await expect(breadcrumb.getByText('Application Detail', { exact: true })).toHaveAttribute('aria-current', 'page');
+});
+
+test('BP-004 overview separates attention, processing, upcoming work and recent activity', async ({ page }) => {
   await page.goto('/entrepreneur/businesses/BP-004');
-  await expect(page.getByRole('heading', { name: 'Sahyadri Bio-Pharma Pvt Ltd' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Overview', exact: true })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Current business and project context' }).getByText('Sahyadri Bio-Pharma Pvt Ltd', { exact: true })).toBeVisible();
   await expect(page.getByTestId('e00-command-centre')).toBeVisible();
 
-  // Displays BP-004 bound applications
-  const applicationsSection = page.locator('section').filter({ has: page.getByRole('heading', { name: 'Applications Across Departments' }) });
-  await expect(applicationsSection).toBeVisible();
-  await expect(applicationsSection.getByText('4 active', { exact: true })).toBeVisible();
-  await expect(applicationsSection.getByRole('link', { name: /APP-2026-MPCB-00412/ })).toBeVisible();
-  await expect(applicationsSection.getByRole('link', { name: /APP-2026-MIDC-00187/ })).toBeVisible();
+  const actionsSection = page.locator('section').filter({ has: page.getByRole('heading', { name: 'Action Required' }) });
+  await expect(actionsSection.getByText(/APP-2026-MPCB-00412/)).toBeVisible();
+  await expect(actionsSection.getByText(/APP-2026-MIDC-00187/)).toBeVisible();
+
+  const progressSection = page.getByRole('region', { name: 'In Progress' });
+  await expect(progressSection.getByText('Factory Registration', { exact: true })).toBeVisible();
+  await expect(progressSection.getByText(/APP-2026-DISH-00241/)).toBeVisible();
 
   // Excludes BP-001 applications
   await expect(page.getByText('APP-MPCB-2026-4892')).not.toBeVisible();
   await expect(page.getByText('APP-MIDC-2026-1190')).not.toBeVisible();
 
-  // Displays BP-004 compliance and inspections
-  const complianceSection = page.locator('section').filter({ has: page.getByRole('heading', { name: 'Compliance', exact: true }) });
-  await expect(complianceSection.getByText('CPL-001', { exact: true })).toBeVisible();
-  await expect(complianceSection.getByText('+1 more obligations →', { exact: true })).toBeVisible();
-  await expect(page.getByText('MPCB Environmental Inspection is Resolved', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Upcoming', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Recent Activity', exact: true })).toBeVisible();
+  await expect(page.getByText('MPCB Environmental Inspection — Resolved', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Regulatory Changes', exact: true })).toBeVisible();
 
   // BP-004 has 0 grievances; sidebar link is available, main-content might still be a disabled button or active link
   await expect(page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Grievances' })).toBeVisible();
@@ -53,15 +73,13 @@ test('E00 command centre keeps its business ID across primary section navigation
   const commandCentre = page.getByTestId('e00-command-centre');
 
   await expect(page).toHaveURL(/\/entrepreneur\/businesses\/BP-004$/);
-  await expect(commandCentre.getByRole('heading', { name: 'Sahyadri Bio-Pharma Pvt Ltd' })).toBeVisible();
+  await expect(commandCentre.getByRole('heading', { name: 'Overview', exact: true })).toBeVisible();
   await expect(commandCentre.getByText('ABC Pharma Pvt Ltd', { exact: true })).not.toBeVisible();
 
   const expectedLinks = [
-    ['Regulatory Journey', '/entrepreneur/businesses/BP-004/journey'],
     ['Applications', '/entrepreneur/businesses/BP-004/applications'],
-    ['Compliance', '/entrepreneur/businesses/BP-004/compliance'],
     ['Inspections', '/entrepreneur/businesses/BP-004/inspections'],
-    ['Open Incentives', '/entrepreneur/businesses/BP-004/incentives'],
+    ['Changes & Expansion', '/entrepreneur/businesses/BP-004/regulatory-changes'],
   ] as const;
 
   for (const [name, href] of expectedLinks) {

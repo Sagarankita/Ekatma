@@ -1,5 +1,5 @@
 import { listClaimsForBusiness, listIncentivesForBusiness, type IncentiveClaim } from '../data';
-import { IncentiveSchemeDetail, IncentiveClaimDetail, IncentiveRoiInput, IncentivePolicyUpdate, type IncentiveFilingWindow, type ClaimStatus } from './types';
+import { IncentiveSchemeDetail, IncentiveClaimDetail, IncentiveRoiInput, IncentivePolicyUpdate, type IncentiveFilingWindow, type ClaimStatus, type IncentiveLifecycleCategory } from './types';
 
 const BP004_DETAIL_SCHEMES: IncentiveSchemeDetail[] = [
   {
@@ -207,11 +207,31 @@ export function getIncentiveDetailSchemes(businessId: string): IncentiveSchemeDe
       scheme.name.toLowerCase().includes(benefit.name.toLowerCase()),
     ) ?? canonical?.benefits[0];
 
-    return primaryBenefit ? {
+    let lifecycleStage: IncentiveLifecycleCategory = 'Potentially relevant';
+    if (scheme.id === 'PSI-2019' || scheme.id === 'PSI-ELEC') {
+      lifecycleStage = 'Approved';
+    } else if (scheme.status === 'needs-info' || scheme.status === 'conditional' || (scheme.missingInfo && scheme.missingInfo.length > 0)) {
+      lifecycleStage = 'Needs verification';
+    } else if (scheme.claimId) {
+      lifecycleStage = 'Claim / Disbursement';
+    } else {
+      lifecycleStage = 'Potentially relevant';
+    }
+
+    return {
       ...scheme,
-      claimCycle: primaryBenefit.claimCycle ?? undefined,
-      eligibilityConditions: primaryBenefit.conditions,
-    } : scheme;
+      lifecycleStage,
+      claimCycle: primaryBenefit?.claimCycle ?? scheme.claimCycle ?? undefined,
+      eligibilityConditions: primaryBenefit?.conditions ?? scheme.criteria.map(c => ({
+        text: c.label + (c.note ? ` (${c.note})` : ''),
+        state: c.met ? 'satisfied' as const : 'needs-verification' as const,
+      })),
+      benefits: canonical?.benefits,
+      category: canonical?.category,
+      matchBasis: canonical?.matchBasis,
+      requiredEvidence: primaryBenefit?.requiredEvidence,
+      applicationSteps: primaryBenefit?.applicationSteps,
+    };
   });
 }
 

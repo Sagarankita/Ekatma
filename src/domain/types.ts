@@ -187,7 +187,7 @@ export interface InspRow {
 export type PlanStatus = 'Draft' | 'Coordination Required' | 'Ready to Schedule' | 'Scheduled' | 'Cancelled'
 export type CalendarView = 'calendar' | 'list'
 export type InspOutcome = 'PASS' | 'OBSERVATION' | 'NON_COMPLIANT' | 'CORRECTION_REQUIRED' | 'RE_INSPECTION_REQUIRED'
-export type CheckStatus = 'Not Checked' | 'Checked' | 'Observation' | 'Not Applicable' | 'Needs Verification'
+export type CheckStatus = 'Not Checked' | 'Checked' | 'Observation' | 'Not Compliant' | 'Not Applicable' | 'Needs Verification'
 export interface CheckItem { id: string; category: string; item: string; dnaValue?: string; appValue?: string; status: CheckStatus; comment: string }
 export interface ObsRecord { id: string; category: string; finding: string; evidence: string; comment: string; severity?: string; correctionRequired: boolean; reInspectionRequired: boolean }
 export type ObsState = 'OPEN' | 'AWAITING_ENTREPRENEUR' | 'RESPONSE_RECEIVED' | 'UNDER_OFFICER_REVIEW' | 'RE_INSPECTION_REQUIRED' | 'RE_INSPECTION_SCHEDULED' | 'RESOLVED' | 'REOPENED'
