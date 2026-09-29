@@ -69,9 +69,10 @@ describe('Applications data models and lookup contracts', () => {
 
   it('resolves exact child records without first-record fallbacks', () => {
     expect(findQueryByAppId('APP-2026-MPCB-00412')?.queryId).toBe('QRY-001');
-    expect(findQueryByAppId('APP-2026-MIDC-00187')).toBeUndefined();
+    expect(findQueryByAppId('APP-2026-MIDC-00187')?.queryId).toBe('QRY-2026-MIDC-00187');
 
     expect(findDecisionByAppId('APP-2026-MPCB-00412')?.decisionId).toBe('DEC-2026-MPCB-00412');
+    expect(findDecisionByAppId('APP-2026-MIDC-00187')?.decisionId).toBe('DEC-2026-MIDC-00187');
     expect(findDecisionByAppId('APP-2026-FIRE-00093')).toBeUndefined();
 
     expect(findInspectionById('INS-001')?.departments).toContain('MIDC');

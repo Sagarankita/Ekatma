@@ -12,7 +12,6 @@ export default function Page() {
       onOpenDna={() => router.push(ROUTES.department.applicationDna(appId))}
       onOpenTimeline={() => router.push(ROUTES.department.applicationTimeline(appId))}
       onOpenScrutinyRoute={() => router.push(ROUTES.department.applicationScrutinyRoute(appId))}
-      onOpenScrutinyWorkflow={() => router.push(ROUTES.department.applicationScrutinyWorkflow(appId))}
       onOpenDocReview={(docId) => router.push(ROUTES.department.applicationDocument(appId, docId))}
       onOpenConsistency={() => router.push(ROUTES.department.applicationConsistency(appId))}
       onOpenDepView={() => router.push(ROUTES.department.applicationDependencyView(appId))}

@@ -10,6 +10,7 @@ import { departmentPageContext, enrichAssistantContext, globalAssistantContext }
 import { GlobalAssistantSurface } from '@/features/regulatory-assistant/GlobalAssistant';
 import type { AssistantContext } from '@/features/regulatory-assistant/types';
 import { applicationStateLabel, getApplicationContext } from '@/data/fixtures/application-contexts';
+import { SahyadriDemoControls } from '@/features/demo/SahyadriDemoControls';
 
 const initialContext: AssistantContext = {
   portal: 'department', userRole: 'Scrutiny Officer', route: '/department', pageType: 'dashboard',
@@ -56,6 +57,7 @@ function PortalShell({ children }: { children: React.ReactNode }) {
         setNotifOpen(false);
       }} />
       <GlobalAssistantSurface pageContext={assistantPageContext} suppressed={notifOpen || pathname.includes('/inspections/') || pathname.includes('/scrutiny-workflow')} />
+      <SahyadriDemoControls surface="department" />
     </DepartmentShell>
   );
 }

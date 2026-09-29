@@ -1,10 +1,30 @@
 import type { ApplicationWorkspaceRecord } from '@/domain/application-workspace';
 import type { ApplicationState } from '@/domain/states';
+import { SAHYADRI_DEMO } from './sahyadri-department-demo';
 
 type Seed = Pick<ApplicationWorkspaceRecord, 'id' | 'business' | 'service' | 'state' | 'desk'> &
   Partial<ApplicationWorkspaceRecord>;
 
 const seeds: Seed[] = [
+  {
+    id: SAHYADRI_DEMO.application.id,
+    businessId: SAHYADRI_DEMO.business.id,
+    business: SAHYADRI_DEMO.business.name,
+    projectId: SAHYADRI_DEMO.business.projectId,
+    project: SAHYADRI_DEMO.business.project,
+    serviceId: SAHYADRI_DEMO.application.serviceId,
+    service: SAHYADRI_DEMO.application.service,
+    dnaVersion: SAHYADRI_DEMO.application.dnaVersion,
+    state: SAHYADRI_DEMO.application.state,
+    desk: SAHYADRI_DEMO.application.desk,
+    sla: SAHYADRI_DEMO.application.sla,
+    inspectionId: SAHYADRI_DEMO.inspection.id,
+    dependencyState: 'Contextual external prerequisites visible',
+    decisionState: 'PENDING',
+    applicant: SAHYADRI_DEMO.application.applicant,
+    received: SAHYADRI_DEMO.application.received,
+    lastUpdated: SAHYADRI_DEMO.application.lastUpdated,
+  },
   { id: 'APP-MIDC-2048', business: 'Aarav Precision Components Pvt Ltd', service: 'Land / Plot', state: 'INITIAL_SCRUTINY', desk: 'Land / Plot Scrutiny', applicant: 'R. Mehta', received: '16 Sep 2026', sla: '1 day remaining' },
   { id: 'APP-MIDC-2051', business: 'Nova Industrial Systems Ltd', service: 'Planning / Building', state: 'TECHNICAL_SCRUTINY', desk: 'Planning / Building Scrutiny', applicant: 'S. Pawar', received: '14 Sep 2026', sla: 'Breached by 1 day' },
   { id: 'APP-MIDC-2019', business: 'Nova Industrial Systems Ltd', service: 'Planning / Building', state: 'QUERY_RAISED', desk: 'Planning / Building Scrutiny', applicant: 'S. Pawar', received: '11 Sep 2026', sla: 'Breached by 4 days', queryVersion: 'QRY-2019-v1' },

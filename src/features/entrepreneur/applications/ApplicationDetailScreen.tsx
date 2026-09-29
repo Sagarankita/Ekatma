@@ -48,6 +48,7 @@ import {
 } from '../documents/data';
 import { CertificatePreviewModal } from '../documents/CertificatePreviewModal';
 import { listJourneyNodesForBusiness } from '../journey/data';
+import { useSahyadriDemoState } from '@/features/demo/sahyadri-demo-state';
 
 export function ApplicationDetailScreen({
   project,
@@ -56,7 +57,22 @@ export function ApplicationDetailScreen({
   project: BusinessProject;
   applicationId: string;
 }) {
-  const app = findTrackerAppById(applicationId);
+  const sourceApp = findTrackerAppById(applicationId);
+  const { state: demoState } = useSahyadriDemoState();
+  const isSahyadriDemo = applicationId === 'APP-2026-MIDC-00187';
+  const approvedDemo = isSahyadriDemo && ['APPROVED', 'CERTIFICATE_ISSUED', 'ENTREPRENEUR_NOTIFIED', 'NEXT_REQUIREMENTS_AVAILABLE'].includes(demoState.currentState);
+  const queryDemo = isSahyadriDemo && ['QUERY_RAISED', 'ENTREPRENEUR_RESPONSE_PENDING'].includes(demoState.currentState);
+  const resubmittedDemo = isSahyadriDemo && ['RESUBMITTED', 'DELTA_RE_SCRUTINY'].includes(demoState.currentState);
+  const inspectionDemo = isSahyadriDemo && (demoState.currentState.startsWith('INSPECTION_') || demoState.currentState.startsWith('RE_INSPECTION_') || demoState.currentState === 'CORRECTION_REQUIRED');
+  const app = sourceApp && isSahyadriDemo ? {
+    ...sourceApp,
+    stage: approvedDemo ? 'Approved' : queryDemo ? 'Query / Correction' : resubmittedDemo ? 'Delta Re-scrutiny' : inspectionDemo ? 'Inspection' : demoState.currentState.replace(/_/g, ' ').replace(/\b\w/g, (letter: string) => letter.toUpperCase()),
+    status: approvedDemo ? 'Approved' : queryDemo ? 'Action Required' : resubmittedDemo ? 'Resubmission Received' : inspectionDemo ? demoState.inspectionStatus.replace(/_/g, ' ') : 'Waiting for MIDC Approval',
+    statusType: approvedDemo ? 'approved' as const : queryDemo ? 'action' as const : 'active' as const,
+    actionRequired: queryDemo ? 'Respond to Query QRY-2026-MIDC-00187 — submit corrected Building Plan v3' : null,
+    currentDesk: approvedDemo ? 'Decision Recorded' : 'Planning / Building Scrutiny',
+    inspection: inspectionDemo ? `${demoState.inspectionStatus} (INS-2026-MIDC-00187)` : 'Pending',
+  } : sourceApp;
   const [activeTab, setActiveTab] = useState<'timeline' | 'documents' | 'queries' | 'inspection' | 'decision'>('timeline');
   const [copiedId, setCopiedId] = useState(false);
   const [previewCertDoc, setPreviewCertDoc] = useState<DocRecord | null>(null);
@@ -78,10 +94,10 @@ export function ApplicationDetailScreen({
   }
 
   // Related Child Records
-  const query = findQueryByAppId(app.appId);
-  const decision = findDecisionByAppId(app.appId);
+  const query = isSahyadriDemo && !queryDemo && !resubmittedDemo ? undefined : findQueryByAppId(app.appId);
+  const decision = isSahyadriDemo && !approvedDemo ? undefined : findDecisionByAppId(app.appId);
   const inspections = listInspectionsForBusiness(project.id);
-  const appInspection = inspections.find(i => i.relatedAppIds.includes(app.appId));
+  const appInspection = isSahyadriDemo && !inspectionDemo && !approvedDemo ? undefined : inspections.find(i => i.relatedAppIds.includes(app.appId) && (!isSahyadriDemo || i.id === 'INS-2026-MIDC-00187'));
   const appObligations = decision?.state === 'approved'
     ? listComplianceForBusiness(project.id).filter(
         o => o.sourceApprovalId === decision.approvalId || o.dept === decision.dept

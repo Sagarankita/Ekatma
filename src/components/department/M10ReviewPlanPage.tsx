@@ -7,6 +7,7 @@ import {
   ReviewFlowEdgeData,
 } from '@/components/department/ReviewPlanFlowGraph';
 import { ScrutinyFactor } from '@/domain/types';
+import { SAHYADRI_DEMO, isSahyadriDemoApplication } from '@/data/fixtures/sahyadri-department-demo';
 
 export const SCRUTINY_FACTORS: ScrutinyFactor[] = [
   {
@@ -96,6 +97,7 @@ export const SCRUTINY_FACTORS: ScrutinyFactor[] = [
 ];
 
 export interface M10ReviewPlanPageProps {
+  applicationId?: string;
   onBackToOverview: () => void;
   onBackToPrecheck?: () => void;
   onOpenDna?: () => void;
@@ -124,6 +126,7 @@ interface EvidenceDetail {
 }
 
 export function M10ReviewPlanPage({
+  applicationId,
   onBackToOverview,
   onBackToPrecheck,
   onOpenDna,
@@ -139,6 +142,7 @@ export function M10ReviewPlanPage({
   onOpenInspections,
   onOpenDetailedRoute,
 }: M10ReviewPlanPageProps) {
+  const isSahyadri = isSahyadriDemoApplication(applicationId);
   const [selectedEvidence, setSelectedEvidence] = useState<EvidenceDetail | null>(null);
   const [showRoutingLogicDrawer, setShowRoutingLogicDrawer] = useState(false);
   const [showReviewDepthDrawer, setShowReviewDepthDrawer] = useState(false);
@@ -318,11 +322,11 @@ export function M10ReviewPlanPage({
       {
         id: 'rev-bldg',
         label: '3B. Building / Planning',
-        subLabel: 'BUA & Side Setback Deficit',
+        subLabel: isSahyadri ? 'Building Plan v2 & built-up area' : 'BUA & Side Setback Deficit',
         status: 'current',
         desk: 'Planning / Building Scrutiny',
         whyActive: 'New construction + architectural plan',
-        findings: 'East setback deficit (4.20m vs 4.50m required)',
+        findings: isSahyadri ? '3,200 sq.m application vs 3,050 sq.m plan' : 'East setback deficit (4.20m vs 4.50m required)',
         actionText: 'Open Building Review →',
         onAction: handleOpenBuilding,
         isParallel: true,
@@ -331,10 +335,10 @@ export function M10ReviewPlanPage({
         id: 'rev-water',
         label: '3C. Water / Utility Scrutiny',
         subLabel: '45 KLD Substation & ETP Feed',
-        status: 'upcoming',
+        status: isSahyadri ? 'completed' : 'upcoming',
         desk: 'Utility / Water Scrutiny',
         whyActive: 'Activated from Business DNA demand',
-        findings: 'ETP Zero Liquid Discharge verified',
+        findings: isSahyadri ? 'Not required for this MIDC review plan' : 'ETP Zero Liquid Discharge verified',
         actionText: 'Open Water Review →',
         onAction: handleOpenWater,
         isParallel: true,
@@ -371,7 +375,7 @@ export function M10ReviewPlanPage({
         status: 'attention',
         desk: 'Planning / Legal Desk',
         whyActive: 'Cross-document field comparison',
-        findings: 'Plot area mismatch (4,800 vs 4,200 sq.m)',
+        findings: isSahyadri ? 'Plot area consistent across 3 trusted sources' : 'Plot area mismatch (4,800 vs 4,200 sq.m)',
         actionText: 'Review Consistency →',
         onAction: handleOpenConsistency,
       },
@@ -842,11 +846,11 @@ export function M10ReviewPlanPage({
             </div>
             <div>
               <span className="text-[10px] text-slate-500 uppercase font-semibold block">Business:</span>
-              <span className="font-semibold text-slate-900 truncate block">Aster Precision Components</span>
+              <span className="font-semibold text-slate-900 truncate block">{isSahyadri ? SAHYADRI_DEMO.business.name : 'Aster Precision Components'}</span>
             </div>
             <div>
               <span className="text-[10px] text-slate-500 uppercase font-semibold block">Service:</span>
-              <span className="font-semibold text-slate-900">Building / Planning</span>
+              <span className="font-semibold text-slate-900">{isSahyadri ? SAHYADRI_DEMO.application.service : 'Building / Planning'}</span>
             </div>
             <div>
               <span className="text-[10px] text-slate-500 uppercase font-semibold block">Current State:</span>
@@ -856,7 +860,7 @@ export function M10ReviewPlanPage({
             </div>
             <div>
               <span className="text-[10px] text-slate-500 uppercase font-semibold block">SLA Status:</span>
-              <span className="font-semibold text-amber-700">Approaching deadline</span>
+              <span className="font-semibold text-amber-700">{isSahyadri ? SAHYADRI_DEMO.application.sla : 'Approaching deadline'}</span>
             </div>
             <div>
               <span className="text-[10px] text-slate-500 uppercase font-semibold block">Current Desk:</span>

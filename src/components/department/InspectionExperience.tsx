@@ -93,6 +93,7 @@ export const EVENT_TYPE_STYLE: Record<string, { bg: string; text: string; dot: s
 
 // ── Canonical Inspection Records Fixture ──────────────────────────────────────
 export const INSPECTION_RECORDS_DATA: InspRow[] = [
+  { inspId: 'INS-2026-MIDC-00187', appId: 'APP-2026-MIDC-00187', business: 'Sahyadri Bio-Pharma Pvt Ltd', service: 'Building / Planning', site: 'Chakan Industrial Area, Plot C-14/2', inspType: 'MIDC Building / Planning Inspection', requiredBy: '25 Sep 2026', status: 'SCHEDULED', assigned: 'Building / Planning Inspection Team', targetDate: '25 Sep 2026, 10:30 AM', slaImpact: 'Approaching deadline', reInspection: false, source: 'Configured service workflow' },
   { inspId: 'INSP-2026-00418', appId: 'MIDC-APP-2026-00418', business: 'Aster Precision Components Pvt. Ltd.', service: 'Building / Planning', site: 'Example MIDC Estate / Plot A-18', inspType: 'Building / Planning Site Inspection', requiredBy: '25 Sep 2026', status: 'COMPLETED', assigned: 'Building / Planning Inspection Team', targetDate: '25 Sep 2026', slaImpact: 'Resolved', reInspection: true, source: 'Configured service workflow' },
   { inspId: 'INSP-2026-00391', appId: 'MIDC-APP-2026-00391', business: 'Kalyan Agro Industries Ltd.', service: 'Water / Utility', site: 'Chakan Phase II / Plot B-07', inspType: 'Utility Site Inspection', requiredBy: '26 Sep 2026', status: 'SCHEDULED', assigned: 'MIDC Utility Inspection Team', targetDate: '26 Sep 2026', slaImpact: 'Within SLA', reInspection: false, source: 'Configured service workflow' },
   { inspId: 'INSP-2026-00372', appId: 'MIDC-APP-2026-00372', business: 'Sunrise Pharmaceuticals Pvt. Ltd.', service: 'Building / Planning', site: 'Taloja MIDC / Plot C-12', inspType: 'Building / Planning - Re-inspection', requiredBy: '28 Sep 2026', status: 'RE_INSPECTION_REQUIRED', assigned: 'Building Inspection Team B', targetDate: '28 Sep 2026', slaImpact: 'SLA Risk', reInspection: true, source: 'Observation outcome' },
@@ -111,6 +112,12 @@ export const AUTHORITATIVE_INSPECTION_TIMELINE: M24Event[] = [
   { date: '01 Oct 2026', type: 'RE_INSPECTION',        id: 'INSP-2026-00418-R1', title: 'Re-inspection Scheduled',      detail: 'Re-inspection scheduled with joint Fire and MIDC planning team.', actor: 'MIDC Officer', status: 'Scheduled' },
   { date: '01 Oct 2026', type: 'INSPECTION',           id: 'INSP-2026-00418-R1', title: 'Re-inspection Conducted',      detail: 'Re-inspection conducted on-site. Verified plot boundaries and revised building setbacks conform to plan v3.', actor: 'Building / Planning Inspection Team', status: 'Pass' },
   { date: '01 Oct 2026', type: 'RESOLVED',             id: 'OBS-2026-00418-01',  title: 'Observation Resolved',         detail: 'On-site verification confirms compliance with plan v3. Observation OBS-2026-00418-01 resolved.', actor: 'Inspection Officer', status: 'Resolved' },
+];
+
+const SAHYADRI_INSPECTION_TIMELINE: M24Event[] = [
+  { date: '25 Sep 2026, 10:30 AM', type: 'INSPECTION', id: 'INS-2026-MIDC-00187', title: 'Inspection scheduled', detail: 'MIDC Building / Planning Inspection scheduled for Chakan Industrial Area, Plot C-14/2.', actor: 'Building / Planning Inspection Team', status: 'Scheduled' },
+  { date: '25 Sep 2026', type: 'INSPECTION', id: 'INS-2026-MIDC-00187', title: 'Inspection completed', detail: 'Site identity, plot parameters, Building Plan v2, application data, on-site documents and MIDC construction norms were checked.', actor: 'Building / Planning Inspection Team', status: 'Pass' },
+  { date: '25 Sep 2026', type: 'RESOLVED', id: 'INS-2026-MIDC-00187-CLOSE', title: 'Inspection findings recorded', detail: 'Inspection completed successfully. Final approval remains governed by the Decision Workspace.', actor: 'Inspection Officer', status: 'Resolved' },
 ];
 
 // ── Common 6-Section Checklist Types and Fixture ─────────────────────────────
@@ -200,11 +207,12 @@ export function InspectionRecordsPage({
   onBack?: () => void;
 }) {
   const allRows = applicationId ? INSPECTION_RECORDS_DATA.filter(r => r.appId === applicationId) : INSPECTION_RECORDS_DATA;
+  const inspectionTimeline = applicationId === 'APP-2026-MIDC-00187' ? SAHYADRI_INSPECTION_TIMELINE : AUTHORITATIVE_INSPECTION_TIMELINE;
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [serviceFilter, setServiceFilter] = useState('All');
   const [selectedRecord, setSelectedRecord] = useState<InspRow | null>(() => (applicationId ? allRows[0] ?? null : null));
-  const [selectedEvent, setSelectedEvent] = useState<M24Event | null>(AUTHORITATIVE_INSPECTION_TIMELINE[1]);
+  const [selectedEvent, setSelectedEvent] = useState<M24Event | null>(inspectionTimeline[0] ?? null);
 
   const filteredRows = allRows.filter(r => {
     const q = search.toLowerCase();
@@ -813,6 +821,7 @@ export function InspectionWorkspacePage({
   service = 'Building / Planning',
   inspectionDate = '25 Sep 2026',
   inspector = 'Building / Planning Inspection Team',
+  successfulDemo = false,
   onBack,
   onOpenRecords,
   onOpenDocReview,
@@ -824,15 +833,16 @@ export function InspectionWorkspacePage({
   service?: string;
   inspectionDate?: string;
   inspector?: string;
+  successfulDemo?: boolean;
   onBack?: () => void;
   onOpenRecords?: () => void;
   onOpenDocReview?: (id: string) => void;
   onOpenDecision?: () => void;
 }) {
   const [showReinspectionSubpage, setShowReinspectionSubpage] = useState(false);
-  const [checklist, setChecklist] = useState<OperationalChecklistItem[]>(INITIAL_OPERATIONAL_CHECKLIST);
+  const [checklist, setChecklist] = useState<OperationalChecklistItem[]>(() => successfulDemo ? INITIAL_OPERATIONAL_CHECKLIST.map(item => ({ ...item, status: 'Checked', observationReason: '' })) : INITIAL_OPERATIONAL_CHECKLIST);
   const [evidenceList, setEvidenceList] = useState<UploadedEvidenceItem[]>(INITIAL_EVIDENCE_ITEMS);
-  const [outcome, setOutcome] = useState<InspOutcome>('CORRECTION_REQUIRED');
+  const [outcome, setOutcome] = useState<InspOutcome>(successfulDemo ? 'PASS' : 'CORRECTION_REQUIRED');
   const [correctionReason, setCorrectionReason] = useState('Submitted building plan v2 does not reflect the current project parameters (building area 2,300 m²).');
   const [requiredCorrection, setRequiredCorrection] = useState('Provide corrected building plan reflecting the current project configuration.');
   const [observationText, setObservationText] = useState('Submitted building plan v2 does not reflect current project parameters. Building area confirmed at 2,300 m² on site versus 2,000 m² on drawing.');

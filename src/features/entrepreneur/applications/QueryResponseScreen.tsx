@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ENTREPRENEUR_ROUTES } from '@/lib/routes/entrepreneur';
 import type { BusinessProject } from '../businesses/catalog';
 import { findQueryByAppId, type Deficiency } from './data';
+import { setSahyadriDemoStep } from '@/features/demo/sahyadri-demo-state';
 
 import {
   AlertTriangle,
@@ -131,6 +132,7 @@ export function QueryResponseScreen({
   };
 
   const handleSubmitResponse = () => {
+    if (applicationId === 'APP-2026-MIDC-00187') setSahyadriDemoStep('RESUBMITTED');
     setSubmittedTimestamp(
       new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) +
         ', ' +

@@ -22,6 +22,7 @@ import {
   responsibilityLabel,
   getHumanAuthority,
 } from './data';
+import { useSahyadriDemoState } from '@/features/demo/sahyadri-demo-state';
 
 export function ApplicationTrackerScreen({
   project,
@@ -29,7 +30,24 @@ export function ApplicationTrackerScreen({
   project: BusinessProject;
 }) {
   const router = useRouter();
-  const apps = listTrackerAppsForBusiness(project.id);
+  const { state: demoState } = useSahyadriDemoState();
+  const apps = listTrackerAppsForBusiness(project.id).map(app => {
+    if (app.appId !== 'APP-2026-MIDC-00187') return app;
+    const approved = ['APPROVED', 'CERTIFICATE_ISSUED', 'ENTREPRENEUR_NOTIFIED', 'NEXT_REQUIREMENTS_AVAILABLE'].includes(demoState.currentState);
+    const query = ['QUERY_RAISED', 'ENTREPRENEUR_RESPONSE_PENDING'].includes(demoState.currentState);
+    const resubmitted = ['RESUBMITTED', 'DELTA_RE_SCRUTINY'].includes(demoState.currentState);
+    const inspection = demoState.currentState.startsWith('INSPECTION_') || demoState.currentState.startsWith('RE_INSPECTION_') || demoState.currentState === 'CORRECTION_REQUIRED';
+    return {
+      ...app,
+      stage: approved ? 'Approved' : query ? 'Query / Correction' : resubmitted ? 'Delta Re-scrutiny' : inspection ? 'Inspection' : demoState.currentState.replace(/_/g, ' ').replace(/\b\w/g, (letter: string) => letter.toUpperCase()),
+      status: approved ? 'Approved' : query ? 'Action Required' : resubmitted ? 'Resubmission Received' : inspection ? demoState.inspectionStatus.replace(/_/g, ' ') : 'Waiting for MIDC Approval',
+      statusType: approved ? 'approved' as const : query ? 'action' as const : 'active' as const,
+      actionRequired: query ? 'Respond to Query QRY-2026-MIDC-00187 — submit corrected Building Plan v3' : null,
+      currentDesk: approved ? 'Decision Recorded' : 'Planning / Building Scrutiny',
+      inspection: inspection ? `${demoState.inspectionStatus} (INS-2026-MIDC-00187)` : 'Pending',
+      lastUpdated: 'Demo state · 29 Sep 2026',
+    };
+  });
 
   // Filters: all, me (entrepreneur action), govt (government action), dept-wait (inter-department), completed
   const [filterMode, setFilterMode] = useState<'all' | 'me' | 'govt' | 'dept-wait' | 'completed'>('all');

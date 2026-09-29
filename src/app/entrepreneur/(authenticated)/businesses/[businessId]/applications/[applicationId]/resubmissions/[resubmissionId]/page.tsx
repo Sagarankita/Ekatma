@@ -18,7 +18,5 @@ export default async function BusinessApplicationExactResubmissionPage({
   if (!app) notFound();
   requireApplicationChildRouteParam('resubmission', business.id, applicationId, resubmissionId);
 
-  if (resubmissionId !== `${applicationId}-R2`) notFound();
-
   return <DeltaResubmissionScreen project={project} applicationId={app.appId} resubmissionId={resubmissionId} />;
 }

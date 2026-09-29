@@ -13,7 +13,8 @@ export default function Page() {
   const appId = (params.applicationId as string) as ApplicationId;
   
   return (
-    <M10ScrutinyRoutePage 
+    <M10ScrutinyRoutePage
+      applicationId={appId}
       onBackToOverview={() => router.push(ROUTES.department.application(appId))}
       onBackToPrecheck={() => router.push(ROUTES.department.applicationPrecheck(appId))}
       onOpenDna={() => router.push(ROUTES.department.applicationDna(appId))}

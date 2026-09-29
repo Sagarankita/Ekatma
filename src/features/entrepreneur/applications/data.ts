@@ -739,8 +739,35 @@ export const SAMPLE_QUERY: QueryRecord = {
   ],
 };
 
+export const SAHYADRI_MIDC_QUERY: QueryRecord = {
+  queryId: 'QRY-2026-MIDC-00187',
+  appId: 'APP-2026-MIDC-00187',
+  dept: 'MIDC',
+  service: 'Building / Planning Approval',
+  issuedDate: '23 Sep 2026',
+  responseDeadline: '30 Sep 2026',
+  deficiencies: [{
+    id: 'DEF-2026-MIDC-00187-01',
+    type: 'correction',
+    summary: 'Building Plan v2 does not match the current project parameters',
+    issue: 'The submitted plan records 3,050 sq.m built-up area while the Business DNA and MIDC application record 3,200 sq.m.',
+    explanation: 'MIDC Building / Planning scrutiny compares the submitted plan with the verified project record before final determination.',
+    evidenceNeeded: 'Corrected Building Plan v3 showing 3,200 sq.m built-up area.',
+    requiredAction: 'Upload the corrected Building Plan v3 and submit the consolidated response.',
+    officerComment: 'Please reconcile the built-up area schedule and submit the corrected plan.',
+    relatedField: 'Built-up Area',
+    relatedDocument: 'Building Plan v2',
+    regulatoryRef: 'MIDC Building / Planning scrutiny record',
+    section: 'building-plan',
+    deadline: '30 Sep 2026',
+    evidenceDocName: 'Sahyadri_Building_Plan_v3.pdf',
+    defaultResponse: 'Building Plan v3 has been corrected to reflect the current project built-up area of 3,200 sq.m. The revised signed plan is attached.',
+  }],
+};
+
 export function findQueryByAppId(appId: string): QueryRecord | undefined {
   if (appId === SAMPLE_QUERY.appId) return SAMPLE_QUERY;
+  if (appId === SAHYADRI_MIDC_QUERY.appId) return SAHYADRI_MIDC_QUERY;
   return undefined;
 }
 
@@ -913,6 +940,29 @@ export interface InspectionRecord {
 }
 
 export const INSPECTIONS: readonly InspectionRecord[] = [
+  {
+    id: 'INS-2026-MIDC-00187',
+    departments: ['MIDC'],
+    type: 'MIDC Building / Planning Inspection',
+    relatedAppIds: ['APP-2026-MIDC-00187'],
+    date: '25 Sep 2026',
+    time: '10:30 AM',
+    site: 'Chakan Industrial Area — Plot C-14/2',
+    status: 'Scheduled',
+    actionRequired: 'Prepare for Inspection',
+    coordinated: false,
+    purpose: 'Verify that the site and corrected Building Plan v3 reflect the current Sahyadri Bio-Pharma project scope.',
+    estimatedDuration: '90 minutes',
+    inspectingTeamNotes: 'Building / Planning Inspection Team',
+    outcomeSummary: null,
+    outcomeCompliance: 'Scheduled',
+    statutoryApprovalDisclaimer: 'Inspection completion does not constitute final statutory approval. The application returns to the Decision Workspace.',
+    prepRequirements: ['Keep the site accessible at 10:30 AM', 'Keep Building Plan v3 and the MIDC plot record available', 'Ensure the authorised site representative is present'],
+    documents: [{ id: 'DOC-002', name: 'Land Possession / MIDC Lease Agreement' }, { id: 'DOC-004', name: 'Building Layout / Architectural Plan' }],
+    checklist: [{ category: 'MIDC — Building & Planning', items: ['Site identity matches application', 'Plot area matches project parameters', 'Building plan reflects current project scope', 'Application data matches site conditions', 'Relevant documents available on site', 'MIDC construction norms'] }],
+    observations: [],
+    reInspectionReason: null,
+  },
   {
     id: 'INS-001',
     departments: ['MIDC', 'Fire', 'DISH'],
@@ -1227,7 +1277,33 @@ export const SAMPLE_DECISION: DecisionRecord = {
   ],
 };
 
+export const SAHYADRI_MIDC_DECISION: DecisionRecord = {
+  decisionId: 'DEC-2026-MIDC-00187',
+  appId: 'APP-2026-MIDC-00187',
+  dept: 'MIDC',
+  service: 'Building / Planning Approval',
+  state: 'approved',
+  decisionDate: '29 Sep 2026',
+  approvalId: 'MIDC/BP/2026/00187',
+  certId: 'CERT-MIDC-2026-00187',
+  issueDate: '29 Sep 2026',
+  validityPeriod: 'Configured prototype validity',
+  whatWasApproved: {
+    service: 'MIDC Building / Planning Approval',
+    authority: 'Maharashtra Industrial Development Corporation (MIDC)',
+    scope: 'Building / Planning approval for the configured Sahyadri Bio-Pharma project record.',
+    location: 'Chakan Industrial Area Phase II, Plot C-14/2, Pune, Maharashtra',
+    orderNo: 'MIDC/BP/2026/00187',
+  },
+  conditions: ['Construction must follow the reviewed Building Plan and recorded MIDC plot boundaries.', 'Material project changes must use the applicable amendment workflow.', 'External approvals remain governed by their respective issuing authorities.'],
+  specialConditions: ['DEMO / PROTOTYPE RECORD — conditions are illustrative and are not represented as actual statutory MIDC conditions.'],
+  downstreamUnlocked: [{ label: 'Fire NOC', status: 'Next configured requirement' }, { label: 'Factory / Occupier Registration', status: 'Next configured requirement' }, { label: 'Boiler Registration', status: 'Next configured requirement' }],
+  inspectionId: 'INS-2026-MIDC-00187',
+  versionHistory: [{ version: 'Decision v1 — Current', date: '29 Sep 2026', note: 'Prototype approval record issued for the Sahyadri end-to-end demonstration.' }],
+};
+
 export function findDecisionByAppId(appId: string): DecisionRecord | undefined {
   if (appId === SAMPLE_DECISION.appId) return SAMPLE_DECISION;
+  if (appId === SAHYADRI_MIDC_DECISION.appId) return SAHYADRI_MIDC_DECISION;
   return undefined;
 }

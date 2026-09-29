@@ -4,6 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { GuidedScrutinyWorkflow } from '@/App';
 import { ApplicationId } from '@/domain/ids';
 import { ROUTES } from '@/lib/routes';
+import { SAHYADRI_DEMO, isSahyadriDemoApplication } from '@/data/fixtures/sahyadri-department-demo';
 
 export default function Page() {
   const params = useParams();
@@ -26,7 +27,7 @@ export default function Page() {
       onOpenDependencyView={() => router.push(ROUTES.department.applicationDependencyView(appId))}
       onOpenQueryBuilder={() => router.push(ROUTES.department.applicationQueryBuilder(appId))}
       onOpenDelta={() => router.push(ROUTES.department.applicationDeltaRescrutiny(appId))}
-      onOpenInspectionPlanning={() => router.push(ROUTES.department.inspectionPlan(appId, 'INSP-2026-00418'))}
+      onOpenInspectionPlanning={() => router.push(ROUTES.department.inspectionPlan(appId, isSahyadriDemoApplication(appId) ? SAHYADRI_DEMO.inspection.id : 'INSP-2026-00418'))}
       onOpenDecisionWorkspace={() => router.push(ROUTES.department.applicationDecisionWorkspace(appId))}
     />
   );

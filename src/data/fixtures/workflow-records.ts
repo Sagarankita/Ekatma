@@ -8,6 +8,13 @@ export type WorkflowChildRecords = {
 
 // Existing M13/M21/M26/M27/M28 prototype identities, not generated records.
 export const WORKFLOW_RECORDS: Readonly<Record<string, WorkflowChildRecords>> = {
+  'APP-2026-MIDC-00187': {
+    documentId: 'BUILDING-PLAN-V2-00187',
+    decisionId: 'DEC-2026-MIDC-00187',
+    dependencyNodeId: 'midc-bldg',
+    complianceId: 'COND-MIDC-00187',
+    inspectionId: 'INS-2026-MIDC-00187',
+  },
   'MIDC-APP-2026-00418': {
     documentId: 'DOC-LAND-00418',
     decisionId: 'DEC-2026-00418',

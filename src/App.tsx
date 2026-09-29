@@ -21,6 +21,8 @@ export { DocumentOcrInsightsPage } from '@/components/department/DocumentOcrInsi
 import { GovDependencyScreen } from '@/features/department/journey/GovDependencyScreen';
 import { useRegulatoryAssistant } from '@/features/regulatory-assistant/Provider';
 import { inlineContext } from '@/features/regulatory-assistant/context';
+import { SAHYADRI_DEMO, isSahyadriDemoApplication } from '@/data/fixtures/sahyadri-department-demo';
+import { approveSahyadriDemo, resetSahyadriDemo, sahyadriDemoApplicationState, setSahyadriDemoStep, useSahyadriDemoState } from '@/features/demo/sahyadri-demo-state';
 
 
 import { createContext, useContext } from 'react';
@@ -2378,11 +2380,17 @@ function QueueTable({ apps, onOpenApp, onClearFilters }: { apps: typeof QUEUE_AP
 }
 
 export function M03QueuePage({ onOpenApp, initialService, initialStatus = 'all' }: { onOpenApp?: (applicationId: string) => void; initialService?: string; initialStatus?: string }) {
+  const { state: sahyadriDemoState } = useSahyadriDemoState()
   const [activeTab, setActiveTab] = useState(initialStatus)
   const [sortBy, setSortBy] = useState('sla-risk')
   const [activeFilters, setActiveFilters] = useState<{label: string; key: string}[]>(() => initialService ? [{ label: `Service: ${initialService}`, key: `service:${initialService}` }] : [])
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [exportNotice, setExportNotice] = useState(false)
+  const queueApps = QUEUE_APPS.map(app => app.id === SAHYADRI_DEMO.application.id ? {
+    ...app,
+    state: sahyadriDemoApplicationState(sahyadriDemoState.currentState),
+    overlay: ['QUERY_RAISED', 'ENTREPRENEUR_RESPONSE_PENDING'].includes(sahyadriDemoState.currentState) ? 'Awaiting Entrepreneur' : '',
+  } : app)
 
   const tabFilter = (tab: string, apps: typeof QUEUE_APPS) => {
     if (tab === 'all') return apps
@@ -2402,17 +2410,17 @@ export function M03QueuePage({ onOpenApp, initialService, initialStatus = 'all' 
   const removeFilter = (key: string) => setActiveFilters(f => f.filter(x => x.key !== key))
   const serviceFilters = activeFilters.filter(filter => filter.key.startsWith('service:')).map(filter => filter.key.slice('service:'.length))
   const normalizeService = (value: string) => value.replace('Building / Planning', 'Planning / Building').replace('Water / Utilities', 'Water / Utility')
-  const filtered = tabFilter(activeTab, QUEUE_APPS).filter(app => serviceFilters.length === 0 || serviceFilters.some(service => normalizeService(service) === normalizeService(app.service)))
+  const filtered = tabFilter(activeTab, queueApps).filter(app => serviceFilters.length === 0 || serviceFilters.some(service => normalizeService(service) === normalizeService(app.service)))
 
   const summary = {
-    total: QUEUE_APPS.length,
-    new: QUEUE_APPS.filter(a => a.state === 'SUBMITTED').length,
-    scrutiny: QUEUE_APPS.filter(a => ['INITIAL_SCRUTINY','TECHNICAL_SCRUTINY','DOCUMENT_SCRUTINY'].includes(a.state)).length,
-    awaiting: QUEUE_APPS.filter(a => a.overlay === 'Awaiting Entrepreneur').length,
-    inspection: QUEUE_APPS.filter(a => a.state === 'INSPECTION_PENDING').length,
-    decision: QUEUE_APPS.filter(a => a.state === 'FINAL_DECISION').length,
-    slaRisk: QUEUE_APPS.filter(a => a.slaState === 'approaching').length,
-    slaBreached: QUEUE_APPS.filter(a => a.slaState === 'breached').length,
+    total: queueApps.length,
+    new: queueApps.filter(a => a.state === 'SUBMITTED').length,
+    scrutiny: queueApps.filter(a => ['INITIAL_SCRUTINY','TECHNICAL_SCRUTINY','DOCUMENT_SCRUTINY'].includes(a.state)).length,
+    awaiting: queueApps.filter(a => a.overlay === 'Awaiting Entrepreneur').length,
+    inspection: queueApps.filter(a => a.state === 'INSPECTION_PENDING').length,
+    decision: queueApps.filter(a => a.state === 'FINAL_DECISION').length,
+    slaRisk: queueApps.filter(a => a.slaState === 'approaching').length,
+    slaBreached: queueApps.filter(a => a.slaState === 'breached').length,
   }
 
   return (
@@ -2460,7 +2468,7 @@ export function M03QueuePage({ onOpenApp, initialService, initialStatus = 'all' 
         {/* Queue tabs */}
         <div className="flex overflow-x-auto border-b border-[#d6dfd5] bg-white rounded-t">
           {Q_TABS.map(tab => {
-            const count = tabFilter(tab.id, QUEUE_APPS).length
+            const count = tabFilter(tab.id, queueApps).length
             return (
               <button
                 key={tab.id}
@@ -5150,6 +5158,19 @@ export function M09PreCheckPage({
   onOpenQueryBuilder?: () => void
 }) {
   const app = useMonolithData().APP_SAMPLE
+  const isSahyadri = isSahyadriDemoApplication(app.id)
+  const { setStep: setDemoStep } = useSahyadriDemoState()
+  const sahyadriPrecheckGroups: PreCheckGroup[] = [
+    {
+      id: 'sahyadri-verified', title: 'Machine verified', desc: 'Configured intake checks matched the submitted application and trusted department records.',
+      checks: SAHYADRI_DEMO.precheck.machineVerified.map((name, index) => ({ id: `sbp-v${index + 1}`, name, result: 'verified' as const, explanation: `${name}. Verified against the application submission and configured source record.`, source: index === 3 || index === 4 ? 'MIDC plot record' : index === 5 ? 'Business DNA' : 'Application submission data', checkedAt: '29 Sep 2026, 09:30', rule: `SBP-VERIFY-${String(index + 1).padStart(2, '0')}` })),
+    },
+    {
+      id: 'sahyadri-review', title: 'Review required', desc: SAHYADRI_DEMO.precheck.notice,
+      checks: SAHYADRI_DEMO.precheck.reviewRequired.map((name, index) => ({ id: `sbp-r${index + 1}`, name, result: 'warning' as const, explanation: `${name}. ${SAHYADRI_DEMO.precheck.notice}`, source: index === 0 ? 'Building Plan v2' : index === 1 ? 'Fire document' : index === 2 ? 'Business DNA + MIDC application + land record' : 'Configured Dependency Graph', checkedAt: '29 Sep 2026, 09:30', rule: `SBP-REVIEW-${String(index + 1).padStart(2, '0')}`, detail: { values: [{ label: 'Verification state', value: 'Officer review required', match: false }, { label: 'Application', value: SAHYADRI_DEMO.application.id }], impact: name, nextReview: index === 0 ? 'Building / Planning Scrutiny' : index === 2 ? 'Cross-form Consistency' : index === 3 ? 'Dependency Graph' : 'Document review' } })),
+    },
+  ]
+  const precheckGroups = isSahyadri ? sahyadriPrecheckGroups : M09_GROUPS
   const [activeCheck, setActiveCheck] = useState<PreCheck | null>(null)
   const [showVerifiedChecks, setShowVerifiedChecks] = useState(false)
   const [showAllCategories, setShowAllCategories] = useState(false)
@@ -5167,7 +5188,7 @@ export function M09PreCheckPage({
     setTimeout(() => setNotification(null), 3500)
   }
 
-  const allChecks = M09_GROUPS.flatMap(g => g.checks)
+  const allChecks = precheckGroups.flatMap(g => g.checks)
   const passedChecks = allChecks.filter(c => c.result === 'verified')
   const priorityChecks = allChecks.filter(c => c.result !== 'verified')
   const totalVerified = passedChecks.length
@@ -5192,6 +5213,7 @@ export function M09PreCheckPage({
   }
 
   const handleProceedToScrutinyPhase = () => {
+    if (isSahyadri) setDemoStep('INITIAL_SCRUTINY')
     if (onOpenScrutinyWorkflow) {
       onOpenScrutinyWorkflow()
     } else if (onOpenScrutinyRoute) {
@@ -5282,7 +5304,7 @@ export function M09PreCheckPage({
               <h2 className="text-sm font-bold text-[#2B2B2B] uppercase tracking-wider">
                 Automated Pre-check
               </h2>
-              <span className="text-xs text-[#555C56]">30 checks completed</span>
+              <span className="text-xs text-[#64748b]">{allChecks.length} checks completed</span>
             </div>
 
             {/* Small Info Tooltip / Note */}
@@ -5508,6 +5530,20 @@ export function M09PreCheckPage({
           </div>
 
           <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
+            {isSahyadri && unreviewedCount > 0 && (
+              <button
+                onClick={() => {
+                  setOfficerReviews(previous => ({
+                    ...previous,
+                    ...Object.fromEntries(priorityChecks.map(check => [check.id, 'valid' as OfficerReviewState])),
+                  }))
+                  showNotice('All Sahyadri pre-check findings marked reviewed')
+                }}
+                className="px-3.5 py-2 text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 rounded border border-emerald-300 transition-colors"
+              >
+                ✓ Mark all reviewed
+              </button>
+            )}
             {unreviewedCount > 0 && (
               <button
                 onClick={handleReviewRemaining}
@@ -7011,6 +7047,8 @@ export function M13DocumentReviewPage({ onBack, onOpenParamDetail }: {
 export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamDetail, onOpenDocReview, onOpenConsistency, onOpenDepView }: {
   onBack: () => void; onBackToOverview: () => void; onOpenParamDetail?: (id: string) => void; onOpenDocReview?: (id: string) => void; onOpenConsistency?: () => void; onOpenDepView?: () => void
 }) {
+  const app = useMonolithData().APP_SAMPLE
+  const isSahyadri = isSahyadriDemoApplication(app.id)
   const [activeSection, setActiveSection] = useState('identity')
   const { openAssistant, pageContext } = useRegulatoryAssistant()
   const openRegulatoryReference = () => openAssistant({ origin: 'inline', mode: 'entity', preset: 'Explain the applicable building specification', context: inlineContext(pageContext, { label: 'Standard Building Specifications and MIDC DCR 2024', pageType: 'technical-scrutiny', recordTitle: 'Building scrutiny reference' }) })
@@ -7091,6 +7129,20 @@ export function M14BuildingScrutinyPage({ onBack, onBackToOverview, onOpenParamD
           <span className="text-[10px] text-[#4A4A4A] italic">Read-only - inherited from Master Project Dossier</span>
         </div>
       </div>
+
+      {isSahyadri && (
+        <div className="bg-amber-50 border-b border-amber-200 px-5 py-3 shrink-0 flex flex-wrap items-center gap-4 text-xs">
+          <div className="min-w-56"><span className="block text-[10px] font-bold uppercase text-amber-800">Applicant submitted</span><strong>{SAHYADRI_DEMO.buildingScrutiny.document}</strong></div>
+          <div><span className="block text-[10px] text-[#6b7280]">Application built-up area</span><strong>{SAHYADRI_DEMO.buildingScrutiny.applicationBuiltUpArea}</strong></div>
+          <div><span className="block text-[10px] text-[#6b7280]">Submitted plan</span><strong>{SAHYADRI_DEMO.buildingScrutiny.submittedPlanBuiltUpArea}</strong></div>
+          <div className="min-w-48"><span className="block text-[10px] text-amber-800">Machine finding</span><strong>{SAHYADRI_DEMO.buildingScrutiny.finding}</strong></div>
+          <div className="ml-auto flex gap-2">
+            <button onClick={() => onOpenDocReview?.('BUILDING-PLAN-V2-00187')} className="rounded border border-[#1a3a5c] bg-white px-3 py-1.5 font-semibold text-[#1a3a5c]">View submitted evidence</button>
+            <button onClick={() => setReview('bp_Built-up Area', 'valid')} className="rounded bg-[#065f46] px-3 py-1.5 font-semibold text-white">Accept finding</button>
+            <button onClick={() => setQueryModal(SAHYADRI_DEMO.buildingScrutiny.finding)} className="rounded border border-amber-300 bg-white px-3 py-1.5 font-semibold text-amber-800">Raise issue</button>
+          </div>
+        </div>
+      )}
 
       {/* Dark summary bar */}
       <div className="bg-[#27472c] px-5 py-2 flex items-center gap-6 shrink-0 text-[10px]">
@@ -7968,6 +8020,8 @@ const M16_FIELDS: ConsistencyField[] = [
 export function M16ConsistencyPage({ onBack, onBackToOverview, onOpenParamDetail, onOpenDocReview }: {
   onBack: () => void; onBackToOverview: () => void; onOpenParamDetail?: (id: string) => void; onOpenDocReview?: (id: string) => void
 }) {
+  const app = useMonolithData().APP_SAMPLE
+  const isSahyadri = isSahyadriDemoApplication(app.id)
   const [selectedField, setSelectedField] = useState<ConsistencyField>(M16_FIELDS[0])
   const [filter, setFilter] = useState<'all'|'mismatch'|'match'|'needs-verification'|'not-applicable'|'resolved'>('all')
   const [activeAction, setActiveAction] = useState<string|null>(null)
@@ -8028,6 +8082,18 @@ export function M16ConsistencyPage({ onBack, onBackToOverview, onOpenParamDetail
           ))}
         </div>
       </div>
+
+      {isSahyadri && (
+        <div className="bg-emerald-50 border-b border-emerald-200 px-5 py-3 shrink-0">
+          <div className="flex flex-wrap items-center gap-x-8 gap-y-2 text-xs">
+            <div><span className="block text-[10px] font-bold uppercase text-emerald-800">{SAHYADRI_DEMO.consistency.field}</span><strong className="text-emerald-900">{SAHYADRI_DEMO.consistency.result}</strong></div>
+            <div><span className="block text-[10px] text-[#6b7280]">Business DNA</span><strong>{SAHYADRI_DEMO.consistency.businessDna}</strong></div>
+            <div><span className="block text-[10px] text-[#6b7280]">MIDC application</span><strong>{SAHYADRI_DEMO.consistency.midcApplication}</strong></div>
+            <div><span className="block text-[10px] text-[#6b7280]">Land record</span><strong>{SAHYADRI_DEMO.consistency.landRecord}</strong></div>
+            <p className="ml-auto max-w-md text-[#4b5563]">Compared across multiple trusted sources; no single form was treated as the only source of truth.</p>
+          </div>
+        </div>
+      )}
 
       {/* Purpose explanation */}
       <div className="bg-[#edf5ef] border-b border-[#bdd4f5] px-5 py-2 shrink-0">
@@ -8730,13 +8796,14 @@ export function M18QueryBuilderPage({ onBack, onBackToOverview, onOpenQueryHisto
   onBack: () => void; onBackToOverview: () => void; onOpenQueryHistory?: () => void
 }) {
   const app = useMonolithData().APP_SAMPLE
+  const isSahyadri = isSahyadriDemoApplication(app.id)
   const [selectedDef, setSelectedDef] = useState<Deficiency | null>(M18_CANDIDATES[0])
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set(isSahyadri ? ['DEF-2026-0092'] : []))
   const [filterCat, setFilterCat]     = useState('All')
   const [showPreview, setShowPreview] = useState(false)
   const [sent, setSent]               = useState(false)
   const [draftSaved, setDraftSaved]   = useState(false)
-  const [queryId]                     = useState(app.queryVersion ?? `DRAFT-${app.id}`)
+  const [queryId]                     = useState(isSahyadri ? 'QRY-2026-MIDC-00187' : app.queryVersion ?? `DRAFT-${app.id}`)
 
   const toggleSelect = (id: string) => setSelectedIds(prev => {
     const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n
@@ -9058,6 +9125,26 @@ export function M18QueryBuilderPage({ onBack, onBackToOverview, onOpenQueryHisto
 
 const SCRUTINY_APPS: ScrutinyApp[] = [
   {
+    appId: 'APP-2026-MIDC-00187', business: 'Sahyadri Bio-Pharma Pvt Ltd',
+    service: 'Building / Planning', projectStage: 'Trial Production',
+    scrutinyStage: 'Building / Planning', actionRequired: 'Review Building Plan v2',
+    lastUpdated: '29 Sep 2026', sla: 'Due Soon', status: 'TECHNICAL_SCRUTINY',
+    resubmitted: false, deltaRequired: false, inspectionPending: true,
+    modules: [
+      { id:'precheck', name:'Automated Pre-check', mNum:'M09', status:'Completed' },
+      { id:'route', name:'Scrutiny Route', mNum:'M10', status:'Completed' },
+      { id:'land', name:'Land / Plot', mNum:'M11', status:'Completed' },
+      { id:'building', name:'Building / Planning', mNum:'M14', status:'In Review', issues:1, lastUpdated:'29 Sep 2026' },
+      { id:'water', name:'Water / Utility', mNum:'M15', status:'Not Applicable' },
+      { id:'consistency', name:'Cross-form Consistency', mNum:'M16', status:'Issues Found', issues:1, lastUpdated:'29 Sep 2026' },
+      { id:'dependency', name:'Regulatory Dependencies', mNum:'M17', status:'Pending', issues:1 },
+      { id:'query', name:'Consolidated Query', mNum:'M18', status:'Not Started' },
+      { id:'queryhistory', name:'Query / Response History', mNum:'M19', status:'Completed' },
+      { id:'delta', name:'Delta Re-scrutiny', mNum:'M20', status:'Not Applicable' },
+      { id:'inspection', name:'Inspection Queue', mNum:'M21', status:'Pending' },
+    ]
+  },
+  {
     appId: 'MIDC-APP-2026-00418', business: 'Aster Precision Components Pvt. Ltd.',
     service: 'Building / Planning', projectStage: 'Construction',
     scrutinyStage: 'Building / Planning', actionRequired: 'Review Building Parameters',
@@ -9214,6 +9301,8 @@ export function GuidedScrutinyWorkflow({
   onOpenDecisionWorkspace,
 }: GuidedScrutinyWorkflowProps) {
   const app = initialApp ?? SCRUTINY_APPS.find(a => a.appId === applicationId) ?? SCRUTINY_APPS[0]
+  const isSahyadri = isSahyadriDemoApplication(app.appId)
+  const { setStep: setDemoStep } = useSahyadriDemoState()
 
   const [activePhaseKey, setActivePhaseKey] = useState<string>(
     initialStageKey ?? (
@@ -9239,6 +9328,9 @@ export function GuidedScrutinyWorkflow({
   ])
   const [showDocPreview, setShowDocPreview] = useState(false)
   const [siteInspectionScheduled, setSiteInspectionScheduled] = useState(false)
+  const [completedPhases, setCompletedPhases] = useState<Set<string>>(() => new Set(['route']))
+  const [scrutinyCompleted, setScrutinyCompleted] = useState(false)
+  const [buildingDecisions, setBuildingDecisions] = useState<Record<'built_up' | 'setback', 'accepted' | 'query' | null>>({ built_up: null, setback: null })
   const [notification, setNotification] = useState<string | null>(null)
 
   function showNotice(msg: string) {
@@ -9321,17 +9413,18 @@ export function GuidedScrutinyWorkflow({
     }
   ]
 
+  const completedOr = (key: string, fallback: string) => completedPhases.has(key) ? 'completed' : fallback
   const checkpoints = [
-    { id: 'phase-1', key: 'precheck', num: 1, name: 'Pre-check', status: Object.keys(precheckDecisions).length >= 6 ? 'completed' : 'attention' },
-    { id: 'phase-2', key: 'route', num: 2, name: 'Review Plan', status: 'completed' },
-    { id: 'phase-3', key: 'land', num: 3, name: 'Land / Plot', status: landStatuses.plot_area === 'Valid' ? 'completed' : 'attention' },
-    { id: 'phase-4', key: 'building', num: 4, name: 'Building / Planning', status: 'current' },
-    { id: 'phase-5', key: 'water', num: 5, name: 'Water / Utility', status: 'not-applicable' },
-    { id: 'phase-6', key: 'consistency', num: 6, name: 'Consistency', status: consistencyDecision ? 'completed' : 'attention' },
-    { id: 'phase-7', key: 'dependency', num: 7, name: 'Dependencies', status: 'attention' },
-    { id: 'phase-8', key: 'query', num: 8, name: 'Query', status: draftedQueries.length > 0 ? 'attention' : 'upcoming' },
-    { id: 'phase-9', key: 'delta', num: 9, name: 'Delta', status: app.resubmitted ? 'attention' : 'not-applicable' },
-    { id: 'phase-10', key: 'inspection', num: 10, name: 'Inspection', status: siteInspectionScheduled ? 'completed' : 'attention' },
+    { id: 'phase-1', key: 'precheck', num: 1, name: 'Pre-check', status: completedOr('precheck', Object.keys(precheckDecisions).length >= 8 ? 'completed' : 'attention') },
+    { id: 'phase-2', key: 'route', num: 2, name: 'Review Plan', status: completedOr('route', 'completed') },
+    { id: 'phase-3', key: 'land', num: 3, name: 'Land / Plot', status: completedOr('land', landStatuses.plot_area === 'Valid' ? 'completed' : 'attention') },
+    { id: 'phase-4', key: 'building', num: 4, name: 'Building / Planning', status: completedOr('building', 'current') },
+    { id: 'phase-5', key: 'water', num: 5, name: 'Water / Utility', status: completedOr('water', 'not-applicable') },
+    { id: 'phase-6', key: 'consistency', num: 6, name: 'Consistency', status: completedOr('consistency', consistencyDecision ? 'completed' : 'attention') },
+    { id: 'phase-7', key: 'dependency', num: 7, name: 'Dependencies', status: completedOr('dependency', 'attention') },
+    { id: 'phase-8', key: 'query', num: 8, name: 'Query', status: completedOr('query', draftedQueries.length > 0 ? 'attention' : 'upcoming') },
+    { id: 'phase-9', key: 'delta', num: 9, name: 'Delta', status: completedOr('delta', app.resubmitted ? 'attention' : 'not-applicable') },
+    { id: 'phase-10', key: 'inspection', num: 10, name: 'Inspection', status: completedOr('inspection', siteInspectionScheduled ? 'completed' : 'attention') },
   ]
 
   const currentPhaseIndex = Math.max(0, checkpoints.findIndex(c => c.key === activePhaseKey))
@@ -9358,6 +9451,38 @@ export function GuidedScrutinyWorkflow({
       setDraftedQueries(prev => [...prev, issue])
       showNotice('Issue added to draft queries')
     }
+  }
+
+  function completeCurrentPhase() {
+    setCompletedPhases(previous => new Set(previous).add(activePhaseKey))
+    if (isSahyadri) {
+      if (activePhaseKey === 'precheck') setDemoStep('INITIAL_SCRUTINY')
+      else if (['route', 'land', 'building', 'water', 'consistency', 'dependency'].includes(activePhaseKey)) setDemoStep('TECHNICAL_SCRUTINY')
+      else if (activePhaseKey === 'query') {
+        setDemoStep('QUERY_RAISED')
+        onOpenQueryBuilder?.()
+        return
+      } else if (activePhaseKey === 'delta') {
+        setDemoStep('INSPECTION_PENDING')
+        onOpenInspectionPlanning?.()
+        return
+      } else if (activePhaseKey === 'inspection') {
+        setDemoStep('FINAL_DECISION')
+        onOpenDecisionWorkspace?.()
+        return
+      }
+    }
+    const nextPhase = checkpoints[currentPhaseIndex + 1]
+    if (nextPhase) setActivePhaseKey(nextPhase.key)
+    showNotice(`${currentPhaseMeta.name} completed${nextPhase ? `. Moving to ${nextPhase.name}.` : '.'}`)
+  }
+
+  function completeScrutiny() {
+    setCompletedPhases(new Set(checkpoints.map(checkpoint => checkpoint.key)))
+    setSiteInspectionScheduled(true)
+    setScrutinyCompleted(true)
+    if (isSahyadri) setDemoStep('FINAL_DECISION')
+    showNotice('Scrutiny completed. All review sections are clear.')
   }
 
   return (
@@ -9432,7 +9557,7 @@ export function GuidedScrutinyWorkflow({
             <div className="absolute top-[18px] left-[45px] right-[45px] h-[2px] bg-[#e3ebe1] z-0" />
 
             {checkpoints.map((cp) => {
-              const isCurrent = cp.key === activePhaseKey
+              const isCurrent = !scrutinyCompleted && cp.key === activePhaseKey
               let circleClasses = 'w-9 h-9 rounded-full font-bold text-xs flex items-center justify-center relative z-10 transition-all shadow-xs'
               let circleContent: React.ReactNode = cp.num
               let labelColor = 'text-[#4A4A4A]'
@@ -9935,6 +10060,21 @@ export function GuidedScrutinyWorkflow({
             </div>
 
             <div className="flex items-center gap-2">
+              {isSahyadri && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBuildingDecisions({ built_up: 'accepted', setback: 'accepted' })
+                    setDraftedQueries([])
+                    setCompletedPhases(previous => new Set(previous).add('building'))
+                    setDemoStep('TECHNICAL_SCRUTINY')
+                    showNotice('All Building / Planning checks marked reviewed for the demo')
+                  }}
+                  className="px-3.5 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-lg shadow-xs"
+                >
+                  ✓ Approve technical checks
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => onOpenDocReview?.('DWG-2026-C14-A02')}
@@ -10003,14 +10143,12 @@ export function GuidedScrutinyWorkflow({
                         <p className="font-bold text-red-700">2,300 m² (Form)</p>
                         <p className="text-[10px] text-[#555C56]">2,000 m² (Drawing Schedule)</p>
                       </td>
-                      <td className="p-3 font-bold text-red-700">300 m² Mismatch</td>
+                      <td className={`p-3 font-bold ${buildingDecisions.built_up === 'accepted' ? 'text-emerald-700' : 'text-red-700'}`}>{buildingDecisions.built_up === 'accepted' ? '✓ Reviewed and accepted' : '300 m² Mismatch'}</td>
                       <td className="p-3 text-right">
-                        <button
-                          onClick={() => handleToggleQuery('Built-up area discrepancy: 2,300 sq.m in form vs 2,000 sq.m in drawing schedule')}
-                          className="px-2 py-1 text-[10px] font-bold border border-red-300 rounded bg-white hover:bg-red-50 text-red-700"
-                        >
-                          Query
-                        </button>
+                        <div className="inline-flex gap-1.5">
+                          <button onClick={() => { setBuildingDecisions(previous => ({ ...previous, built_up: 'accepted' })); setDraftedQueries(previous => previous.filter(query => !query.startsWith('Built-up area discrepancy'))); showNotice('Built-up area finding accepted') }} className="px-2 py-1 text-[10px] font-bold border border-emerald-300 rounded bg-white hover:bg-emerald-50 text-emerald-700">Approve</button>
+                          <button onClick={() => { setBuildingDecisions(previous => ({ ...previous, built_up: 'query' })); if (!draftedQueries.some(query => query.startsWith('Built-up area discrepancy'))) handleToggleQuery('Built-up area discrepancy: 2,300 sq.m in form vs 2,000 sq.m in drawing schedule') }} className="px-2 py-1 text-[10px] font-bold border border-red-300 rounded bg-white hover:bg-red-50 text-red-700">Query</button>
+                        </div>
                       </td>
                     </tr>
 
@@ -10023,14 +10161,12 @@ export function GuidedScrutinyWorkflow({
                         <p className="font-bold text-amber-800">4.20m proposed</p>
                         <p className="text-[10px] text-[#555C56]">Min 4.50m required (Rule 14.2)</p>
                       </td>
-                      <td className="p-3 font-bold text-amber-800">-0.30m Deficit</td>
+                      <td className={`p-3 font-bold ${buildingDecisions.setback === 'accepted' ? 'text-emerald-700' : 'text-amber-800'}`}>{buildingDecisions.setback === 'accepted' ? '✓ Reviewed and accepted' : '-0.30m Deficit'}</td>
                       <td className="p-3 text-right">
-                        <button
-                          onClick={() => handleToggleQuery('East Side Setback shortfall: 4.2m proposed vs 4.5m required under MIDC DCR Rule 14.2')}
-                          className="px-2 py-1 text-[10px] font-bold border border-amber-300 rounded bg-white hover:bg-amber-50 text-amber-800"
-                        >
-                          Query
-                        </button>
+                        <div className="inline-flex gap-1.5">
+                          <button onClick={() => { setBuildingDecisions(previous => ({ ...previous, setback: 'accepted' })); setDraftedQueries(previous => previous.filter(query => !query.startsWith('East Side Setback'))); showNotice('Setback finding accepted') }} className="px-2 py-1 text-[10px] font-bold border border-emerald-300 rounded bg-white hover:bg-emerald-50 text-emerald-700">Approve</button>
+                          <button onClick={() => { setBuildingDecisions(previous => ({ ...previous, setback: 'query' })); if (!draftedQueries.some(query => query.startsWith('East Side Setback'))) handleToggleQuery('East Side Setback shortfall: 4.2m proposed vs 4.5m required under MIDC DCR Rule 14.2') }} className="px-2 py-1 text-[10px] font-bold border border-amber-300 rounded bg-white hover:bg-amber-50 text-amber-800">Query</button>
+                        </div>
                       </td>
                     </tr>
 
@@ -10857,12 +10993,30 @@ export function GuidedScrutinyWorkflow({
               onClick={() => setActivePhaseKey(checkpoints[currentPhaseIndex + 1].key)}
               className="px-4 py-2 bg-[#355E3B] text-white text-xs font-bold rounded hover:bg-[#27472c] transition-colors shadow-xs flex items-center gap-1.5"
             >
-              Next: {checkpoints[currentPhaseIndex + 1].name} →
+              Complete {currentPhaseMeta.name} & Next →
+            </button>
+          ) : !scrutinyCompleted ? (
+            <button
+              onClick={completeScrutiny}
+              className="px-5 py-2 bg-emerald-700 text-white text-xs font-bold rounded hover:bg-emerald-800 transition-colors shadow-xs flex items-center gap-1.5"
+            >
+              ✓ Complete Scrutiny
             </button>
           ) : (
-            <span className="text-xs font-bold text-emerald-700">✓ All Scrutiny Phases Completed</span>
+            <button
+              onClick={() => onOpenDecisionWorkspace?.()}
+              className="px-5 py-2 bg-[#1a3a5c] text-white text-xs font-bold rounded hover:bg-[#0f2540] transition-colors shadow-xs"
+            >
+              Continue to Final Decision →
+            </button>
           )}
         </div>
+
+        {scrutinyCompleted && (
+          <div className="rounded-xl border border-emerald-300 bg-emerald-50 px-5 py-4 text-sm text-emerald-900 shadow-xs" role="status">
+            <strong>✓ Scrutiny completed.</strong> All ten review sections are marked complete. Continue to Final Decision when you are ready.
+          </div>
+        )}
 
         {/* ── Scrutiny Review Summary & Final Action Bar ──────────────────────── */}
         <div className="bg-white border-2 border-[#355E3B] rounded-xl shadow-md p-6 sticky bottom-4 z-20">
@@ -10880,10 +11034,10 @@ export function GuidedScrutinyWorkflow({
               </div>
             </div>
 
-            <div className="flex items-center gap-2.5 flex-wrap">
+            {!scrutinyCompleted && <div className="flex items-center gap-2.5 flex-wrap">
               {onOpenQueryBuilder && (
                 <button
-                  onClick={onOpenQueryBuilder}
+                  onClick={() => { if (isSahyadri) setDemoStep('QUERY_RAISED'); onOpenQueryBuilder() }}
                   className="px-4 py-2 text-xs font-bold bg-[#9a3412] text-white rounded hover:bg-[#7c2d12] transition-colors shadow-xs"
                 >
                   Raise Consolidated Query ({draftedQueries.length})
@@ -10901,13 +11055,13 @@ export function GuidedScrutinyWorkflow({
 
               {onOpenDecisionWorkspace && (
                 <button
-                  onClick={onOpenDecisionWorkspace}
+                  onClick={() => { if (isSahyadri) setDemoStep('FINAL_DECISION'); onOpenDecisionWorkspace() }}
                   className="px-4 py-2 text-xs font-bold bg-[#065f46] text-white rounded hover:bg-[#044e3a] transition-colors shadow-xs"
                 >
                   Approve & Forward to Executive Engineer
                 </button>
               )}
-            </div>
+            </div>}
           </div>
         </div>
 
@@ -11932,12 +12086,18 @@ export function DecisionsDashboard({ onOpenApp, onOpenCompliance, onOpenDependen
 export function M25DecisionWorkspacePage({ onBack, onOpenDocReview, onOpenConsistency, onOpenDna, onOpenDepView, onOpenQueryHistory, onOpenDelta, onOpenInspection, onOpenM24, onOpenScrutiny, onRecordDecision }: {
   onBack: () => void; onOpenDocReview: (id: string) => void; onOpenConsistency: () => void; onOpenDna: () => void; onOpenDepView: () => void; onOpenQueryHistory: () => void; onOpenDelta: () => void; onOpenInspection?: (id: string) => void; onOpenM24?: (id: string) => void; onOpenScrutiny: () => void; onRecordDecision?: (id: string) => void
 }) {
+  const app = useMonolithData().APP_SAMPLE
+  const isSahyadri = isSahyadriDemoApplication(app.id)
+  const decisionId = isSahyadri ? SAHYADRI_DEMO.decision.id : 'DEC-2026-00418'
+  const approvalNumber = isSahyadri ? SAHYADRI_DEMO.decision.approvalNumber : 'APPR-2026-00418'
+  const decisionDate = isSahyadri ? SAHYADRI_DEMO.decision.issueDate : '01 Oct 2026'
+  const inspectionId = isSahyadri ? SAHYADRI_DEMO.inspection.id : 'INSP-2026-00418'
   const [selectedOutcome, setSelectedOutcome] = useState<'APPROVE' | 'CORRECTION_REQUIRED' | 'REJECT' | null>(null)
   const [decisionStep, setDecisionStep] = useState<'evidence' | 'form' | 'confirm'>('evidence')
   const [openSection, setOpenSection] = useState<string | null>(null)
   // APPROVE form
   const [approvalRemarks, setApprovalRemarks] = useState('')
-  const [approvalConditions, setApprovalConditions] = useState('1. Construction must comply with approved plan.\n2. Occupancy certificate required on completion.')
+  const [approvalConditions, setApprovalConditions] = useState(isSahyadri ? SAHYADRI_DEMO.decision.conditions.join('\n') : '1. Construction must comply with approved plan.\n2. Occupancy certificate required on completion.')
   const [approvalBasis, setApprovalBasis] = useState('MRTP Act 1966; MIDC Estate Guidelines 2019')
   // CORRECTION form
   const [deficiencies, setDeficiencies] = useState([
@@ -12302,10 +12462,10 @@ export function M25DecisionWorkspacePage({ onBack, onOpenDocReview, onOpenConsis
             <div className="p-4 space-y-4">
               <div className="grid grid-cols-2 gap-3 text-xs">
                 <Row label="Outcome" value={selectedOutcome.replace('_', ' ')} />
-                <Row label="Decision ID" value="DEC-2026-00418" />
-                <Row label="Application" value="MIDC-APP-2026-00418" />
+                <Row label="Decision ID" value={decisionId} />
+                <Row label="Application" value={app.id} />
                 <Row label="Officer" value="Authorised Officer - MIDC Building" />
-                <Row label="Decision Date" value="01 Oct 2026" />
+                <Row label="Decision Date" value={decisionDate} />
                 <Row label="Supporting Basis" value={approvalBasis || rejectBasis || 'MRTP Act 1966 / MIDC Estate Guidelines 2019'} />
               </div>
               <div className="text-xs bg-[#F9FAF2] border border-[#e3ebe1] rounded p-3">
@@ -12331,6 +12491,9 @@ export function M25DecisionWorkspacePage({ onBack, onOpenDocReview, onOpenConsis
 export function M26DecisionRecordPage({ onBack, onBackToOverview, onOpenDepView, onOpenDna }: {
   onBack: () => void; onBackToOverview: () => void; onOpenDepView: (id: string) => void; onOpenDna: () => void
 }) {
+  const app = useMonolithData().APP_SAMPLE
+  const isSahyadri = isSahyadriDemoApplication(app.id)
+  const decision = isSahyadri ? SAHYADRI_DEMO.decision : null
   const [activeTab, setActiveTab] = useState<'record' | 'dependencies' | 'audit' | 'version-history'>('record')
 
   return (
@@ -12346,11 +12509,11 @@ export function M26DecisionRecordPage({ onBack, onBackToOverview, onOpenDepView,
         {/* Official header strip */}
         <div className="bg-[#355E3B] rounded-lg px-5 py-4 grid grid-cols-2 gap-3 md:grid-cols-4">
           {[
-            { label: 'Decision ID', value: 'DEC-2026-00418' },
-            { label: 'Application', value: 'MIDC-APP-2026-00418' },
-            { label: 'Business', value: 'Aster Precision Components Pvt. Ltd.' },
+            { label: 'Decision ID', value: decision?.id ?? 'DEC-2026-00418' },
+            { label: 'Application', value: app.id },
+            { label: 'Business', value: app.business },
             { label: 'Decision', value: 'APPROVED' },
-            { label: 'Decision Date', value: '01 Oct 2026' },
+            { label: 'Decision Date', value: decision?.issueDate ?? '01 Oct 2026' },
             { label: 'Officer', value: 'Authorised Officer - MIDC Building / Planning' },
             { label: 'Region', value: 'Pune Region' },
             { label: 'Service', value: 'MIDC Building / Planning Service' },
@@ -12378,9 +12541,10 @@ export function M26DecisionRecordPage({ onBack, onBackToOverview, onOpenDepView,
                 <h2 className="text-sm font-semibold text-[#2B2B2B]">Approval Record</h2>
               </div>
               <div className="p-4 grid grid-cols-2 gap-3 text-xs">
-                <Row label="Approval / Order ID" value="APPR-2026-00418" />
-                <Row label="Issue Date" value="01 Oct 2026" />
-                <Row label="Expiry" value="Not applicable (configured service)" />
+                <Row label="Approval / Order ID" value={decision?.approvalNumber ?? 'APPR-2026-00418'} />
+                <Row label="Certificate" value={decision?.certificate ?? 'DOC-MIDC-2026-00418'} />
+                <Row label="Issue Date" value={decision?.issueDate ?? '01 Oct 2026'} />
+                <Row label="Expiry" value={decision?.validity ?? 'Not applicable (configured service)'} />
                 <Row label="Decision Officer" value="Authorised Officer - MIDC Building / Planning" />
                 <Row label="Supporting Basis" value="MRTP Act 1966 / MIDC Estate Guidelines 2019" />
               </div>
@@ -12390,6 +12554,7 @@ export function M26DecisionRecordPage({ onBack, onBackToOverview, onOpenDepView,
                   <li>Construction must comply with approved building plan.</li>
                   <li>Occupancy certificate required on completion of construction.</li>
                 </ol>
+                {isSahyadri && <p className="mt-3 text-[10px] text-[#6b7280]">Prototype demonstration record. Conditions are illustrative and are not represented as statutory MIDC conditions.</p>}
               </div>
             </div>
             <div className="bg-white border border-[#e3ebe1] rounded-lg overflow-hidden">
@@ -12398,12 +12563,12 @@ export function M26DecisionRecordPage({ onBack, onBackToOverview, onOpenDepView,
               </div>
               <div className="divide-y divide-[#9ab098]">
                 {[
-                  { label: 'Application', value: 'MIDC-APP-2026-00418', action: onBackToOverview },
-                  { label: 'Business DNA', value: 'v4', action: onOpenDna },
-                  { label: 'Building Plan', value: 'v3' },
-                  { label: 'Inspection Record', value: 'INSP-2026-00418' },
-                  { label: 'Query Record', value: 'QRY-2026-0042' },
-                  { label: 'Resubmission', value: 'v2' },
+                  { label: 'Application', value: app.id, action: onBackToOverview },
+                  { label: 'Business DNA', value: isSahyadri ? SAHYADRI_DEMO.application.dnaVersion : 'v4', action: onOpenDna },
+                  { label: 'Building Plan', value: isSahyadri ? SAHYADRI_DEMO.buildingScrutiny.document : 'v3' },
+                  { label: 'Inspection Record', value: isSahyadri ? SAHYADRI_DEMO.inspection.id : 'INSP-2026-00418' },
+                  { label: 'Query Record', value: isSahyadri ? 'No open query' : 'QRY-2026-0042' },
+                  { label: 'Certificate', value: decision?.certificate ?? 'Not generated' },
                 ].map((r, i) => (
                   <div key={i} className="px-4 py-2 flex items-center justify-between text-xs">
                     <span className="text-[#2B2B2B]">{r.label}</span>
